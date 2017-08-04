@@ -42,29 +42,40 @@ module PaintedRabbit
     end
   end
 
+  class PaintedRabbitError < StandardError; end;
+
   class Base
     def self.identifier(method, name: method, serializer: PublicSendSerializer)
       views[:identifier] = { name: Field.new(method, name, serializer.bleh) }
     end
 
-    def self.field(method, name: method, serializer: PublicSendSerializer) # TODO: options
+    def self.field(method, options = {})
+      name = options.delete(:name) || method
+      serializer = options.delete(:serializer) || AssociationSerializer
       current_views.each do |view_name|
         views[view_name] ||= {}
-        views[view_name][name] = Field.new(method, name, serializer.bleh)
+        views[view_name][name] = Field.new(method, name, serializer.bleh, options)
       end
     end
 
-    def self.association(method, name: method, serializer: AssociationSerializer)
+    # Options:
+    #   preload: Set to false to stop trying to eagerly load associations
+    def self.association(method, options = {})
+      name = options.delete(:name) || method
+      serializer = options.delete(:serializer) || AssociationSerializer
       current_views.each do |view_name|
         views[view_name] ||= {}
         views[view_name][name] = Field.new(method,
                                            name,
                                            serializer.bleh,
-                                           association: true)
+                                           options.merge(association: true))
       end
     end
 
     def self.render(object, view: :default)
+      unless views.keys.include? view
+        raise PaintedRabbitError, "View '#{view}' is not defined"
+      end
       if object.respond_to? :each
         if object.respond_to? :select # TODO: Change to more explicitely test for AR
           select_columns = (active_record_attributes(object) &

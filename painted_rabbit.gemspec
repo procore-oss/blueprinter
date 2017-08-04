@@ -7,9 +7,9 @@ require "painted_rabbit/version"
 Gem::Specification.new do |s|
   s.name        = "painted_rabbit"
   s.version     = PaintedRabbit::VERSION
-  s.authors     = ["Adam Hess"]
+  s.authors     = ["Adam Hess", "Derek Carter"]
   s.email       = ["adamhess1991@gmail.com"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/procore/painted-rabbit"
   s.summary     = "Simple Fast Declarative Serialization Library"
   s.description = ""
   s.license     = "MIT"

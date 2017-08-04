@@ -90,8 +90,8 @@ module PaintedRabbit
           }
         end.to_json
       else
-        views[view].values.each_with_object({}) { |field, hash|
-          hash[field.name] = field.serializer.call(field.method, object, field.options)
+        render_fields(view).each_with_object({}) { |field, hash|
+          hash[field.name] = field.serializer.call(field.method, object)
         }.to_json
       end
     end
@@ -116,9 +116,8 @@ module PaintedRabbit
       if view == :default
         views[:identifier].values + views[:default].values.sort_by(&:name)
       else
-        (views[:identifier].values +
-          views[:default].values + views[view].values).
-            sort_by(&:name)
+        views[:identifier].values +
+          (views[:default].values + views[view].values).sort_by(&:name)
       end
     end
 

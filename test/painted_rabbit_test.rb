@@ -1,30 +1,32 @@
 require 'test_helper'
 require 'ostruct'
-class PaintedRabbit::Test < ActiveSupport::TestCase
-  test "truth" do
+
+class PaintedRabbit::Test < Minitest::Test
+
+  def test_truth
     assert_kind_of Module, PaintedRabbit
   end
 
-  test "it renders based on a templates class" do
+  def test_templates_class
     my_obj = OpenStruct.new(id: 1, name: 'Meg')
-    SimpleRabbit = Class.new(PaintedRabbit::Base) do
+    simple_rabbit = Class.new(PaintedRabbit::Base) do
       field :id
       field :name
     end
-    assert_equal('{"id":1,"name":"Meg"}', SimpleRabbit.render(my_obj))
+    assert_equal('{"id":1,"name":"Meg"}', simple_rabbit.render(my_obj))
   end
 
-  test "it can rename keys" do
+  def test_renaming_keys
     my_obj = OpenStruct.new(id: 1, name: 'Meg')
-    RenameRabbit = Class.new(PaintedRabbit::Base) do
+    rename_rabbit = Class.new(PaintedRabbit::Base) do
       field :id, name: :identifier
       field :name
     end
-    assert_equal('{"identifier":1,"name":"Meg"}', RenameRabbit.render(my_obj))
+    assert_equal('{"identifier":1,"name":"Meg"}', rename_rabbit.render(my_obj))
   end
 
-  test "fields can use custom serializers" do
-    UpcaseSerializer = Class.new(PaintedRabbit::Serializer) do
+  def test_fields_using_custom_serializers
+    upcase_serializer = Class.new(PaintedRabbit::Serializer) do
       # TODO: this API sucks, just pass the value.
       # It has a place internally and for complicated uses, but should be wrapped.
       serialize do |field_name, object|
@@ -33,14 +35,14 @@ class PaintedRabbit::Test < ActiveSupport::TestCase
     end
     my_obj = OpenStruct.new(id: 1, name: 'Meg')
 
-    UpcaseRabbit = Class.new(PaintedRabbit::Base) do
+    upcase_rabbit = Class.new(PaintedRabbit::Base) do
       field :id
-      field :name, serializer: UpcaseSerializer
+      field :name, serializer: upcase_serializer
     end
-    assert_equal('{"id":1,"name":"MEG"}', UpcaseRabbit.render(my_obj))
+    assert_equal('{"id":1,"name":"MEG"}', upcase_rabbit.render(my_obj))
   end
 
-  test "it can take an array of fields" do
+  def test_accepts_array_of_fields
     my_obj = OpenStruct.new(id: 1, name: 'Meg', description: 'A person')
     my_klass = Class.new(PaintedRabbit::Base) do
       identifier :id
@@ -49,7 +51,7 @@ class PaintedRabbit::Test < ActiveSupport::TestCase
     assert_equal('{"id":1,"description":"A person","name":"Meg"}', my_klass.render(my_obj))
   end
 
-  test "it supports views" do
+  def test_views
     my_obj = OpenStruct.new(id: 1, name: 'Meg', position: 'Manager', description: 'A person', 'company': 'Procore')
     view_klass = Class.new(PaintedRabbit::Base) do
       identifier :id

@@ -1,3 +1,4 @@
+require 'json'
 require_relative 'field'
 require_relative 'serializer'
 require_relative 'serializers/association_serializer'
@@ -36,7 +37,7 @@ module PaintedRabbit
       unless views.keys.include? view
         raise PaintedRabbitError, "View '#{view}' is not defined"
       end
-      if object.respond_to? :each
+      output_hash = if object.respond_to? :each
         if object.respond_to? :select # TODO: Change to more explicitely test for AR
           select_columns = (active_record_attributes(object) &
             render_fields(view).map(&:method)) +
@@ -48,12 +49,13 @@ module PaintedRabbit
           render_fields(view).each_with_object({}) { |field, hash|
             hash[field.name] = field.serializer.call(field.method, obj)#, field.options)
           }
-        end.to_json
+        end
       else
         render_fields(view).each_with_object({}) { |field, hash|
           hash[field.name] = field.serializer.call(field.method, object)
-        }.to_json
+        }
       end
+      jsonify(output_hash)
     end
 
     def self.include_associations(object, view:)
@@ -73,12 +75,8 @@ module PaintedRabbit
     end
 
     def self.render_fields(view)
-      if view == :default
-        views[:identifier].values + views[:default].values.sort_by(&:name)
-      else
-        views[:identifier].values +
-          (views[:default].values + views[view].values).sort_by(&:name)
-      end
+      views[:identifier].values + 
+        views[:default].merge(views[view]).values.sort_by(&:name)
     end
 
     # Find all the attributes required for includes & eager/pre-loading
@@ -112,16 +110,22 @@ module PaintedRabbit
       current_views = [:default]
     end
 
+    private
+
+    def self.jsonify(blob)
+      if blob.respond_to? :to_json
+        blob.to_json
+      else
+        JSON.generate(blob)
+      end
+    end
+
     # I had to test this, so a note for later, class level instance variables
     # are not mutated at the parent class level when they are changed at the
     # inherited class
     def self.tracked_fields
       @tracked_fields ||= []
     end
-
-    #def self.current_views=(view_list)
-    #  @current_views = Array(view_list)
-    #end
 
     def self.current_views
       @current_views ||= [:default]

@@ -1,7 +1,8 @@
 class PaintedRabbit::AssociationSerializer < PaintedRabbit::Serializer
-  serialize do |association_name, object, options|
-    if object.class.respond_to? :serializer
-      object.class.serializer.render(object.public_send(association_name), options)
+  serialize do |association_name, object, options={}|
+    if options[:serializer]
+      view = options[:view] || :default
+      options[:serializer].hashify(object.public_send(association_name), view: view)
     else
       object.public_send(association_name)
     end

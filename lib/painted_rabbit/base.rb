@@ -1,4 +1,5 @@
 require 'json'
+require_relative 'painted_rabbit_error'
 require_relative 'field'
 require_relative 'serializer'
 require_relative 'serializers/association_serializer'
@@ -23,17 +24,20 @@ module PaintedRabbit
     #   preload: Set to false to stop trying to eagerly load associations
     def self.association(method, options = {})
       name = options.delete(:name) || method
-      serializer = options.delete(:serializer) || AssociationSerializer
       current_views.each do |view_name|
         views[view_name] ||= {}
         views[view_name][name] = Field.new(method,
                                            name,
-                                           serializer.bleh,
+                                           AssociationSerializer.bleh,
                                            options.merge(association: true))
       end
     end
 
     def self.render(object, view: :default)
+      jsonify(hashify(object, view: view))
+    end
+
+    def self.hashify(object, view:)
       unless views.keys.include? view
         raise PaintedRabbitError, "View '#{view}' is not defined"
       end
@@ -47,15 +51,14 @@ module PaintedRabbit
         object = include_associations(object, view: view)
         object.map do |obj|
           render_fields(view).each_with_object({}) { |field, hash|
-            hash[field.name] = field.serializer.call(field.method, obj)#, field.options)
+            hash[field.name] = field.serializer.call(field.method, obj, field.options)
           }
         end
       else
         render_fields(view).each_with_object({}) { |field, hash|
-          hash[field.name] = field.serializer.call(field.method, object)
+          hash[field.name] = field.serializer.call(field.method, object, field.options)
         }
       end
-      jsonify(output_hash)
     end
 
     def self.include_associations(object, view:)
@@ -75,7 +78,7 @@ module PaintedRabbit
     end
 
     def self.render_fields(view)
-      views[:identifier].values + 
+      views[:identifier].values +
         views[:default].merge(views[view]).values.sort_by(&:name)
     end
 

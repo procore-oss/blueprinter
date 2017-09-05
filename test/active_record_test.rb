@@ -5,7 +5,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
   include FactoryGirl::Syntax::Methods
 
   test 'simple model serializer' do
-    SimpleUserSerializer = Class.new(PaintedRabbit::Base) do
+    simple_user_serializer_class = Class.new(PaintedRabbit::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name
@@ -20,11 +20,11 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       last_name: user.last_name
     })
 
-    assert_equal(expected_result, SimpleUserSerializer.render(user))
+    assert_equal(expected_result, simple_user_serializer_class.render(user))
   end
 
   test 'model serializer with views' do
-    ViewUserSerializer = Class.new(PaintedRabbit::Base) do
+    view_user_serializer_class = Class.new(PaintedRabbit::Base) do
       identifier :id
       field :email
 
@@ -39,19 +39,20 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       id: user.id,
       email: user.email
     })
-    assert_equal(expected_default_view, ViewUserSerializer.render(user))
     expected_normal_view = JSON.generate({
       id: user.id,
       email: user.email,
       first_name: user.first_name,
       last_name: user.last_name
     })
+
+    assert_equal(expected_default_view, view_user_serializer_class.render(user))
     assert_equal(expected_normal_view,
-                 ViewUserSerializer.render(user, view: :normal))
+                 view_user_serializer_class.render(user, view: :normal))
   end
 
   test 'model serializer with associations' do
-    SimpleVehicleSerializer = Class.new(PaintedRabbit::Base) do
+    simple_vehicle_serializer_class = Class.new(PaintedRabbit::Base) do
       identifier :id
       fields :make, :model
 
@@ -60,13 +61,13 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       end
     end
 
-    UserSerializer = Class.new(PaintedRabbit::Base) do
+    user_serializer_class = Class.new(PaintedRabbit::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name
 
       include_in :normal do
-        association :vehicles, serializer: SimpleVehicleSerializer
+        association :vehicles, serializer: simple_vehicle_serializer_class
       end
     end
 
@@ -84,11 +85,11 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
         model: vehicle.model
       }]
     })
-    assert_equal(expected_result, UserSerializer.render(user, view: :normal))
+    assert_equal(expected_result, user_serializer_class.render(user, view: :normal))
   end
 
   test 'model serializer with associations with views' do
-    VehicleViewSerializer = Class.new(PaintedRabbit::Base) do
+    vehicle_view_serializer_class = Class.new(PaintedRabbit::Base) do
       identifier :id
       fields :make, :model
 
@@ -97,13 +98,13 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       end
     end
 
-    UserAssociationSerializer = Class.new(PaintedRabbit::Base) do
+    user_association_serializer_class = Class.new(PaintedRabbit::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name
 
       include_in :normal do
-        association :vehicles, serializer: VehicleViewSerializer, view: :extended
+        association :vehicles, serializer: vehicle_view_serializer_class, view: :extended
       end
     end
 
@@ -122,6 +123,6 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
         model: vehicle.model
       }]
     })
-    assert_equal(expected_result, UserAssociationSerializer.render(user, view: :normal))
+    assert_equal(expected_result, user_association_serializer_class.render(user, view: :normal))
   end
 end

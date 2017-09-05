@@ -9,20 +9,20 @@ class PaintedRabbit::Test < Minitest::Test
 
   def test_templates_class
     my_obj = OpenStruct.new(id: 1, name: 'Meg')
-    simple_rabbit = Class.new(PaintedRabbit::Base) do
+    simple_rabbit_class = Class.new(PaintedRabbit::Base) do
       field :id
       field :name
     end
-    assert_equal('{"id":1,"name":"Meg"}', simple_rabbit.render(my_obj))
+    assert_equal('{"id":1,"name":"Meg"}', simple_rabbit_class.render(my_obj))
   end
 
   def test_renaming_keys
     my_obj = OpenStruct.new(id: 1, name: 'Meg')
-    rename_rabbit = Class.new(PaintedRabbit::Base) do
+    rename_rabbit_class = Class.new(PaintedRabbit::Base) do
       field :id, name: :identifier
       field :name
     end
-    assert_equal('{"identifier":1,"name":"Meg"}', rename_rabbit.render(my_obj))
+    assert_equal('{"identifier":1,"name":"Meg"}', rename_rabbit_class.render(my_obj))
   end
 
   def test_fields_using_custom_serializers
@@ -35,11 +35,11 @@ class PaintedRabbit::Test < Minitest::Test
     end
     my_obj = OpenStruct.new(id: 1, name: 'Meg')
 
-    upcase_rabbit = Class.new(PaintedRabbit::Base) do
+    upcase_rabbit_class = Class.new(PaintedRabbit::Base) do
       field :id
       field :name, serializer: upcase_serializer
     end
-    assert_equal('{"id":1,"name":"MEG"}', upcase_rabbit.render(my_obj))
+    assert_equal('{"id":1,"name":"MEG"}', upcase_rabbit_class.render(my_obj))
   end
 
   def test_accepts_array_of_fields

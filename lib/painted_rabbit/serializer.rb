@@ -10,7 +10,7 @@ class PaintedRabbit::Serializer
     @_blah
   end
 
-  def call(field_name, object)
-    @block.call(field_name, object)
+  def call(field_name, object, options={})
+    @block.call(field_name, object, options)
   end
 end

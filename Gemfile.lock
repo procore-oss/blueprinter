@@ -47,9 +47,12 @@ GEM
     builder (3.2.3)
     concurrent-ruby (1.0.5)
     erubi (1.6.1)
+    factory_girl (4.8.0)
+      activesupport (>= 3.0.0)
     globalid (0.4.0)
       activesupport (>= 4.2.0)
     i18n (0.8.6)
+    json (2.0.3)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.6)
@@ -110,6 +113,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  factory_girl
+  json
   painted_rabbit!
   rails (~> 5.1.2)
   sqlite3

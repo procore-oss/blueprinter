@@ -8,7 +8,7 @@ require_relative 'serializers/public_send_serializer'
 module PaintedRabbit
   class Base
     def self.identifier(method, name: method, serializer: PublicSendSerializer)
-      views[:identifier] = { name: Field.new(method, name, serializer.bleh) }
+      views[:identifier] = { name: Field.new(method, name, serializer) }
     end
 
     def self.field(method, options = {})
@@ -16,7 +16,7 @@ module PaintedRabbit
       serializer = options.delete(:serializer) || AssociationSerializer
       current_views.each do |view_name|
         views[view_name] ||= {}
-        views[view_name][name] = Field.new(method, name, serializer.bleh, options)
+        views[view_name][name] = Field.new(method, name, serializer, options)
       end
     end
 
@@ -28,7 +28,7 @@ module PaintedRabbit
         views[view_name] ||= {}
         views[view_name][name] = Field.new(method,
                                            name,
-                                           AssociationSerializer.bleh,
+                                           AssociationSerializer,
                                            options.merge(association: true))
       end
     end
@@ -58,7 +58,7 @@ module PaintedRabbit
       field_names.each do |field_name|
         current_views.each do |view_name|
           views[view_name] ||= {}
-          views[view_name][field_name] = Field.new(field_name, field_name, PublicSendSerializer.bleh)
+          views[view_name][field_name] = Field.new(field_name, field_name, PublicSendSerializer)
         end
       end
     end
@@ -77,7 +77,7 @@ module PaintedRabbit
 
     def self.object_to_hash(object, view:)
       render_fields(view).each_with_object({}) do |field, hash|
-        hash[field.name] = field.serializer.call(field.method, object, field.options)
+        hash[field.name] = field.serializer.serialize(field.method, object, field.options)
       end
     end
     private_class_method :object_to_hash

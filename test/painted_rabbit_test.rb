@@ -27,9 +27,7 @@ class PaintedRabbit::Test < Minitest::Test
 
   def test_fields_using_custom_serializers
     upcase_serializer = Class.new(PaintedRabbit::Serializer) do
-      # TODO: this API sucks, just pass the value.
-      # It has a place internally and for complicated uses, but should be wrapped.
-      serialize do |field_name, object|
+      def serialize(field_name, object, options={})
         object.public_send(field_name).upcase
       end
     end

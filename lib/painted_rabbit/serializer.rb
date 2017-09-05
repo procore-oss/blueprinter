@@ -1,16 +1,12 @@
 class PaintedRabbit::Serializer
-  def initialize(block)
-    @block = block
-  end
-  def self.serialize(&block)
-    @_blah = self.new(block)
+  def initialize
   end
 
-  def self.bleh
-    @_blah
+  def serialize(field_name, object, options={})
+    fail NotImplementedError, "A serializer must implement #serialize"
   end
 
-  def call(field_name, object, options={})
-    @block.call(field_name, object, options)
+  def self.serialize(field_name, object, options={})
+    self.new.serialize(field_name, object, options)
   end
 end

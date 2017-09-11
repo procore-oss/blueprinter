@@ -1,4 +1,4 @@
-require 'rails_test_helper'
+require_relative 'rails_test_helper'
 require_relative 'factories/model_factories.rb'
 
 class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase

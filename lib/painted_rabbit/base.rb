@@ -83,9 +83,7 @@ module PaintedRabbit
     private_class_method :object_to_hash
 
     def self.select_columns(object, view:)
-      unless object.is_a?(ActiveRecord::Base) && object.respond_to?(:klass)
-        return object
-      end
+      return object unless object.is_a?(ActiveRecord::Relation)
       select_columns = (active_record_attributes(object) &
         render_fields(view).map(&:method)) +
         required_lookup_attributes(object)
@@ -94,9 +92,7 @@ module PaintedRabbit
     private_class_method :select_columns
 
     def self.include_associations(object, view:)
-      unless object.is_a?(ActiveRecord::Base) && object.respond_to?(:klass)
-        return object
-      end
+      return object unless object.is_a?(ActiveRecord::Relation)
       # TODO: Do we need to support more than `eager_load` ?
       fields_to_include = associations(view).select { |a|
         a.options[:include] != false

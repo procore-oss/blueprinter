@@ -1,5 +1,5 @@
 class PaintedRabbit::AssociationSerializer < PaintedRabbit::Serializer
-  serialize do |association_name, object, options={}|
+  def serialize(association_name, object, options={})
     if options[:serializer]
       view = options[:view] || :default
       options[:serializer].prepare(object.public_send(association_name), view: view)

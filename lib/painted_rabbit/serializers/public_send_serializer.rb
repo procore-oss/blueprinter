@@ -1,5 +1,5 @@
 class PaintedRabbit::PublicSendSerializer < PaintedRabbit::Serializer
-  serialize do |field_name, object|
+  def serialize(field_name, object, options = {})
     object.public_send(field_name)
   end
 end

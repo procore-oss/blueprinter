@@ -67,14 +67,14 @@ class PaintedRabbit::Test < Minitest::Test
       end
     end
     assert_equal(
-      '{"id":1}',
-      view_klass.render(my_obj),
-      'The default view should render the right fields'
-    )
-    assert_equal(
       '{"id":1,"employer":"Procore","name":"Meg","position":"Manager"}',
       view_klass.render(my_obj, view: :normal),
       'The normal view should render the right fields'
+    )
+    assert_equal(
+      '{"id":1}',
+      view_klass.render(my_obj),
+      'The default view should render the right fields'
     )
     assert_equal(
       '{"id":1,"description":"A person","employer":"Procore","name":"Meg","position":"Manager"}',

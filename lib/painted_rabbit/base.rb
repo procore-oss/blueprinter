@@ -57,25 +57,27 @@ module PaintedRabbit
     end
 
     def self.associations(view = :default)
-      views.render_fields(view).select { |f| f.options[:association] }
+      views.fields_for(view).select { |f| f.options[:association] }
     end
 
     def self.include_view(view)
+      current_view.included_views << view
     end
 
     def self.exclude(field_name)
+      current_view.excluded_fields << field_name
     end
 
     def self.view(view_name)
-      current_view = views[view_name]
+      @current_view = views[view_name]
       yield
-      current_view = views[:default]
+      @current_view = views[:default]
     end
 
     private
 
     def self.object_to_hash(object, view:)
-      views.render_fields(view).each_with_object({}) do |field, hash|
+      views.fields_for(view).each_with_object({}) do |field, hash|
         hash[field.name] = field.serializer.serialize(field.method, object, field.options)
       end
     end
@@ -88,7 +90,7 @@ module PaintedRabbit
         return object
       end
       select_columns = (active_record_attributes(object) &
-        views.render_fields(view).map(&:method)) +
+        views.fields_for(view).map(&:method)) +
         required_lookup_attributes(object)
       object.select(*select_columns)
     end

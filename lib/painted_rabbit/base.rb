@@ -10,7 +10,7 @@ require_relative 'serializers/public_send_serializer'
 module PaintedRabbit
   class Base
     def self.identifier(method, name: method, serializer: PublicSendSerializer)
-      views[:identifier] << Field.new(method, name, serializer)
+      view_collection[:identifier] << Field.new(method, name, serializer)
     end
 
     def self.field(method, options = {})
@@ -35,18 +35,21 @@ module PaintedRabbit
 
     # This is the magic method that converts complex objects into a simple hash
     # ready for JSON conversion
+    # Note: we accept view (public interface) that is in reality a view_name,
+    #   so we rename it for clarity
     def self.prepare(object, view:)
-      unless views.has_view? view
-        raise PaintedRabbitError, "View '#{view}' is not defined"
+      view_name = view
+      unless view_collection.has_view? view_name
+        raise PaintedRabbitError, "View '#{view_name}' is not defined"
       end
-      prepared_object = select_columns(object, view: view)
-      prepared_object = include_associations(prepared_object, view: view)
+      prepared_object = select_columns(object, view_name: view_name)
+      prepared_object = include_associations(prepared_object, view_name: view_name)
       if prepared_object.respond_to? :map
         prepared_object.map do |obj|
-          object_to_hash(obj, view: view)
+          object_to_hash(obj, view_name: view_name)
         end
       else
-        object_to_hash(prepared_object, view: view)
+        object_to_hash(prepared_object, view_name: view_name)
       end
     end
 
@@ -56,47 +59,47 @@ module PaintedRabbit
       end
     end
 
-    def self.associations(view = :default)
-      views.fields_for(view).select { |f| f.options[:association] }
+    def self.associations(view_name = :default)
+      view_collection.fields_for(view_name).select { |f| f.options[:association] }
     end
 
-    def self.include_view(view)
-      current_view.included_views << view
+    def self.include_view(view_name)
+      current_view.include_view(view_name)
     end
 
     def self.exclude(field_name)
-      current_view.excluded_fields << field_name
+      current_view.exclude_field(field_name)
     end
 
     def self.view(view_name)
-      @current_view = views[view_name]
+      @current_view = view_collection[view_name]
       yield
-      @current_view = views[:default]
+      @current_view = view_collection[:default]
     end
 
     private
 
-    def self.object_to_hash(object, view:)
-      views.fields_for(view).each_with_object({}) do |field, hash|
+    def self.object_to_hash(object, view_name:)
+      view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
         hash[field.name] = field.serializer.serialize(field.method, object, field.options)
       end
     end
     private_class_method :object_to_hash
 
-    def self.select_columns(object, view:)
+    def self.select_columns(object, view_name:)
       unless defined?(ActiveRecord::Base) &&
           object.is_a?(ActiveRecord::Base) &&
           object.respond_to?(:klass)
         return object
       end
       select_columns = (active_record_attributes(object) &
-        views.fields_for(view).map(&:method)) +
+        view_collection.fields_for(view).map(&:method)) +
         required_lookup_attributes(object)
       object.select(*select_columns)
     end
     private_class_method :select_columns
 
-    def self.include_associations(object, view:)
+    def self.include_associations(object, view_name:)
       unless defined?(ActiveRecord::Base) &&
           object.is_a?(ActiveRecord::Base) &&
           object.respond_to?(:klass)
@@ -142,13 +145,13 @@ module PaintedRabbit
     private_class_method :jsonify
 
     def self.current_view
-      @current_view ||= views[:default]
+      @current_view ||= view_collection[:default]
     end
     private_class_method :current_view
 
-    def self.views
-      @views ||= ViewCollection.new
+    def self.view_collection
+      @view_collection ||= ViewCollection.new
     end
-    private_class_method :views
+    private_class_method :view_collection
   end
 end

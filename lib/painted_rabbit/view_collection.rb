@@ -29,13 +29,13 @@ module PaintedRabbit
     def sortable_fields(view_name)
       fields = views[:default].fields
       fields += views[view_name].fields
-      views[view_name].included_views.each do |included_view_name|
+      views[view_name].included_view_names.each do |included_view_name|
         if view_name != included_view_name
           fields += sortable_fields(included_view_name)
         end
       end
       fields.delete_if do |f|
-        views[view_name].excluded_fields.include? f.name
+        views[view_name].excluded_field_names.include? f.name
       end
     end
   end

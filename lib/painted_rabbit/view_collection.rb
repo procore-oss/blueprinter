@@ -3,8 +3,8 @@ module PaintedRabbit
     attr_reader :views
     def initialize
       @views = {
-        identifier: View.new,
-        default: View.new
+        identifier: View.new(:identifier),
+        default: View.new(:default)
       }
     end
 
@@ -13,30 +13,33 @@ module PaintedRabbit
     end
 
     def fields_for(view_name)
-      identifier_fields + sortable_fields(view_name).sort_by(&:name)
+      identifier_fields + sortable_fields(view_name).values.sort_by(&:name)
     end
 
     def [](view_name)
-      @views[view_name] ||= View.new
+      @views[view_name] ||= View.new(view_name)
     end
 
     private
 
     def identifier_fields
-      views[:identifier].fields
+      views[:identifier].fields.values
     end
 
     def sortable_fields(view_name)
       fields = views[:default].fields
-      fields += views[view_name].fields
+      fields = fields.merge(views[view_name].fields)
       views[view_name].included_view_names.each do |included_view_name|
         if view_name != included_view_name
-          fields += sortable_fields(included_view_name)
+          fields = fields.merge(sortable_fields(included_view_name))
         end
       end
-      fields.delete_if do |f|
-        views[view_name].excluded_field_names.include? f.name
+
+      views[view_name].excluded_field_names.each do |name|
+        fields.delete(name)
       end
+
+      fields
     end
   end
 end

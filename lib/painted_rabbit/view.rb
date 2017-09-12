@@ -2,8 +2,9 @@ module PaintedRabbit
   class View
     attr_reader :fields, :included_view_names, :excluded_field_names
 
-    def initialize
-      @fields = []
+    def initialize(name)
+      @name = name
+      @fields = {}
       @included_view_names = []
       @excluded_field_names = []
     end
@@ -17,7 +18,11 @@ module PaintedRabbit
     end
 
     def <<(field)
-      @fields << field
+      if @fields.has_key? field
+        raise PaintedRabbitError,
+          "Field #{field.name} already defined on #{@name}"
+      end
+      @fields[field.name] = field
     end
   end
 end

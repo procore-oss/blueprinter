@@ -1,0 +1,11 @@
+machine:
+  ruby:
+    version: 2.4.1
+
+database:
+  override:
+    - echo 'Skipping DB phase.'
+
+test:
+  post:
+    - bundle exec rake

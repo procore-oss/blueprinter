@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rails", "~> 5.1.2"
 
-  s.add_development_dependency "json"
+  s.add_runtime_dependency "json"
 
   s.add_development_dependency "sqlite3"
 end

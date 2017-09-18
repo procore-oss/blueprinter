@@ -1,4 +1,4 @@
-require 'rails_test_helper'
+require_relative 'rails_test_helper'
 require_relative 'factories/model_factories.rb'
 
 class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
@@ -28,7 +28,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       identifier :id
       field :email
 
-      include_in :normal do
+      view :normal do
         fields :last_name, :first_name
       end
     end
@@ -56,7 +56,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       identifier :id
       fields :make, :model
 
-      include_in :extended do
+      view :extended do
         field :miles
       end
     end
@@ -66,7 +66,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       field :email
       fields :last_name, :first_name
 
-      include_in :normal do
+      view :normal do
         association :vehicles, serializer: simple_vehicle_serializer_class
       end
     end
@@ -93,7 +93,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       identifier :id
       fields :make, :model
 
-      include_in :extended do
+      view :extended do
         field :miles
       end
     end
@@ -103,7 +103,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       field :email
       fields :last_name, :first_name
 
-      include_in :normal do
+      view :normal do
         association :vehicles, serializer: vehicle_view_serializer_class, view: :extended
       end
     end

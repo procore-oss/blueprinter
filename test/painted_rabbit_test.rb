@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 require 'ostruct'
 
 class PaintedRabbit::Test < Minitest::Test
@@ -53,16 +53,38 @@ class PaintedRabbit::Test < Minitest::Test
     my_obj = OpenStruct.new(id: 1, name: 'Meg', position: 'Manager', description: 'A person', 'company': 'Procore')
     view_klass = Class.new(PaintedRabbit::Base) do
       identifier :id
-      include_in [:normal, :extended] do
+      view :normal do
         fields :name, :position
         field :company, name: :employer
       end
-      include_in :extended do
+      view :extended do
+        include_view :normal
         field :description
       end
+      view :special do
+        include_view :extended
+        exclude :position
+      end
     end
-    assert_equal('{"id":1}', view_klass.render(my_obj))
-    assert_equal('{"id":1,"employer":"Procore","name":"Meg","position":"Manager"}', view_klass.render(my_obj, view: :normal))
-    assert_equal('{"id":1,"description":"A person","employer":"Procore","name":"Meg","position":"Manager"}', view_klass.render(my_obj, view: :extended))
+    assert_equal(
+      '{"id":1,"employer":"Procore","name":"Meg","position":"Manager"}',
+      view_klass.render(my_obj, view: :normal),
+      'The normal view should render the right fields'
+    )
+    assert_equal(
+      '{"id":1}',
+      view_klass.render(my_obj),
+      'The default view should render the right fields'
+    )
+    assert_equal(
+      '{"id":1,"description":"A person","employer":"Procore","name":"Meg","position":"Manager"}',
+      view_klass.render(my_obj, view: :extended),
+      'The extended view should render the right fields'
+    )
+    assert_equal(
+      '{"id":1,"description":"A person","employer":"Procore","name":"Meg"}',
+      view_klass.render(my_obj, view: :special),
+      'The special view should render the right fields'
+    )
   end
 end

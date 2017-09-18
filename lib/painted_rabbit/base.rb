@@ -2,35 +2,31 @@ require 'json'
 require_relative 'painted_rabbit_error'
 require_relative 'field'
 require_relative 'serializer'
+require_relative 'view'
+require_relative 'view_collection'
 require_relative 'serializers/association_serializer'
 require_relative 'serializers/public_send_serializer'
 
 module PaintedRabbit
   class Base
     def self.identifier(method, name: method, serializer: PublicSendSerializer)
-      views[:identifier] = { name: Field.new(method, name, serializer) }
+      view_collection[:identifier] << Field.new(method, name, serializer)
     end
 
     def self.field(method, options = {})
       name = options.delete(:name) || method
       serializer = options.delete(:serializer) || AssociationSerializer
-      current_views.each do |view_name|
-        views[view_name] ||= {}
-        views[view_name][name] = Field.new(method, name, serializer, options)
-      end
+      current_view << Field.new(method, name, serializer, options)
     end
 
     # Options:
     #   preload: Set to false to stop trying to eagerly load associations
     def self.association(method, options = {})
       name = options.delete(:name) || method
-      current_views.each do |view_name|
-        views[view_name] ||= {}
-        views[view_name][name] = Field.new(method,
-                                           name,
-                                           AssociationSerializer,
-                                           options.merge(association: true))
-      end
+      current_view << Field.new(method,
+                                       name,
+                                       AssociationSerializer,
+                                       options.merge(association: true))
     end
 
     def self.render(object, view: :default)
@@ -39,62 +35,74 @@ module PaintedRabbit
 
     # This is the magic method that converts complex objects into a simple hash
     # ready for JSON conversion
+    # Note: we accept view (public interface) that is in reality a view_name,
+    #   so we rename it for clarity
     def self.prepare(object, view:)
-      unless views.keys.include? view
-        raise PaintedRabbitError, "View '#{view}' is not defined"
+      view_name = view
+      unless view_collection.has_view? view_name
+        raise PaintedRabbitError, "View '#{view_name}' is not defined"
       end
-      prepared_object = select_columns(object, view: view)
-      prepared_object = include_associations(prepared_object, view: view)
+      prepared_object = select_columns(object, view_name: view_name)
+      prepared_object = include_associations(prepared_object, view_name: view_name)
       if prepared_object.respond_to? :map
         prepared_object.map do |obj|
-          object_to_hash(obj, view: view)
+          object_to_hash(obj, view_name: view_name)
         end
       else
-        object_to_hash(prepared_object, view: view)
+        object_to_hash(prepared_object, view_name: view_name)
       end
     end
 
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_views.each do |view_name|
-          views[view_name] ||= {}
-          views[view_name][field_name] = Field.new(field_name, field_name, PublicSendSerializer)
-        end
+        current_view << Field.new(field_name, field_name, PublicSendSerializer)
       end
     end
 
-    def self.associations(view = :default)
-      render_fields(view).select { |f| f.options[:association] }
+    def self.associations(view_name = :default)
+      view_collection.fields_for(view_name).select { |f| f.options[:association] }
     end
 
-    def self.include_in(view_list)
-      @current_views = Array(view_list)
+    def self.include_view(view_name)
+      current_view.include_view(view_name)
+    end
+
+    def self.exclude(field_name)
+      current_view.exclude_field(field_name)
+    end
+
+    def self.view(view_name)
+      @current_view = view_collection[view_name]
       yield
-      current_views = [:default]
+      @current_view = view_collection[:default]
     end
 
     private
 
-    def self.object_to_hash(object, view:)
-      render_fields(view).each_with_object({}) do |field, hash|
+    def self.object_to_hash(object, view_name:)
+      view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
         hash[field.name] = field.serializer.serialize(field.method, object, field.options)
       end
     end
     private_class_method :object_to_hash
 
-    def self.select_columns(object, view:)
-      unless object.is_a?(ActiveRecord::Base) && object.respond_to?(:klass)
+    def self.select_columns(object, view_name:)
+      unless defined?(ActiveRecord::Base) &&
+          object.is_a?(ActiveRecord::Base) &&
+          object.respond_to?(:klass)
         return object
       end
       select_columns = (active_record_attributes(object) &
-        render_fields(view).map(&:method)) +
+        view_collection.fields_for(view).map(&:method)) +
         required_lookup_attributes(object)
       object.select(*select_columns)
     end
     private_class_method :select_columns
 
-    def self.include_associations(object, view:)
-      unless object.is_a?(ActiveRecord::Base) && object.respond_to?(:klass)
+    def self.include_associations(object, view_name:)
+      unless defined?(ActiveRecord::Base) &&
+          object.is_a?(ActiveRecord::Base) &&
+          object.respond_to?(:klass)
         return object
       end
       # TODO: Do we need to support more than `eager_load` ?
@@ -113,12 +121,6 @@ module PaintedRabbit
       object.klass.column_names.map(&:to_sym)
     end
     private_class_method :active_record_attributes
-
-    def self.render_fields(view)
-      views[:identifier].values +
-        views[:default].merge(views[view]).values.sort_by(&:name)
-    end
-    private_class_method :render_fields
 
     # Find all the attributes required for includes & eager/pre-loading
     def self.required_lookup_attributes(object)
@@ -142,14 +144,14 @@ module PaintedRabbit
     end
     private_class_method :jsonify
 
-    def self.current_views
-      @current_views ||= [:default]
+    def self.current_view
+      @current_view ||= view_collection[:default]
     end
-    private_class_method :current_views
+    private_class_method :current_view
 
-    def self.views
-      @views ||= { identifier: {}, default: {} }
+    def self.view_collection
+      @view_collection ||= ViewCollection.new
     end
-    private_class_method :views
+    private_class_method :view_collection
   end
 end

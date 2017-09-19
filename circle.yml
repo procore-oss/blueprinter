@@ -9,3 +9,4 @@ database:
 test:
   post:
     - bundle exec rake
+    - bundle exec rake benchmarks

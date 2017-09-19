@@ -25,9 +25,16 @@ require 'rake/testtask'
 
 Rake::TestTask.new(:test) do |t|
   t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
+  t.test_files = Dir['test/**/*_test.rb'].reject do |path|
+    path.include?('benchmarks')
+  end
   t.verbose = false
 end
 
+Rake::TestTask.new(:benchmarks) do |t|
+  t.libs << 'test'
+  t.pattern = 'test/benchmarks/**/*_test.rb'
+  t.verbose = false
+end
 
 task default: :test

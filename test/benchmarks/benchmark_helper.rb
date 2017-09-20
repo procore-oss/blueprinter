@@ -1,0 +1,11 @@
+module BenchmarkHelper
+  def iterate(&block)
+    start = Time.now
+    count = 0
+    while Time.now - start <= 1.second do
+      block.call
+      count += 1
+    end
+    count
+  end
+end

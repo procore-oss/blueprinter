@@ -1,2 +1,3 @@
-class PaintedRabbit::PaintedRabbitError < StandardError
+module PaintedRabbit
+  class PaintedRabbitError < StandardError; end
 end

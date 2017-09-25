@@ -4,6 +4,7 @@ require_relative 'field'
 require_relative 'serializer'
 require_relative 'view'
 require_relative 'view_collection'
+require_relative 'optimizer'
 require_relative 'serializers/association_serializer'
 require_relative 'serializers/public_send_serializer'
 
@@ -42,7 +43,8 @@ module Blueprinter
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
-      prepared_object = select_columns(object, view_name: view_name)
+      prepared_object = Optimizer.new(object)
+                          .select(view_collection.fields_for(view))
       prepared_object = include_associations(prepared_object, view_name: view_name)
       if prepared_object.respond_to? :map
         prepared_object.map do |obj|
@@ -86,19 +88,6 @@ module Blueprinter
     end
     private_class_method :object_to_hash
 
-    def self.select_columns(object, view_name:)
-      unless defined?(ActiveRecord::Base) &&
-          object.is_a?(ActiveRecord::Base) &&
-          object.respond_to?(:klass)
-        return object
-      end
-      select_columns = (active_record_attributes(object) &
-        view_collection.fields_for(view).map(&:method)) +
-        required_lookup_attributes(object)
-      object.select(*select_columns)
-    end
-    private_class_method :select_columns
-
     def self.include_associations(object, view_name:)
       unless defined?(ActiveRecord::Base) &&
           object.is_a?(ActiveRecord::Base) &&
@@ -116,24 +105,6 @@ module Blueprinter
       end
     end
     private_class_method :include_associations
-
-    def self.active_record_attributes(object)
-      object.klass.column_names.map(&:to_sym)
-    end
-    private_class_method :active_record_attributes
-
-    # Find all the attributes required for includes & eager/pre-loading
-    def self.required_lookup_attributes(object)
-      # TODO: We may not need all four of these
-      lookup_values = (object.includes_values +
-        object.preload_values +
-        object.joins_values +
-        object.eager_load_values).uniq
-      lookup_values.map do |value|
-        object.reflections[value.to_s].foreign_key
-      end
-    end
-    private_class_method :required_lookup_attributes
 
     def self.jsonify(blob)
       if blob.respond_to? :to_json

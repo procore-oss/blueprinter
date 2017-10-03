@@ -1,6 +1,6 @@
 gem 'minitest', '~> 5.10'
 require 'minitest/autorun'
-require 'painted_rabbit'
+require 'blueprinter'
 require 'factory_girl'
 
 #require "rails/test_help"

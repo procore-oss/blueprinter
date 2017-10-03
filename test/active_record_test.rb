@@ -1,11 +1,11 @@
 require_relative 'rails_test_helper'
 require_relative 'factories/model_factories.rb'
 
-class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
+class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
   include FactoryGirl::Syntax::Methods
 
   test 'simple model serializer' do
-    simple_user_serializer_class = Class.new(PaintedRabbit::Base) do
+    simple_user_serializer_class = Class.new(Blueprinter::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name
@@ -24,7 +24,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
   end
 
   test 'model serializer with views' do
-    view_user_serializer_class = Class.new(PaintedRabbit::Base) do
+    view_user_serializer_class = Class.new(Blueprinter::Base) do
       identifier :id
       field :email
 
@@ -52,7 +52,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
   end
 
   test 'model serializer with associations' do
-    simple_vehicle_serializer_class = Class.new(PaintedRabbit::Base) do
+    simple_vehicle_serializer_class = Class.new(Blueprinter::Base) do
       identifier :id
       fields :make, :model
 
@@ -61,7 +61,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       end
     end
 
-    user_serializer_class = Class.new(PaintedRabbit::Base) do
+    user_serializer_class = Class.new(Blueprinter::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name
@@ -89,7 +89,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
   end
 
   test 'model serializer with associations with views' do
-    vehicle_view_serializer_class = Class.new(PaintedRabbit::Base) do
+    vehicle_view_serializer_class = Class.new(Blueprinter::Base) do
       identifier :id
       fields :make, :model
 
@@ -98,7 +98,7 @@ class PaintedRabbit::ActiveRecordTest < ActiveSupport::TestCase
       end
     end
 
-    user_association_serializer_class = Class.new(PaintedRabbit::Base) do
+    user_association_serializer_class = Class.new(Blueprinter::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name

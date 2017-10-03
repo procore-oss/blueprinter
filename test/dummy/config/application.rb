@@ -3,7 +3,7 @@ require_relative 'boot'
 require 'rails/all'
 
 Bundler.require(*Rails.groups)
-require "painted_rabbit"
+require "blueprinter"
 
 module Dummy
   class Application < Rails::Application

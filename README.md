@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/procore/painted-rabbit.svg?style=svg)](https://circleci.com/gh/procore/painted-rabbit)
 
-# PaintedRabbit
+# Blueprinter
 Short description and motivation.
 
 ## Usage
@@ -10,7 +10,7 @@ How to use my plugin.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'painted_rabbit'
+gem 'blueprinter'
 ```
 
 And then execute:
@@ -20,7 +20,7 @@ $ bundle
 
 Or install it yourself as:
 ```bash
-$ gem install painted_rabbit
+$ gem install blueprinter
 ```
 
 ## Contributing

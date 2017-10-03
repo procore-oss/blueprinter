@@ -1,5 +1,5 @@
 require 'json'
-require_relative 'painted_rabbit_error'
+require_relative 'blueprinter_error'
 require_relative 'field'
 require_relative 'serializer'
 require_relative 'view'
@@ -7,7 +7,7 @@ require_relative 'view_collection'
 require_relative 'serializers/association_serializer'
 require_relative 'serializers/public_send_serializer'
 
-module PaintedRabbit
+module Blueprinter
   class Base
     def self.identifier(method, name: method, serializer: PublicSendSerializer)
       view_collection[:identifier] << Field.new(method, name, serializer)
@@ -40,7 +40,7 @@ module PaintedRabbit
     def self.prepare(object, view:)
       view_name = view
       unless view_collection.has_view? view_name
-        raise PaintedRabbitError, "View '#{view_name}' is not defined"
+        raise BlueprinterError, "View '#{view_name}' is not defined"
       end
       prepared_object = select_columns(object, view_name: view_name)
       prepared_object = include_associations(prepared_object, view_name: view_name)

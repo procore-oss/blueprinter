@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    painted_rabbit (0.1.0)
+    blueprinter (0.1.0)
       json
 
 GEM
@@ -114,8 +114,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  blueprinter!
   factory_girl
-  painted_rabbit!
   rails (~> 5.1.2)
   sqlite3
 

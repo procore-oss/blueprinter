@@ -1,4 +1,4 @@
-class PaintedRabbit::AssociationSerializer < PaintedRabbit::Serializer
+class Blueprinter::AssociationSerializer < Blueprinter::Serializer
   def serialize(association_name, object, options={})
     if options[:serializer]
       view = options[:view] || :default

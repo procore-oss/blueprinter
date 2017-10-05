@@ -1,4 +1,4 @@
-class PaintedRabbit::Field
+class Blueprinter::Field
   attr_reader :method, :name, :serializer, :options
   def initialize(method, name, serializer, options = {})
     @method = method

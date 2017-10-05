@@ -1,3 +1,3 @@
-module PaintedRabbit
+module Blueprinter
   VERSION = '0.1.0'
 end

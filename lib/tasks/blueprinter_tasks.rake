@@ -1,4 +1,4 @@
 # desc "Explaining what the task does"
-# task :painted_rabbit do
+# task :blueprinter do
 #   # Task goes here
 # end

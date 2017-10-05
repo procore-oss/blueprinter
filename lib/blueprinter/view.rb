@@ -1,4 +1,4 @@
-module PaintedRabbit
+module Blueprinter
   class View
     attr_reader :fields, :included_view_names, :excluded_field_names
 
@@ -19,7 +19,7 @@ module PaintedRabbit
 
     def <<(field)
       if @fields.has_key? field
-        raise PaintedRabbitError,
+        raise BlueprinterError,
           "Field #{field.name} already defined on #{@name}"
       end
       @fields[field.name] = field

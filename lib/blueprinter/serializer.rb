@@ -1,4 +1,4 @@
-class PaintedRabbit::Serializer
+class Blueprinter::Serializer
   def initialize
   end
 

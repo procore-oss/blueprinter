@@ -1,4 +1,4 @@
-module PaintedRabbit
+module Blueprinter
   class ViewCollection
     attr_reader :views
     def initialize

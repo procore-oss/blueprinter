@@ -2,11 +2,11 @@ require_relative '../rails_test_helper'
 require_relative '../factories/model_factories.rb'
 require 'minitest/benchmark'
 
-class PaintedRabbit::ActiveRecordBigOTest < Minitest::Benchmark
+class Blueprinter::ActiveRecordBigOTest < Minitest::Benchmark
   include FactoryGirl::Syntax::Methods
 
   def setup
-    @painted_rabbit = Class.new(PaintedRabbit::Base) do
+    @blueprinter = Class.new(Blueprinter::Base) do
       identifier :id
       fields :first_name, :last_name
     end
@@ -17,7 +17,7 @@ class PaintedRabbit::ActiveRecordBigOTest < Minitest::Benchmark
 
   def bench_render_active_record
     assert_performance_linear do |n|
-      @painted_rabbit.render(@prepared_objects[n])
+      @blueprinter.render(@prepared_objects[n])
     end
   end
 end

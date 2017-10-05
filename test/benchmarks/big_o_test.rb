@@ -2,9 +2,9 @@ require_relative '../test_helper'
 require 'ostruct'
 require 'minitest/benchmark'
 
-class PaintedRabbit::BigOTest < Minitest::Benchmark
+class Blueprinter::BigOTest < Minitest::Benchmark
   def setup
-    @painted_rabbit = Class.new(PaintedRabbit::Base) do
+    @blueprinter = Class.new(Blueprinter::Base) do
       field :id
       field :name
     end
@@ -15,7 +15,7 @@ class PaintedRabbit::BigOTest < Minitest::Benchmark
 
   def bench_render_basic
     assert_performance_linear do |n|
-      @painted_rabbit.render(@prepared_objects[n])
+      @blueprinter.render(@prepared_objects[n])
     end
   end
 end

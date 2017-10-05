@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/procore/painted-rabbit.svg?style=svg)](https://circleci.com/gh/procore/painted-rabbit)
+[![CircleCI](https://circleci.com/gh/procore/blueprinter.svg?style=svg)](https://circleci.com/gh/procore/blueprinter)
 
 # Blueprinter
 Short description and motivation.

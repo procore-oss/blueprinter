@@ -4,7 +4,7 @@ module Blueprinter
       @object = object
     end
 
-    def select(fields)
+    def optimize!(fields)
       return object unless active_record_relation?
       select_columns = (active_record_attributes & fields.map(&:method)) +
                        required_lookup_attributes

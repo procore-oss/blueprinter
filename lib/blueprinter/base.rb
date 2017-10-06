@@ -44,7 +44,7 @@ module Blueprinter
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
       prepared_object = Optimizer.new(object)
-                          .select(view_collection.fields_for(view))
+                          .optimize!(view_collection.fields_for(view))
       prepared_object = include_associations(prepared_object, view_name: view_name)
       if prepared_object.respond_to? :map
         prepared_object.map do |obj|

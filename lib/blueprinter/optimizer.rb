@@ -12,8 +12,8 @@ module Blueprinter
       private
 
       def active_record_relation?(object)
-        !!defined?(ActiveRecord::Relation) &&
-          object.is_a?(ActiveRecord::Relation)
+        !!(defined?(ActiveRecord::Relation) &&
+          object.is_a?(ActiveRecord::Relation))
       end
 
       def active_record_attributes_for(object)

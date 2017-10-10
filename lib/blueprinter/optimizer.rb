@@ -1,7 +1,7 @@
 module Blueprinter
   class Optimizer
     class << self
-      def optimize!(object, fields:)
+      def optimize(object, fields:)
         return object unless active_record_relation?(object)
         select_columns = (active_record_attributes_for(object) &
                          fields.map(&:method)) +

@@ -109,6 +109,7 @@ GEM
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.2)
+    yard (0.9.9)
 
 PLATFORMS
   ruby
@@ -118,6 +119,7 @@ DEPENDENCIES
   factory_girl
   rails (~> 5.1.2)
   sqlite3
+  yard (~> 0.9.9)
 
 BUNDLED WITH
    1.15.4

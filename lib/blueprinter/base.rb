@@ -30,6 +30,19 @@ module Blueprinter
                                        options.merge(association: true))
     end
 
+    # Generates a JSON formatted String.
+    # Takes a required object and an optional view.
+    #
+    # @param object [Object] the Object to serialize upon.
+    # @param view [Symbol] the view name that corresponds to the group of
+    #   fields to be serialized.
+    #
+    # @example Generating JSON with an extended view
+    #   post = Post.all
+    #   Blueprinter::Base.render post, view: :extended
+    #   # => "[{\"id\":1,\"title\":\"Hello\"},{\"id\":2,\"title\":\"My Day\"}]"
+    #
+    # @return [String] JSON formatted String
     def self.render(object, view: :default)
       jsonify(prepare(object, view: view))
     end

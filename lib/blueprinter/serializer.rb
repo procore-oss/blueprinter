@@ -1,3 +1,4 @@
+# @api private
 class Blueprinter::Serializer
   def initialize
   end

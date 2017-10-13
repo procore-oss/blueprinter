@@ -1,4 +1,5 @@
 module Blueprinter
+  # @api private
   class Optimizer
     class << self
       def optimize(object, fields:)

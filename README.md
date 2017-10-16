@@ -28,7 +28,7 @@ $ gem install blueprinter
 We use [Yard](https://yardoc.org/) for documentation. Here are the following
 documentation rules:
 
-- Document public all methods we expect to be utilized by the end developers.
+- Document all public methods we expect to be utilized by the end developers.
 - Methods that are not set to private due to ruby visibility rule limitations should be marked with `@api private`.
 
 ## Contributing

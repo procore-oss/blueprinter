@@ -13,10 +13,13 @@ module Blueprinter
     # Specify a field or method name used as an identifier. Usually, this is
     # something like :id
     #
+    # Note: identifiers are always rendered and considerered their own view,
+    # similar to the :default view.
+    #
     # @param method [Symbol] the method or field used as an identifier that you
     #   want to set for serialization.
     # @param name [Symbol] to rename the identifier key in the JSON
-    #   object. Defaults to method given.
+    #   output. Defaults to method given.
     # @param serializer [AssociationSerializer,PublicSendSerializer]
     #   Kind of serializer to use.
     #   Either define your own or use Blueprinter's premade serializers.
@@ -44,8 +47,8 @@ module Blueprinter
     #   Either define your own or use Blueprinter's premade serializers. The
     #   Default serializer is AssociationSerializer
     # @option options [Symbol] :name Use this to rename the method. Useful if
-    #   if you want your JSON key named differently than your object's field
-    #   or method name.
+    #   if you want your JSON key named differently in the output than your
+    #   object's field or method name.
     #
     # @example Specifying a user's first_name to be serialized.
     #   class UserBlueprint < Blueprinter::Base
@@ -66,7 +69,7 @@ module Blueprinter
     # @param method [Symbol] the association name
     # @param options [Hash] options to overide defaults.
     # @option options [Symbol] :name Use this to rename the association in the
-    #   JSON object.
+    #   JSON output.
     # @option options [Symbol] :view Specify the view to use or fall back to
     #   to the :default view.
     #
@@ -160,12 +163,13 @@ module Blueprinter
     #   class UserBlueprint < Blueprinter::Base
     #     # other code...
     #     view :normal do
-    #       # some fields set here
+    #       fields :first_name, :last_name
     #     end
     #     view :extended do
     #       include_view :normal # include fields specified from above.
     #       field :description
     #     end
+    #     #=> [:first_name, :last_name, :description]
     #   end
     #
     # @return [Array<Symbol>] an array of view names.
@@ -180,13 +184,14 @@ module Blueprinter
     #
     # @example Excluding a field from being included into the current view.
     #   view :normal do
-    #     fields :position, company
+    #     fields :position, :company
     #   end
     #   view :special do
-    #     include_view :extended
+    #     include_view :normal
     #     field :birthday
     #     exclude :position
     #   end
+    #   #=> [:company, :birthday]
     #
     # @return [Array<Symbol>] an array of field names
     def self.exclude(field_name)
@@ -203,7 +208,7 @@ module Blueprinter
     # @example Using views
     #   view :extended do
     #     fields :position, :company
-    #     include_view :extended
+    #     include_view :normal
     #     exclude :first_name
     #   end
     #

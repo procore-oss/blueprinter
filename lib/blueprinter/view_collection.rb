@@ -1,4 +1,5 @@
 module Blueprinter
+  # @api private
   class ViewCollection
     attr_reader :views
     def initialize

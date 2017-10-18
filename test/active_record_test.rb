@@ -5,7 +5,7 @@ class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
   include FactoryGirl::Syntax::Methods
 
   test 'simple model serializer' do
-    simple_user_serializer_class = Class.new(Blueprinter::Base) do
+    simple_user_blueprint_class = Class.new(Blueprinter::Base) do
       identifier :id
       field :email
       fields :last_name, :first_name
@@ -20,7 +20,7 @@ class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
       last_name: user.last_name
     })
 
-    assert_equal(expected_result, simple_user_serializer_class.render(user))
+    assert_equal(expected_result, simple_user_blueprint_class.render(user))
   end
 
   test 'model serializer with views' do

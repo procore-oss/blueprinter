@@ -7,6 +7,7 @@ require_relative 'view_collection'
 require_relative 'optimizer'
 require_relative 'serializers/association_serializer'
 require_relative 'serializers/public_send_serializer'
+require_relative 'serializers/local_method_serializer'
 
 module Blueprinter
   class Base
@@ -217,6 +218,11 @@ module Blueprinter
       @current_view = view_collection[view_name]
       yield
       @current_view = view_collection[:default]
+    end
+
+    def self.local_method(method)
+      options = {local_methods: {method => yield}}
+      current_view << Field.new(method, method, LocalMethodSerializer, options)
     end
 
     private

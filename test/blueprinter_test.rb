@@ -90,4 +90,16 @@ class Blueprinter::Test < Minitest::Test
       'The special view should render the right fields'
     )
   end
+
+  def test_local_methods
+    my_obj = OpenStruct.new(id: 1, name: 'Meg')
+    simple_blueprinter_class = Class.new(Blueprinter::Base) do
+      identifier :id
+      fields :name
+      local_method :age { 30 + 1 }
+      local_method :address { '777 Test Dr' }
+    end
+    assert_equal('{"id":1,"address":"777 Test Dr","age":31,"name":"Meg"}',
+                 simple_blueprinter_class.render(my_obj))
+  end
 end

@@ -125,4 +125,25 @@ class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
     })
     assert_equal(expected_result, user_association_serializer_class.render(user, view: :normal))
   end
+
+  test 'model serializer with local methods' do
+    simple_user_blueprint_class = Class.new(Blueprinter::Base) do
+      identifier :id
+      field :email
+      fields :last_name, :first_name
+      local_method(:age) { 30 + 1 }
+    end
+
+    user = create(:user)
+
+    expected_result = JSON.generate({
+      id: user.id,
+      age: 31,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name
+    })
+
+    assert_equal(expected_result, simple_user_blueprint_class.render(user))
+  end
 end

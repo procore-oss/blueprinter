@@ -220,6 +220,17 @@ module Blueprinter
       @current_view = view_collection[:default]
     end
 
+    # Specify a custom local method which executes the code in the block.
+    # It accepts the name of the method as a symbol and a block.
+    #
+    # @param view_name [Symbol] the method name.
+    # @yield Use this block to define your method body.
+    #
+    # @example Using views
+    #   fields :position, :company
+    #   local_method(:age) { 31 }
+    #
+    # @return [Field] A Field object
     def self.local_method(method)
       options = {local_methods: {method => yield}}
       current_view << Field.new(method, method, LocalMethodSerializer, options)

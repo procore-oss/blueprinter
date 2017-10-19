@@ -99,7 +99,7 @@ Output:
   "first_name": "John",
   "last_name": "Doe",
   "login": "john.doe@some.fake.email.domain",
-  "projects" [
+  "projects": [
     {
       "uuid": "dca94051-4195-42bc-a9aa-eb99f7723c82",
       "name": "Beach Cleanup"

@@ -231,8 +231,8 @@ module Blueprinter
     #   local_method(:age) { 31 }
     #
     # @return [Field] A Field object
-    def self.local_method(method)
-      options = {local_methods: {method => yield}}
+    def self.local_method(method, &block)
+      options = {local_methods: {method => block}}
       current_view << Field.new(method, method, LocalMethodSerializer, options)
     end
 

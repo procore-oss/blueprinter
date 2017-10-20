@@ -102,4 +102,14 @@ class Blueprinter::Test < Minitest::Test
     assert_equal('{"id":1,"address":"777 Test Dr","age":31,"name":"Meg"}',
                  simple_blueprinter_class.render(my_obj))
   end
+
+  def test_local_method_and_object
+    my_obj = OpenStruct.new(id: 1, first_name: 'Meg', last_name: 'Ryan')
+    simple_blueprinter_class = Class.new(Blueprinter::Base) do
+      identifier :id
+      local_method :full_name { |obj| "#{obj.first_name} #{obj.last_name}" }
+    end
+    assert_equal('{"id":1,"full_name":"Meg Ryan"}',
+                 simple_blueprinter_class.render(my_obj))
+  end
 end

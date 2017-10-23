@@ -7,6 +7,7 @@ require_relative 'view_collection'
 require_relative 'optimizer'
 require_relative 'serializers/association_serializer'
 require_relative 'serializers/public_send_serializer'
+require_relative 'serializers/block_serializer'
 
 module Blueprinter
   class Base
@@ -49,6 +50,8 @@ module Blueprinter
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
+    # @yield [Object] The object passed to `render` is also passed to the
+    #   block.
     #
     # @example Specifying a user's first_name to be serialized.
     #   class UserBlueprint < Blueprinter::Base
@@ -56,11 +59,23 @@ module Blueprinter
     #     # other code
     #   end
     #
+    # @example Passing a block to be evaluated as the value.
+    #   class UserBlueprint < Blueprinter::Base
+    #     field :full_name {|obj| "#{obj.first_name} #{obj.last_name}"}
+    #     # other code
+    #   end
+    #
     # @return [Field] A Field object
-    def self.field(method, options = {})
-      name = options.delete(:name) || method
-      serializer = options.delete(:serializer) || AssociationSerializer
-      current_view << Field.new(method, name, serializer, options)
+    def self.field(method, options = {}, &block)
+      options = if block_given?
+        {name: method, serializer: BlockSerializer, block: {method => block}}
+      else
+        {name: method, serializer: AssociationSerializer}
+      end.merge(options)
+      current_view << Field.new(method,
+                                options[:name],
+                                options[:serializer],
+                                options)
     end
 
     # Specify an associated object to be included for serialization.

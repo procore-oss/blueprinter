@@ -71,9 +71,11 @@ module Blueprinter
         {name: method, serializer: BlockSerializer, block: {method => block}}
       else
         {name: method, serializer: AssociationSerializer}
-      end.merge options
-      current_view << Field.new(method, options[:name], options[:serializer],
-        options)
+      end.merge(options)
+      current_view << Field.new(method,
+                                options[:name],
+                                options[:serializer],
+                                options)
     end
 
     # Specify an associated object to be included for serialization.

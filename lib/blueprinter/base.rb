@@ -7,7 +7,6 @@ require_relative 'view_collection'
 require_relative 'optimizer'
 require_relative 'serializers/association_serializer'
 require_relative 'serializers/public_send_serializer'
-require_relative 'serializers/local_method_serializer'
 require_relative 'serializers/block_serializer'
 
 module Blueprinter
@@ -231,22 +230,6 @@ module Blueprinter
       @current_view = view_collection[view_name]
       yield
       @current_view = view_collection[:default]
-    end
-
-    # Specify a custom local method which executes the code in the block.
-    # It accepts the name of the method as a symbol and a block.
-    #
-    # @param view_name [Symbol] the method name.
-    # @yield Use this block to define your method body.
-    #
-    # @example Using views
-    #   fields :position, :company
-    #   local_method(:age) { 31 }
-    #
-    # @return [Field] A Field object
-    def self.local_method(method, &block)
-      options = {local_methods: {method => block}}
-      current_view << Field.new(method, method, LocalMethodSerializer, options)
     end
 
     private

@@ -112,6 +112,34 @@ Output:
 }
 ```
 
+### Defining a field directly in the Blueprint
+
+You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. For example:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field(:full_name) do |user|
+    "#{user.first_name} #{user.last_name}"
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "full_name": "John Doe"
+}
+```
+
 ## Installation
 Add this line to your application's Gemfile:
 

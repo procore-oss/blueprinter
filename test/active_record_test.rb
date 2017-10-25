@@ -141,4 +141,22 @@ class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
 
     assert_equal(expected_result, simple_user_blueprint_class.render(user))
   end
+
+  test 'render with options' do
+    simple_user_blueprint_class = Class.new(Blueprinter::Base) do
+      identifier :id
+      field :vehicle_name {|_obj, options| options[:vehicle].make}
+    end
+
+    user = create(:user)
+    vehicle = create(:vehicle)
+
+    expected_result = JSON.generate({
+      id: user.id,
+      vehicle_name: "#{vehicle.make}",
+    })
+
+    assert_equal(expected_result,
+                 simple_user_blueprint_class.render(user, vehicle: vehicle))
+  end
 end

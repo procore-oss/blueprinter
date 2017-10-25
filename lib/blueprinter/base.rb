@@ -118,8 +118,9 @@ module Blueprinter
     #   # => "[{\"id\":1,\"title\":\"Hello\"},{\"id\":2,\"title\":\"My Day\"}]"
     #
     # @return [String] JSON formatted String
-    def self.render(object, view: :default)
-      jsonify(prepare(object, view: view))
+    def self.render(object, options = {})
+      view_name = options.delete(:view) || :default
+      jsonify(prepare(object, view_name: view_name, local_options: options))
     end
 
     # This is the magic method that converts complex objects into a simple hash
@@ -129,20 +130,23 @@ module Blueprinter
     # so we rename it for clarity
     #
     # @api private
-    def self.prepare(object, view:)
-      view_name = view
+    def self.prepare(object, view_name:, local_options:)
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
-      fields = view_collection.fields_for(view)
+      fields = view_collection.fields_for(view_name)
       prepared_object = Optimizer.optimize(object, fields: fields)
       prepared_object = include_associations(prepared_object, view_name: view_name)
       if prepared_object.respond_to? :map
         prepared_object.map do |obj|
-          object_to_hash(obj, view_name: view_name)
+          object_to_hash(obj,
+                         view_name: view_name,
+                         local_options: local_options)
         end
       else
-        object_to_hash(prepared_object, view_name: view_name)
+        object_to_hash(prepared_object,
+                       view_name: view_name,
+                       local_options: local_options)
       end
     end
 
@@ -236,9 +240,12 @@ module Blueprinter
 
     private
 
-    def self.object_to_hash(object, view_name:)
+    def self.object_to_hash(object, view_name:, local_options:)
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-        hash[field.name] = field.serializer.serialize(field.method, object, field.options)
+        hash[field.name] = field.serializer.serialize(field.method,
+                                                      object,
+                                                      local_options,
+                                                      field.options)
       end
     end
     private_class_method :object_to_hash

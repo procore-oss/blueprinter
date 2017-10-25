@@ -108,7 +108,9 @@ module Blueprinter
     # Takes a required object and an optional view.
     #
     # @param object [Object] the Object to serialize upon.
-    # @param view [Symbol] Defaults to :default.
+    # @param options [Hash] the options hash which requires a :view. Any
+    #   additional key value pairs will be exposed during serialization.
+    # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
     #

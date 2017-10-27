@@ -3,7 +3,7 @@
 # Blueprinter
 Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant.
 
-It heavily relies on the idea of `views` which, similar to Rails views, are ways of predefining output for data in different contexts. 
+It heavily relies on the idea of `views` which, similar to Rails views, are ways of predefining output for data in different contexts.
 
 ## Documentation
 !TODO Link to the docs
@@ -17,7 +17,7 @@ You may define a simple blueprint like so:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  
+
   fields :first_name, :last_name, :email
 end
 ```
@@ -44,7 +44,7 @@ You may define different ouputs by utilizing views:
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
   field :email, name: :login
-  
+
   view :normal do
     fields :first_name, :last_name
   end
@@ -79,7 +79,7 @@ You may include associated objects. Say for example, a user has projects:
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
   field :email, name: :login
-  
+
   view :normal do
     fields :first_name, :last_name
     association :projects

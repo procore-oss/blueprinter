@@ -129,7 +129,9 @@ class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
   test 'model serializer with a field and block' do
     simple_user_blueprint_class = Class.new(Blueprinter::Base) do
       identifier :id
-      field :full_name {|obj| "#{obj.first_name} #{obj.last_name}"}
+      field :full_name do |obj|
+        "#{obj.first_name} #{obj.last_name}"
+      end
     end
 
     user = create(:user)

@@ -95,7 +95,9 @@ class Blueprinter::Test < Minitest::Test
     my_obj = OpenStruct.new(id: 1, first_name: 'Meg', last_name: 'Ryan')
     simple_blueprinter_class = Class.new(Blueprinter::Base) do
       identifier :id
-      field :full_name { |obj| "#{obj.first_name} #{obj.last_name}" }
+      field :full_name do |obj|
+        "#{obj.first_name} #{obj.last_name}"
+      end
     end
     assert_equal('{"id":1,"full_name":"Meg Ryan"}',
                  simple_blueprinter_class.render(my_obj))

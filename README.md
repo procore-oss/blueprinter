@@ -119,7 +119,7 @@ You can define a field directly in the Blueprint by passing it a block. This is 
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field(:full_name) do |user|
+  field :full_name do |user|
     "#{user.first_name} #{user.last_name}"
   end
 end

@@ -16,6 +16,6 @@ class Blueprinter::IPSTest < Minitest::Test
   def test_render
     result = iterate {@blueprinter.render(@prepared_objects)}
     puts "\nBasic IPS: #{result}"
-    assert_operator(result, :>=, 3000)
+    assert_operator(result, :>=, 2500)
   end
 end

@@ -145,7 +145,9 @@ class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
   test 'render with options' do
     simple_user_blueprint_class = Class.new(Blueprinter::Base) do
       identifier :id
-      field :vehicle_name {|_obj, options| options[:vehicle].make}
+      field :vehicle_name do |_obj, options|
+        options[:vehicle].make
+      end
     end
 
     user = create(:user)

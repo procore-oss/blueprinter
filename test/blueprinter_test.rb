@@ -106,7 +106,9 @@ class Blueprinter::Test < Minitest::Test
     vehicle = OpenStruct.new(id: 1, make: 'Super Car')
     simple_blueprinter_class = Class.new(Blueprinter::Base) do
       identifier :id
-      field :vehicle_make { |_obj, options| "#{options[:vehicle].make}" }
+      field :vehicle_make do |_obj, options|
+        "#{options[:vehicle].make}"
+      end
     end
     assert_equal('{"id":1,"vehicle_make":"Super Car"}',
                  simple_blueprinter_class.render(user, vehicle: vehicle))

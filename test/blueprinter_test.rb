@@ -29,7 +29,7 @@ class Blueprinter::Test < Minitest::Test
 
   def test_fields_using_custom_serializers
     upcase_serializer = Class.new(Blueprinter::Serializer) do
-      def serialize(field_name, object, options={})
+      def serialize(field_name, object, _local_options, _options={})
         object.public_send(field_name).upcase
       end
     end
@@ -101,5 +101,18 @@ class Blueprinter::Test < Minitest::Test
     end
     assert_equal('{"id":1,"full_name":"Meg Ryan"}',
                  simple_blueprinter_class.render(my_obj))
+  end
+
+  def test_render_with_options
+    user = OpenStruct.new(id: 1, first_name: 'Meg', last_name: 'Ryan')
+    vehicle = OpenStruct.new(id: 1, make: 'Super Car')
+    simple_blueprinter_class = Class.new(Blueprinter::Base) do
+      identifier :id
+      field :vehicle_make do |_obj, options|
+        "#{options[:vehicle].make}"
+      end
+    end
+    assert_equal('{"id":1,"vehicle_make":"Super Car"}',
+                 simple_blueprinter_class.render(user, vehicle: vehicle))
   end
 end

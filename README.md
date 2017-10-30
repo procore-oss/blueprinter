@@ -140,6 +140,34 @@ Output:
 }
 ```
 
+### Passing additional properties to `render`
+
+`render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field(:company_name) do |_user, options|
+    options[:company].name
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user, company: company)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "company_name": "My Company LLC"
+}
+```
+
 ## Installation
 Add this line to your application's Gemfile:
 

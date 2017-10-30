@@ -46,7 +46,7 @@ module Blueprinter
     # @option options [AssociationSerializer,PublicSendSerializer] :serializer
     #   Kind of serializer to use.
     #   Either define your own or use Blueprinter's premade serializers. The
-    #   Default serializer is AssociationSerializer
+    #   Default serializer is PublicSendSerializer
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
@@ -70,7 +70,7 @@ module Blueprinter
       options = if block_given?
         {name: method, serializer: BlockSerializer, block: {method => block}}
       else
-        {name: method, serializer: AssociationSerializer}
+        {name: method, serializer: PublicSendSerializer}
       end.merge(options)
       current_view << Field.new(method,
                                 options[:name],

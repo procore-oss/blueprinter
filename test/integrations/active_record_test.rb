@@ -1,5 +1,5 @@
-require_relative 'rails_test_helper'
-require_relative 'factories/model_factories.rb'
+require_relative '../rails_test_helper'
+require_relative '../factories/model_factories.rb'
 
 class Blueprinter::ActiveRecordTest < ActiveSupport::TestCase
   include FactoryGirl::Syntax::Methods

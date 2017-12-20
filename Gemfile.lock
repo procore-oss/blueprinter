@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     blueprinter (0.1.0)
-      json
 
 GEM
   remote: https://rubygems.org/
@@ -55,7 +54,6 @@ GEM
     globalid (0.4.0)
       activesupport (>= 4.2.0)
     i18n (0.8.6)
-    json (2.1.0)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.6)

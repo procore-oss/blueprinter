@@ -1,4 +1,3 @@
-require 'json'
 require_relative 'blueprinter_error'
 require_relative 'field'
 require_relative 'serializer'

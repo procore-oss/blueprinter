@@ -115,7 +115,7 @@ GEM
     websocket-driver (0.6.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.2)
-    yard (0.9.9)
+    yard (0.9.12)
 
 PLATFORMS
   ruby
@@ -126,7 +126,7 @@ DEPENDENCIES
   pry
   rails (~> 5.1.2)
   sqlite3
-  yard (~> 0.9.9)
+  yard (~> 0.9.11)
 
 BUNDLED WITH
-   1.15.4
+   1.16.0

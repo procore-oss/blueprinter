@@ -51,6 +51,7 @@ GEM
     erubi (1.6.1)
     factory_girl (4.8.0)
       activesupport (>= 3.0.0)
+    github-markup (1.6.1)
     globalid (0.4.0)
       activesupport (>= 4.2.0)
     i18n (0.8.6)
@@ -99,6 +100,7 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (12.0.0)
+    redcarpet (3.4.0)
     slop (3.6.0)
     sprockets (3.7.1)
       concurrent-ruby (~> 1.0)
@@ -123,8 +125,10 @@ PLATFORMS
 DEPENDENCIES
   blueprinter!
   factory_girl
+  github-markup
   pry
   rails (~> 5.1.2)
+  redcarpet
   sqlite3
   yard (~> 0.9.11)
 

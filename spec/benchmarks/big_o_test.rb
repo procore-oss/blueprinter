@@ -1,4 +1,3 @@
-require_relative '../test_helper'
 require 'ostruct'
 require 'minitest/benchmark'
 

@@ -32,8 +32,8 @@ Rake::TestTask.new(:test) do |t|
 end
 
 Rake::TestTask.new(:benchmarks) do |t|
-  t.libs << 'test'
-  t.pattern = 'test/benchmarks/**/*_test.rb'
+  t.libs << 'spec'
+  t.pattern = 'spec/benchmarks/**/*_test.rb'
   t.verbose = false
 end
 

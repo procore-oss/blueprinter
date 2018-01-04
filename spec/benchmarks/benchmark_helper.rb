@@ -1,3 +1,7 @@
+require "rails/test_help"
+
+Rails::TestUnitReporter.executable = 'bin/test'
+
 module BenchmarkHelper
   def iterate(&block)
     start = Time.now

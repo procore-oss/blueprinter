@@ -1,5 +1,6 @@
 require_relative '../rails_test_helper'
 require_relative '../factories/model_factories.rb'
+require_relative 'benchmark_helper'
 require 'minitest/benchmark'
 
 class Blueprinter::ActiveRecordBigOTest < Minitest::Benchmark

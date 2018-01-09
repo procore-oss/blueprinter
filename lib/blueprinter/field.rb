@@ -7,4 +7,8 @@ class Blueprinter::Field
     @serializer = serializer
     @options = options
   end
+
+  def serialize(object, local_options)
+    serializer.serialize(method, object, local_options, options)
+  end
 end

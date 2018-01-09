@@ -244,10 +244,7 @@ module Blueprinter
 
     def self.object_to_hash(object, view_name:, local_options:)
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-        hash[field.name] = field.serializer.serialize(field.method,
-                                                      object,
-                                                      local_options,
-                                                      field.options)
+        hash[field.name] = field.serialize(object, local_options)
       end
     end
     private_class_method :object_to_hash

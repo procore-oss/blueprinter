@@ -1,6 +1,7 @@
 module Blueprinter
   # @api private
   class Optimizer
+    include ActiveRecordHelpers
     class << self
       def optimize(object, fields:)
         return object unless active_record_relation?(object)
@@ -11,11 +12,6 @@ module Blueprinter
       end
 
       private
-
-      def active_record_relation?(object)
-        !!(defined?(ActiveRecord::Relation) &&
-          object.is_a?(ActiveRecord::Relation))
-      end
 
       def active_record_attributes_for(object)
         object.klass.column_names.map(&:to_sym)

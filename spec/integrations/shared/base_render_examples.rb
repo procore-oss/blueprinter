@@ -1,6 +1,4 @@
 shared_examples 'Base::render' do
-  let(:obj_id) { obj.id.to_s }
-
   context 'Given blueprint has ::field' do
     let(:result) { '{"first_name":"Meg","id":' + obj_id + '}' }
     let(:blueprint) do
@@ -41,7 +39,7 @@ shared_examples 'Base::render' do
     let(:blueprint) do
       serializer = Class.new(Blueprinter::Serializer) do
         def serialize(field_name, object, _local_options, _options={})
-          object.public_send(field_name).upcase
+          object[field_name].upcase
         end
       end
       Class.new(Blueprinter::Base) do
@@ -91,14 +89,7 @@ shared_examples 'Base::render' do
 
   context 'Given blueprint has ::field with a block' do
     let(:result) { '{"id":' + obj_id + ',"position_and_company":"Manager at Procore"}' }
-    let(:blueprint) do
-      Class.new(Blueprinter::Base) do
-        identifier :id
-        field :position_and_company do |obj|
-          "#{obj.position} at #{obj.company}"
-        end
-      end
-    end
+    let(:blueprint) { blueprint_with_block }
     it('returns json with values derived from a block') { should eq(result) }
   end
 
@@ -109,7 +100,7 @@ shared_examples 'Base::render' do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :vehicle_make do |_obj, options|
-          "#{options[:vehicle].make}"
+          "#{options[:vehicle][:make]}"
         end
       end
     end

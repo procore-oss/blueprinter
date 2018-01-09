@@ -1,16 +1,21 @@
 require 'json'
 require_relative 'blueprinter_error'
-require_relative 'field'
+require_relative 'helpers/active_record_helpers'
 require_relative 'serializer'
+require_relative 'serializers/association_serializer'
+require_relative 'serializers/auto_serializer'
+require_relative 'serializers/block_serializer'
+require_relative 'serializers/hash_serializer'
+require_relative 'serializers/public_send_serializer'
+require_relative 'field'
 require_relative 'view'
 require_relative 'view_collection'
 require_relative 'optimizer'
-require_relative 'serializers/association_serializer'
-require_relative 'serializers/public_send_serializer'
-require_relative 'serializers/block_serializer'
 
 module Blueprinter
   class Base
+    include ActiveRecordHelpers
+
     # Specify a field or method name used as an identifier. Usually, this is
     # something like :id
     #
@@ -21,10 +26,10 @@ module Blueprinter
     #   want to set for serialization.
     # @param name [Symbol] to rename the identifier key in the JSON
     #   output. Defaults to method given.
-    # @param serializer [AssociationSerializer,PublicSendSerializer]
+    # @param serializer [AssociationSerializer,AutoSerializer,BlockSerializer,HashSerializer,PublicSendSerializer]
     #   Kind of serializer to use.
     #   Either define your own or use Blueprinter's premade serializers.
-    #   Defaults to PublicSendSerializer
+    #   Defaults to AutoSerializer
     #
     # @example Specifying a uuid as an identifier.
     #   class UserBlueprint < Blueprinter::Base
@@ -33,7 +38,7 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.identifier(method, name: method, serializer: PublicSendSerializer)
+    def self.identifier(method, name: method, serializer: AutoSerializer)
       view_collection[:identifier] << Field.new(method, name, serializer)
     end
 
@@ -43,10 +48,10 @@ module Blueprinter
     # @param method [Symbol] the field or method name you want to include for
     #   serialization.
     # @param options [Hash] options to overide defaults.
-    # @option options [AssociationSerializer,PublicSendSerializer] :serializer
+    # @option options [AssociationSerializer,BlockSerializer,HashSerializer,PublicSendSerializer] :serializer
     #   Kind of serializer to use.
     #   Either define your own or use Blueprinter's premade serializers. The
-    #   Default serializer is PublicSendSerializer
+    #   Default serializer is AutoSerializer
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
@@ -70,7 +75,7 @@ module Blueprinter
       options = if block_given?
         {name: method, serializer: BlockSerializer, block: {method => block}}
       else
-        {name: method, serializer: PublicSendSerializer}
+        {name: method, serializer: AutoSerializer}
       end.merge(options)
       current_view << Field.new(method,
                                 options[:name],
@@ -139,7 +144,7 @@ module Blueprinter
       fields = view_collection.fields_for(view_name)
       prepared_object = Optimizer.optimize(object, fields: fields)
       prepared_object = include_associations(prepared_object, view_name: view_name)
-      if prepared_object.respond_to? :map
+      if array_like?(object)
         prepared_object.map do |obj|
           object_to_hash(obj,
                          view_name: view_name,
@@ -167,7 +172,7 @@ module Blueprinter
     # @return [Array<Symbol>] an array of field names
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_view << Field.new(field_name, field_name, PublicSendSerializer)
+        current_view << Field.new(field_name, field_name, AutoSerializer)
       end
     end
 
@@ -285,5 +290,10 @@ module Blueprinter
       @view_collection ||= ViewCollection.new
     end
     private_class_method :view_collection
+
+    def self.array_like?(object)
+      object.is_a?(Array) || active_record_relation?(object)
+    end
+    private_class_method :array_like?
   end
 end

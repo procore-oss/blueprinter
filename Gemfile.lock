@@ -2,7 +2,6 @@ PATH
   remote: .
   specs:
     blueprinter (0.1.0)
-      json
 
 GEM
   remote: https://rubygems.org/
@@ -55,7 +54,6 @@ GEM
     globalid (0.4.0)
       activesupport (>= 4.2.0)
     i18n (0.8.6)
-    json (2.1.0)
     loofah (2.0.3)
       nokogiri (>= 1.5.9)
     mail (2.6.6)
@@ -69,6 +67,7 @@ GEM
     nio4r (2.1.0)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
+    oj (3.3.10)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -137,6 +136,7 @@ PLATFORMS
 DEPENDENCIES
   blueprinter!
   factory_girl
+  oj (~> 3.0)
   pry
   rails (~> 5.1.2)
   rspec (~> 3.7)

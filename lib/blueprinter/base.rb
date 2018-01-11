@@ -1,4 +1,3 @@
-require 'json'
 require_relative 'blueprinter_error'
 require_relative 'field'
 require_relative 'serializer'
@@ -271,11 +270,7 @@ module Blueprinter
     private_class_method :include_associations
 
     def self.jsonify(blob)
-      if blob.respond_to? :to_json
-        blob.to_json
-      else
-        JSON.generate(blob)
-      end
+      Blueprinter.configuration.generator.generate(blob)
     end
     private_class_method :jsonify
 

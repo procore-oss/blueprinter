@@ -185,6 +185,27 @@ Or install it yourself as:
 $ gem install blueprinter
 ```
 
+You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
+
+## OJ
+
+By default, Blueprinter will be calling `JSON.generate(object)` internally and it expects that you have `require 'json'` already in your project's code. You may use `Oj` to generate in place of `JSON` like so:
+
+```ruby
+require 'oj' # you can skip this if OJ has already been required.
+
+Blueprinter.configure do |config|
+  config.generator = Oj # default is JSON
+end
+```
+
+Ensure that you have the `Oj` gem installed in your Gemfile if you haven't already:
+
+```ruby
+# Gemfile
+gem 'oj'
+```
+
 ## Documentation
 
 We use [Yard](https://yardoc.org/) for documentation. Here are the following

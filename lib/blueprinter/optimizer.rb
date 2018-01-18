@@ -8,7 +8,7 @@ module Blueprinter
         select_columns = (active_record_attributes_for(object) &
                          fields.map(&:method)) +
                          required_lookup_attributes_for(object)
-        object.select(*select_columns)
+        object.select(*select_columns.compact)
       end
 
       private
@@ -23,7 +23,10 @@ module Blueprinter
                          object.preload_values +
                          object.joins_values +
                          object.eager_load_values).uniq
-        lookup_values.map {|value| object.reflections[value.to_s].foreign_key}
+        lookup_values.map do |value|
+          result = object.reflections[value.to_s]
+          result.foreign_key if result
+        end
       end
     end
   end

@@ -9,7 +9,6 @@ require_relative 'serializers/public_send_serializer'
 require_relative 'field'
 require_relative 'view'
 require_relative 'view_collection'
-require_relative 'optimizer'
 
 module Blueprinter
   class Base
@@ -141,8 +140,7 @@ module Blueprinter
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
       fields = view_collection.fields_for(view_name)
-      prepared_object = Optimizer.optimize(object, fields: fields)
-      prepared_object = include_associations(prepared_object, view_name: view_name)
+      prepared_object = include_associations(object, view_name: view_name)
       if array_like?(object)
         prepared_object.map do |obj|
           object_to_hash(obj,

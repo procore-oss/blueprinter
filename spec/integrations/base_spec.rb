@@ -67,6 +67,40 @@ describe '::Base' do
       let(:vehicle) { create(:vehicle) }
 
       include_examples 'Base::render'
+
+      context 'Given blueprint has ::association' do
+        let(:result) do
+          '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car"}]}'
+        end
+        let(:blueprint_without_associated_blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            association :vehicles
+          end
+        end
+        before { vehicle.update(user: obj) }
+        context 'Given associated blueprint is given' do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+            end
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles, blueprint: vehicle_blueprint
+            end
+          end
+          it('returns json with association') { should eq(result) }
+        end
+        context 'Given no associated blueprint is given' do
+          let(:blueprint) do
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles
+            end
+          end
+          it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+        end
+      end
     end
   end
 end

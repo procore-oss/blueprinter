@@ -77,13 +77,18 @@ Output:
 ### Associations
 You may include associated objects. Say for example, a user has projects:
 ```ruby
+class ProjectBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :name
+end
+
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
   field :email, name: :login
 
   view :normal do
     fields :first_name, :last_name
-    association :projects
+    association :projects, blueprint: ProjectBlueprint
   end
 end
 ```

@@ -86,6 +86,8 @@ module Blueprinter
     #
     # @param method [Symbol] the association name
     # @param options [Hash] options to overide defaults.
+    # @option options [Symbol] :blueprint Required. Use this to specify the
+    #   blueprint to use for the associated object.
     # @option options [Symbol] :name Use this to rename the association in the
     #   JSON output.
     # @option options [Symbol] :view Specify the view to use or fall back to
@@ -94,12 +96,13 @@ module Blueprinter
     # @example Specifying an association
     #   class UserBlueprint < Blueprinter::Base
     #     # code
-    #     association :vehicles, view: :extended
+    #     association :vehicles, view: :extended, blueprint: VehiclesBlueprint
     #     # code
     #   end
     #
     # @return [Field] A Field object
     def self.association(method, options = {})
+      raise BlueprinterError, 'blueprint required' unless options[:blueprint]
       name = options.delete(:name) || method
       current_view << Field.new(method,
                                        name,

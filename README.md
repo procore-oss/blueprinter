@@ -7,7 +7,7 @@ Blueprinter is a JSON Object Presenter for Ruby that takes business objects and 
 It heavily relies on the idea of `views` which, similar to Rails views, are ways of predefining output for data in different contexts.
 
 ## Documentation
-!TODO Link to the docs
+Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 
 ## Usage
 ### Basic
@@ -212,7 +212,7 @@ Ensure that you have the `Oj` gem installed in your Gemfile if you haven't alrea
 gem 'oj'
 ```
 
-## Documentation
+## How to Document
 
 We use [Yard](https://yardoc.org/) for documentation. Here are the following
 documentation rules:

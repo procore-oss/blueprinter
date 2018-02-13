@@ -3,11 +3,11 @@ require "rails/test_help"
 Rails::TestUnitReporter.executable = 'bin/test'
 
 module BenchmarkHelper
-  def iterate(&block)
+  def iterate
     start = Time.now
     count = 0
     while Time.now - start <= 1.second do
-      block.call
+      yield
       count += 1
     end
     count

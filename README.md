@@ -95,7 +95,7 @@ end
 
 Usage:
 ```ruby
-puts UserBlueprint.render(user, view: :extended)
+puts UserBlueprint.render(user, view: :normal)
 ```
 
 Output:

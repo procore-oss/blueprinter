@@ -131,6 +131,10 @@ module Blueprinter
       jsonify(prepare(object, view_name: view_name, local_options: options))
     end
 
+    class << self
+      alias_method :print, :render
+    end
+
     # This is the magic method that converts complex objects into a simple hash
     # ready for JSON conversion.
     #

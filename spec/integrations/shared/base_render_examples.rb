@@ -34,20 +34,20 @@ shared_examples 'Base::render' do
     it('returns json with a renamed field') { should eq(result) }
   end
 
-  context 'Given blueprint has ::field with a :serializer argument' do
+  context 'Given blueprint has ::field with a :extractor argument' do
     let(:result) { '{"first_name":"MEG","id":' + obj_id + '}' }
     let(:blueprint) do
-      serializer = Class.new(Blueprinter::Serializer) do
-        def serialize(field_name, object, _local_options, _options={})
+      extractor = Class.new(Blueprinter::Extractor) do
+        def extract(field_name, object, _local_options, _options={})
           object[field_name].upcase
         end
       end
       Class.new(Blueprinter::Base) do
         field :id
-        field :first_name, serializer: serializer
+        field :first_name, extractor: extractor
       end
     end
-    it('returns json derived from a custom serializer') { should eq(result) }
+    it('returns json derived from a custom extractor') { should eq(result) }
   end
 
   context 'Given blueprint has ::view' do

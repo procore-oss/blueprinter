@@ -1,11 +1,11 @@
 require_relative 'blueprinter_error'
 require_relative 'helpers/active_record_helpers'
-require_relative 'serializer'
-require_relative 'serializers/association_serializer'
-require_relative 'serializers/auto_serializer'
-require_relative 'serializers/block_serializer'
-require_relative 'serializers/hash_serializer'
-require_relative 'serializers/public_send_serializer'
+require_relative 'extractor'
+require_relative 'extractors/association_extractor'
+require_relative 'extractors/auto_extractor'
+require_relative 'extractors/block_extractor'
+require_relative 'extractors/hash_extractor'
+require_relative 'extractors/public_send_extractor'
 require_relative 'field'
 require_relative 'view'
 require_relative 'view_collection'
@@ -24,10 +24,10 @@ module Blueprinter
     #   want to set for serialization.
     # @param name [Symbol] to rename the identifier key in the JSON
     #   output. Defaults to method given.
-    # @param serializer [AssociationSerializer,AutoSerializer,BlockSerializer,HashSerializer,PublicSendSerializer]
-    #   Kind of serializer to use.
-    #   Either define your own or use Blueprinter's premade serializers.
-    #   Defaults to AutoSerializer
+    # @param extractor [AssociationExtractor,AutoExtractor,BlockExtractor,HashExtractor,PublicSendExtractor]
+    #   Kind of extractor to use.
+    #   Either define your own or use Blueprinter's premade extractors.
+    #   Defaults to AutoExtractor
     #
     # @example Specifying a uuid as an identifier.
     #   class UserBlueprint < Blueprinter::Base
@@ -36,8 +36,8 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.identifier(method, name: method, serializer: AutoSerializer)
-      view_collection[:identifier] << Field.new(method, name, serializer)
+    def self.identifier(method, name: method, extractor: AutoExtractor)
+      view_collection[:identifier] << Field.new(method, name, extractor)
     end
 
     # Specify a field or method name to be included for serialization.
@@ -46,10 +46,10 @@ module Blueprinter
     # @param method [Symbol] the field or method name you want to include for
     #   serialization.
     # @param options [Hash] options to overide defaults.
-    # @option options [AssociationSerializer,BlockSerializer,HashSerializer,PublicSendSerializer] :serializer
-    #   Kind of serializer to use.
-    #   Either define your own or use Blueprinter's premade serializers. The
-    #   Default serializer is AutoSerializer
+    # @option options [AssociationExtractor,BlockExtractor,HashExtractor,PublicSendExtractor] :extractor
+    #   Kind of extractor to use.
+    #   Either define your own or use Blueprinter's premade extractors. The
+    #   Default extractor is AutoExtractor
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
@@ -71,13 +71,13 @@ module Blueprinter
     # @return [Field] A Field object
     def self.field(method, options = {}, &block)
       options = if block_given?
-        {name: method, serializer: BlockSerializer, block: {method => block}}
+        {name: method, extractor: BlockExtractor, block: {method => block}}
       else
-        {name: method, serializer: AutoSerializer}
+        {name: method, extractor: AutoExtractor}
       end.merge(options)
       current_view << Field.new(method,
                                 options[:name],
-                                options[:serializer],
+                                options[:extractor],
                                 options)
     end
 
@@ -106,7 +106,7 @@ module Blueprinter
       name = options.delete(:name) || method
       current_view << Field.new(method,
                                        name,
-                                       AssociationSerializer,
+                                       AssociationExtractor,
                                        options.merge(association: true))
     end
 
@@ -172,7 +172,7 @@ module Blueprinter
     # @return [Array<Symbol>] an array of field names
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_view << Field.new(field_name, field_name, AutoSerializer)
+        current_view << Field.new(field_name, field_name, AutoExtractor)
       end
     end
 
@@ -249,7 +249,7 @@ module Blueprinter
 
     def self.object_to_hash(object, view_name:, local_options:)
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-        hash[field.name] = field.serialize(object, local_options)
+        hash[field.name] = field.extract(object, local_options)
       end
     end
     private_class_method :object_to_hash

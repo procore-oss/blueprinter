@@ -3,7 +3,7 @@ require_relative '../factories/model_factories.rb'
 require_relative 'benchmark_helper'
 
 class Blueprinter::ActiveRecordIPSTest < Minitest::Test
-  include FactoryGirl::Syntax::Methods
+  include FactoryBot::Syntax::Methods
   include BenchmarkHelper
 
   def setup

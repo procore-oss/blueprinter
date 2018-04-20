@@ -4,7 +4,7 @@ require_relative 'benchmark_helper'
 require 'minitest/benchmark'
 
 class Blueprinter::ActiveRecordBigOTest < Minitest::Benchmark
-  include FactoryGirl::Syntax::Methods
+  include FactoryBot::Syntax::Methods
 
   def setup
     @blueprinter = Class.new(Blueprinter::Base) do

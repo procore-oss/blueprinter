@@ -61,7 +61,7 @@ describe '::Base' do
     end
 
     context 'Inside Rails project' do
-      include FactoryGirl::Syntax::Methods
+      include FactoryBot::Syntax::Methods
       let(:obj) { create(:user) }
       let(:obj_id) { obj.id.to_s }
       let(:vehicle) { create(:vehicle) }

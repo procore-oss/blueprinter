@@ -144,7 +144,7 @@ module Blueprinter
     # @example Generating a hash with an extended view
     #   post = Post.all
     #   Blueprinter::Base.render_as_hash post, view: :extended
-    #   # => [{id:1, title: Hello},{id:2, title: My Day}]"
+    #   # => [{id:1, title: Hello},{id:2, title: My Day}]
     #
     # @return [Hash]
     def self.render_as_hash(object, options= {})

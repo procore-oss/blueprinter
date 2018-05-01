@@ -131,6 +131,27 @@ module Blueprinter
       jsonify(prepare(object, view_name: view_name, local_options: options))
     end
 
+    # Generates a hash.
+    # Takes a required object and an optional view.
+    #
+    # @param object [Object] the Object to serialize upon.
+    # @param options [Hash] the options hash which requires a :view. Any
+    #   additional key value pairs will be exposed during serialization.
+    # @option options [Symbol] :view Defaults to :default.
+    #   The view name that corresponds to the group of
+    #   fields to be serialized.
+    #
+    # @example Generating a hash with an extended view
+    #   post = Post.all
+    #   Blueprinter::Base.render_as_hash post, view: :extended
+    #   # => [{id:1, title: Hello},{id:2, title: My Day}]"
+    #
+    # @return [Hash]
+    def self.render_as_hash(object, options= {})
+      view_name = options.delete(:view) || :default
+      prepare(object, view_name: view_name, local_options: options)
+    end
+
     # This is the magic method that converts complex objects into a simple hash
     # ready for JSON conversion.
     #

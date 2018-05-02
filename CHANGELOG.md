@@ -1,3 +1,8 @@
+## 0.4.0  - 2018/05/02
+
+* [FEATURE] Add `render_as_hash` which will output a hash instead of
+a JSON String. See PR #76 by @amayer171 and Issue #73.
+
 ## 0.3.0  - 2018/04/05
 
 Sort of a breaking Change. Serializer classes has been renamed to Extractor. To upgrade, if you passed in a specific serializer to `field` or `identifier` such as:

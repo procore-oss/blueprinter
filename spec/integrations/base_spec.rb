@@ -94,6 +94,40 @@ describe '::Base' do
           it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
         end
       end
+
+      context "Given association is nil" do
+        before do
+          expect(vehicle).to receive(:user).and_return(nil)
+        end
+
+        context "Given default association value is not provided" do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+              association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+            end
+          end
+
+          it "should render the association as nil" do
+            expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
+          end
+        end
+
+        context "Given default association value is provided" do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+              association :user,
+                blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                default: {}
+            end
+          end
+
+          it "should render the default value provided for the association" do
+            expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+          end
+        end
+      end
     end
   end
   describe '::render_as_hash' do

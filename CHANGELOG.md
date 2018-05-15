@@ -1,3 +1,8 @@
+## 0.5.0  - 2018/05/15
+
+* [FEATURE] Add `default` option to `association` which will be used as the serialized value instead of `null` when the association evaluates to null.
+See PR #78 by @vinaya-procore.
+
 ## 0.4.0  - 2018/05/02
 
 * [FEATURE] Add `render_as_hash` which will output a hash instead of

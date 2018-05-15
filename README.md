@@ -120,6 +120,20 @@ Output:
 }
 ```
 
+#### Default option
+By default, an association that evaluates to `nil` is serialized as `nil`. A default serialized value can be
+specified as option on the association for cases when the association could potentially evaluate to `nil`.
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    fields :first_name, :last_name
+    association :company, blueprint: CompanyBlueprint, default: {}
+  end
+end
+```
+
 ### Defining a field directly in the Blueprint
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. For example:

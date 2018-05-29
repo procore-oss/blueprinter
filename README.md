@@ -42,7 +42,7 @@ And the output would look like:
 ```
 
 ### Views
-You may define different ouputs by utilizing views:
+You may define different outputs by utilizing views:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid

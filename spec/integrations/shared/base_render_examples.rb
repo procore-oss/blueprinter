@@ -50,6 +50,19 @@ shared_examples 'Base::render' do
     it('returns json derived from a custom extractor') { should eq(result) }
   end
 
+  context 'Given blueprint has ::field with a :datetime_format argument' do
+    let(:result) do
+      '{"id":' + obj_id + ',"birthday":"03/04/1994"}'
+    end
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday, datetime_format: "%m/%d/%Y"
+      end
+    end
+    it('returns json with a formatted field') { should eq(result) }
+  end
+
   context 'Given blueprint has ::view' do
     let(:normal) do
       ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',

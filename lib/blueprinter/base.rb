@@ -6,7 +6,6 @@ require_relative 'extractors/auto_extractor'
 require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
-require_relative 'extractors/datetime_extractor'
 require_relative 'field'
 require_relative 'view'
 require_relative 'view_collection'
@@ -25,7 +24,7 @@ module Blueprinter
     #   want to set for serialization.
     # @param name [Symbol] to rename the identifier key in the JSON
     #   output. Defaults to method given.
-    # @param extractor [AssociationExtractor,AutoExtractor,BlockExtractor,HashExtractor,PublicSendExtractor,DateTimeExtractor]
+    # @param extractor [AssociationExtractor,AutoExtractor,BlockExtractor,HashExtractor,PublicSendExtractor]
     #   Kind of extractor to use.
     #   Either define your own or use Blueprinter's premade extractors.
     #   Defaults to AutoExtractor
@@ -47,7 +46,7 @@ module Blueprinter
     # @param method [Symbol] the field or method name you want to include for
     #   serialization.
     # @param options [Hash] options to overide defaults.
-    # @option options [AssociationExtractor,BlockExtractor,HashExtractor,PublicSendExtractor,DateTimeExtractor] :extractor
+    # @option options [AssociationExtractor,BlockExtractor,HashExtractor,PublicSendExtractor] :extractor
     #   Kind of extractor to use.
     #   Either define your own or use Blueprinter's premade extractors. The
     #   Default extractor is AutoExtractor

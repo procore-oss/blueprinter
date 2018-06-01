@@ -163,7 +163,6 @@ module Blueprinter
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
-      fields = view_collection.fields_for(view_name)
       prepared_object = include_associations(object, view_name: view_name)
       if array_like?(object)
         prepared_object.map do |obj|

@@ -53,6 +53,8 @@ module Blueprinter
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
+    # @option options [String] :datetime_format Format Date or DateTime object
+    #   with given strftime formatting
     # @yield [Object] The object passed to `render` is also passed to the
     #   block.
     #

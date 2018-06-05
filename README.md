@@ -42,7 +42,7 @@ And the output would look like:
 ```
 
 ### Views
-You may define different ouputs by utilizing views:
+You may define different outputs by utilizing views:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -187,6 +187,25 @@ Output:
 {
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
   "company_name": "My Company LLC"
+}
+```
+
+### Custom formatting for dates and times
+To define a custom format for a Date or DateTime field, include the option `datetime_format` with the associated `strptime` format.
+
+Usage:
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :name
+  field :birthday, datetime_format: "%m/%d/%Y"
+end
+```
+
+Output:
+```json
+{
+  "name": "John Doe",
+  "birthday": "03/04/1994"
 }
 ```
 

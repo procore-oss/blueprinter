@@ -53,6 +53,8 @@ module Blueprinter
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
+    # @option options [String] :datetime_format Format Date or DateTime object
+    #   with given strftime formatting
     # @option options [Symbol,Proc] :if Specifies a method, proc or string to
     #   call to determine if the field should be included (e.g.
     #   `if: :include_first_name?, or if: Proc.new { |user, options| options[:current_user] == user }).

@@ -5,6 +5,7 @@ FactoryBot.define do
     position 'Manager'
     description 'A person'
     company 'Procore'
+    birthday Date.new(1994, 3, 4)
   end
 
   factory :vehicle do

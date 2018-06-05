@@ -1,3 +1,9 @@
+## 0.6.0  - 2018/06/05
+
+* [FEATURE] Add `date_time` format as an option to `field`. Please see pr #68. Thanks to @njbbaer.
+* [FEATURE] Add conditional field support `:unless` and `:if` as an option to `field`. Please see pr #86. Thanks to @ojab.
+* [BUGFIX] Fix case where miscellaneous options were not being passed through the `AutoExtractor`. See pr #83.
+
 ## 0.5.0  - 2018/05/15
 
 * [FEATURE] Add `default` option to `association` which will be used as the serialized value instead of `null` when the association evaluates to null.

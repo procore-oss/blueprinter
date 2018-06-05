@@ -37,7 +37,7 @@ module Blueprinter
     #
     # @return [Field] A Field object
     def self.identifier(method, name: method, extractor: AutoExtractor)
-      view_collection[:identifier] << Field.new(method, name, extractor)
+      view_collection[:identifier] << Field.new(method, name, extractor, self)
     end
 
     # Specify a field or method name to be included for serialization.
@@ -55,6 +55,14 @@ module Blueprinter
     #   object's field or method name.
     # @option options [String] :datetime_format Format Date or DateTime object
     #   with given strftime formatting
+    # @option options [Symbol,Proc] :if Specifies a method, proc or string to
+    #   call to determine if the field should be included (e.g.
+    #   `if: :include_first_name?, or if: Proc.new { |user, options| options[:current_user] == user }).
+    #   The method, proc or string should return or evaluate to a true or false value.
+    # @option options [Symbol,Proc] :unless Specifies a method, proc or string
+    #   to call to determine if the field should be included (e.g.
+    #   `unless: :include_first_name?, or unless: Proc.new { |user, options| options[:current_user] != user }).
+    #   The method, proc or string should return or evaluate to a true or false value.
     # @yield [Object] The object passed to `render` is also passed to the
     #   block.
     #
@@ -70,6 +78,17 @@ module Blueprinter
     #     # other code
     #   end
     #
+    # @example Passing an if proc and unless method..
+    #   class UserBlueprint < Blueprinter::Base
+    #     def skip_first_name?(user, options)
+    #       user.first_name == options[:first_name]
+    #     end
+    #
+    #     field :first_name, unless: :skip_first_name?
+    #     field :last_name, if: ->(user, options) { user.first_name != options[:first_name] }
+    #     # other code
+    #   end
+    #
     # @return [Field] A Field object
     def self.field(method, options = {}, &block)
       options = if block_given?
@@ -80,6 +99,7 @@ module Blueprinter
       current_view << Field.new(method,
                                 options[:name],
                                 options[:extractor],
+                                self,
                                 options)
     end
 
@@ -109,6 +129,7 @@ module Blueprinter
       current_view << Field.new(method,
                                        name,
                                        AssociationExtractor,
+                                       self,
                                        options.merge(association: true))
     end
 
@@ -165,7 +186,6 @@ module Blueprinter
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
-      fields = view_collection.fields_for(view_name)
       prepared_object = include_associations(object, view_name: view_name)
       if array_like?(object)
         prepared_object.map do |obj|
@@ -195,7 +215,7 @@ module Blueprinter
     # @return [Array<Symbol>] an array of field names
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_view << Field.new(field_name, field_name, AutoExtractor)
+        current_view << Field.new(field_name, field_name, AutoExtractor, self)
       end
     end
 
@@ -272,6 +292,7 @@ module Blueprinter
 
     def self.object_to_hash(object, view_name:, local_options:)
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
+        next if field.skip?(object, local_options)
         hash[field.name] = field.extract(object, local_options)
       end
     end

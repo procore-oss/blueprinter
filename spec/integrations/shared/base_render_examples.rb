@@ -72,6 +72,100 @@ shared_examples 'Base::render' do
     end
     it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
   end
+  
+  context 'Given blueprint has ::field with a conditional argument' do
+    variants = %i[proc method].product([true, false])
+
+    let(:if_value) { true }
+    let(:unless_value) { false }
+    let(:field_options) { {} }
+    let(:local_options) { { x: 1, y: 2 } }
+    let(:if_proc) { ->(_obj, _local_opts) { if_value } }
+    let(:unless_proc) { ->(_obj, _local_opts) { unless_value } }
+    let(:blueprint) do
+      f_options = field_options
+
+      bp = Class.new(Blueprinter::Base) do
+        field :id
+        field :first_name, f_options
+      end
+      bp.instance_eval <<-RUBY, __FILE__, __LINE__ + 1
+            def self.if_method(_object, _options)
+              #{if_value}
+            end
+
+            def self.unless_method(_object, _options)
+              #{unless_value}
+            end
+          RUBY
+      bp
+    end
+    let(:result_with_first_name) do
+      %({"first_name":"Meg","id":#{obj_id}})
+    end
+    let(:result_without_first_name) { %({"id":#{obj_id}}) }
+    subject { blueprint.render(obj, local_options) }
+
+    shared_examples 'serializes the conditional field' do
+      it 'serializes the conditional field' do
+        should eq(result_with_first_name)
+      end
+    end
+
+    shared_examples 'does not serialize the conditional field' do
+      it 'does not serialize the conditional field' do
+        should eq(result_without_first_name)
+      end
+    end
+
+    variants.each do |type, value|
+      context "Given the conditional is :if #{type} returning #{value}" do
+        let(:if_value) { value }
+
+        before do
+          field_options[:if] = type == :method ? :if_method : if_proc
+        end
+
+        context 'and no :unless conditional' do
+          if value
+            include_examples 'serializes the conditional field'
+          else
+            include_examples 'does not serialize the conditional field'
+          end
+        end
+
+        variants.each do |other_type, other_value|
+          context "and :unless conditional is #{other_type} returning #{other_value}" do
+            let(:unless_value) { other_value }
+            before do
+              field_options[:unless] = if type == :method then :unless_method
+                                       else unless_proc
+                                       end
+            end
+
+            if value && !other_value
+              include_examples 'serializes the conditional field'
+            else
+              include_examples 'does not serialize the conditional field'
+            end
+          end
+        end
+      end
+
+      context "Given the conditional is :unless #{type} returning #{value} and no :if conditional" do
+        let(:unless_value) { value }
+        before do
+          field_options[:unless] = type == :method ? :unless_method : unless_proc
+        end
+
+        if value
+          include_examples 'does not serialize the conditional field'
+        else
+          include_examples 'serializes the conditional field'
+        end
+      end
+    end
+  end
 
   context 'Given blueprint has ::view' do
     let(:normal) do

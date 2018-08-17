@@ -41,6 +41,30 @@ And the output would look like:
 }
 ```
 
+### Renaming
+
+You can rename the resulting JSON keys in both fields and associations by using the `name` option.
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  
+  field :email, name: :login
+  
+  association :user_projects, name: :projects
+end
+```
+
+This will result in JSON that looks something like this:
+
+```json
+{
+  "uuid": "92a5c732-2874-41e4-98fc-4123cd6cfa86",
+  "login": "my@email.com",
+  "projects": []
+}
+```
+
 ### Views
 You may define different outputs by utilizing views:
 ```ruby

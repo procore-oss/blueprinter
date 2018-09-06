@@ -223,4 +223,21 @@ shared_examples 'Base::render' do
     end
     it('returns json with values derived from options') { should eq(result) }
   end
+
+  context 'Given ::render with options and mapping' do
+    subject { blueprint.render(obj, vehicle: vehicle) }
+    let(:result) { '{"id":' + obj_id + ',"vehicle_make":"Super Car"}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :vehicle_make
+        mapping do
+          def vehicle_make
+            "#{options[:vehicle][:make]}"
+          end
+        end
+      end
+    end
+    it('returns json with values derived from options') { should eq(result) }
+  end
 end

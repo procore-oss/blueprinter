@@ -19,7 +19,8 @@ describe '::Base' do
 
       mapping do
         def position_and_company
-          "#{obj.position} at #{obj.company}"
+          struct = object.is_a?(Hash) ? OpenStruct.new(object) : object
+            "#{struct.position} at #{struct.company}"
         end
       end
     end

@@ -72,7 +72,7 @@ shared_examples 'Base::render' do
     end
     it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
   end
-  
+
   context 'Given blueprint has ::field with a conditional argument' do
     variants = %i[proc method].product([true, false])
 
@@ -209,6 +209,13 @@ shared_examples 'Base::render' do
     let(:blueprint) { blueprint_with_block }
     it('returns json with values derived from a block') { should eq(result) }
   end
+
+  context 'Given blueprint has ::field based on a mapping' do
+    let(:result) { '{"id":' + obj_id + ',"position_and_company":"Manager at Procore"}' }
+    let(:blueprint) { blueprint_with_mapping }
+    it('returns json with values derived from a mapping') { should eq(result) }
+  end
+
 
   context 'Given ::render with options' do
     subject { blueprint.render(obj, vehicle: vehicle) }

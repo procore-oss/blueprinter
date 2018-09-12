@@ -7,6 +7,7 @@ require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
 require_relative 'field'
+require_relative 'mapper'
 require_relative 'view'
 require_relative 'view_collection'
 
@@ -131,6 +132,43 @@ module Blueprinter
                                        AssociationExtractor,
                                        self,
                                        options.merge(association: true))
+    end
+
+    # Specify the body of a mapper class.
+    # The mapper is an intermediate object wrapping the object being serialized.
+    # It enables the blueprint to have fields and association not matching exactly methods on the object.
+    # Methods of the mapper can access the options passed to render or render_as_hash.
+    #
+    #
+    # @example Specifying a mapper
+    #   class UserBlueprint < Blueprinter::Base
+    #     
+    #     field :city_name
+    #     association :country
+    #     
+    #     mapping do 
+    #     # we imagine the User has a main_address method
+    #
+    #       def city_name
+    #         if options[:normalize]
+    #           main_address.city.name.downcase.capitalize
+    #         else
+    #           main_address.city.name
+    #       end
+    #
+    #       def country
+    #         if options[:normalize]
+    #           main_address.country
+    #         else
+    #           main_address.city
+    #       end
+    #
+    #     end
+    #   end
+    #
+    # @return [Field] A Field object
+    def self.mapping(&block)
+      delegator_class.class_eval(&block)
     end
 
     # Generates a JSON formatted String.
@@ -290,10 +328,18 @@ module Blueprinter
 
     private
 
+    def self.delegator_class
+      @delegator_class ||= Class.new(Mapper)
+    end
+    private_class_method :delegator_class
+      
+
     def self.object_to_hash(object, view_name:, local_options:)
+      object_mapper = delegator_class.new(object, local_options)
+
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-        next if field.skip?(object, local_options)
-        hash[field.name] = field.extract(object, local_options)
+        next if field.skip?(object_mapper, local_options)
+        hash[field.name] = field.extract(object_mapper, local_options)
       end
     end
     private_class_method :object_to_hash

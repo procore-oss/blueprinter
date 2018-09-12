@@ -12,6 +12,19 @@ describe '::Base' do
       end
     end
   end
+  let(:blueprint_with_mapping) do
+    Class.new(Blueprinter::Base) do
+      identifier :id
+      field :position_and_company
+
+      mapping do
+        def position_and_company
+          struct = object.is_a?(Hash) ? OpenStruct.new(object) : object
+            "#{struct.position} at #{struct.company}"
+        end
+      end
+    end
+  end
   let(:obj_hash) do
     {
       id: 1,

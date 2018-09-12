@@ -214,6 +214,18 @@ Output:
 }
 ```
 
+### Conditional field
+
+`field` supports `:if` and `:unless` options argument that can be used to serialize the field conditionally.
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :last_name, if: ->(user, options) { user.first_name != options[:first_name] }
+  field :age, unless: ->(user, _options) { user.age < 18 }
+end
+```
+
 ### Custom formatting for dates and times
 To define a custom format for a Date or DateTime field, include the option `datetime_format` with the associated `strptime` format.
 

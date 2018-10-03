@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.2.2'
 
+  s.add_development_dependency "factory_bot"
   s.add_development_dependency "nokogiri", ">= 1.8.2"
   s.add_development_dependency "oj", "~> 3.0"
   s.add_development_dependency "pry"

@@ -1,0 +1,39 @@
+version: 2
+
+steps: &steps_spec
+  - checkout
+  - run:
+      name: Installing ruby dependencies
+      command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+  - run:
+      command: bundle exec rake
+  - run:
+      command: bundle exec rake benchmarks
+
+jobs:
+  ruby-2.2:
+    steps: *steps_spec
+    docker:
+      - image: ruby:2.2
+  ruby-2.3:
+    steps: *steps_spec
+    docker:
+      - image: ruby:2.3
+  ruby-2.4:
+    steps: *steps_spec
+    docker:
+      - image: ruby:2.4
+  ruby-2.5:
+    steps: *steps_spec
+    docker:
+      - image: ruby:2.5
+
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - ruby-2.2
+      - ruby-2.3
+      - ruby-2.4
+      - ruby-2.5

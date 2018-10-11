@@ -1,5 +1,6 @@
+require 'benchmark_helper'
+require 'blueprinter/base'
 require 'ostruct'
-require 'minitest/benchmark'
 
 class Blueprinter::BigOTest < Minitest::Benchmark
   def setup

@@ -11,10 +11,10 @@ steps: &steps_spec
       command: bundle exec rake benchmarks
 
 jobs:
-  ruby-2.2:
+  ruby-2.2.10:
     steps: *steps_spec
     docker:
-      - image: ruby:2.2
+      - image: ruby:2.2.10
   ruby-2.3:
     steps: *steps_spec
     docker:
@@ -33,7 +33,7 @@ workflows:
   version: 2
   test:
     jobs:
-      - ruby-2.2
+      - ruby-2.2.10
       - ruby-2.3
       - ruby-2.4
       - ruby-2.5

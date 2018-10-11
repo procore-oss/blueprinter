@@ -7,8 +7,7 @@ require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
 require_relative 'field'
-require_relative 'view'
-require_relative 'view_collection'
+require_relative 'view/manager'
 
 module Blueprinter
   class Base
@@ -37,7 +36,8 @@ module Blueprinter
     #
     # @return [Field] A Field object
     def self.identifier(method, name: method, extractor: AutoExtractor)
-      view_collection[:identifier] << Field.new(method, name, extractor, self)
+      view_manager.set Field.new(method, name, extractor, self),
+                       to: :identifier
     end
 
     # Specify a field or method name to be included for serialization.
@@ -96,11 +96,12 @@ module Blueprinter
       else
         {name: method, extractor: AutoExtractor}
       end.merge(options)
-      current_view << Field.new(method,
-                                options[:name],
-                                options[:extractor],
-                                self,
-                                options)
+      view_manager.add Field.new(method,
+                                 options[:name],
+                                 options[:extractor],
+                                 self,
+                                 options),
+                       to: current_view_name
     end
 
     # Specify an associated object to be included for serialization.
@@ -126,11 +127,12 @@ module Blueprinter
     def self.association(method, options = {})
       raise BlueprinterError, 'blueprint required' unless options[:blueprint]
       name = options.delete(:name) || method
-      current_view << Field.new(method,
-                                       name,
-                                       AssociationExtractor,
-                                       self,
-                                       options.merge(association: true))
+      view_manager.add Field.new(method,
+                                 name,
+                                 AssociationExtractor,
+                                 self,
+                                 options.merge(association: true)),
+                       to: current_view_name
     end
 
     # Generates a JSON formatted String.
@@ -183,9 +185,6 @@ module Blueprinter
     #
     # @api private
     def self.prepare(object, view_name:, local_options:)
-      unless view_collection.has_view? view_name
-        raise BlueprinterError, "View '#{view_name}' is not defined"
-      end
       prepared_object = include_associations(object, view_name: view_name)
       if array_like?(object)
         prepared_object.map do |obj|
@@ -215,13 +214,13 @@ module Blueprinter
     # @return [Array<Symbol>] an array of field names
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_view << Field.new(field_name, field_name, AutoExtractor, self)
+        view_manager.add Field.new(field_name, field_name, AutoExtractor, self), to: current_view_name
       end
     end
 
     # @api private
     def self.associations(view_name = :default)
-      view_collection.fields_for(view_name).select { |f| f.options[:association] }
+      view_manager.fields_for(view_name).select { |f| f.options[:association] }
     end
 
     # Specify another view that should be mixed into the current view.
@@ -243,7 +242,7 @@ module Blueprinter
     #
     # @return [Array<Symbol>] an array of view names.
     def self.include_view(view_name)
-      current_view.include_view(view_name)
+      view_manager.include(current_view_name, with: view_name)
     end
 
 
@@ -264,7 +263,7 @@ module Blueprinter
     #
     # @return [Array<Symbol>] an array of field names
     def self.exclude(field_name)
-      current_view.exclude_field(field_name)
+      view_manager.exclude(field_name, from: current_view_name)
     end
 
     # Specify a view and the fields it should have.
@@ -283,15 +282,23 @@ module Blueprinter
     #
     # @return [View] a Blueprinter::View object
     def self.view(view_name)
-      @current_view = view_collection[view_name]
+      @current_view_name = view_name
       yield
-      @current_view = view_collection[:default]
+      @current_view_name = :default
     end
 
     private
 
+    def self.current_view_name
+      @current_view_name ||= :default
+    end
+
+    def self.current_view_name=(view_name)
+      @current_view_name = view_name
+    end
+
     def self.object_to_hash(object, view_name:, local_options:)
-      view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
+      view_manager.fields_for(view_name).each_with_object({}) do |field, hash|
         next if field.skip?(object, local_options)
         hash[field.name] = field.extract(object, local_options)
       end
@@ -321,15 +328,10 @@ module Blueprinter
     end
     private_class_method :jsonify
 
-    def self.current_view
-      @current_view ||= view_collection[:default]
+    def self.view_manager
+      @view_manager ||= View::Manager.new
     end
-    private_class_method :current_view
-
-    def self.view_collection
-      @view_collection ||= ViewCollection.new
-    end
-    private_class_method :view_collection
+    private_class_method :view_manager
 
     def self.array_like?(object)
       object.is_a?(Array) || active_record_relation?(object)

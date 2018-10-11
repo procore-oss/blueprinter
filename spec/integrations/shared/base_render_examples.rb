@@ -72,7 +72,7 @@ shared_examples 'Base::render' do
     end
     it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
   end
-  
+
   context 'Given blueprint has ::field with a conditional argument' do
     variants = %i[proc method].product([true, false])
 
@@ -169,20 +169,36 @@ shared_examples 'Base::render' do
 
   context 'Given blueprint has ::view' do
     let(:normal) do
-      ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',
-      '"position":"Manager"}'].join(',')
+      ['{"id":' + obj_id + '', '"default_view_field":"defaults inherited"',
+       '"employer":"Procore"', '"first_name":"Meg"',
+       '"position":"Manager"}'].join(',')
     end
     let(:ext) do
-      ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
-      '"first_name":"Meg"', '"position":"Manager"}'].join(',')
+      ['{"id":' + obj_id + '', '"default_view_field":"defaults inherited"',
+       '"description":"A person"', '"employer":"Procore"',
+       '"first_name":"Meg"', '"position":"Manager"}'].join(',')
     end
     let(:special) do
-      ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
-      '"first_name":"Meg"}'].join(',')
+      ['{"id":' + obj_id + '', '"default_view_field":"defaults inherited"',
+       '"description":"A person"', '"employer":"Procore"',
+       '"first_name":"Meg"}'].join(',')
     end
+
+    let(:still_exclude) do
+      ['{"id":' + obj_id + '', '"default_view_field":"defaults inherited"',
+       '"description":"A person"', '"employer":"Procore"',
+       '"first_name":"Meg"', '"lower_first_name":"meg"}'].join(',')
+    end
+
+    let(:view_made_after) do
+      ['{"id":' + obj_id + '', '"after":"after"',
+       '"default_view_field":"defaults inherited"}'].join(',')
+    end
+
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
+        field(:default_view_field) {|_| "defaults inherited"}
         view :normal do
           fields :first_name, :position
           field :company, name: :employer
@@ -195,12 +211,32 @@ shared_examples 'Base::render' do
           include_view :extended
           exclude :position
         end
+        view :still_exclude do
+          include_view :special
+          field(:lower_first_name) {|obj| obj[:first_name].downcase}
+        end
+        view :after_view do
+          include_view :view_made_after
+        end
+        view :view_made_after do
+          field(:after) {|_| 'after'}
+        end
       end
     end
-    it('returns json derived from a view') do
+    it('returns json from a view and the default view') do
       expect(blueprint.render(obj, view: :normal)).to eq(normal)
+    end
+    it('returns json from a view and included view') do
       expect(blueprint.render(obj, view: :extended)).to eq(ext)
+    end
+    it('returns json from a view, included view, excludes field') do
       expect(blueprint.render(obj, view: :special)).to eq(special)
+    end
+    it('returns json from a view, included view, persists excluded field') do
+      expect(blueprint.render(obj, view: :still_exclude)).to eq(still_exclude)
+    end
+    it('returns json from a view, and included view that is made after') do
+      expect(blueprint.render(obj, view: :after_view)).to eq(view_made_after)
     end
   end
 

@@ -48,9 +48,9 @@ You can rename the resulting JSON keys in both fields and associations by using 
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  
+
   field :email, name: :login
-  
+
   association :user_projects, name: :projects
 end
 ```
@@ -302,6 +302,9 @@ We use Yard for documentation. Here are the following documentation rules:
 
 - Document all public methods we expect to be utilized by the end developers.
 - Methods that are not set to private due to ruby visibility rule limitations should be marked with `@api private`.
+
+### Releasing a New Version
+To release a new version, change the version number in `version.rb`, and update the `CHANGELOG.md`. Finally, maintainers need to run `bundle exec rake release`, which will automatically create a git tag for the version, push git commits and tags to Github, and push the `.gem` file to rubygems.org.
 
 ## License
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).

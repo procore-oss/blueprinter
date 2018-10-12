@@ -1,7 +1,6 @@
+require 'activerecord_helper'
 require 'ostruct'
 require_relative 'shared/base_render_examples'
-require_relative '../rails_test_helper'
-require_relative '../factories/model_factories.rb'
 
 describe '::Base' do
   let(:blueprint_with_block) do

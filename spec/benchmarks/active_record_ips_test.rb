@@ -1,6 +1,6 @@
-require_relative '../rails_test_helper'
-require_relative '../factories/model_factories.rb'
-require_relative 'benchmark_helper'
+require 'activerecord_helper'
+require 'benchmark_helper'
+require 'blueprinter/base'
 
 class Blueprinter::ActiveRecordIPSTest < Minitest::Test
   include FactoryBot::Syntax::Methods

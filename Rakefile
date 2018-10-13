@@ -18,7 +18,7 @@ RDoc::Task.new(:rdoc) do |rdoc|
 end
 
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.rspec_opts = '--pattern spec/**/*_spec.rb'
+  t.rspec_opts = '--pattern spec/**/*_spec.rb --warnings'
 end
 
 Rake::TestTask.new(:benchmarks) do |t|

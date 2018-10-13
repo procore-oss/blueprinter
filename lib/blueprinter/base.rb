@@ -41,6 +41,10 @@ module Blueprinter
       view_collection[:identifier] << Field.new(method, name, extractor, self)
     end
 
+    def self.inherited(subclass)
+      subclass.send(:view_collection).inherit(view_collection)
+    end
+
     # Specify a field or method name to be included for serialization.
     # Takes a required method and an option.
     #

@@ -97,7 +97,7 @@ module Blueprinter
     # @return [Field] A Field object
     def self.field(method, options = {}, &block)
       options = if block_given?
-        {name: method, extractor: BlockExtractor, block: {method => block}}
+        {name: method, extractor: BlockExtractor, block: block}
       else
         {name: method, extractor: AutoExtractor}
       end.merge(options)
@@ -128,14 +128,21 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.association(method, options = {})
+    def self.association(method, options = {}, &block)
       raise BlueprinterError, 'blueprint required' unless options[:blueprint]
       name = options.delete(:name) || method
+
+      options = if block_given?
+        options.merge(extractor: BlockExtractor, block: block)
+      else
+        options.merge(extractor: AutoExtractor)
+      end
+
       current_view << Field.new(method,
-                                       name,
-                                       AssociationExtractor,
-                                       self,
-                                       options.merge(association: true))
+                                name,
+                                AssociationExtractor.new(options[:extractor]),
+                                self,
+                                options.merge(association: true))
     end
 
     # Generates a JSON formatted String.

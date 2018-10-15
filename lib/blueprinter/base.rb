@@ -37,7 +37,7 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.identifier(method, name: method, extractor: AutoExtractor)
+    def self.identifier(method, name: method, extractor: AutoExtractor.new)
       view_collection[:identifier] << Field.new(method, name, extractor, self)
     end
 
@@ -97,9 +97,9 @@ module Blueprinter
     # @return [Field] A Field object
     def self.field(method, options = {}, &block)
       options = if block_given?
-        {name: method, extractor: BlockExtractor, block: block}
+        {name: method, extractor: BlockExtractor.new, block: block}
       else
-        {name: method, extractor: AutoExtractor}
+        {name: method, extractor: AutoExtractor.new}
       end.merge(options)
       current_view << Field.new(method,
                                 options[:name],
@@ -119,6 +119,8 @@ module Blueprinter
     #   JSON output.
     # @option options [Symbol] :view Specify the view to use or fall back to
     #   to the :default view.
+    # @yield [Object] The object passed to `render` is also passed to the
+    #   block.
     #
     # @example Specifying an association
     #   class UserBlueprint < Blueprinter::Base
@@ -127,20 +129,27 @@ module Blueprinter
     #     # code
     #   end
     #
+    # @example Passing a block to be evaluated as the value.
+    #   class UserBlueprint < Blueprinter::Base
+    #     association :vehicles, blueprint: VehiclesBlueprint do |user|
+    #       user.vehicles + user.company.vehicles
+    #     end
+    #   end
+    #
     # @return [Field] A Field object
     def self.association(method, options = {}, &block)
       raise BlueprinterError, 'blueprint required' unless options[:blueprint]
       name = options.delete(:name) || method
 
       options = if block_given?
-        options.merge(extractor: BlockExtractor, block: block)
+        options.merge(extractor: BlockExtractor.new, block: block)
       else
-        options.merge(extractor: AutoExtractor)
+        options.merge(extractor: AutoExtractor.new)
       end
 
       current_view << Field.new(method,
                                 name,
-                                AssociationExtractor.new(options[:extractor]),
+                                AssociationExtractor.new,
                                 self,
                                 options.merge(association: true))
     end
@@ -227,7 +236,7 @@ module Blueprinter
     # @return [Array<Symbol>] an array of field names
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_view << Field.new(field_name, field_name, AutoExtractor, self)
+        current_view << Field.new(field_name, field_name, AutoExtractor.new, self)
       end
     end
 

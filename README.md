@@ -186,6 +186,44 @@ Output:
 }
 ```
 
+#### Defining an association directly in the Blueprint
+
+You can also pass a block to an association:
+
+```ruby
+class ProjectBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :name
+end
+
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  association :projects, blueprint: ProjectBlueprint do |user|
+    user.projects + user.company.projects
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "projects": [
+    {"uuid": "b426a1e6-ac41-45ab-bfef-970b9a0b4289", "name": "query-console"},
+    {"uuid": "5bd84d6c-4fd2-4e36-ae31-c137e39be542", "name": "blueprinter"},
+    {"uuid": "785f5cd4-7d8d-4779-a6dd-ec5eab440eff", "name": "uncontrollable"}
+  ]
+}
+```
+
 ### Passing additional properties to `render`
 
 `render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:

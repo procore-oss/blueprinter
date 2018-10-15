@@ -33,10 +33,6 @@ module Blueprinter
     end
 
     def <<(field)
-      if fields.has_key?(field.name)
-        raise BlueprinterError,
-          "Field #{field.name} already defined on #{name}"
-      end
       fields[field.name] = field
     end
   end

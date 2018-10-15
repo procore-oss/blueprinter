@@ -33,10 +33,14 @@ describe '::View' do
     end
 
     context 'Given a field that already exists' do
+      let(:aliased_field) { MockField.new(:fname, :first_name) }
+
       before { view << field }
-      it { expect { view << field }.to raise_error(blueprinter_error) }
-      it 'should not set #fields' do
-        expect(view.fields).to eq({first_name: field})
+
+      it 'overrides previous definition' do
+        view << aliased_field
+
+        expect(view.fields).to eq(first_name: aliased_field)
       end
     end
   end
@@ -56,8 +60,9 @@ describe '::View' do
 end
 
 class MockField
-  attr_reader :name
-  def initialize(name)
-    @name = name
+  attr_reader :name, :method
+  def initialize(method, name = nil)
+    @method = method
+    @name = name || method
   end
 end

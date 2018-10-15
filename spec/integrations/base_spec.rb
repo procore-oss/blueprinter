@@ -148,6 +148,7 @@ describe '::Base' do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :name
+        field(:overridable) { |o| o.name }
 
         view :with_age do
           field :age
@@ -162,6 +163,8 @@ describe '::Base' do
 
     let(:blueprint) do
       Class.new(application_blueprint) do
+        field(:overridable) { |o| o.age }
+
         view :only_age do
           include_view :with_age
           exclude :name
@@ -173,6 +176,7 @@ describe '::Base' do
 
     it('inherits identifier') { expect(subject[:id]).to eq(obj.id) }
     it('inherits field') { expect(subject[:name]).to eq(obj.name) }
+    it('overrides field definition') { expect(subject[:overridable]).to eq(obj.age) }
 
     describe 'Inheriting views' do
       let(:view) { :with_age }

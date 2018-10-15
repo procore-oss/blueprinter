@@ -102,7 +102,7 @@ describe '::Base' do
 
         context "Given default association value is not provided" do
           let(:blueprint) do
-            vehicle_blueprint = Class.new(Blueprinter::Base) do
+            Class.new(Blueprinter::Base) do
               fields :make
               association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
             end
@@ -115,7 +115,7 @@ describe '::Base' do
 
         context "Given default association value is provided" do
           let(:blueprint) do
-            vehicle_blueprint = Class.new(Blueprinter::Base) do
+            Class.new(Blueprinter::Base) do
               fields :make
               association :user,
                 blueprint: Class.new(Blueprinter::Base) { identifier :id },

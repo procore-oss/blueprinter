@@ -21,13 +21,13 @@ class Blueprinter::Field
   private
 
   def if_callable
-    return @if_callable unless @if_callable.nil?
-    @if_callable ||= callable_from(:if)
+    return @if_callable if defined?(@if_callable)
+    @if_callable = callable_from(:if)
   end
 
   def unless_callable
-    return @unless_callable unless @unless_callable.nil?
-    @unless_callable ||= callable_from(:unless)
+    return @unless_callable if defined?(@unless_callable)
+    @unless_callable = callable_from(:unless)
   end
 
   def callable_from(option_name)

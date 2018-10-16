@@ -141,4 +141,65 @@ describe '::Base' do
       end
     end
   end
+
+  describe 'Using the ApplicationBlueprint pattern' do
+    let(:obj) { OpenStruct.new(id: 1, name: 'Meg', age: 32) }
+    let(:application_blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :name
+        field(:overridable) { |o| o.name }
+
+        view :with_age do
+          field :age
+        end
+
+        view :anonymous_age do
+          include_view :with_age
+          exclude :name
+        end
+      end
+    end
+
+    let(:blueprint) do
+      Class.new(application_blueprint) do
+        field(:overridable) { |o| o.age }
+
+        view :only_age do
+          include_view :with_age
+          exclude :name
+        end
+      end
+    end
+
+    subject { blueprint.render_as_hash(obj) }
+
+    it('inherits identifier') { expect(subject[:id]).to eq(obj.id) }
+    it('inherits field') { expect(subject[:name]).to eq(obj.name) }
+    it('overrides field definition') { expect(subject[:overridable]).to eq(obj.age) }
+
+    describe 'Inheriting views' do
+      let(:view) { :with_age }
+      subject { blueprint.render_as_hash(obj, view: view) }
+
+      it('includes identifier') { expect(subject[:id]).to eq(obj.id) }
+      it('includes base fields') { expect(subject[:name]).to eq(obj.name) }
+      it('includes view fields') { expect(subject[:age]).to eq(obj.age) }
+
+      describe 'With complex views' do
+        let(:view) { :anonymous_age }
+
+        it('includes identifier') { expect(subject[:id]).to eq(obj.id) }
+        it('includes include_view fields') { expect(subject[:age]).to eq(obj.age) }
+        it('excludes excluded fields') { expect(subject).to_not have_key(:name) }
+      end
+
+      describe 'Referencing views from parent blueprint' do
+        let(:view) { :only_age }
+
+        it('includes include_view fields') { expect(subject[:age]).to eq(obj.age) }
+        it('excludes excluded fields') { expect(subject).not_to have_key(:name) }
+      end
+    end
+  end
 end

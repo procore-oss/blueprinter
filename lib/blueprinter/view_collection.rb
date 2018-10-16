@@ -9,6 +9,12 @@ module Blueprinter
       }
     end
 
+    def inherit(view_collection)
+      view_collection.views.each do |view_name, view|
+        self[view_name].inherit(view)
+      end
+    end
+
     def has_view?(view_name)
       views.has_key? view_name
     end

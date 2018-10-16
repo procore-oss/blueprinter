@@ -10,6 +10,20 @@ module Blueprinter
       @excluded_field_names = excluded_view_names
     end
 
+    def inherit(view)
+      view.fields.values.each do |field|
+        self << field
+      end
+
+      view.included_view_names.each do |view_name|
+        include_view(view_name)
+      end
+
+      view.excluded_field_names.each do |field_name|
+        exclude_field(field_name)
+      end
+    end
+
     def include_view(view_name)
       included_view_names << view_name
     end
@@ -19,10 +33,6 @@ module Blueprinter
     end
 
     def <<(field)
-      if fields.has_key?(field.name)
-        raise BlueprinterError,
-          "Field #{field.name} already defined on #{name}"
-      end
       fields[field.name] = field
     end
   end

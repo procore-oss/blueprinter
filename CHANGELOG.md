@@ -1,3 +1,9 @@
+## 0.7.0  - 2018/10/17
+
+* [FEATURE] Allow associations to be defined with a block. Please see pr #106. Thanks to @hugopeixoto.
+* [FEATURE] Inherit view definition when using inheritance. Please see pr #105. Thanks to @hugopeixoto.
+
+
 ## 0.6.0  - 2018/06/05
 
 * [FEATURE] Add `date_time` format as an option to `field`. Please see pr #68. Thanks to @njbbaer.

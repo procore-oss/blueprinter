@@ -236,7 +236,7 @@ module Blueprinter
     # @return [Array<Symbol>] an array of field names
     def self.fields(*field_names)
       field_names.each do |field_name|
-        current_view << Field.new(field_name, field_name, AutoExtractor.new, self)
+        field(field_name)
       end
     end
 

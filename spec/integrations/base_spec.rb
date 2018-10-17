@@ -84,6 +84,22 @@ describe '::Base' do
           end
           it('returns json with association') { should eq(result) }
         end
+        context 'Given block is passed' do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+            end
+
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association(:automobiles, blueprint: vehicle_blueprint) { |o| o.vehicles }
+            end
+          end
+          let(:result) do
+            '{"id":' + obj_id + ',"automobiles":[{"make":"Super Car"}]}'
+          end
+          it('returns json with aliased association') { should eq(result) }
+        end
         context 'Given no associated blueprint is given' do
           let(:blueprint) do
             Class.new(Blueprinter::Base) do

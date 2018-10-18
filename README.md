@@ -160,13 +160,13 @@ end
 
 ### Defining a field directly in the Blueprint
 
-You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. For example:
+You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
 
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :full_name do |user|
-    "#{user.first_name} #{user.last_name}"
+  field :full_name do |user, options|
+    "#{options[:title_prefix]} #{user.first_name} #{user.last_name}"
   end
 end
 ```
@@ -174,7 +174,7 @@ end
 Usage:
 
 ```ruby
-puts UserBlueprint.render(user)
+puts UserBlueprint.render(user, title_prefix: "Mr")
 ```
 
 Output:
@@ -199,8 +199,8 @@ end
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
 
-  association :projects, blueprint: ProjectBlueprint do |user|
-    user.projects + user.company.projects
+  association :projects, blueprint: ProjectBlueprint do |user, options|
+    user.projects + options[:draft_projects]
   end
 end
 ```
@@ -208,7 +208,7 @@ end
 Usage:
 
 ```ruby
-puts UserBlueprint.render(user)
+puts UserBlueprint.render(user, draft_projects: Project.where(draft: true))
 ```
 
 Output:

@@ -68,8 +68,8 @@ module Blueprinter
     #   to call to determine if the field should be included (e.g.
     #   `unless: :include_first_name?, or unless: Proc.new { |user, options| options[:current_user] != user }).
     #   The method, proc or string should return or evaluate to a true or false value.
-    # @yield [Object] The object passed to `render` is also passed to the
-    #   block.
+    # @yield [object, options] The object and the options passed to render are
+    #   also yielded to the block.
     #
     # @example Specifying a user's first_name to be serialized.
     #   class UserBlueprint < Blueprinter::Base
@@ -79,7 +79,9 @@ module Blueprinter
     #
     # @example Passing a block to be evaluated as the value.
     #   class UserBlueprint < Blueprinter::Base
-    #     field :full_name {|obj| "#{obj.first_name} #{obj.last_name}"}
+    #     field :full_name do |object, options|
+    #       "options[:title_prefix] #{object.first_name} #{object.last_name}"
+    #     end
     #     # other code
     #   end
     #
@@ -119,8 +121,8 @@ module Blueprinter
     #   JSON output.
     # @option options [Symbol] :view Specify the view to use or fall back to
     #   to the :default view.
-    # @yield [Object] The object passed to `render` is also passed to the
-    #   block.
+    # @yield [object, options] The object and the options passed to render are
+    #   also yielded to the block.
     #
     # @example Specifying an association
     #   class UserBlueprint < Blueprinter::Base
@@ -131,8 +133,8 @@ module Blueprinter
     #
     # @example Passing a block to be evaluated as the value.
     #   class UserBlueprint < Blueprinter::Base
-    #     association :vehicles, blueprint: VehiclesBlueprint do |user|
-    #       user.vehicles + user.company.vehicles
+    #     association :vehicles, blueprint: VehiclesBlueprint do |user, opts|
+    #       user.vehicles + opts[:additional_vehicles]
     #     end
     #   end
     #

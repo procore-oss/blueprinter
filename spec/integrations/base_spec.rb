@@ -158,6 +158,34 @@ describe '::Base' do
     end
   end
 
+  describe 'identifier' do
+    let(:rendered) do
+      blueprint.render_as_hash(OpenStruct.new(uid: 42))
+    end
+
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :uid
+      end
+    end
+
+    it "renders identifier" do
+      expect(rendered).to eq(uid: 42)
+    end
+
+    describe 'Given a block is passed' do
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier(:id) { |object, _| object.uid * 2 }
+        end
+      end
+
+      it "renders result of block" do
+        expect(rendered).to eq(id: 84)
+      end
+    end
+  end
+
   describe 'Using the ApplicationBlueprint pattern' do
     let(:obj) { OpenStruct.new(id: 1, name: 'Meg', age: 32) }
     let(:application_blueprint) do

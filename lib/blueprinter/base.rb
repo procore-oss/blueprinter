@@ -26,6 +26,9 @@ module Blueprinter
     # @param name [Symbol] to rename the identifier key in the JSON
     #   output. Defaults to method given.
     # @param extractor [AssociationExtractor,AutoExtractor,BlockExtractor,HashExtractor,PublicSendExtractor]
+    # @yield [object, options] The object and the options passed to render are
+    #   also yielded to the block.
+    #
     #   Kind of extractor to use.
     #   Either define your own or use Blueprinter's premade extractors.
     #   Defaults to AutoExtractor
@@ -36,13 +39,22 @@ module Blueprinter
     #     # other code
     #   end
     #
+    # @example Passing a block to be evaluated as the value.
+    #   class UserBlueprint < Blueprinter::Base
+    #     identifier :uuid do |user, options|
+    #       options[:current_user].anonymize(user.uuid)
+    #     end
+    #   end
+    #
     # @return [Field] A Field object
-    def self.identifier(method, name: method, extractor: AutoExtractor.new)
-      view_collection[:identifier] << Field.new(method, name, extractor, self)
-    end
-
-    def self.inherited(subclass)
-      subclass.send(:view_collection).inherit(view_collection)
+    def self.identifier(method, name: method, extractor: AutoExtractor.new, &block)
+      view_collection[:identifier] << Field.new(
+        method,
+        name,
+        extractor,
+        self,
+        block: block,
+      )
     end
 
     # Specify a field or method name to be included for serialization.
@@ -98,16 +110,13 @@ module Blueprinter
     #
     # @return [Field] A Field object
     def self.field(method, options = {}, &block)
-      options = if block_given?
-        {name: method, extractor: BlockExtractor.new, block: block}
-      else
-        {name: method, extractor: AutoExtractor.new}
-      end.merge(options)
-      current_view << Field.new(method,
-                                options[:name],
-                                options[:extractor],
-                                self,
-                                options)
+      current_view << Field.new(
+        method,
+        options.fetch(:name) { method },
+        options.fetch(:extractor) { AutoExtractor.new },
+        self,
+        options.merge(block: block),
+      )
     end
 
     # Specify an associated object to be included for serialization.
@@ -141,19 +150,12 @@ module Blueprinter
     # @return [Field] A Field object
     def self.association(method, options = {}, &block)
       raise BlueprinterError, 'blueprint required' unless options[:blueprint]
-      name = options.delete(:name) || method
 
-      options = if block_given?
-        options.merge(extractor: BlockExtractor.new, block: block)
-      else
-        options.merge(extractor: AutoExtractor.new)
-      end
-
-      current_view << Field.new(method,
-                                name,
-                                AssociationExtractor.new,
-                                self,
-                                options.merge(association: true))
+      field(
+        method,
+        options.merge(association: true, extractor: AssociationExtractor.new),
+        &block
+      )
     end
 
     # Generates a JSON formatted String.
@@ -312,6 +314,11 @@ module Blueprinter
     end
 
     private
+
+    def self.inherited(subclass)
+      subclass.send(:view_collection).inherit(view_collection)
+    end
+    private_class_method :inherited
 
     def self.object_to_hash(object, view_name:, local_options:)
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|

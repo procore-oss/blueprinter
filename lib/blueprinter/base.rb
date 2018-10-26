@@ -242,11 +242,6 @@ module Blueprinter
       end
     end
 
-    # @api private
-    def self.associations(view_name = :default)
-      view_collection.fields_for(view_name).select { |f| f.options[:association] }
-    end
-
     # Specify another view that should be mixed into the current view.
     #
     # @param view_name [Symbol] the view to mix into the current view.
@@ -358,5 +353,10 @@ module Blueprinter
       object.is_a?(Array) || active_record_relation?(object)
     end
     private_class_method :array_like?
+
+    def self.associations(view_name = :default)
+      view_collection.fields_for(view_name).select { |f| f.options[:association] }
+    end
+    private_class_method :associations
   end
 end

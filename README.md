@@ -186,6 +186,32 @@ Output:
 }
 ```
 
+#### Defining an identifier directly in the Blueprint
+
+You can also pass a block to an identifier:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid do |user, options|
+    options[:current_user].anonymize(user.uuid)
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user, current_user: current_user)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+}
+```
+
 #### Defining an association directly in the Blueprint
 
 You can also pass a block to an association:

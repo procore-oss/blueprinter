@@ -144,15 +144,15 @@ Output:
 }
 ```
 
-#### Default option
-By default, an association that evaluates to `nil` is serialized as `nil`. A default serialized value can be
-specified as option on the association for cases when the association could potentially evaluate to `nil`.
+### Default Association/Field Option
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be
+specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
 
   view :normal do
-    fields :first_name, :last_name
+    field :first_name, default: "N/A"
     association :company, blueprint: CompanyBlueprint, default: {}
   end
 end

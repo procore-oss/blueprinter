@@ -24,6 +24,7 @@ module Blueprinter
     end
 
     def format_datetime(datetime, format)
+      return nil if datetime.nil?
       datetime.strftime(format)
     rescue NoMethodError
       raise BlueprinterError, 'Cannot format invalid DateTime object'

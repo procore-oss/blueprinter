@@ -186,6 +186,22 @@ describe '::Base' do
     end
   end
 
+  describe 'date_format option' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :date, datetime_format: '%FT%T%:z'
+      end
+    end
+
+    context 'field with nil instead of value' do
+      let(:object) { OpenStruct.new(date: nil) }
+
+      it 'renders null' do
+        expect(blueprint.render_as_hash(object)).to eq(date: nil)
+      end
+    end
+  end
+
   describe 'Using the ApplicationBlueprint pattern' do
     let(:obj) { OpenStruct.new(id: 1, name: 'Meg', age: 32) }
     let(:application_blueprint) do

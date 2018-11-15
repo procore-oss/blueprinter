@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "factory_bot"
   s.add_development_dependency "nokogiri", ">= 1.8.2"
   s.add_development_dependency "oj", "~> 3.0"
+  s.add_development_dependency "yajl-ruby", "~> 3.0"
   s.add_development_dependency "pry"
   s.add_development_dependency "rake"
   s.add_development_dependency "activerecord", "~> 5.1.2"

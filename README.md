@@ -182,7 +182,7 @@ Output:
 ```json
 {
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
-  "full_name": "John Doe"
+  "full_name": "Mr John Doe"
 }
 ```
 
@@ -346,6 +346,21 @@ Ensure that you have the `Oj` gem installed in your Gemfile if you haven't alrea
 # Gemfile
 gem 'oj'
 ```
+
+## Yajl-ruby
+
+[yajl-ruby](https://github.com/brianmario/yajl-ruby) is a fast and powerful JSON generator/parser. To use `yajl-ruby` in place of `JSON / OJ`, use:
+
+```ruby
+require 'yajl' # you can skip this if OJ has already been required.
+
+Blueprinter.configure do |config|
+  config.generator = Yajl::Encoder # default is JSON
+  config.method = :encode # default is generate
+end
+```
+
+##### Note: You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
 
 ## How to Document
 

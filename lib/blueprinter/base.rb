@@ -342,7 +342,7 @@ module Blueprinter
     private_class_method :include_associations
 
     def self.jsonify(blob)
-      Blueprinter.configuration.generator.generate(blob)
+      Blueprinter.configuration.jsonify(blob)
     end
     private_class_method :jsonify
 

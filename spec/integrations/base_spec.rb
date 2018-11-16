@@ -19,7 +19,8 @@ describe '::Base' do
       position: 'Manager',
       description: 'A person',
       company: 'Procore',
-      birthday: Date.new(1994, 3, 4)
+      birthday: Date.new(1994, 3, 4),
+      deleted_at: nil
     }
   end
   let(:object_with_attributes) { OpenStruct.new(obj_hash) }
@@ -182,22 +183,6 @@ describe '::Base' do
 
       it "renders result of block" do
         expect(rendered).to eq(id: 84)
-      end
-    end
-  end
-
-  describe 'date_format option' do
-    let(:blueprint) do
-      Class.new(Blueprinter::Base) do
-        field :date, datetime_format: '%FT%T%:z'
-      end
-    end
-
-    context 'field with nil instead of value' do
-      let(:object) { OpenStruct.new(date: nil) }
-
-      it 'renders null' do
-        expect(blueprint.render_as_hash(object)).to eq(date: nil)
       end
     end
   end

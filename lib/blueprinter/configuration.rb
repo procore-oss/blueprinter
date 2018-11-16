@@ -8,7 +8,7 @@ module Blueprinter
     end
 
     def jsonify(blob)
-      generator.send(method, blob)
+      generator.public_send(method, blob)
     end
   end
 

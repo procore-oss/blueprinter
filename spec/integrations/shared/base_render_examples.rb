@@ -72,7 +72,37 @@ shared_examples 'Base::render' do
     end
     it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
   end
-  
+
+  context "Given blueprint has ::field with nil value" do
+    before do
+      obj[:first_name] = nil
+    end
+
+    context "Given default value is not provided" do
+      let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          field :id
+          field :first_name
+        end
+      end
+      it('returns json with specified fields') { should eq(result) }
+    end
+
+    context "Given default value is provided" do
+      let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          field :id
+          field :first_name, default: "Unknown"
+        end
+      end
+      it('returns json with specified fields') {
+        should eq(result)
+      }
+    end
+  end
+
   context 'Given blueprint has ::field with a conditional argument' do
     variants = %i[proc method].product([true, false])
 

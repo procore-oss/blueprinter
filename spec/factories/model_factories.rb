@@ -8,6 +8,7 @@ FactoryBot.define do
     description { 'A person' }
     company { 'Procore' }
     birthday { Date.new(1994, 3, 4) }
+    deleted_at { nil }
   end
 
   factory :vehicle do

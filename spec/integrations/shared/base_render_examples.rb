@@ -52,12 +52,13 @@ shared_examples 'Base::render' do
 
   context 'Given blueprint has ::field with a :datetime_format argument' do
     let(:result) do
-      '{"id":' + obj_id + ',"birthday":"03/04/1994"}'
+      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null}'
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
-        field :birthday, datetime_format: "%m/%d/%Y"
+        field :birthday,   datetime_format: "%m/%d/%Y"
+        field :deleted_at, datetime_format: '%FT%T%:z'
       end
     end
     it('returns json with a formatted field') { should eq(result) }

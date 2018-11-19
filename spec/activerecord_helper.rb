@@ -15,7 +15,7 @@ class User < ActiveRecord::Base
   has_many :vehicles
 end
 
-ActiveRecord::Schema.define(version: 20170830212110) do
+ActiveRecord::Schema.define(version: 20181116094242) do
   create_table "users", force: :cascade do |t|
     t.string "first_name"
     t.string "last_name"
@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(version: 20170830212110) do
     t.datetime "birthday"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
   end
 
   create_table "vehicles", force: :cascade do |t|

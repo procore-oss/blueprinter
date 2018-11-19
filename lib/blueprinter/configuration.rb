@@ -1,9 +1,14 @@
 module Blueprinter
   class Configuration
-    attr_accessor :generator
+    attr_accessor :generator, :method
 
     def initialize
       @generator = JSON
+      @method = :generate
+    end
+
+    def jsonify(blob)
+      generator.public_send(method, blob)
     end
   end
 

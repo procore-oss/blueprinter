@@ -158,6 +158,18 @@ describe '::Base' do
       end
     end
   end
+  
+  describe '::render_as_json' do
+    subject { blueprint_with_block.render_as_json(object_with_attributes) }
+    context 'Outside Rails project' do
+      context 'Given passed object has dot notation accessible attributes' do
+        let(:obj) { object_with_attributes }
+        it 'returns a hash with expected format' do
+          expect(subject).to eq({ "id" => obj.id, "position_and_company" => "#{obj.position} at #{obj.company}"})
+        end
+      end
+    end
+  end
 
   describe 'identifier' do
     let(:rendered) do

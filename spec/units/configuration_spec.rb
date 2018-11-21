@@ -7,6 +7,7 @@ describe '::Configuration' do
     after { Blueprinter.configure { |config| 
       config.generator = JSON
       config.method = :generate
+      config.sort_by_definition = false
     } }
 
     it 'should set the generator' do
@@ -21,6 +22,13 @@ describe '::Configuration' do
       }
       expect(Blueprinter.configuration.generator).to be(Yajl::Encoder)
       expect(Blueprinter.configuration.method).to be(:encode)
+    end
+
+    it 'should set the sort_by_definition' do
+      Blueprinter.configure { |config| 
+        config.sort_by_definition = true
+      }
+      expect(Blueprinter.configuration.sort_by_definition).to be(true)
     end
   end
 end

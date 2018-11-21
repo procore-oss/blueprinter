@@ -331,7 +331,7 @@ module Blueprinter
       view_name = options.delete(:view) || :default
       prepare(object, view_name: view_name, local_options: options)
     end
-    private_class_method :inherited
+    private_class_method :prepare_for_render
 
     def self.inherited(subclass)
       subclass.send(:view_collection).inherit(view_collection)

@@ -100,6 +100,40 @@ Output:
 }
 ```
 
+### Exclude fields
+You can specifically choose to exclude certain fields for specific views
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+  end
+
+  view :extended do
+    include_view :normal
+    field :address
+    exclude :last_name
+  end
+end
+```
+
+Usage:
+```ruby
+puts UserBlueprint.render(user, view: :extended)
+```
+
+Output:
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "address": "123 Fake St.",
+  "first_name": "John",
+  "login": "john.doe@some.fake.email.domain"
+}
+```
+
 ### Associations
 You may include associated objects. Say for example, a user has projects:
 ```ruby

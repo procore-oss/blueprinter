@@ -399,13 +399,13 @@ $ gem install blueprinter
 You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
 
 ## Sorting
-By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, set the below configuration to true.
+By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, use the below configuration option.
 
 Usage:
 
 ```ruby
 Blueprinter.configure do |config|
-  config.sort_by_definition = true
+  config.sort_fields_by = :definition
 end
 ```
 

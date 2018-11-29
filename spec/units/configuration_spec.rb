@@ -7,7 +7,7 @@ describe '::Configuration' do
     after { Blueprinter.configure { |config| 
       config.generator = JSON
       config.method = :generate
-      config.sort_by_definition = false
+      config.sort_fields_by = :name_asc
     } }
 
     it 'should set the generator' do
@@ -24,11 +24,11 @@ describe '::Configuration' do
       expect(Blueprinter.configuration.method).to be(:encode)
     end
 
-    it 'should set the sort_by_definition' do
+    it 'should set the sort_fields_by' do
       Blueprinter.configure { |config| 
-        config.sort_by_definition = true
+        config.sort_fields_by = :definition
       }
-      expect(Blueprinter.configuration.sort_by_definition).to be(true)
+      expect(Blueprinter.configuration.sort_fields_by).to be(:definition)
     end
   end
 end

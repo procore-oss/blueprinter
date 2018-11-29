@@ -7,7 +7,7 @@ module Blueprinter
         identifier: View.new(:identifier),
         default: View.new(:default)
       }
-      @sort_by_definition = Blueprinter.configuration.sort_by_definition
+      @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
     end
 
     def inherit(view_collection)

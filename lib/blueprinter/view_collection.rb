@@ -21,10 +21,8 @@ module Blueprinter
     end
 
     def fields_for(view_name)
-      sorted_fields = sortable_fields(view_name).values
-      unless sort_by_definition
-        sorted_fields = sorted_fields.sort_by(&:name)
-      end
+      fields = sortable_fields(view_name).values
+      sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
       identifier_fields + sorted_fields
     end
 

@@ -100,6 +100,40 @@ Output:
 }
 ```
 
+### Exclude fields
+You can specifically choose to exclude certain fields for specific views
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+  end
+
+  view :extended do
+    include_view :normal
+    field :address
+    exclude :last_name
+  end
+end
+```
+
+Usage:
+```ruby
+puts UserBlueprint.render(user, view: :extended)
+```
+
+Output:
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "address": "123 Fake St.",
+  "first_name": "John",
+  "login": "john.doe@some.fake.email.domain"
+}
+```
+
 ### Associations
 You may include associated objects. Say for example, a user has projects:
 ```ruby
@@ -278,6 +312,42 @@ Output:
 }
 ```
 
+### render_as_hash
+Same as `render`, returns a Ruby Hash.
+
+Usage:
+
+```ruby
+puts UserBlueprint.render_as_hash(user, company: company)
+```
+
+Output:
+
+```ruby
+{
+  uuid: "733f0758-8f21-4719-875f-262c3ec743af",
+  company_name: "My Company LLC"
+}
+```
+
+### render_as_json
+Same as `render`, returns a Ruby Hash JSONified. This will call JSONify all keys and values.
+
+Usage:
+
+```ruby
+puts UserBlueprint.render_as_json(user, company: company)
+```
+
+Output:
+
+```ruby
+{
+  "uuid" => "733f0758-8f21-4719-875f-262c3ec743af",
+  "company_name" => "My Company LLC"
+}
+```
+
 ### Conditional field
 
 `field` supports `:if` and `:unless` options argument that can be used to serialize the field conditionally.
@@ -328,6 +398,34 @@ $ gem install blueprinter
 
 You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
 
+## Sorting
+By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, use the below configuration option.
+
+Usage:
+
+```ruby
+Blueprinter.configure do |config|
+  config.sort_fields_by = :definition
+end
+```
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :name
+  field :email
+  field :birthday, datetime_format: "%m/%d/%Y"
+end
+```
+
+Output:
+```json
+{
+  "name": "John Doe",
+  "email": "john.doe@some.fake.email.domain",
+  "birthday": "03/04/1994"
+}
+```
+
 ## OJ
 
 By default, Blueprinter will be calling `JSON.generate(object)` internally and it expects that you have `require 'json'` already in your project's code. You may use `Oj` to generate in place of `JSON` like so:
@@ -352,7 +450,7 @@ gem 'oj'
 [yajl-ruby](https://github.com/brianmario/yajl-ruby) is a fast and powerful JSON generator/parser. To use `yajl-ruby` in place of `JSON / OJ`, use:
 
 ```ruby
-require 'yajl' # you can skip this if OJ has already been required.
+require 'yajl' # you can skip this if yajl has already been required.
 
 Blueprinter.configure do |config|
   config.generator = Yajl::Encoder # default is JSON
@@ -360,7 +458,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-##### Note: You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
+Note: You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
 
 ## How to Document
 

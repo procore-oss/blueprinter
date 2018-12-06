@@ -1,10 +1,11 @@
 module Blueprinter
   class Configuration
-    attr_accessor :generator, :method
+    attr_accessor :generator, :method, :sort_fields_by
 
     def initialize
       @generator = JSON
       @method = :generate
+      @sort_fields_by = :name_asc
     end
 
     def jsonify(blob)

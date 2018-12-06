@@ -1,12 +1,13 @@
 module Blueprinter
   # @api private
   class ViewCollection
-    attr_reader :views
+    attr_reader :views, :sort_by_definition
     def initialize
       @views = {
         identifier: View.new(:identifier),
         default: View.new(:default)
       }
+      @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
     end
 
     def inherit(view_collection)
@@ -20,7 +21,9 @@ module Blueprinter
     end
 
     def fields_for(view_name)
-      identifier_fields + sortable_fields(view_name).values.sort_by(&:name)
+      fields = sortable_fields(view_name).values
+      sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
+      identifier_fields + sorted_fields
     end
 
     def [](view_name)
@@ -35,10 +38,10 @@ module Blueprinter
 
     def sortable_fields(view_name)
       fields = views[:default].fields
-      fields = fields.merge(views[view_name].fields)
+      fields = merge_fields(fields, views[view_name].fields)
       views[view_name].included_view_names.each do |included_view_name|
         if view_name != included_view_name
-          fields = fields.merge(sortable_fields(included_view_name))
+          fields = merge_fields(fields, sortable_fields(included_view_name))
         end
       end
 
@@ -47,6 +50,14 @@ module Blueprinter
       end
 
       fields
+    end
+
+    def merge_fields(source_fields, included_fields)
+      if sort_by_definition
+        included_fields.merge(source_fields)
+      else
+        source_fields.merge(included_fields)
+      end
     end
   end
 end

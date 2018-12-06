@@ -1,3 +1,9 @@
+## 0.9.0  - 2018/11/29
+
+* [FEATURE] Added a `render_as_json` API. Similar to `render_as_hash` but returns a JSONified hash. Please see pr [#119](https://github.com/procore/blueprinter/pull/119). Thanks to [@ritikesh](https://github.com/ritikesh).
+* [FEATURE] Sorting of fields in the response is now configurable to sort by definition or by name(asc only). Please see pr [#119](https://github.com/procore/blueprinter/pull/119). Thanks to [@ritikesh](https://github.com/ritikesh).
+* [ENHANCEMENT] Updated readme for above features and some existing undocumented features like `exclude fields`, `render_as_hash`. Please see pr [#119](https://github.com/procore/blueprinter/pull/119). Thanks to [@ritikesh](https://github.com/ritikesh).
+
 ## 0.8.0  - 2018/11/19
 
 * [FEATURE] Extend Support for other JSON encoders like yajl-ruby. Please see pr [#118](https://github.com/procore/blueprinter/pull/118). Thanks to [@ritikesh](https://github.com/ritikesh).

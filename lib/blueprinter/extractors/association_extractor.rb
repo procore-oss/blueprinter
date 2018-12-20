@@ -8,7 +8,14 @@ module Blueprinter
       value = @extractor.extract(association_name, object, local_options, options.except(:default))
       return options[:default] if value.nil?
       view = options[:view] || :default
-      options[:blueprint].prepare(value, view_name: view, local_options: local_options)
+      association_blueprint(value, options).prepare(value, view_name: view, local_options: local_options)
+    end
+    
+    private
+
+    def association_blueprint(value, options)
+      return options[:blueprint] unless options[:blueprint].is_a?(Proc)
+      options[:blueprint].call(value)
     end
   end
 end

@@ -192,6 +192,20 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
+### Supporting Dynamic Blueprints for associations
+When defining a association in the blueprint, we can dynamically evaluate the blueprint as well. This comes in handy when adding `polymorphic associations` to the blueprint but wanting to reuse existing blueprints.
+```ruby
+class TaskBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    field :title, default: "N/A"
+    association :taskable, blueprint: ->(association) {association.blueprint}, default: {}
+  end
+end
+```
+Note: `association.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
+
 ### Defining a field directly in the Blueprint
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:

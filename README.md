@@ -179,8 +179,7 @@ Output:
 ```
 
 ### Default Association/Field Option
-By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be
-specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -193,7 +192,7 @@ end
 ```
 
 ### Supporting Dynamic Blueprints for associations
-When defining a association in the blueprint, we can dynamically evaluate the blueprint as well. This comes in handy when adding `polymorphic associations` to the blueprint but wanting to reuse existing blueprints.
+When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
 ```ruby
 class TaskBlueprint < Blueprinter::Base
   identifier :uuid

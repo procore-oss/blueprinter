@@ -1,4 +1,4 @@
-## 0.9.1  - 2018/12/20
+## 0.10.0  - 2018/12/20
 
 * [FEATURE] Association Blueprints can be dynamically evaluated using a proc. [#122](https://github.com/procore/blueprinter/pull/122). Thanks to [@ritikesh](https://github.com/ritikesh).
 

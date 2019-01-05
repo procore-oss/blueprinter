@@ -194,16 +194,28 @@ end
 ### Supporting Dynamic Blueprints for associations
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
 ```ruby
+class Task < ActiveRecord::Base
+  belongs_to :taskable, polymorphic: true
+end
+
+class Project < ActiveRecord::Base
+  has_many :tasks, as: :taskable
+  
+  def blueprint
+    ProjectBlueprint
+  end
+end
+
 class TaskBlueprint < Blueprinter::Base
   identifier :uuid
 
   view :normal do
     field :title, default: "N/A"
-    association :taskable, blueprint: ->(association) {association.blueprint}, default: {}
+    association :taskable, blueprint: ->(taskable) {taskable.blueprint}, default: {}
   end
 end
 ```
-Note: `association.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
+Note: `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
 ### Defining a field directly in the Blueprint
 

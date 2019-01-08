@@ -86,12 +86,17 @@ describe '::Base' do
           it('returns json with association') { should eq(result) }
         end
         context "Given association with dynamic blueprint" do
+          class UserBlueprint < Blueprinter::Base
+            fields :id
+          end
+          class User < ActiveRecord::Base
+            def blueprint
+              UserBlueprint
+            end
+          end
           let(:blueprint) do
             Class.new(Blueprinter::Base) do
-              association :user, blueprint: ->(obj) { user_blueprint }
-              def self.user_blueprint
-                Class.new(Blueprinter::Base) { identifier :id }
-              end
+              association :user, blueprint: ->(obj) { obj.blueprint }
             end
           end
           it "should render the association with dynamic blueprint" do

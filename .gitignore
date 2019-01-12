@@ -8,3 +8,4 @@ spec/dummy/tmp/
 doc/
 .yardoc/
 Gemfile.lock
+.vscode

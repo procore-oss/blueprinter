@@ -180,8 +180,7 @@ Output:
 ```
 
 ### Default Association/Field Option
-By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be
-specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -192,6 +191,32 @@ class UserBlueprint < Blueprinter::Base
   end
 end
 ```
+
+### Supporting Dynamic Blueprints for associations
+When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
+```ruby
+class Task < ActiveRecord::Base
+  belongs_to :taskable, polymorphic: true
+end
+
+class Project < ActiveRecord::Base
+  has_many :tasks, as: :taskable
+  
+  def blueprint
+    ProjectBlueprint
+  end
+end
+
+class TaskBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    field :title, default: "N/A"
+    association :taskable, blueprint: ->(taskable) {taskable.blueprint}, default: {}
+  end
+end
+```
+Note: `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
 ### Defining a field directly in the Blueprint
 

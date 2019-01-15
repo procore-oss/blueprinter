@@ -21,10 +21,6 @@ module Blueprinter
     end
   end
 
-  def self.reset_configuration!
-    @configuration = Configuration.new
-  end
-
   def self.configuration
     @configuration ||= Configuration.new
   end

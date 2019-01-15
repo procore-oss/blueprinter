@@ -4,7 +4,7 @@ require 'yajl'
 describe 'Blueprinter' do
   describe '#configure' do
     before { Blueprinter.configure { |config| config.generator = JSON } }
-    after { Blueprinter.reset_configuration! }
+    after { reset_blueprinter_config! }
 
     it 'should set the `generator`' do
       Blueprinter.configure { |config| config.generator = Oj }
@@ -41,34 +41,6 @@ describe 'Blueprinter' do
         config.unless = unless_lambda
       }
       expect(Blueprinter.configuration.unless).to be(unless_lambda)
-    end
-  end
-
-  describe '#reset_configuration!' do
-    before { Blueprinter.configure do |config|
-        config.generator = Oj
-        config.if = :foo_method
-        config.method = :foobar_generate
-        config.sort_fields_by = :name_desc
-        config.unless = :bar_method
-      end
-    }
-    after { Blueprinter.reset_configuration! }
-
-    it 'should set the configuration options to default values' do
-      expected_defaults = {
-        generator: JSON,
-        if: nil,
-        method: :generate,
-        sort_fields_by: :name_asc,
-        unless: nil,
-      }
-      Blueprinter.reset_configuration!
-
-      expected_defaults.keys.each do |option|
-        actual = Blueprinter.configuration.public_send(option)
-        expect(actual).to be(expected_defaults[option])
-      end
     end
   end
 

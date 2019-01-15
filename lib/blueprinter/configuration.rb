@@ -2,6 +2,8 @@ module Blueprinter
   class Configuration
     attr_accessor :generator, :if, :method, :sort_fields_by, :unless
 
+    VALID_CALLABLES = %i(if unless)
+
     def initialize
       @generator = JSON
       @if = nil
@@ -12,6 +14,10 @@ module Blueprinter
 
     def jsonify(blob)
       generator.public_send(method, blob)
+    end
+
+    def valid_callable?(callable_name)
+      VALID_CALLABLES.includes?(callable_name)
     end
   end
 

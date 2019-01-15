@@ -36,10 +36,8 @@ class Blueprinter::Field
     # Use field-level callable, or when not defined, try global callable
     tmp = if options.key?(option_name)
       options.fetch(option_name)
-    elsif config.respond_to? option_name
+    elsif config.valid_callable?(option_name)
       config.public_send(option_name)
-    else
-      nil
     end
 
     return false unless tmp

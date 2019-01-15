@@ -1,6 +1,6 @@
 ## 0.11.0  - 2019/1/15
 
-* [FEATURE] Enables the setting of a global :if/:unless proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).
+* [FEATURE] Enables the setting of a global `:if`/`:unless` proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).
 
 ## 0.10.0  - 2018/12/20
 

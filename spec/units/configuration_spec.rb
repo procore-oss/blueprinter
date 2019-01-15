@@ -58,10 +58,10 @@ describe 'Blueprinter' do
     it 'should set the configuration options to default values' do
       expected_defaults = {
         generator: JSON,
-        :if => nil,
+        if: nil,
         method: :generate,
         sort_fields_by: :name_asc,
-        :unless => nil,
+        unless: nil,
       }
       Blueprinter.reset_configuration!
 
@@ -69,11 +69,6 @@ describe 'Blueprinter' do
         actual = Blueprinter.configuration.public_send(option)
         expect(actual).to be(expected_defaults[option])
       end
-    end
-
-    it 'should return false for invalid callable' do
-      actual = Blueprinter.configuration.valid_callable?(:invalid_option)
-      expect(actual).to be(false)
     end
   end
 

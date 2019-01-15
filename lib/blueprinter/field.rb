@@ -31,9 +31,19 @@ class Blueprinter::Field
   end
 
   def callable_from(option_name)
-    return false unless options.key?(option_name)
+    config = Blueprinter.configuration
 
-    tmp = options.fetch(option_name)
+    # Use field-level callable, or when not defined, try global callable
+    tmp = if options.key?(option_name)
+      options.fetch(option_name)
+    elsif config.respond_to? option_name
+      config.public_send(option_name)
+    else
+      nil
+    end
+
+    return false unless tmp
+
     case tmp
     when Proc then tmp
     when Symbol then blueprint.method(tmp)

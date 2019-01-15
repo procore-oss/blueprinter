@@ -176,7 +176,7 @@ describe '::Base' do
       end
     end
   end
-  
+
   describe '::render_as_json' do
     subject { blueprint_with_block.render_as_json(object_with_attributes) }
     context 'Outside Rails project' do

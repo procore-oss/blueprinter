@@ -17,7 +17,7 @@ module Blueprinter
     end
 
     def valid_callable?(callable_name)
-      VALID_CALLABLES.includes?(callable_name)
+      VALID_CALLABLES.include?(callable_name)
     end
   end
 

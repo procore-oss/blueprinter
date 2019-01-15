@@ -2,7 +2,7 @@ require 'oj'
 require 'yajl'
 
 describe '::Configuration' do
-  describe '#generator' do
+  describe '#configure' do
     before { Blueprinter.configure { |config| config.generator = JSON } }
     after { Blueprinter.configure { |config|
       config.generator = JSON
@@ -47,6 +47,20 @@ describe '::Configuration' do
         config.unless = unless_lambda
       }
       expect(Blueprinter.configuration.unless).to be(unless_lambda)
+    end
+  end
+
+  describe '#valid_callable?' do
+    it 'should return true for valid callable' do
+      [:if, :unless].each do |option|
+        actual = Blueprinter.configuration.valid_callable?(option)
+        expect(actual).to be(true)
+      end
+    end
+
+    it 'should return false for invalid callable' do
+      actual = Blueprinter.configuration.valid_callable?(:invalid_option)
+      expect(actual).to be(false)
     end
   end
 end

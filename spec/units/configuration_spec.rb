@@ -1,16 +1,10 @@
 require 'oj'
 require 'yajl'
 
-describe '::Configuration' do
+describe 'Blueprinter' do
   describe '#configure' do
     before { Blueprinter.configure { |config| config.generator = JSON } }
-    after { Blueprinter.configure { |config|
-      config.generator = JSON
-      config.if = nil
-      config.method = :generate
-      config.sort_fields_by = :name_asc
-      config.unless = nil
-    } }
+    after { Blueprinter.reset_configuration! }
 
     it 'should set the `generator`' do
       Blueprinter.configure { |config| config.generator = Oj }
@@ -50,17 +44,52 @@ describe '::Configuration' do
     end
   end
 
-  describe '#valid_callable?' do
-    it 'should return true for valid callable' do
-      [:if, :unless].each do |option|
-        actual = Blueprinter.configuration.valid_callable?(option)
-        expect(actual).to be(true)
+  describe '#reset_configuration!' do
+    before { Blueprinter.configure do |config|
+        config.generator = Oj
+        config.if = :foo_method
+        config.method = :foobar_generate
+        config.sort_fields_by = :name_desc
+        config.unless = :bar_method
+      end
+    }
+    after { Blueprinter.reset_configuration! }
+
+    it 'should set the configuration options to default values' do
+      expected_defaults = {
+        generator: JSON,
+        :if => nil,
+        method: :generate,
+        sort_fields_by: :name_asc,
+        :unless => nil,
+      }
+      Blueprinter.reset_configuration!
+
+      expected_defaults.keys.each do |option|
+        actual = Blueprinter.configuration.public_send(option)
+        expect(actual).to be(expected_defaults[option])
       end
     end
 
     it 'should return false for invalid callable' do
       actual = Blueprinter.configuration.valid_callable?(:invalid_option)
       expect(actual).to be(false)
+    end
+  end
+
+  describe "::Configuration" do
+    describe '#valid_callable?' do
+      it 'should return true for valid callables' do
+        [:if, :unless].each do |option|
+          actual = Blueprinter.configuration.valid_callable?(option)
+          expect(actual).to be(true)
+        end
+      end
+
+      it 'should return false for invalid callable' do
+        actual = Blueprinter.configuration.valid_callable?(:invalid_option)
+        expect(actual).to be(false)
+      end
     end
   end
 end

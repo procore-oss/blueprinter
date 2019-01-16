@@ -1,7 +1,7 @@
 ## 0.11.0  - 2019/1/15
 
 * 🚀 [FEATURE] Enables the setting of a global `:if`/`:unless` proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).
-*💥 [BREAKING] `:if`/`:unless` procs now take in three arguments `(obj, field_name, options)` instead of just `(obj, options)`.
+* 💥 [BREAKING] `:if`/`:unless` procs now take in three arguments `(obj, field_name, options)` instead of just `(obj, options)`.
 To upgrade, please ensure your `:if`/`:unless` procs are updated to take in all three arguments.
 
 ## 0.10.0  - 2018/12/20

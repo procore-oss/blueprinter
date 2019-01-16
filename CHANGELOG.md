@@ -1,3 +1,7 @@
+## 0.12.0  - 2019/1/16
+
+* 🚀 [FEATURE] Enables the setting of global `:field_default` and `:association_default` option value in the Blueprinter Configuration that will be used as default values for fields and associations that evaluate to nil. [#128](https://github.com/procore/blueprinter/pull/128). Thanks to [@mcclayton](https://github.com/mcclayton).
+
 ## 0.11.0  - 2019/1/15
 
 * 🚀 [FEATURE] Enables the setting of a global `:if`/`:unless` proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).

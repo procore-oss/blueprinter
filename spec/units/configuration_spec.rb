@@ -42,6 +42,16 @@ describe 'Blueprinter' do
       }
       expect(Blueprinter.configuration.unless).to be(unless_lambda)
     end
+
+    it 'should set the `field_default` option' do
+      Blueprinter.configure { |config| config.field_default = "N/A" }
+      expect(Blueprinter.configuration.field_default).to eq("N/A")
+    end
+
+    it 'should set the `association_default` option' do
+      Blueprinter.configure { |config| config.association_default = {} }
+      expect(Blueprinter.configuration.association_default).to eq({})
+    end
   end
 
   describe "::Configuration" do

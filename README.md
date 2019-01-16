@@ -180,7 +180,17 @@ Output:
 ```
 
 ### Default Association/Field Option
-By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
+
+#### Global Config Setting
+```ruby
+Blueprinter.configure do |config|
+  config.field_default = "N/A"
+  config.association_default = {}
+end
+```
+
+#### Field-level/Associaion-level Setting
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid

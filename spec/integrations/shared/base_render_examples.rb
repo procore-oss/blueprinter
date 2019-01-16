@@ -79,28 +79,55 @@ shared_examples 'Base::render' do
       obj[:first_name] = nil
     end
 
-    context "Given default value is not provided" do
-      let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :id
-          field :first_name
+    context "Given global default field value is specified" do
+      before { Blueprinter.configure { |config| config.field_default = "N/A" } }
+      after { reset_blueprinter_config! }
+
+      context "Given default field value is not provided" do
+        let(:result) { '{"first_name":"N/A","id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name
+          end
         end
+        it('global default value is rendered for nil field') { should eq(result) }
       end
-      it('returns json with specified fields') { should eq(result) }
+
+      context "Given default field value is provided" do
+        let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name, default: "Unknown"
+          end
+        end
+        it('field-level default value is rendered for nil field') { should eq(result) }
+      end
     end
 
-    context "Given default value is provided" do
-      let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :id
-          field :first_name, default: "Unknown"
+    context "Given global default value is not specified" do
+      context "Given default field value is not provided" do
+        let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name
+          end
         end
+        it('returns json with specified fields') { should eq(result) }
       end
-      it('returns json with specified fields') {
-        should eq(result)
-      }
+
+      context "Given default field value is provided" do
+        let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name, default: "Unknown"
+          end
+        end
+        it('field-level default value is rendered for nil field') { should eq(result) }
+      end
     end
   end
 

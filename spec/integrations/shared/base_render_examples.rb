@@ -111,8 +111,8 @@ shared_examples 'Base::render' do
     let(:unless_value) { false }
     let(:field_options) { {} }
     let(:local_options) { { x: 1, y: 2 } }
-    let(:if_proc) { ->(_obj, _local_opts) { if_value } }
-    let(:unless_proc) { ->(_obj, _local_opts) { unless_value } }
+    let(:if_proc) { ->(_obj, _field_name, _local_opts) { if_value } }
+    let(:unless_proc) { ->(_obj, _field_name, _local_opts) { unless_value } }
     let(:blueprint) do
       f_options = field_options
 
@@ -121,11 +121,11 @@ shared_examples 'Base::render' do
         field :first_name, f_options
       end
       bp.instance_eval <<-RUBY, __FILE__, __LINE__ + 1
-            def self.if_method(_object, _options)
+            def self.if_method(_object, _field_name, _options)
               #{if_value}
             end
 
-            def self.unless_method(_object, _options)
+            def self.unless_method(_object, _field_name, _options)
               #{unless_value}
             end
           RUBY

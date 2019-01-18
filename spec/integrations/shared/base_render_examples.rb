@@ -104,6 +104,17 @@ shared_examples 'Base::render' do
         end
         it('field-level default value is rendered for nil field') { should eq(result) }
       end
+
+      context "Given default field value is provided but is nil" do
+        let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name, default: nil
+          end
+        end
+        it('field-level default value is rendered for nil field') { should eq(result) }
+      end
     end
 
     context "Given global default value is not specified" do

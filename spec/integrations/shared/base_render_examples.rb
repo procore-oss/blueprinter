@@ -10,6 +10,20 @@ shared_examples 'Base::render' do
     it('returns json with specified fields') { should eq(result) }
   end
 
+  context 'Given blueprint has ::field with all data types' do
+    let(:result) { '{"active":false,"birthday":"1994-03-04","deleted_at":null,"first_name":"Meg","id":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id # number
+        field :first_name # string
+        field :active # boolean
+        field :birthday # date
+        field :deleted_at # null
+      end
+    end
+    it('returns json with the correct values for each data type') { should eq(result) }
+  end
+
   context 'Given blueprint has ::fields' do
     let(:result) do
       '{"id":' + obj_id + ',"description":"A person","first_name":"Meg"}'

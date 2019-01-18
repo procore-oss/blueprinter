@@ -381,8 +381,8 @@ Both the `field` and the global Blueprinter Configuration supports `:if` and `:u
 #### Global Config Setting
 ```ruby
 Blueprinter.configure do |config|
-  config.if = ->(obj, field_name, _options) { !obj[field_name].nil? }
-  config.unless = ->(obj, field_name, _options) { obj[field_name].nil? }
+  config.if = ->(obj, _options) { obj.is_a?(Foo) }
+  config.unless = ->(obj, _options) { obj.is_a?(Bar) }
 end
 ```
 
@@ -390,8 +390,8 @@ end
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :last_name, if: ->(user, _field_name, options) { user.first_name != options[:first_name] }
-  field :age, unless: ->(user, _field_name, _options) { user.age < 18 }
+  field :last_name, if: ->(user, options) { user.first_name != options[:first_name] }
+  field :age, unless: ->(user, _options) { user.age < 18 }
 end
 ```
 

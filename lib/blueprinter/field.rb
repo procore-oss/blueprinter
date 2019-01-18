@@ -13,9 +13,9 @@ class Blueprinter::Field
     extractor.extract(method, object, local_options, options)
   end
 
-  def skip?(object, field_name, local_options)
-    return true if if_callable && !if_callable.call(object, field_name, local_options)
-    unless_callable && unless_callable.call(object, field_name, local_options)
+  def skip?(object, local_options)
+    return true if if_callable && !if_callable.call(object, local_options)
+    unless_callable && unless_callable.call(object, local_options)
   end
 
   private

@@ -74,7 +74,7 @@ module Blueprinter
     #   with given strftime formatting
     # @option options [Symbol,Proc] :if Specifies a method, proc or string to
     #   call to determine if the field should be included (e.g.
-    #   `if: :include_first_name?, or if: Proc.new { |user, field_name, options| options[:current_user] == user }).
+    #   `if: :include_first_name?, or if: Proc.new { |user, options| options[:current_user] == user }).
     #   The method, proc or string should return or evaluate to a true or false value.
     # @option options [Symbol,Proc] :unless Specifies a method, proc or string
     #   to call to determine if the field should be included (e.g.
@@ -340,7 +340,7 @@ module Blueprinter
 
     def self.object_to_hash(object, view_name:, local_options:)
       view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-        next if field.skip?(object, field.name, local_options)
+        next if field.skip?(object, local_options)
         hash[field.name] = field.extract(object, local_options)
       end
     end

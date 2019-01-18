@@ -62,4 +62,4 @@ workflows:
           filters:
             branches:
               only:
-                - automateReleases
+                - master

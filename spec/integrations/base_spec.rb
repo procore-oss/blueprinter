@@ -166,6 +166,21 @@ describe '::Base' do
               expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
             end
           end
+
+          context "Given default association value is provided and is nil" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: nil
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
+            end
+          end
         end
 
         context "Given global default association value is not specified" do

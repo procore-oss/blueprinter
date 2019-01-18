@@ -28,19 +28,19 @@ jobs:
     docker:
       - image: ruby:2.5
   release-gem:
-    docker:
-      - image: ruby:2.5
     steps:
       - checkout
       - run:
-        name: Installing ruby dependencies
-        command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+          name: Installing ruby dependencies
+          command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
       - deploy:
           name: Release New Gem Version
           command: |
             GEM_VERSION=$(ruby -r "./lib/blueprinter/version.rb" -e "puts Blueprinter::VERSION")
             echo "Attempting to release version '$GEM_VERSION' of Blueprinter..."
             bundle exec rake release
+    docker:
+      - image: ruby:2.5
 
 workflows:
   version: 2
@@ -53,7 +53,7 @@ workflows:
   release:
     jobs:
       - release-gem:
-        filters:
-          branches:
-            only:
-              - master
+          filters:
+            branches:
+              only:
+                - automateReleases

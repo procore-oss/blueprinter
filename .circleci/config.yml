@@ -33,6 +33,12 @@ jobs:
       - run:
           name: Installing ruby dependencies
           command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - run:
+          name: Auth RubyGems
+          command: |
+            mkdir ~/.gem
+            install -m 0600 /dev/null ~/.gem/credentials
+            echo -e "---\n:rubygems_api_key: $RUBY_GEMS_API_KEY" > ~/.gem/credentials
       - deploy:
           name: Release New Gem Version
           command: |

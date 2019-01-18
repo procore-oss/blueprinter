@@ -1,3 +1,15 @@
+## 1.0.0  - 2019/1/18
+
+### Blueprinter's first major release! 🎉
+
+We've grouped together a number of breaking changes as part of this release -- please read through these changes *carefully* and see the section below detailing the steps needed to upgrade to `1.0.0`.
+
+* 💥 [BREAKING] :if/:unless procs now take in three arguments (field_name, obj, options) instead of just (obj, options).
+
+### Upgrading to 1.0.0
+
+* All conditional :if/:unless procs must be augmented to take in three arguments instead of two. i.e. `(obj, options)` to `(field_name, obj, options)`.
+
 ## 0.11.0  - 2019/1/15
 
 * 🚀 [FEATURE] Enables the setting of a global `:if`/`:unless` proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).

@@ -44,7 +44,7 @@ jobs:
           command: |
             GEM_VERSION=$(ruby -r "./lib/blueprinter/version.rb" -e "puts Blueprinter::VERSION")
             echo "Attempting to release version '$GEM_VERSION' of Blueprinter..."
-            bundle exec rake release
+            bundle exec rake release || true # Don't fail when deploy does not take place
     docker:
       - image: ruby:2.5
 

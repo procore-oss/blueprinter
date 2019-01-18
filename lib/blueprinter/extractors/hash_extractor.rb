@@ -1,7 +1,7 @@
 module Blueprinter
   class HashExtractor < Extractor
-    def extract(field_name, object, local_options, options = {})
-      object[field_name] || object[field_name.to_s]
+    def extract(field_name, object, _local_options, _options = {})
+      object[field_name]
     end
   end
 end

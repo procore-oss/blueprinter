@@ -30,14 +30,14 @@ class Blueprinter::Field
     @unless_callable = callable_from(:unless)
   end
 
-  def callable_from(option_name)
+  def callable_from(condition)
     config = Blueprinter.configuration
 
     # Use field-level callable, or when not defined, try global callable
-    tmp = if options.key?(option_name)
-      options.fetch(option_name)
-    elsif config.valid_callable?(option_name)
-      config.public_send(option_name)
+    tmp = if options.key?(condition)
+      options.fetch(condition)
+    elsif config.valid_callable?(condition)
+      config.public_send(condition)
     end
 
     return false unless tmp
@@ -46,7 +46,7 @@ class Blueprinter::Field
     when Proc then tmp
     when Symbol then blueprint.method(tmp)
     else
-      raise ArgumentError, "#{tmp.class} is passed to :#{option_name}"
+      raise ArgumentError, "#{tmp.class} is passed to :#{condition}"
     end
   end
 end

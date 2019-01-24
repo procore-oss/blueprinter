@@ -1,10 +1,12 @@
 module Blueprinter
   class Configuration
-    attr_accessor :generator, :if, :method, :sort_fields_by, :unless
+    attr_accessor :association_default, :field_default, :generator, :if, :method, :sort_fields_by, :unless
 
     VALID_CALLABLES = %i(if unless).freeze
 
     def initialize
+      @association_default = nil
+      @field_default = nil
       @generator = JSON
       @if = nil
       @method = :generate

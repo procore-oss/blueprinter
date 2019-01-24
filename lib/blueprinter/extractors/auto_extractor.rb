@@ -9,10 +9,14 @@ module Blueprinter
     def extract(field_name, object, local_options, options = {})
       extraction = extractor(object, options).extract(field_name, object, local_options, options)
       value = options.key?(:datetime_format) ? format_datetime(extraction, options[:datetime_format]) : extraction
-      value.nil? ? options[:default] : value
+      value.nil? ? default_value(options) : value
     end
 
     private
+
+    def default_value(field_options)
+      field_options.key?(:default) ? field_options.fetch(:default) : Blueprinter.configuration.field_default
+    end
 
     def extractor(object, options)
       if options[:block]

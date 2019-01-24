@@ -180,7 +180,17 @@ Output:
 ```
 
 ### Default Association/Field Option
-By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
+
+#### Global Config Setting
+```ruby
+Blueprinter.configure do |config|
+  config.field_default = "N/A"
+  config.association_default = {}
+end
+```
+
+#### Field-level/Associaion-level Setting
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -201,7 +211,7 @@ end
 
 class Project < ActiveRecord::Base
   has_many :tasks, as: :taskable
-  
+
   def blueprint
     ProjectBlueprint
   end
@@ -374,10 +384,19 @@ Output:
 }
 ```
 
-### Conditional field
+### Conditional fields
 
-`field` supports `:if` and `:unless` options argument that can be used to serialize the field conditionally.
+Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
 
+#### Global Config Setting
+```ruby
+Blueprinter.configure do |config|
+  config.if = ->(obj, _options) { obj.is_a?(Foo) }
+  config.unless = ->(obj, _options) { obj.is_a?(Bar) }
+end
+```
+
+#### Field-level Setting
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -385,6 +404,8 @@ class UserBlueprint < Blueprinter::Base
   field :age, unless: ->(user, _options) { user.age < 18 }
 end
 ```
+
+The field-level setting overrides the global config setting (for the field) if both are set.
 
 ### Custom formatting for dates and times
 To define a custom format for a Date or DateTime field, include the option `datetime_format` with the associated `strptime` format.

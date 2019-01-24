@@ -136,31 +136,81 @@ describe '::Base' do
           expect(vehicle).to receive(:user).and_return(nil)
         end
 
-        context "Given default association value is not provided" do
-          let(:blueprint) do
-            Class.new(Blueprinter::Base) do
-              fields :make
-              association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+        context "Given global default association value is specified" do
+          before { Blueprinter.configure { |config| config.association_default = "N/A" } }
+          after { reset_blueprinter_config! }
+
+          context "Given default association value is not provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+              end
+            end
+
+            it "should render the association using the default global association value" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq("N/A")
             end
           end
 
-          it "should render the association as nil" do
-            expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
+          context "Given default association value is provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: {}
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+            end
+          end
+
+          context "Given default association value is provided and is nil" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: nil
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
+            end
           end
         end
 
-        context "Given default association value is provided" do
-          let(:blueprint) do
-            Class.new(Blueprinter::Base) do
-              fields :make
-              association :user,
-                blueprint: Class.new(Blueprinter::Base) { identifier :id },
-                default: {}
+        context "Given global default association value is not specified" do
+          context "Given default association value is not provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+              end
+            end
+
+            it "should render the association as nil" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
             end
           end
 
-          it "should render the default value provided for the association" do
-            expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+          context "Given default association value is provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: {}
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+            end
           end
         end
       end
@@ -177,7 +227,7 @@ describe '::Base' do
       end
     end
   end
-  
+
   describe '::render_as_json' do
     subject { blueprint_with_block.render_as_json(object_with_attributes) }
     context 'Outside Rails project' do

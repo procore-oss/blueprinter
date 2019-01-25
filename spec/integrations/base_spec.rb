@@ -20,7 +20,8 @@ describe '::Base' do
       description: 'A person',
       company: 'Procore',
       birthday: Date.new(1994, 3, 4),
-      deleted_at: nil
+      deleted_at: nil,
+      active: false
     }
   end
   let(:object_with_attributes) { OpenStruct.new(obj_hash) }

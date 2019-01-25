@@ -1,3 +1,7 @@
+## 0.12.1  - 2019/1/24
+
+* 🐛 [BUGFIX] Fix boolean `false` values getting serialized as `null`. Please see PR [#132](https://github.com/procore/blueprinter/pull/132).
+
 ## 0.12.0  - 2019/1/16
 
 * 🚀 [FEATURE] Enables the setting of global `:field_default` and `:association_default` option value in the Blueprinter Configuration that will be used as default values for fields and associations that evaluate to nil. [#128](https://github.com/procore/blueprinter/pull/128). Thanks to [@mcclayton](https://github.com/mcclayton).

@@ -34,6 +34,11 @@ jobs:
           name: Installing ruby dependencies
           command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
       - run:
+          name: Sign in to Github as CircleCI Bot
+          command: |
+            git config --global user.email "$CIRCLECI_GIT_BOT_GIT_EMAIL"
+            git config --global user.name "$CIRCLECI_GIT_BOT_NAME"
+      - run:
           name: Auth RubyGems
           command: |
             mkdir ~/.gem

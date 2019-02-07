@@ -244,21 +244,8 @@ module Blueprinter
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
-      prepared_object = include_associations(object, view_name: view_name)
-      data = if array_like?(object)
-        prepared_object.map do |obj|
-          object_to_hash(obj,
-                         view_name: view_name,
-                         local_options: local_options)
-        end
-      else
-        object_to_hash(prepared_object,
-                       view_name: view_name,
-                       local_options: local_options)
-      end
-      return data unless root
-      ret = { root => data }
-      meta ? ret.merge!(meta: meta) : ret
+      data = prepare_data(object, view_name, local_options)
+      prepend_root_and_meta(data, root, meta)
     end
 
     # Specify one or more field/method names to be included for serialization.
@@ -353,6 +340,29 @@ module Blueprinter
     end
     private_class_method :prepare_for_render
 
+    def self.prepare_data(object, view_name, local_options)
+      prepared_object = include_associations(object, view_name: view_name)
+      if array_like?(object)
+        prepared_object.map do |obj|
+          object_to_hash(obj,
+                         view_name: view_name,
+                         local_options: local_options)
+        end
+      else
+        object_to_hash(prepared_object,
+                       view_name: view_name,
+                       local_options: local_options)
+      end
+    end
+    private_class_method :prepare_data
+
+    def self.prepend_root_and_meta(data, root, meta)
+      return data unless root
+      ret = { root => data }
+      meta ? ret.merge!(meta: meta) : ret
+    end
+    private_class_method :prepend_root_and_meta
+    
     def self.inherited(subclass)
       subclass.send(:view_collection).inherit(view_collection)
     end

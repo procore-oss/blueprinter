@@ -224,6 +224,32 @@ module Blueprinter
       prepare_for_render(object, options).as_json
     end
 
+    # This is the magic method that converts complex objects into a simple hash
+    # ready for JSON conversion.
+    #
+    # Note: we accept view (public interface) that is in reality a view_name,
+    # so we rename it for clarity
+    #
+    # @api private
+    def self.prepare(object, view_name:, root: nil, local_options:)
+      unless view_collection.has_view? view_name
+        raise BlueprinterError, "View '#{view_name}' is not defined"
+      end
+      prepared_object = include_associations(object, view_name: view_name)
+      if array_like?(object)
+        ret = prepared_object.map do |obj|
+          object_to_hash(obj,
+                         view_name: view_name,
+                         local_options: local_options)
+        end
+      else
+        ret = object_to_hash(prepared_object,
+                       view_name: view_name,
+                       local_options: local_options)
+      end
+      root ? { root => ret } : ret
+    end
+
     # Specify one or more field/method names to be included for serialization.
     # Takes at least one field or method names.
     #
@@ -314,33 +340,6 @@ module Blueprinter
       prepare(object, view_name: view_name, root: root, local_options: options)
     end
     private_class_method :prepare_for_render
-
-    # This is the magic method that converts complex objects into a simple hash
-    # ready for JSON conversion.
-    #
-    # Note: we accept view (public interface) that is in reality a view_name,
-    # so we rename it for clarity
-    #
-    # @api private
-    def self.prepare(object, view_name:, root:, local_options:)
-      unless view_collection.has_view? view_name
-        raise BlueprinterError, "View '#{view_name}' is not defined"
-      end
-      prepared_object = include_associations(object, view_name: view_name)
-      if array_like?(object)
-        ret = prepared_object.map do |obj|
-          object_to_hash(obj,
-                         view_name: view_name,
-                         local_options: local_options)
-        end
-      else
-        ret = object_to_hash(prepared_object,
-                       view_name: view_name,
-                       local_options: local_options)
-      end
-      root ? { root => ret } : ret
-    end
-    private_class_method :prepare
 
     def self.inherited(subclass)
       subclass.send(:view_collection).inherit(view_collection)

@@ -295,6 +295,22 @@ shared_examples 'Base::render' do
     end
   end
 
+  context 'Given blueprint has ::meta' do
+    let(:result) { '{"root":{"id":' + obj_id + ',"position_and_company":"Manager at Procore"},"meta":"meta_value"}' }
+    let(:blueprint) { blueprint_with_block }
+    it('returns json with a root') do
+      expect(blueprint.render(obj, root: :root, meta: 'meta_value')).to eq(result)
+    end
+  end
+
+  context 'Given blueprint has ::meta without root' do
+    let(:result) { '{"id":' + obj_id + ',"position_and_company":"Manager at Procore"}' }
+    let(:blueprint) { blueprint_with_block }
+    it('returns json with a root') do
+      expect(blueprint.render(obj, meta: 'meta_value')).to eq(result)
+    end
+  end
+
   context 'Given blueprint has ::field with a block' do
     let(:result) { '{"id":' + obj_id + ',"position_and_company":"Manager at Procore"}' }
     let(:blueprint) { blueprint_with_block }

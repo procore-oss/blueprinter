@@ -231,23 +231,25 @@ module Blueprinter
     # so we rename it for clarity
     #
     # @api private
-    def self.prepare(object, view_name:, root: nil, local_options:)
+    def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
       prepared_object = include_associations(object, view_name: view_name)
       if array_like?(object)
-        ret = prepared_object.map do |obj|
+        data = prepared_object.map do |obj|
           object_to_hash(obj,
                          view_name: view_name,
                          local_options: local_options)
         end
       else
-        ret = object_to_hash(prepared_object,
+        data = object_to_hash(prepared_object,
                        view_name: view_name,
                        local_options: local_options)
       end
-      root ? { root => ret } : ret
+      return data unless root
+      ret = { root => data }
+      meta ? ret.merge!(meta: meta) : ret
     end
 
     # Specify one or more field/method names to be included for serialization.
@@ -337,7 +339,8 @@ module Blueprinter
     def self.prepare_for_render(object, options)
       view_name = options.delete(:view) || :default
       root = options.delete(:root)
-      prepare(object, view_name: view_name, root: root, local_options: options)
+      meta = options.delete(:meta)
+      prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
     end
     private_class_method :prepare_for_render
 

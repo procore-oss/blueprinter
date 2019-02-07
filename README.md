@@ -158,6 +158,47 @@ Output:
 }
 ```
 
+### Meta attributes
+You can additionally add meta-data to the json as well:
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+  end
+end
+```
+
+Usage:
+```ruby
+json = UserBlueprint.render(user, view: :normal, root: :user, meta: {links: [
+  'https://app.mydomain.com',
+  'https://alternate.mydomain.com'
+]})
+puts json
+```
+
+Output:
+```json
+{ 
+  "user": {
+    "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+    "first_name": "John",
+    "last_name": "Doe",
+    "login": "john.doe@some.fake.email.domain"
+  },
+  "meta": {
+    "links": [
+      "https://app.mydomain.com",
+      "https://alternate.mydomain.com"
+    ]
+  }
+}
+```
+Note: for meta attributes, a [root](#root-elements) attribute is mandatory.
+
 ### Exclude fields
 You can specifically choose to exclude certain fields for specific views
 ```ruby

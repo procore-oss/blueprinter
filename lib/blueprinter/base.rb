@@ -169,6 +169,9 @@ module Blueprinter
     #   fields to be serialized.
     # @option options [Symbol|String] :root Defaults to nil.
     #   Render the json/hash with a root key if provided.
+    # @option options [Any] :meta Defaults to nil.
+    #   Render the json/hash with a meta attribute with provided value 
+    #   if both root and meta keys options are provided.
     #
     # @example Generating JSON with an extended view
     #   post = Post.all
@@ -191,6 +194,9 @@ module Blueprinter
     #   fields to be serialized.
     # @option options [Symbol|String] :root Defaults to nil.
     #   Render the json/hash with a root key if provided.
+    # @option options [Any] :meta Defaults to nil.
+    #   Render the json/hash with a meta attribute with provided value 
+    #   if both root and meta keys options are provided.
     #
     # @example Generating a hash with an extended view
     #   post = Post.all
@@ -213,6 +219,9 @@ module Blueprinter
     #   fields to be serialized.
     # @option options [Symbol|String] :root Defaults to nil.
     #   Render the json/hash with a root key if provided.
+    # @option options [Any] :meta Defaults to nil.
+    #   Render the json/hash with a meta attribute with provided value 
+    #   if both root and meta keys options are provided.
     #
     # @example Generating a hash with an extended view
     #   post = Post.all

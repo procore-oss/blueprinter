@@ -167,6 +167,8 @@ module Blueprinter
     # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
+    # @option options [Symbol|String] :root Defaults to nil.
+    #   Render the json/hash with a root key if provided.
     #
     # @example Generating JSON with an extended view
     #   post = Post.all
@@ -187,6 +189,8 @@ module Blueprinter
     # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
+    # @option options [Symbol|String] :root Defaults to nil.
+    #   Render the json/hash with a root key if provided.
     #
     # @example Generating a hash with an extended view
     #   post = Post.all
@@ -207,6 +211,8 @@ module Blueprinter
     # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
+    # @option options [Symbol|String] :root Defaults to nil.
+    #   Render the json/hash with a root key if provided.
     #
     # @example Generating a hash with an extended view
     #   post = Post.all
@@ -216,31 +222,6 @@ module Blueprinter
     # @return [Hash]
     def self.render_as_json(object, options= {})
       prepare_for_render(object, options).as_json
-    end
-
-    # This is the magic method that converts complex objects into a simple hash
-    # ready for JSON conversion.
-    #
-    # Note: we accept view (public interface) that is in reality a view_name,
-    # so we rename it for clarity
-    #
-    # @api private
-    def self.prepare(object, view_name:, local_options:)
-      unless view_collection.has_view? view_name
-        raise BlueprinterError, "View '#{view_name}' is not defined"
-      end
-      prepared_object = include_associations(object, view_name: view_name)
-      if array_like?(object)
-        prepared_object.map do |obj|
-          object_to_hash(obj,
-                         view_name: view_name,
-                         local_options: local_options)
-        end
-      else
-        object_to_hash(prepared_object,
-                       view_name: view_name,
-                       local_options: local_options)
-      end
     end
 
     # Specify one or more field/method names to be included for serialization.
@@ -329,9 +310,37 @@ module Blueprinter
     # Begin private class methods
     def self.prepare_for_render(object, options)
       view_name = options.delete(:view) || :default
-      prepare(object, view_name: view_name, local_options: options)
+      root = options.delete(:root)
+      prepare(object, view_name: view_name, root: root, local_options: options)
     end
     private_class_method :prepare_for_render
+
+    # This is the magic method that converts complex objects into a simple hash
+    # ready for JSON conversion.
+    #
+    # Note: we accept view (public interface) that is in reality a view_name,
+    # so we rename it for clarity
+    #
+    # @api private
+    def self.prepare(object, view_name:, root:, local_options:)
+      unless view_collection.has_view? view_name
+        raise BlueprinterError, "View '#{view_name}' is not defined"
+      end
+      prepared_object = include_associations(object, view_name: view_name)
+      if array_like?(object)
+        ret = prepared_object.map do |obj|
+          object_to_hash(obj,
+                         view_name: view_name,
+                         local_options: local_options)
+        end
+      else
+        ret = object_to_hash(prepared_object,
+                       view_name: view_name,
+                       local_options: local_options)
+      end
+      root ? { root => ret } : ret
+    end
+    private_class_method :prepare
 
     def self.inherited(subclass)
       subclass.send(:view_collection).inherit(view_collection)

@@ -42,6 +42,33 @@ And the output would look like:
 }
 ```
 
+### Collections
+
+You can also pass a collection object or an array to the render method.
+
+```ruby
+puts UserBlueprint.render(User.all)
+```
+
+This will result in JSON that looks something like this:
+
+```json
+[
+  {
+    "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+    "email": "john.doe@some.fake.email.domain",
+    "first_name": "John",
+    "last_name": "Doe"
+  },
+  {
+    "uuid": "733f0758-8f21-4719-875f-743af262c3ec",
+    "email": "john.doe.2@some.fake.email.domain",
+    "first_name": "John",
+    "last_name": "Doe 2"
+  }
+]
+```
+
 ### Renaming
 
 You can rename the resulting JSON keys in both fields and associations by using the `name` option.
@@ -98,6 +125,36 @@ Output:
   "first_name": "John",
   "last_name": "Doe",
   "login": "john.doe@some.fake.email.domain"
+}
+```
+
+### Root Elements
+You can also optionally pass in a root element to wrap your resulting json in:
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+  end
+end
+```
+
+Usage:
+```ruby
+puts UserBlueprint.render(user, view: :normal, root: :user)
+```
+
+Output:
+```json
+{ 
+  "user": {
+    "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+    "first_name": "John",
+    "last_name": "Doe",
+    "login": "john.doe@some.fake.email.domain"
+  }
 }
 ```
 

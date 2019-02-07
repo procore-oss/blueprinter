@@ -245,14 +245,14 @@ module Blueprinter
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
       prepared_object = include_associations(object, view_name: view_name)
-      if array_like?(object)
-        data = prepared_object.map do |obj|
+      data = if array_like?(object)
+        prepared_object.map do |obj|
           object_to_hash(obj,
                          view_name: view_name,
                          local_options: local_options)
         end
       else
-        data = object_to_hash(prepared_object,
+        object_to_hash(prepared_object,
                        view_name: view_name,
                        local_options: local_options)
       end

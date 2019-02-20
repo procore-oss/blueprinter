@@ -141,7 +141,7 @@ DEPENDENCIES
   pry
   rails (~> 5.1.2)
   rspec (~> 3.7)
-  sqlite3
+  sqlite3 (~> 1.3.6)
   yard (~> 0.9.11)
 
 BUNDLED WITH

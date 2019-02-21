@@ -1,4 +1,5 @@
-require_relative 'benchmark_helper'
+require 'benchmark_helper'
+require 'blueprinter/base'
 require 'ostruct'
 
 class Blueprinter::IPSTest < Minitest::Test

@@ -1,10 +1,25 @@
 module Blueprinter
   class AssociationExtractor < Extractor
+    def initialize
+      @extractor = AutoExtractor.new
+    end
+
     def extract(association_name, object, local_options, options={})
-      value = object.public_send(association_name)
-      return value if value.nil?
+      value = @extractor.extract(association_name, object, local_options, options.except(:default))
+      return default_value(options) if value.nil?
       view = options[:view] || :default
-      options[:blueprint].prepare(value, view_name: view, local_options: local_options)
+      blueprint = association_blueprint(options[:blueprint], value)
+      blueprint.prepare(value, view_name: view, local_options: local_options)
+    end
+
+    private
+
+    def default_value(association_options)
+      association_options.key?(:default) ? association_options.fetch(:default) : Blueprinter.configuration.association_default
+    end
+
+    def association_blueprint(blueprint, value)
+      blueprint.is_a?(Proc) ? blueprint.call(value) : blueprint
     end
   end
 end

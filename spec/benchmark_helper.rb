@@ -1,12 +1,11 @@
-require "rails/test_help"
-
-Rails::TestUnitReporter.executable = 'bin/test'
+require 'minitest/autorun'
+require 'minitest/benchmark'
 
 module BenchmarkHelper
   def iterate
     start = Time.now
     count = 0
-    while Time.now - start <= 1.second do
+    while Time.now - start <= 1 do
       yield
       count += 1
     end

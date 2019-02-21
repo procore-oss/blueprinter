@@ -1,7 +1,15 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'blueprinter'
 
+module SpecHelpers
+  def reset_blueprinter_config!
+    Blueprinter.instance_variable_set(:@configuration, nil)
+  end
+end
+
 RSpec.configure do |config|
+  config.include SpecHelpers
+
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end

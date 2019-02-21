@@ -1,10 +1,9 @@
-require_relative '../rails_test_helper'
-require_relative '../factories/model_factories.rb'
-require_relative 'benchmark_helper'
-require 'minitest/benchmark'
+require 'activerecord_helper'
+require 'benchmark_helper'
+require 'blueprinter/base'
 
 class Blueprinter::ActiveRecordBigOTest < Minitest::Benchmark
-  include FactoryGirl::Syntax::Methods
+  include FactoryBot::Syntax::Methods
 
   def setup
     @blueprinter = Class.new(Blueprinter::Base) do

@@ -1,5 +1,6 @@
+require 'benchmark_helper'
+require 'blueprinter/base'
 require 'ostruct'
-require 'minitest/benchmark'
 
 class Blueprinter::BigOTest < Minitest::Benchmark
   def setup
@@ -13,7 +14,7 @@ class Blueprinter::BigOTest < Minitest::Benchmark
   end
 
   def bench_render_basic
-    assert_performance_linear do |n|
+    assert_performance_linear(0.98) do |n|
       @blueprinter.render(@prepared_objects[n])
     end
   end

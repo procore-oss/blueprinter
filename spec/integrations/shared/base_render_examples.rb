@@ -311,6 +311,13 @@ shared_examples 'Base::render' do
     end
   end
 
+  context 'Given blueprint has root as a non-supported object' do
+    let(:blueprint) { blueprint_with_block }
+    it('raises a BlueprinterError') { 
+      expect{blueprint.render(obj, root: {some_key: "invalid root"})}.to raise_error(Blueprinter::BlueprinterError)
+    }
+  end
+
   context 'Given blueprint has ::field with a block' do
     let(:result) { '{"id":' + obj_id + ',"position_and_company":"Manager at Procore"}' }
     let(:blueprint) { blueprint_with_block }

@@ -1,7 +1,6 @@
 describe '::View' do
   let(:view) { Blueprinter::View.new('Basic View') }
   let(:field) { MockField.new(:first_name) }
-  let(:blueprinter_error) { Blueprinter::BlueprinterError }
 
   describe '#include_view(:view_name)' do
     it 'should return [:view_name]' do

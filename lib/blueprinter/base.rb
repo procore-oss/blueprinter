@@ -7,13 +7,13 @@ require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
 require_relative 'field'
-require_relative 'helpers/active_record_helpers'
+require_relative 'helpers/base_helpers'
 require_relative 'view'
 require_relative 'view_collection'
 
 module Blueprinter
   class Base
-    include ActiveRecordHelpers
+    include BaseHelpers
 
     # Specify a field or method name used as an identifier. Usually, this is
     # something like :id
@@ -167,6 +167,11 @@ module Blueprinter
     # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
+    # @option options [Symbol|String] :root Defaults to nil.
+    #   Render the json/hash with a root key if provided.
+    # @option options [Any] :meta Defaults to nil.
+    #   Render the json/hash with a meta attribute with provided value 
+    #   if both root and meta keys are provided in the options hash.
     #
     # @example Generating JSON with an extended view
     #   post = Post.all
@@ -187,6 +192,11 @@ module Blueprinter
     # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
+    # @option options [Symbol|String] :root Defaults to nil.
+    #   Render the json/hash with a root key if provided.
+    # @option options [Any] :meta Defaults to nil.
+    #   Render the json/hash with a meta attribute with provided value 
+    #   if both root and meta keys are provided in the options hash.
     #
     # @example Generating a hash with an extended view
     #   post = Post.all
@@ -207,6 +217,11 @@ module Blueprinter
     # @option options [Symbol] :view Defaults to :default.
     #   The view name that corresponds to the group of
     #   fields to be serialized.
+    # @option options [Symbol|String] :root Defaults to nil.
+    #   Render the json/hash with a root key if provided.
+    # @option options [Any] :meta Defaults to nil.
+    #   Render the json/hash with a meta attribute with provided value 
+    #   if both root and meta keys are provided in the options hash.
     #
     # @example Generating a hash with an extended view
     #   post = Post.all
@@ -225,22 +240,12 @@ module Blueprinter
     # so we rename it for clarity
     #
     # @api private
-    def self.prepare(object, view_name:, local_options:)
+    def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
-      prepared_object = include_associations(object, view_name: view_name)
-      if array_like?(object)
-        prepared_object.map do |obj|
-          object_to_hash(obj,
-                         view_name: view_name,
-                         local_options: local_options)
-        end
-      else
-        object_to_hash(prepared_object,
-                       view_name: view_name,
-                       local_options: local_options)
-      end
+      data = prepare_data(object, view_name, local_options)
+      prepend_root_and_meta(data, root, meta)
     end
 
     # Specify one or more field/method names to be included for serialization.
@@ -325,68 +330,5 @@ module Blueprinter
       yield
       @current_view = view_collection[:default]
     end
-
-    # Begin private class methods
-    def self.prepare_for_render(object, options)
-      view_name = options.delete(:view) || :default
-      prepare(object, view_name: view_name, local_options: options)
-    end
-    private_class_method :prepare_for_render
-
-    def self.inherited(subclass)
-      subclass.send(:view_collection).inherit(view_collection)
-    end
-    private_class_method :inherited
-
-    def self.object_to_hash(object, view_name:, local_options:)
-      view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-        next if field.skip?(object, local_options)
-        hash[field.name] = field.extract(object, local_options)
-      end
-    end
-    private_class_method :object_to_hash
-
-    def self.include_associations(object, view_name:)
-      unless defined?(ActiveRecord::Base) &&
-          object.is_a?(ActiveRecord::Base) &&
-          object.respond_to?(:klass)
-        return object
-      end
-      # TODO: Do we need to support more than `eager_load` ?
-      fields_to_include = associations(view).select { |a|
-        a.options[:include] != false
-      }.map(&:method)
-      if !fields_to_include.empty?
-        object.eager_load(*fields_to_include)
-      else
-        object
-      end
-    end
-    private_class_method :include_associations
-
-    def self.jsonify(blob)
-      Blueprinter.configuration.jsonify(blob)
-    end
-    private_class_method :jsonify
-
-    def self.current_view
-      @current_view ||= view_collection[:default]
-    end
-    private_class_method :current_view
-
-    def self.view_collection
-      @view_collection ||= ViewCollection.new
-    end
-    private_class_method :view_collection
-
-    def self.array_like?(object)
-      object.is_a?(Array) || active_record_relation?(object)
-    end
-    private_class_method :array_like?
-
-    def self.associations(view_name = :default)
-      view_collection.fields_for(view_name).select { |f| f.options[:association] }
-    end
-    private_class_method :associations
   end
 end

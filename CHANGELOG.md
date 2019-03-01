@@ -1,3 +1,8 @@
+## 0.13.0  - 2019/02/07
+
+* 🚀 [FEATURE] Added an option to render with a root key. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).
+* 🚀 [FEATURE] Added an option to render with a top-level meta attribute. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).
+
 ## 0.12.1  - 2019/1/24
 
 * 🐛 [BUGFIX] Fix boolean `false` values getting serialized as `null`. Please see PR [#132](https://github.com/procore/blueprinter/pull/132).

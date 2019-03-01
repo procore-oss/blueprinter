@@ -14,8 +14,8 @@ module Blueprinter
       def prepare_for_render(object, options)
         view_name = options.delete(:view) || :default
         root = options.delete(:root)
-        symbol_or_string_or_nil?(root, :root)
         meta = options.delete(:meta)
+        validate_root_and_meta(root, meta)
         prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
       end
 
@@ -51,12 +51,14 @@ module Blueprinter
         end
       end
 
-      def symbol_or_string_or_nil?(obj, key)
-        case obj
-        when String, Symbol, NilClass
+      def validate_root_and_meta(root, meta)
+        case root
+        when String, Symbol
           # no-op
+        when NilClass
+          raise BlueprinterError, "meta requires a root to be passed" if meta
         else
-          raise BlueprinterError, "#{key} should be one of String, Symbol, NilClass"
+          raise BlueprinterError, "root should be one of String, Symbol, NilClass"
         end
       end
 

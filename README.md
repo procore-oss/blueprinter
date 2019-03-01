@@ -128,8 +128,8 @@ Output:
 }
 ```
 
-### Root Elements
-You can also optionally pass in a root element to wrap your resulting json in:
+### Root
+You can also optionally pass in a root key to wrap your resulting json in:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -197,7 +197,7 @@ Output:
   }
 }
 ```
-Note: for meta attributes, a [root](#root-elements) attribute is mandatory.
+Note: For meta attributes, a [root](#root) is mandatory.
 
 ### Exclude fields
 You can specifically choose to exclude certain fields for specific views

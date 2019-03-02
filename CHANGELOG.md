@@ -1,3 +1,6 @@
+## 0.13.1  - 2019/03/02
+* 💅 [MAINTENANCE | ENHANCEMENT] Cleaning up the `include_associations` section. This is not a documented/supported feature and is calling `respond_to?(:klass)` on every object passed to blueprinter. [#139](https://github.com/procore/blueprinter/pull/139). Thanks to [@ritikesh](https://github.com/ritikesh).
+
 ## 0.13.0  - 2019/02/07
 
 * 🚀 [FEATURE] Added an option to render with a root key. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).

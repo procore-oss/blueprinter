@@ -20,15 +20,14 @@ module Blueprinter
       end
 
       def prepare_data(object, view_name, local_options)
-        prepared_object = include_associations(object, view_name: view_name)
         if array_like?(object)
-          prepared_object.map do |obj|
+          object.map do |obj|
             object_to_hash(obj,
                           view_name: view_name,
                           local_options: local_options)
           end
         else
-          object_to_hash(prepared_object,
+          object_to_hash(object,
                         view_name: view_name,
                         local_options: local_options)
         end
@@ -59,23 +58,6 @@ module Blueprinter
           raise BlueprinterError, "meta requires a root to be passed" if meta
         else
           raise BlueprinterError, "root should be one of String, Symbol, NilClass"
-        end
-      end
-
-      def include_associations(object, view_name:)
-        unless defined?(ActiveRecord::Base) &&
-            object.is_a?(ActiveRecord::Base) &&
-            object.respond_to?(:klass)
-          return object
-        end
-        # TODO: Do we need to support more than `eager_load` ?
-        fields_to_include = associations(view).select { |a|
-          a.options[:include] != false
-        }.map(&:method)
-        if !fields_to_include.empty?
-          object.eager_load(*fields_to_include)
-        else
-          object
         end
       end
 

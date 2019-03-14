@@ -1,3 +1,6 @@
+## 0.13.2  - 2019/03/14
+* 🐛 [BUGFIX] Replacing use of rails-specific method `Hash::except` so that Blueprinter continues to work in non-Rails environments. [#140](https://github.com/procore/blueprinter/pull/140). Thanks to [@checkbutton](https://github.com/checkbutton).
+
 ## 0.13.1  - 2019/03/02
 * 💅 [MAINTENANCE | ENHANCEMENT] Cleaning up the `include_associations` section. This is not a documented/supported feature and is calling `respond_to?(:klass)` on every object passed to blueprinter. [#139](https://github.com/procore/blueprinter/pull/139). Thanks to [@ritikesh](https://github.com/ritikesh).
 

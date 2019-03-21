@@ -325,7 +325,7 @@ module Blueprinter
     #     fields :birthday,:joining_anniversary
     #     excludes :position,:address
     #   end
-    #   #=> [:company, :birthday]
+    #   => [:name, :company, :contact, :birthday, :joining_anniversary]
     #
     # @return [Array<Symbol>] an array of field names
     

@@ -309,6 +309,29 @@ module Blueprinter
     def self.exclude(field_name)
       current_view.exclude_field(field_name)
     end
+    
+    # When mixing multiple views under a single view, some fields may required to be excluded from
+    # current view
+    # 
+    # @param [Array<Symbol>] the fields to exclude from the current view.
+    #
+    # @example Excluding mutiple fields from being included into the current view.
+    #   view :normal do
+    #     fields :name,:address,:position, 
+    #           :company, :contact
+    #   end
+    #   view :special do
+    #     include_view :normal
+    #     fields :birthday,:joining_anniversary
+    #     excludes :position,:address
+    #   end
+    #   #=> [:company, :birthday]
+    #
+    # @return [Array<Symbol>] an array of field names
+    
+    def self.excludes(*field_names)
+      current_view.exclude_fields(field_names)
+    end
 
     # Specify a view and the fields it should have.
     # It accepts a view name and a block. The block should specify the fields.

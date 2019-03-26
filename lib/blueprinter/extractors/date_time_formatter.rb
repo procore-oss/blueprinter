@@ -13,8 +13,11 @@ module Blueprinter
       Blueprinter.configuration.utc ? value.utc : value
     end
 
-    def format_datetime(value, format)
+    def format_datetime(value, options)
+      return nil if value.nil?
       options.key?(:datetime_format) ? value.strftime(options[:datetime_format]) : value
+    rescue NoMethodError
+      raise BlueprinterError, 'Cannot format invalid DateTime object'
     end
   end
 end

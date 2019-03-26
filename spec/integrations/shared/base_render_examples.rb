@@ -69,7 +69,7 @@ shared_examples 'Base::render' do
     after { reset_blueprinter_config! }
     
     let(:result) do
-      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null,"created_at":"+00:00"}'
+      '{"id":' + obj_id + ',"birthday":"03/04/1994","created_at":"+00:00","deleted_at":null}'
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do

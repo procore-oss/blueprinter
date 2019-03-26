@@ -1,5 +1,5 @@
 ## 0.14.0  - 2019/03/26
-* 🚀 [FEATURE] Add ability to pass in `datetime_format` field option as either a string representing the strptime format, or a Proc which takes in the Date or DateTime object and returns the formatted date. [#140](https://github.com/procore/blueprinter/pull/142). Thanks to [@mcclayton](https://github.com/mcclayton).
+* 🚀 [FEATURE] Add ability to pass in `datetime_format` field option as either a string representing the strptime format, or a Proc which takes in the Date or DateTime object and returns the formatted date. [#142](https://github.com/procore/blueprinter/pull/142). Thanks to [@mcclayton](https://github.com/mcclayton).
 
 ## 0.13.2  - 2019/03/14
 * 🐛 [BUGFIX] Replacing use of rails-specific method `Hash::except` so that Blueprinter continues to work in non-Rails environments. [#140](https://github.com/procore/blueprinter/pull/140). Thanks to [@checkbutton](https://github.com/checkbutton).

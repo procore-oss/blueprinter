@@ -64,28 +64,22 @@ shared_examples 'Base::render' do
     it('returns json derived from a custom extractor') { should eq(result) }
   end
 
-  context 'Given blueprint has ::field with a :datetime_format argument' do
+  context 'Given blueprint has ::field with a :datetime_format argument and UTC enabled' do
+    before { Blueprinter.configure { |config| config.utc = true } }
+    after { reset_blueprinter_config! }
+    
     let(:result) do
-      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null}'
+      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null,"created_at":"+00:00"}'
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :birthday,   datetime_format: "%m/%d/%Y"
         field :deleted_at, datetime_format: '%FT%T%:z'
+        field :created_at, datetime_format: '%:z'
       end
     end
     it('returns json with a formatted field') { should eq(result) }
-  end
-
-  context 'Given blueprint has a :datetime_format argument on an invalid ::field' do
-    let(:blueprint) do
-      Class.new(Blueprinter::Base) do
-        identifier :id
-        field :first_name, datetime_format: "%m/%d/%Y"
-      end
-    end
-    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
   end
 
   context "Given blueprint has ::field with nil value" do

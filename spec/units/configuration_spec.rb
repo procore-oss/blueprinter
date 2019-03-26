@@ -52,6 +52,11 @@ describe 'Blueprinter' do
       Blueprinter.configure { |config| config.association_default = {} }
       expect(Blueprinter.configuration.association_default).to eq({})
     end
+
+    it 'should set the `utc` option' do
+      Blueprinter.configure { |config| config.utc = true }
+      expect(Blueprinter.configuration.utc).to eq(true)
+    end
   end
 
   describe "::Configuration" do

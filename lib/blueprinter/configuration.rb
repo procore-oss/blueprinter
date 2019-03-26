@@ -12,6 +12,7 @@ module Blueprinter
       @method = :generate
       @sort_fields_by = :name_asc
       @unless = nil
+      @utc = false
     end
 
     def jsonify(blob)

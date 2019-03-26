@@ -8,6 +8,8 @@ require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
 require_relative 'formatters/date_time_formatter'
 require_relative 'field'
+require_relative 'formatter'
+require_relative 'formatters/datetime_formatter'
 require_relative 'helpers/base_helpers'
 require_relative 'view'
 require_relative 'view_collection'
@@ -71,8 +73,11 @@ module Blueprinter
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
-    # @option options [String] :datetime_format Format Date or DateTime object
-    #   with given strftime formatting
+    # @option options [String,Proc] :datetime_format Format Date or DateTime object
+    #   If the option provided is a String, the object will be formatted with given strftime
+    #   formatting.
+    #   If this option is a Proc, the object will be formatted by calling the provided Proc
+    #   on the Date/DateTime object.
     # @option options [Symbol,Proc] :if Specifies a method, proc or string to
     #   call to determine if the field should be included (e.g.
     #   `if: :include_first_name?, or if: Proc.new { |user, options| options[:current_user] == user }).
@@ -171,7 +176,7 @@ module Blueprinter
     # @option options [Symbol|String] :root Defaults to nil.
     #   Render the json/hash with a root key if provided.
     # @option options [Any] :meta Defaults to nil.
-    #   Render the json/hash with a meta attribute with provided value 
+    #   Render the json/hash with a meta attribute with provided value
     #   if both root and meta keys are provided in the options hash.
     #
     # @example Generating JSON with an extended view
@@ -196,7 +201,7 @@ module Blueprinter
     # @option options [Symbol|String] :root Defaults to nil.
     #   Render the json/hash with a root key if provided.
     # @option options [Any] :meta Defaults to nil.
-    #   Render the json/hash with a meta attribute with provided value 
+    #   Render the json/hash with a meta attribute with provided value
     #   if both root and meta keys are provided in the options hash.
     #
     # @example Generating a hash with an extended view
@@ -221,7 +226,7 @@ module Blueprinter
     # @option options [Symbol|String] :root Defaults to nil.
     #   Render the json/hash with a root key if provided.
     # @option options [Any] :meta Defaults to nil.
-    #   Render the json/hash with a meta attribute with provided value 
+    #   Render the json/hash with a meta attribute with provided value
     #   if both root and meta keys are provided in the options hash.
     #
     # @example Generating a hash with an extended view

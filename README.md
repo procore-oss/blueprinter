@@ -148,7 +148,7 @@ puts UserBlueprint.render(user, view: :normal, root: :user)
 
 Output:
 ```json
-{ 
+{
   "user": {
     "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
     "first_name": "John",
@@ -182,7 +182,7 @@ puts json
 
 Output:
 ```json
-{ 
+{
   "user": {
     "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
     "first_name": "John",
@@ -506,9 +506,12 @@ end
 The field-level setting overrides the global config setting (for the field) if both are set.
 
 ### Custom formatting for dates and times
-To define a custom format for a Date or DateTime field, include the option `datetime_format` with the associated `strptime` format.
+To define a custom format for a Date or DateTime field, include the option `datetime_format`.
+This field option can be either a string representing the associated `strptime` format,
+or a Proc which receives the original Date/DateTime object and returns the formatted value.
+When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
 
-Usage:
+Usage (String Option):
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :name
@@ -521,6 +524,22 @@ Output:
 {
   "name": "John Doe",
   "birthday": "03/04/1994"
+}
+```
+
+Usage (Proc Option):
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :name
+  field :birthday, datetime_format: ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
+end
+```
+
+Output:
+```json
+{
+  "name": "John Doe",
+  "birthday": 762739200
 }
 ```
 

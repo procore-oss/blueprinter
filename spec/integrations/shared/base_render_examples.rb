@@ -69,14 +69,13 @@ shared_examples 'Base::render' do
     after { reset_blueprinter_config! }
     
     let(:result) do
-      '{"id":' + obj_id + ',"birthday":"03/04/1994","created_at":"+00:00","deleted_at":null}'
+      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null}'
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :birthday
         field :deleted_at, datetime_format: '%FT%T%:z'
-        field :created_at, datetime_format: '%:z'
       end
     end
     it('returns json with a formatted field') { should eq(result) }

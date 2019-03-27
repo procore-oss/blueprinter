@@ -21,7 +21,6 @@ describe '::Base' do
       company: 'Procore',
       birthday: Date.new(1994, 3, 4),
       deleted_at: nil,
-      created_at: DateTime.new(1994, 3, 4),
       active: false
     }
   end

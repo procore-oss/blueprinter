@@ -53,9 +53,9 @@ describe 'Blueprinter' do
       expect(Blueprinter.configuration.association_default).to eq({})
     end
 
-    it 'should set the `utc` option' do
-      Blueprinter.configure { |config| config.utc = true }
-      expect(Blueprinter.configuration.utc).to eq(true)
+    it 'should set the `datetime_format` option' do
+      Blueprinter.configure { |config| config.datetime_format = "%m/%d/%Y" }
+      expect(Blueprinter.configuration.datetime_format).to eq("%m/%d/%Y")
     end
   end
 

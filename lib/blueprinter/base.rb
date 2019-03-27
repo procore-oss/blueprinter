@@ -18,7 +18,7 @@ module Blueprinter
     # Specify a field or method name used as an identifier. Usually, this is
     # something like :id
     #
-    # Note: identifiers are always rendered and considerered their own view,
+    # Note: identifiers are always rendered and considered their own view,
     # similar to the :default view.
     #
     # @param method [Symbol] the method or field used as an identifier that you

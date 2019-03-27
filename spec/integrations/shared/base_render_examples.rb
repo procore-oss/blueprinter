@@ -64,7 +64,7 @@ shared_examples 'Base::render' do
     it('returns json derived from a custom extractor') { should eq(result) }
   end
 
-  context 'Given blueprint has ::field with a :datetime_format argument and UTC enabled' do
+  context 'Given blueprint has ::fields with :datetime_format argument and global datetime_format' do
     before { Blueprinter.configure { |config| config.datetime_format = "%m/%d/%Y" } }
     after { reset_blueprinter_config! }
     

@@ -503,7 +503,7 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
-The field-level setting overrides the global config setting (for the field) if both are set.
+_NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
 ### Custom formatting for dates and times
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
@@ -553,6 +553,8 @@ Output:
   "birthday": 762739200
 }
 ```
+
+_NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
 ## Installation
 Add this line to your application's Gemfile:

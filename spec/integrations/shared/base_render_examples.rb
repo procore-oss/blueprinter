@@ -88,7 +88,7 @@ shared_examples 'Base::render' do
         field :first_name, datetime_format: "%m/%d/%Y"
       end
     end
-    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
   end
 
   context 'Given blueprint has ::field with a Proc :datetime_format argument' do
@@ -109,10 +109,10 @@ shared_examples 'Base::render' do
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
-        field :first_name, datetime_format: -> datetime { datetime.strftime("%s") }
+        field :first_name, datetime_format: -> datetime { datetime.capitalize }
       end
     end
-    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
   end
 
   context 'Given blueprint has a Proc :datetime_format which fails to process date' do
@@ -132,7 +132,7 @@ shared_examples 'Base::render' do
         field :birthday, datetime_format: :invalid_symbol_format
       end
     end
-    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
   end
 
   context "Given blueprint has ::field with nil value" do

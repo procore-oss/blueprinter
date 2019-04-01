@@ -1,3 +1,6 @@
+## 0.14.0  - 2019/04/01
+* 🚀 [FEATURE] Added a global `datetime_format` option. [#135](https://github.com/procore/blueprinter/pull/143). Thanks to [@ritikesh](https://github.com/ritikesh).
+
 ## 0.13.2  - 2019/03/14
 * 🐛 [BUGFIX] Replacing use of rails-specific method `Hash::except` so that Blueprinter continues to work in non-Rails environments. [#140](https://github.com/procore/blueprinter/pull/140). Thanks to [@checkbutton](https://github.com/checkbutton).
 

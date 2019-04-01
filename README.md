@@ -511,6 +511,17 @@ This field option can be either a string representing the associated `strptime` 
 or a Proc which receives the original Date/DateTime object and returns the formatted value.
 When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
 
+
+#### Global Config Setting
+If a global datetime_format is set (either as a string format or a Proc), this option will be
+invoked and used to format all fields that respond to `strptime`.
+```ruby
+Blueprinter.configure do |config|
+  config.datetime_format = "%m/%d/%Y"
+end
+```
+
+#### Field-level Setting
 Usage (String Option):
 ```ruby
 class UserBlueprint < Blueprinter::Base

@@ -21,14 +21,14 @@ describe '::DateTimeFormatter' do
       end
 
       context 'and given invalid datetime' do
-        it 'raises a BlueprinterError' do
-          expect{formatter.format(invalid_date, field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(invalid_date, field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
 
       context 'and given invalid format' do
-        it 'raises a BlueprinterError' do
-          expect{formatter.format(valid_date, invalid_field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(valid_date, invalid_field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
     end
@@ -50,14 +50,14 @@ describe '::DateTimeFormatter' do
       end
 
       context 'and given invalid datetime' do
-        it 'raises original error from Proc' do
-          expect{formatter.format(invalid_date, field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(invalid_date, field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
 
       context 'and given invalid format' do
-        it 'raises a BlueprinterError' do
-          expect{formatter.format(valid_date, invalid_field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(valid_date, invalid_field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
     end
@@ -66,20 +66,20 @@ describe '::DateTimeFormatter' do
       let(:field_options) { { datetime_format: 5 } }
 
       context 'and given valid datetime' do
-        it 'raises a BlueprinterError' do
-          expect{formatter.format(valid_date, field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(valid_date, field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
 
       context 'and given invalid datetime' do
-        it 'raises a BlueprinterError' do
-          expect{formatter.format(invalid_date, field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(invalid_date, field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
 
       context 'and given invalid format' do
-        it 'raises a BlueprinterError' do
-          expect{formatter.format(invalid_date, invalid_field_options)}.to raise_error(Blueprinter::BlueprinterError)
+        it 'raises an InvalidDateTimeFormatterError' do
+          expect{formatter.format(invalid_date, invalid_field_options)}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError)
         end
       end
     end

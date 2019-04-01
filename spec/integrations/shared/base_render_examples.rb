@@ -81,15 +81,14 @@ shared_examples 'Base::render' do
     it('returns json with a formatted field') { should eq(result) }
   end
 
-  context 'Given blueprint has a :datetime_format argument on a non-date ::field' do
-    let(:result) { '{"id":' + obj_id + ',"first_name":"Meg"}' }
+  context 'Given blueprint has a :datetime_format argument on an invalid ::field' do
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :first_name, datetime_format: "%m/%d/%Y"
       end
     end
-    it('does not apply the date format') { should eq(result) }
+    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
   end
 
   context "Given blueprint has ::field with nil value" do

@@ -517,7 +517,7 @@ If a global datetime_format is set (either as a string format or a Proc), this o
 invoked and used to format all fields that respond to `strptime`.
 ```ruby
 Blueprinter.configure do |config|
-  config.datetime_format = "%m/%d/%Y"
+  config.datetime_format = ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
 end
 ```
 

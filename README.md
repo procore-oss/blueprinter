@@ -197,7 +197,7 @@ Output:
   }
 }
 ```
-Note: For meta attributes, a [root](#root) is mandatory.
+_NOTE:_ For meta attributes, a [root](#root) is mandatory.
 
 ### Exclude fields
 You can specifically choose to exclude certain fields for specific views
@@ -324,7 +324,7 @@ class TaskBlueprint < Blueprinter::Base
   end
 end
 ```
-Note: `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
+_NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
 ### Defining a field directly in the Blueprint
 
@@ -635,7 +635,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-Note: You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
+_NOTE:_ You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
 
 ## How to Document
 

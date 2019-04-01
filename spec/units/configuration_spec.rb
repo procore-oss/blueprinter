@@ -52,6 +52,11 @@ describe 'Blueprinter' do
       Blueprinter.configure { |config| config.association_default = {} }
       expect(Blueprinter.configuration.association_default).to eq({})
     end
+
+    it 'should set the `datetime_format` option' do
+      Blueprinter.configure { |config| config.datetime_format = "%m/%d/%Y" }
+      expect(Blueprinter.configuration.datetime_format).to eq("%m/%d/%Y")
+    end
   end
 
   describe "::Configuration" do

@@ -507,7 +507,7 @@ The field-level setting overrides the global config setting (for the field) if b
 
 ### Custom formatting for dates and times
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
-This field option can be either a string representing the associated `strptime` format,
+This global or field-level option can be either a string representing the associated `strptime` format,
 or a Proc which receives the original Date/DateTime object and returns the formatted value.
 When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
 

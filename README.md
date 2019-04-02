@@ -45,6 +45,7 @@ And the output would look like:
   "last_name": "Doe"
 }
 ```
+
 ---
 </details>
 
@@ -78,6 +79,7 @@ This will result in JSON that looks something like this:
   }
 ]
 ```
+
 ---
 </details>
 
@@ -108,6 +110,7 @@ This will result in JSON that looks something like this:
   "projects": []
 }
 ```
+
 ---
 </details>
 
@@ -150,6 +153,7 @@ Output:
   "login": "john.doe@some.fake.email.domain"
 }
 ```
+
 ---
 </details>
 
@@ -187,6 +191,7 @@ Output:
   }
 }
 ```
+
 ---
 </details>
 
@@ -235,6 +240,7 @@ Output:
 }
 ```
 _NOTE:_ For meta attributes, a [root](#root) is mandatory.
+
 ---
 </details>
 
@@ -276,6 +282,7 @@ Output:
   "login": "john.doe@some.fake.email.domain"
 }
 ```
+
 ---
 </details>
 
@@ -327,6 +334,7 @@ Output:
   ]
 }
 ```
+
 ---
 </details>
 
@@ -357,6 +365,7 @@ class UserBlueprint < Blueprinter::Base
   end
 end
 ```
+
 ---
 </details>
 
@@ -390,6 +399,7 @@ class TaskBlueprint < Blueprinter::Base
 end
 ```
 _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
+
 ---
 </details>
 
@@ -424,6 +434,7 @@ Output:
   "full_name": "Mr John Doe"
 }
 ```
+
 ---
 </details>
 
@@ -456,6 +467,7 @@ Output:
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
 }
 ```
+
 ---
 </details>
 
@@ -500,6 +512,7 @@ Output:
   ]
 }
 ```
+
 ---
 </details>
 
@@ -534,6 +547,7 @@ Output:
   "company_name": "My Company LLC"
 }
 ```
+
 ---
 </details>
 
@@ -563,6 +577,7 @@ end
 ```
 
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
+
 ---
 </details>
 
@@ -621,6 +636,7 @@ Output:
 ```
 
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
+
 ---
 </details>
 
@@ -656,6 +672,7 @@ Output:
   "birthday": "03/04/1994"
 }
 ```
+
 ---
 </details>
 
@@ -681,6 +698,7 @@ Output:
   company_name: "My Company LLC"
 }
 ```
+
 ---
 </details>
 
@@ -706,6 +724,7 @@ Output:
   "company_name" => "My Company LLC"
 }
 ```
+
 ---
 </details>
 

@@ -14,7 +14,7 @@ Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 
 ## Usage
 <details>
-<summary>Basic</summary>
+<summary>_Basic_</summary>
 
 If you have an object you would like serialized, simply create a blueprint. Say, for example, you have a User record with the following attributes `[:uuid, :email, :first_name, :last_name, :password, :address]`.
 
@@ -45,8 +45,10 @@ And the output would look like:
 ```
 </details>
 
+---
+
 <details>
-<summary>Collections</summary>
+<summary>_Collections_</summary>
 
 You can also pass a collection object or an array to the render method.
 
@@ -74,8 +76,10 @@ This will result in JSON that looks something like this:
 ```
 </details>
 
+---
+
 <details>
-<summary>Renaming</summary>
+<summary>_Renaming_</summary>
 You can rename the resulting JSON keys in both fields and associations by using the `name` option.
 
 ```ruby
@@ -99,8 +103,10 @@ This will result in JSON that looks something like this:
 ```
 </details>
 
+---
+
 <details>
-<summary>Views</summary>
+<summary>_Views_</summary>
 
 You may define different outputs by utilizing views:
 ```ruby
@@ -137,8 +143,10 @@ Output:
 ```
 </details>
 
+---
+
 <details>
-<summary>Root</summary>
+<summary>_Root_</summary>
 
 You can also optionally pass in a root key to wrap your resulting json in:
 ```ruby
@@ -170,8 +178,10 @@ Output:
 ```
 </details>
 
+---
+
 <details>
-<summary>Meta Attributes</summary>
+<summary>_Meta Attributes_</summary>
 
 You can additionally add meta-data to the json as well:
 ```ruby
@@ -214,8 +224,10 @@ Output:
 _NOTE:_ For meta attributes, a [root](#root) is mandatory.
 </details>
 
+---
+
 <details>
-<summary>Exclude Fields</summary>
+<summary>_Exclude Fields_</summary>
 
 You can specifically choose to exclude certain fields for specific views
 ```ruby
@@ -251,8 +263,10 @@ Output:
 ```
 </details>
 
+---
+
 <details>
-<summary>Associations</summary>
+<summary>_Associations_</summary>
 
 You may include associated objects. Say for example, a user has projects:
 ```ruby
@@ -298,8 +312,10 @@ Output:
 ```
 </details>
 
+---
+
 <details>
-<summary>Default Association/Field Option</summary>
+<summary>_Default Association/Field Option_</summary>
 
 By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
 
@@ -324,8 +340,10 @@ end
 ```
 </details>
 
+---
+
 <details>
-<summary>Supporting Dynamic Blueprints for Associations</summary>
+<summary>_Supporting Dynamic Blueprints for Associations_</summary>
 
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
 ```ruby
@@ -353,8 +371,10 @@ end
 _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 </details>
 
+---
+
 <details>
-<summary>Defining a field directly in the Blueprint</summary>
+<summary>_Defining a field directly in the Blueprint_</summary>
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
 
@@ -383,8 +403,10 @@ Output:
 ```
 </details>
 
+---
+
 <details>
-<summary>Defining an identifier directly in the Blueprint</summary>
+<summary>_Defining an identifier directly in the Blueprint_</summary>
 
 You can also pass a block to an identifier:
 
@@ -411,8 +433,10 @@ Output:
 ```
 </details>
 
+---
+
 <details>
-<summary>Defining an association directly in the Blueprint</summary>
+<summary>_Defining an association directly in the Blueprint_</summary>
 
 You can also pass a block to an association:
 
@@ -451,9 +475,10 @@ Output:
 ```
 </details>
 
+---
 
 <details>
-<summary>Passing additional properties to `render`</summary>
+<summary>_Passing additional properties to `render`_</summary>
 
 `render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:
 
@@ -482,6 +507,7 @@ Output:
 ```
 </details>
 
+---
 
 <details>
 <summary>`render_as_hash`</summary>
@@ -504,6 +530,7 @@ Output:
 ```
 </details>
 
+---
 
 <details>
 <summary>`render_as_json`</summary>
@@ -526,9 +553,10 @@ Output:
 ```
 </details>
 
+---
 
 <details>
-<summary>Conditional Fields</summary>
+<summary>_Conditional Fields_</summary>
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
 
@@ -552,9 +580,10 @@ end
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 </details>
 
+---
 
 <details>
-<summary>Custom Formatting for Dates and Times</summary>
+<summary>_Custom Formatting for Dates and Times_</summary>
 
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
 This global or field-level option can be either a string representing the associated `strptime` format,

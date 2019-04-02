@@ -15,6 +15,7 @@ Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 ## Usage
 <details>
 <summary>Basic</summary>
+
 ---
 
 If you have an object you would like serialized, simply create a blueprint. Say, for example, you have a User record with the following attributes `[:uuid, :email, :first_name, :last_name, :password, :address]`.
@@ -50,6 +51,7 @@ And the output would look like:
 
 <details>
 <summary>Collections</summary>
+
 ---
 
 You can also pass a collection object or an array to the render method.
@@ -82,6 +84,7 @@ This will result in JSON that looks something like this:
 
 <details>
 <summary>Renaming</summary>
+
 ---
 
 You can rename the resulting JSON keys in both fields and associations by using the `name` option.
@@ -111,6 +114,7 @@ This will result in JSON that looks something like this:
 
 <details>
 <summary>Views</summary>
+
 ---
 
 You may define different outputs by utilizing views:
@@ -152,6 +156,7 @@ Output:
 
 <details>
 <summary>Root</summary>
+
 ---
 
 You can also optionally pass in a root key to wrap your resulting json in:
@@ -188,6 +193,7 @@ Output:
 
 <details>
 <summary>Meta Attributes</summary>
+
 ---
 
 You can additionally add meta-data to the json as well:
@@ -235,6 +241,7 @@ _NOTE:_ For meta attributes, a [root](#root) is mandatory.
 
 <details>
 <summary>Exclude Fields</summary>
+
 ---
 
 You can specifically choose to exclude certain fields for specific views
@@ -275,6 +282,7 @@ Output:
 
 <details>
 <summary>Associations</summary>
+
 ---
 
 You may include associated objects. Say for example, a user has projects:
@@ -325,6 +333,7 @@ Output:
 
 <details>
 <summary>Default Association/Field Option</summary>
+
 ---
 
 By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
@@ -354,6 +363,7 @@ end
 
 <details>
 <summary>Supporting Dynamic Blueprints For Associations</summary>
+
 ---
 
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
@@ -386,6 +396,7 @@ _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `
 
 <details>
 <summary>Defining A Field Directly In The Blueprint</summary>
+
 ---
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
@@ -419,6 +430,7 @@ Output:
 
 <details>
 <summary>Defining An Identifier Directly In The Blueprint</summary>
+
 ---
 
 You can also pass a block to an identifier:
@@ -450,6 +462,7 @@ Output:
 
 <details>
 <summary>Defining An Association Directly In The Blueprint</summary>
+
 ---
 
 You can also pass a block to an association:
@@ -493,6 +506,7 @@ Output:
 
 <details>
 <summary>Passing Additional Properties To #render</summary>
+
 ---
 
 `render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:
@@ -526,6 +540,7 @@ Output:
 
 <details>
 <summary>Conditional Fields</summary>
+
 ---
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
@@ -554,6 +569,7 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 
 <details>
 <summary>Custom Formatting for Dates and Times</summary>
+
 ---
 
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
@@ -611,6 +627,7 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 
 <details>
 <summary>Sorting Fields</summary>
+
 ---
 
 By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, use the below configuration option.
@@ -645,6 +662,7 @@ Output:
 
 <details>
 <summary>render_as_hash</summary>
+
 ---
 
 Same as `render`, returns a Ruby Hash.
@@ -669,6 +687,7 @@ Output:
 
 <details>
 <summary>render_as_json</summary>
+
 ---
 
 Same as `render`, returns a Ruby Hash JSONified. This will call JSONify all keys and values.

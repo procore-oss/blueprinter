@@ -14,7 +14,7 @@ Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 
 ## Usage
 <details>
-<summary>_Basic_</summary>
+<summary>Basic</summary>
 
 If you have an object you would like serialized, simply create a blueprint. Say, for example, you have a User record with the following attributes `[:uuid, :email, :first_name, :last_name, :password, :address]`.
 
@@ -45,7 +45,6 @@ And the output would look like:
 ```
 </details>
 
----
 
 <details>
 <summary>_Collections_</summary>
@@ -76,10 +75,9 @@ This will result in JSON that looks something like this:
 ```
 </details>
 
----
 
 <details>
-<summary>_Renaming_</summary>
+<summary>Renaming</summary>
 You can rename the resulting JSON keys in both fields and associations by using the `name` option.
 
 ```ruby
@@ -103,10 +101,9 @@ This will result in JSON that looks something like this:
 ```
 </details>
 
----
 
 <details>
-<summary>_Views_</summary>
+<summary>Views</summary>
 
 You may define different outputs by utilizing views:
 ```ruby
@@ -143,10 +140,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Root_</summary>
+<summary>Root</summary>
 
 You can also optionally pass in a root key to wrap your resulting json in:
 ```ruby
@@ -178,10 +174,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Meta Attributes_</summary>
+<summary>Meta Attributes</summary>
 
 You can additionally add meta-data to the json as well:
 ```ruby
@@ -224,10 +219,9 @@ Output:
 _NOTE:_ For meta attributes, a [root](#root) is mandatory.
 </details>
 
----
 
 <details>
-<summary>_Exclude Fields_</summary>
+<summary>Exclude Fields</summary>
 
 You can specifically choose to exclude certain fields for specific views
 ```ruby
@@ -263,10 +257,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Associations_</summary>
+<summary>Associations</summary>
 
 You may include associated objects. Say for example, a user has projects:
 ```ruby
@@ -312,10 +305,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Default Association/Field Option_</summary>
+<summary>Default Association/Field Option</summary>
 
 By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
 
@@ -340,10 +332,9 @@ end
 ```
 </details>
 
----
 
 <details>
-<summary>_Supporting Dynamic Blueprints for Associations_</summary>
+<summary>Supporting Dynamic Blueprints for Associations</summary>
 
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
 ```ruby
@@ -371,10 +362,9 @@ end
 _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 </details>
 
----
 
 <details>
-<summary>_Defining a field directly in the Blueprint_</summary>
+<summary>Defining a field directly in the Blueprint</summary>
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
 
@@ -403,10 +393,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Defining an identifier directly in the Blueprint_</summary>
+<summary>Defining an identifier directly in the Blueprint</summary>
 
 You can also pass a block to an identifier:
 
@@ -433,10 +422,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Defining an association directly in the Blueprint_</summary>
+<summary>Defining an association directly in the Blueprint</summary>
 
 You can also pass a block to an association:
 
@@ -475,10 +463,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Passing additional properties to `render`_</summary>
+<summary>Passing additional properties to `render`</summary>
 
 `render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:
 
@@ -507,7 +494,6 @@ Output:
 ```
 </details>
 
----
 
 <details>
 <summary>`render_as_hash`</summary>
@@ -530,7 +516,6 @@ Output:
 ```
 </details>
 
----
 
 <details>
 <summary>`render_as_json`</summary>
@@ -553,10 +538,9 @@ Output:
 ```
 </details>
 
----
 
 <details>
-<summary>_Conditional Fields_</summary>
+<summary>Conditional Fields</summary>
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
 
@@ -580,10 +564,9 @@ end
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 </details>
 
----
 
 <details>
-<summary>_Custom Formatting for Dates and Times_</summary>
+<summary>Custom Formatting for Dates and Times</summary>
 
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
 This global or field-level option can be either a string representing the associated `strptime` format,
@@ -636,26 +619,10 @@ Output:
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 </details>
 
-## Installation
-Add this line to your application's Gemfile:
 
-```ruby
-gem 'blueprinter'
-```
+<details>
+<summary>Sorting</summary>
 
-And then execute:
-```bash
-$ bundle
-```
-
-Or install it yourself as:
-```bash
-$ gem install blueprinter
-```
-
-You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
-
-## Sorting
 By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, use the below configuration option.
 
 Usage:
@@ -682,6 +649,27 @@ Output:
   "birthday": "03/04/1994"
 }
 ```
+</details>
+
+
+## Installation
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'blueprinter'
+```
+
+And then execute:
+```bash
+$ bundle
+```
+
+Or install it yourself as:
+```bash
+$ gem install blueprinter
+```
+
+You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
 
 ## OJ
 

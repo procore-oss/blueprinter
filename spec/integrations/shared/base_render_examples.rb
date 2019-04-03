@@ -65,11 +65,11 @@ shared_examples 'Base::render' do
   end
 
   context 'Given blueprint has ::fields with :datetime_format argument and global datetime_format' do
-    before { Blueprinter.configure { |config| config.datetime_format = "%m/%d/%Y" } }
+    before { Blueprinter.configure { |config| config.datetime_format = -> datetime { datetime.strftime("%s").to_i } } }
     after { reset_blueprinter_config! }
-    
+
     let(:result) do
-      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null}'
+      '{"id":' + obj_id + ',"birthday":762739200,"deleted_at":null}'
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
@@ -81,14 +81,58 @@ shared_examples 'Base::render' do
     it('returns json with a formatted field') { should eq(result) }
   end
 
-  context 'Given blueprint has a :datetime_format argument on an invalid ::field' do
+  context 'Given blueprint has a string :datetime_format argument on an invalid ::field' do
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :first_name, datetime_format: "%m/%d/%Y"
       end
     end
-    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
+  end
+
+  context 'Given blueprint has ::field with a Proc :datetime_format argument' do
+    let(:result) do
+      '{"id":' + obj_id + ',"birthday":762739200,"deleted_at":null}'
+    end
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday,   datetime_format: -> datetime { datetime.strftime("%s").to_i }
+        field :deleted_at, datetime_format: -> datetime { datetime.strftime("%s").to_i }
+      end
+    end
+    it('returns json with a formatted field') { should eq(result) }
+  end
+
+  context 'Given blueprint has a Proc :datetime_format argument on an invalid ::field' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :first_name, datetime_format: -> datetime { datetime.capitalize }
+      end
+    end
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
+  end
+
+  context 'Given blueprint has a Proc :datetime_format which fails to process date' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday, datetime_format: -> datetime { datetime.invalid_method }
+      end
+    end
+    it('raises original error from Proc') { expect{subject}.to raise_error(NoMethodError) }
+  end
+
+  context 'Given blueprint has ::field with an invalid :datetime_format argument' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday, datetime_format: :invalid_symbol_format
+      end
+    end
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
   end
 
   context "Given blueprint has ::field with nil value" do
@@ -308,14 +352,14 @@ shared_examples 'Base::render' do
 
   context 'Given blueprint has :meta without :root' do
     let(:blueprint) { blueprint_with_block }
-    it('raises a BlueprinterError') { 
+    it('raises a BlueprinterError') {
       expect{blueprint.render(obj, meta: 'meta_value')}.to raise_error(Blueprinter::BlueprinterError)
     }
   end
 
   context 'Given blueprint has root as a non-supported object' do
     let(:blueprint) { blueprint_with_block }
-    it('raises a BlueprinterError') { 
+    it('raises a BlueprinterError') {
       expect{blueprint.render(obj, root: {some_key: "invalid root"})}.to raise_error(Blueprinter::BlueprinterError)
     }
   end

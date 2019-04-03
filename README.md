@@ -148,7 +148,7 @@ puts UserBlueprint.render(user, view: :normal, root: :user)
 
 Output:
 ```json
-{ 
+{
   "user": {
     "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
     "first_name": "John",
@@ -182,7 +182,7 @@ puts json
 
 Output:
 ```json
-{ 
+{
   "user": {
     "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
     "first_name": "John",
@@ -197,7 +197,7 @@ Output:
   }
 }
 ```
-Note: For meta attributes, a [root](#root) is mandatory.
+_NOTE:_ For meta attributes, a [root](#root) is mandatory.
 
 ### Exclude fields
 You can specifically choose to exclude certain fields for specific views
@@ -324,7 +324,7 @@ class TaskBlueprint < Blueprinter::Base
   end
 end
 ```
-Note: `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
+_NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
 ### Defining a field directly in the Blueprint
 
@@ -503,12 +503,26 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
-The field-level setting overrides the global config setting (for the field) if both are set.
+_NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
 ### Custom formatting for dates and times
-To define a custom format for a Date or DateTime field, include the option `datetime_format` with the associated `strptime` format.
+To define a custom format for a Date or DateTime field, include the option `datetime_format`.
+This global or field-level option can be either a string representing the associated `strptime` format,
+or a Proc which receives the original Date/DateTime object and returns the formatted value.
+When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
 
-Usage:
+
+#### Global Config Setting
+If a global datetime_format is set (either as a string format or a Proc), this option will be
+invoked and used to format all fields that respond to `strptime`.
+```ruby
+Blueprinter.configure do |config|
+  config.datetime_format = ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
+end
+```
+
+#### Field-level Setting
+Usage (String Option):
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :name
@@ -523,6 +537,24 @@ Output:
   "birthday": "03/04/1994"
 }
 ```
+
+Usage (Proc Option):
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :name
+  field :birthday, datetime_format: ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
+end
+```
+
+Output:
+```json
+{
+  "name": "John Doe",
+  "birthday": 762739200
+}
+```
+
+_NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
 ## Installation
 Add this line to your application's Gemfile:
@@ -603,7 +635,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-Note: You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
+_NOTE:_ You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
 
 ## How to Document
 

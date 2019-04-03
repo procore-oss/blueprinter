@@ -1,3 +1,6 @@
+## 0.15.0  - 2019/04/1
+* 🚀 [FEATURE] Add ability to pass in `datetime_format` field option as either a string representing the strptime format, or a Proc which takes in the Date or DateTime object and returns the formatted date. [#145](https://github.com/procore/blueprinter/pull/145). Thanks to [@mcclayton](https://github.com/mcclayton).
+
 ## 0.14.0  - 2019/04/01
 * 🚀 [FEATURE] Added a global `datetime_format` option. [#135](https://github.com/procore/blueprinter/pull/143). Thanks to [@ritikesh](https://github.com/ritikesh).
 

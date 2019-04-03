@@ -588,14 +588,14 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 ---
 
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
-This global or field-level option can be either a string representing the associated `strptime` format,
+This global or field-level option can be either a string representing the associated `strftime` format,
 or a Proc which receives the original Date/DateTime object and returns the formatted value.
 When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
 
 
 #### Global Config Setting
 If a global datetime_format is set (either as a string format or a Proc), this option will be
-invoked and used to format all fields that respond to `strptime`.
+invoked and used to format all fields that respond to `strftime`.
 ```ruby
 Blueprinter.configure do |config|
   config.datetime_format = ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }

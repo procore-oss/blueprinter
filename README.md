@@ -13,7 +13,7 @@ It heavily relies on the idea of `views` which, similar to Rails views, are ways
 Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 
 ## Usage
-<details>
+<details open>
 <summary>Basic</summary>
 
 ---

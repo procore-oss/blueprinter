@@ -1,3 +1,6 @@
+## 0.16.0  - 2019/04/3
+* 🚀 [FEATURE] Add ability to exclude multiple fields inline using `excludes`. [#141](https://github.com/procore/blueprinter/pull/141). Thanks to [@pabhinaya](https://github.com/pabhinaya).
+
 ## 0.15.0  - 2019/04/1
 * 🚀 [FEATURE] Add ability to pass in `datetime_format` field option as either a string representing the strftime format, or a Proc which takes in the Date or DateTime object and returns the formatted date. [#145](https://github.com/procore/blueprinter/pull/145). Thanks to [@mcclayton](https://github.com/mcclayton).
 

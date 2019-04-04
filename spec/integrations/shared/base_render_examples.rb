@@ -300,30 +300,31 @@ shared_examples 'Base::render' do
   context 'Given blueprint has ::view' do
     let(:normal) do
       ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',
-      '"position":"Manager"}'].join(',')
+      '"last_name":"' + obj[:last_name] + '"', '"position":"Manager"}'].join(',')
     end
     let(:ext) do
       ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
       '"first_name":"Meg"', '"position":"Manager"}'].join(',')
     end
     let(:special) do
-      ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
+      ['{"id":' + obj_id + '', '"description":"A person"',
       '"first_name":"Meg"}'].join(',')
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         view :normal do
-          fields :first_name, :position
+          fields :first_name, :last_name, :position
           field :company, name: :employer
         end
         view :extended do
           include_view :normal
           field :description
+          exclude :last_name
         end
         view :special do
           include_view :extended
-          exclude :position
+          excludes :employer, :position
         end
       end
     end

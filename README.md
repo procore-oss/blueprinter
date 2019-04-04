@@ -283,6 +283,25 @@ Output:
 }
 ```
 
+Use `excludes` to exclude multiple fields at once inline.
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :age, :first_name, :last_name,
+  end
+
+  view :extended do
+    include_view :normal
+    field :address
+    excludes :age, :last_name
+  end
+end
+```
+
 ---
 </details>
 

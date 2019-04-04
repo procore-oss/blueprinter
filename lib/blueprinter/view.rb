@@ -31,6 +31,12 @@ module Blueprinter
     def exclude_field(field_name)
       excluded_field_names << field_name
     end
+    
+    def exclude_fields(field_names)
+      field_names.each do |field_name|
+        excluded_field_names << field_name
+      end
+    end
 
     def <<(field)
       fields[field.name] = field

@@ -293,6 +293,44 @@ module Blueprinter
       current_view.include_view(view_name)
     end
 
+    # Specify a view that needs to be excluded from the current view.
+    #
+    # @param view_name [Symbol] the view to exclude from the current view.
+    # PURPOSE: Though excludes can be used to exclude several fields. If all the excluded fields are from a single view, then exclude_view
+    # is a more refined and usable option
+    #
+    # @example Excluding a view from a dervied view
+    #   class UserBlueprint < Blueprinter::Base
+    #     # other code...
+    #     view :normal do
+    #       fields :first_name, :last_name
+    #     end
+    #
+    #     view :descriptive do
+    #        field :get_full_name, name: :name
+    #        view :extended
+    #        exclude_view :normal
+    #     end
+    #
+    #     view :additional_info do
+    #        fields :time_zone, :language
+    #     end
+    #
+    #     view :extended do
+    #       include_view :normal
+    #       include_view :additional_info
+    #       field :description
+    #     end
+    #
+    #     #=> [:first_name, :last_name, :description]
+    #   end
+    #
+    # @return [Array<Symbol>] an array of view names.
+
+    def self.exclude_view(view_name)
+      current_view.exclude_view(view_name)
+    end
+
 
     # Exclude a field that was mixed into the current view.
     #
@@ -313,15 +351,15 @@ module Blueprinter
     def self.exclude(field_name)
       current_view.exclude_field(field_name)
     end
-    
+
     # When mixing multiple views under a single view, some fields may required to be excluded from
     # current view
-    # 
+    #
     # @param [Array<Symbol>] the fields to exclude from the current view.
     #
     # @example Excluding mutiple fields from being included into the current view.
     #   view :normal do
-    #     fields :name,:address,:position, 
+    #     fields :name,:address,:position,
     #           :company, :contact
     #   end
     #   view :special do
@@ -332,7 +370,7 @@ module Blueprinter
     #   => [:name, :company, :contact, :birthday, :joining_anniversary]
     #
     # @return [Array<Symbol>] an array of field names
-    
+
     def self.excludes(*field_names)
       current_view.exclude_fields(field_names)
     end

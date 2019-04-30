@@ -12,6 +12,17 @@ describe '::View' do
     end
   end
 
+  describe '#exclude_view(:view_name)' do
+    it 'show return [:view_name]' do
+      expect(view.exclude_view(:extended)).to eq([:extended])
+    end
+
+    it 'should set #excluded_view_names to [:view_name]' do
+      view.exclude_view(:extended)
+      expect(view.excluded_view_names).to eq([:extended])
+    end
+  end
+
   describe '#exclude_field(:view_name)' do
     it 'should return [:view_name]' do
       expect(view.exclude_field(:last_name)).to eq([:last_name])
@@ -22,16 +33,16 @@ describe '::View' do
     end
   end
 
-  describe '#exclude_fields(:view_name)' do 
-    it 'should return [:view_name]' do 
+  describe '#exclude_fields(:view_name)' do
+    it 'should return [:view_name]' do
       expect(view.exclude_fields([:last_name,:middle_name])).to eq([:last_name,:middle_name])
     end
-    it 'should set #excluded_field_names to [:view_name]' do 
+    it 'should set #excluded_field_names to [:view_name]' do
       view.exclude_fields([:last_name,:middle_name])
       expect(view.excluded_field_names).to eq([:last_name,:middle_name])
     end
   end
-  
+
   describe '#<<(field)' do
     context 'Given a field that does not exist' do
       it('should return field') { expect(view << field).to eq(field) }

@@ -1,7 +1,7 @@
 module Blueprinter
   # @api private
   class View
-    attr_reader :excluded_field_names, :fields, :included_view_names, :name
+    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :excluded_view_names
 
     def initialize(name, fields: {}, included_view_names: [], excluded_field_names: [],excluded_view_names: [])
       @name = name

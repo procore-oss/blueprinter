@@ -51,7 +51,7 @@ module Blueprinter
 
       views[view_name].excluded_view_names.each do |excluded_view_name|
         next if view_name == excluded_view_name
-        fields.except(views[excluded_view_name].fields.keys)
+        fields.except!(*views[excluded_view_name].fields.keys)
       end
 
       fields

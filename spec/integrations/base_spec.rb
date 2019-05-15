@@ -129,6 +129,25 @@ describe '::Base' do
           end
           it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
         end
+
+        context 'Given an association :extractor option' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
+          let(:blueprint) do
+            extractor = Class.new(Blueprinter::Extractor) do
+              def extract(association_name, object, _local_options, _options={})
+                object.send(association_name).map { |vehicle| { make: vehicle.make.upcase } }
+              end
+            end
+
+            vehicle_blueprint = Class.new(Blueprinter::Base) { fields :make }
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association :vehicles, blueprint: vehicle_blueprint, extractor: extractor
+            end
+          end
+          it('returns json derived from a custom extractor') { should eq(result) }
+        end
       end
 
       context "Given association is nil" do

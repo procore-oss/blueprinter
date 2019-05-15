@@ -11,6 +11,11 @@ module Blueprinter
           object.is_a?(ActiveRecord::Relation))
       end
 
+      def mongoid_criteria_relation?(object)
+        !!(defined?(Mongoid::Criteria) &&
+          object.is_a?(Mongoid::Criteria))
+      end
+
       def prepare_for_render(object, options)
         view_name = options.delete(:view) || :default
         root = options.delete(:root)
@@ -38,7 +43,7 @@ module Blueprinter
         ret = { root => data }
         meta ? ret.merge!(meta: meta) : ret
       end
-      
+
       def inherited(subclass)
         subclass.send(:view_collection).inherit(view_collection)
       end
@@ -74,7 +79,9 @@ module Blueprinter
       end
 
       def array_like?(object)
-        object.is_a?(Array) || active_record_relation?(object)
+        object.is_a?(Array) ||
+          active_record_relation?(object) ||
+          mongoid_criteria_relation?(object)
       end
 
       def associations(view_name = :default)

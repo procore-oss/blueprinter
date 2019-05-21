@@ -199,9 +199,15 @@ shared_examples 'Base::render' do
   end
 
   context 'Given blueprint has ::view' do
+    let(:identifier) do
+      '{"id":' + obj_id + '}'
+    end
+    let(:no_view) do
+      ['{"id":' + obj_id + '', '"first_name":"Meg"' + '}'].join(',')
+    end
     let(:normal) do
       ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',
-      '"position":"Manager"}'].join(',')
+       '"position":"Manager"}'].join(',')
     end
     let(:ext) do
       ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
@@ -214,8 +220,9 @@ shared_examples 'Base::render' do
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
+        field :first_name
         view :normal do
-          fields :first_name, :position
+          field :position
           field :company, name: :employer
         end
         view :extended do
@@ -229,9 +236,11 @@ shared_examples 'Base::render' do
       end
     end
     it('returns json derived from a view') do
-      expect(blueprint.render(obj, view: :normal)).to eq(normal)
-      expect(blueprint.render(obj, view: :extended)).to eq(ext)
-      expect(blueprint.render(obj, view: :special)).to eq(special)
+      expect(blueprint.render(obj)).to                    eq(no_view)
+      expect(blueprint.render(obj, view: :identifier)).to eq(identifier)
+      expect(blueprint.render(obj, view: :normal)).to     eq(normal)
+      expect(blueprint.render(obj, view: :extended)).to   eq(ext)
+      expect(blueprint.render(obj, view: :special)).to    eq(special)
     end
   end
 

@@ -11,7 +11,7 @@ class Vehicle < ActiveRecord::Base
 end
 
 class User < ActiveRecord::Base
-  attr_accessor :company, :description, :position
+  attr_accessor :company, :description, :position, :active
   has_many :vehicles
 end
 
@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 20181116094242) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
+    t.boolean "active"
   end
 
   create_table "vehicles", force: :cascade do |t|

@@ -20,7 +20,8 @@ describe '::Base' do
       description: 'A person',
       company: 'Procore',
       birthday: Date.new(1994, 3, 4),
-      deleted_at: nil
+      deleted_at: nil,
+      active: false
     }
   end
   let(:object_with_attributes) { OpenStruct.new(obj_hash) }
@@ -128,6 +129,25 @@ describe '::Base' do
           end
           it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
         end
+
+        context 'Given an association :extractor option' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
+          let(:blueprint) do
+            extractor = Class.new(Blueprinter::Extractor) do
+              def extract(association_name, object, _local_options, _options={})
+                object.send(association_name).map { |vehicle| { make: vehicle.make.upcase } }
+              end
+            end
+
+            vehicle_blueprint = Class.new(Blueprinter::Base) { fields :make }
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association :vehicles, blueprint: vehicle_blueprint, extractor: extractor
+            end
+          end
+          it('returns json derived from a custom extractor') { should eq(result) }
+        end
       end
 
       context "Given association is nil" do
@@ -135,31 +155,81 @@ describe '::Base' do
           expect(vehicle).to receive(:user).and_return(nil)
         end
 
-        context "Given default association value is not provided" do
-          let(:blueprint) do
-            Class.new(Blueprinter::Base) do
-              fields :make
-              association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+        context "Given global default association value is specified" do
+          before { Blueprinter.configure { |config| config.association_default = "N/A" } }
+          after { reset_blueprinter_config! }
+
+          context "Given default association value is not provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+              end
+            end
+
+            it "should render the association using the default global association value" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq("N/A")
             end
           end
 
-          it "should render the association as nil" do
-            expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
+          context "Given default association value is provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: {}
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+            end
+          end
+
+          context "Given default association value is provided and is nil" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: nil
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
+            end
           end
         end
 
-        context "Given default association value is provided" do
-          let(:blueprint) do
-            Class.new(Blueprinter::Base) do
-              fields :make
-              association :user,
-                blueprint: Class.new(Blueprinter::Base) { identifier :id },
-                default: {}
+        context "Given global default association value is not specified" do
+          context "Given default association value is not provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user, blueprint: Class.new(Blueprinter::Base) { identifier :id }
+              end
+            end
+
+            it "should render the association as nil" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to be_nil
             end
           end
 
-          it "should render the default value provided for the association" do
-            expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+          context "Given default association value is provided" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                fields :make
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: {}
+              end
+            end
+
+            it "should render the default value provided for the association" do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({})
+            end
           end
         end
       end

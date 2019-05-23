@@ -1,3 +1,31 @@
+## 0.16.0  - 2019/04/3
+* 🚀 [FEATURE] Add ability to exclude multiple fields inline using `excludes`. [#141](https://github.com/procore/blueprinter/pull/141). Thanks to [@pabhinaya](https://github.com/pabhinaya).
+
+## 0.15.0  - 2019/04/1
+* 🚀 [FEATURE] Add ability to pass in `datetime_format` field option as either a string representing the strftime format, or a Proc which takes in the Date or DateTime object and returns the formatted date. [#145](https://github.com/procore/blueprinter/pull/145). Thanks to [@mcclayton](https://github.com/mcclayton).
+
+## 0.14.0  - 2019/04/01
+* 🚀 [FEATURE] Added a global `datetime_format` option. [#135](https://github.com/procore/blueprinter/pull/143). Thanks to [@ritikesh](https://github.com/ritikesh).
+
+## 0.13.2  - 2019/03/14
+* 🐛 [BUGFIX] Replacing use of rails-specific method `Hash::except` so that Blueprinter continues to work in non-Rails environments. [#140](https://github.com/procore/blueprinter/pull/140). Thanks to [@checkbutton](https://github.com/checkbutton).
+
+## 0.13.1  - 2019/03/02
+* 💅 [MAINTENANCE | ENHANCEMENT] Cleaning up the `include_associations` section. This is not a documented/supported feature and is calling `respond_to?(:klass)` on every object passed to blueprinter. [#139](https://github.com/procore/blueprinter/pull/139). Thanks to [@ritikesh](https://github.com/ritikesh).
+
+## 0.13.0  - 2019/02/07
+
+* 🚀 [FEATURE] Added an option to render with a root key. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).
+* 🚀 [FEATURE] Added an option to render with a top-level meta attribute. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).
+
+## 0.12.1  - 2019/1/24
+
+* 🐛 [BUGFIX] Fix boolean `false` values getting serialized as `null`. Please see PR [#132](https://github.com/procore/blueprinter/pull/132).
+
+## 0.12.0  - 2019/1/16
+
+* 🚀 [FEATURE] Enables the setting of global `:field_default` and `:association_default` option value in the Blueprinter Configuration that will be used as default values for fields and associations that evaluate to nil. [#128](https://github.com/procore/blueprinter/pull/128). Thanks to [@mcclayton](https://github.com/mcclayton).
+
 ## 0.11.0  - 2019/1/15
 
 * 🚀 [FEATURE] Enables the setting of a global `:if`/`:unless` proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).

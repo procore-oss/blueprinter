@@ -9,3 +9,4 @@ doc/
 .yardoc/
 Gemfile.lock
 .vscode
+.DS_Store

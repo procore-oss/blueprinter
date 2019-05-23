@@ -157,7 +157,10 @@ module Blueprinter
 
       field(
         method,
-        options.merge(association: true, extractor: AssociationExtractor.new),
+        options.merge(
+          association: true,
+          extractor: options.fetch(:extractor) { AssociationExtractor.new },
+        ),
         &block
       )
     end

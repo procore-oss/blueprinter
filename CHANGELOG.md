@@ -1,7 +1,12 @@
-## 0.16.0  - 2019/04/3
+## 0.17.0  - 2019/05/23
+* 🐛 [BUGFIX] Fixing view: :identifier including non-identifier fields. [#154](https://github.com/procore/blueprinter/pull/154). Thanks to [@AllPurposeName](https://github.com/AllPurposeName).
+
+* 💅 [ENHANCEMENT] Add ability to override :extractor option for an ::association. [#152](https://github.com/procore/blueprinter/pull/152). Thanks to [@hugopeixoto](https://github.com/hugopeixoto).
+
+## 0.16.0  - 2019/04/03
 * 🚀 [FEATURE] Add ability to exclude multiple fields inline using `excludes`. [#141](https://github.com/procore/blueprinter/pull/141). Thanks to [@pabhinaya](https://github.com/pabhinaya).
 
-## 0.15.0  - 2019/04/1
+## 0.15.0  - 2019/04/01
 * 🚀 [FEATURE] Add ability to pass in `datetime_format` field option as either a string representing the strftime format, or a Proc which takes in the Date or DateTime object and returns the formatted date. [#145](https://github.com/procore/blueprinter/pull/145). Thanks to [@mcclayton](https://github.com/mcclayton).
 
 ## 0.14.0  - 2019/04/01

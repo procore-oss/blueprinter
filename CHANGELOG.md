@@ -1,4 +1,6 @@
 ## 0.17.0  - 2019/05/23
+* 🐛 [BUGFIX] Fixing view: :identifier including non-identifier fields. [#154](https://github.com/procore/blueprinter/pull/154). Thanks to [@AllPurposeName](https://github.com/AllPurposeName).
+
 * 💅 [ENHANCEMENT] Add ability to override :extractor option for an ::association. [#152](https://github.com/procore/blueprinter/pull/152). Thanks to [@hugopeixoto](https://github.com/hugopeixoto).
 
 ## 0.16.0  - 2019/04/03

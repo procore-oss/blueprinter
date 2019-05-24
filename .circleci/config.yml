@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 steps: &steps_spec
   - checkout
@@ -7,23 +7,42 @@ steps: &steps_spec
       command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
   - run:
       command: bundle exec rake
-  - run:
-      command: bundle exec rake benchmarks
+  - when:
+      condition: << parameters.benchmark >>
+      steps:
+        - run:
+            command: bundle exec rake benchmarks
 
 jobs:
-  ruby-2.2:
+  ruby-2_2:
+    parameters:
+      benchmark:
+        type: boolean
+        default: false
     steps: *steps_spec
     docker:
       - image: ruby:2.2
-  ruby-2.3:
+  ruby-2_3:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
     steps: *steps_spec
     docker:
       - image: ruby:2.3
-  ruby-2.4:
+  ruby-2_4:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
     steps: *steps_spec
     docker:
       - image: ruby:2.4
-  ruby-2.5:
+  ruby-2_5:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
     steps: *steps_spec
     docker:
       - image: ruby:2.5
@@ -57,10 +76,10 @@ workflows:
   version: 2
   test:
     jobs:
-      - ruby-2.2
-      - ruby-2.3
-      - ruby-2.4
-      - ruby-2.5
+      - ruby-2_2
+      - ruby-2_3
+      - ruby-2_4
+      - ruby-2_5
   release:
     jobs:
       - release-gem:

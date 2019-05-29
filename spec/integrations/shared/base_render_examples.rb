@@ -234,7 +234,7 @@ shared_examples 'Base::render' do
       end
     end
 
-    context 'Given conditional proc has three arguments' do
+    context 'Given conditional proc has three argument signature' do
       variants = %i[proc method].product([true, false])
 
       let(:if_value) { true }

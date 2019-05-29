@@ -27,7 +27,31 @@ jobs:
     steps: *steps_spec
     docker:
       - image: ruby:2.5
-
+  release-gem:
+    steps:
+      - checkout
+      - run:
+          name: Installing ruby dependencies
+          command: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - run:
+          name: Sign in to Github as CircleCI Bot
+          command: |
+            git config --global user.email "$CIRCLECI_GIT_BOT_GIT_EMAIL"
+            git config --global user.name "$CIRCLECI_GIT_BOT_NAME"
+      - run:
+          name: Auth RubyGems
+          command: |
+            mkdir ~/.gem
+            install -m 0600 /dev/null ~/.gem/credentials
+            echo -e "---\n:rubygems_api_key: $RUBY_GEMS_API_KEY" > ~/.gem/credentials
+      - deploy:
+          name: Release New Gem Version
+          command: |
+            GEM_VERSION=$(ruby -r "./lib/blueprinter/version.rb" -e "puts Blueprinter::VERSION")
+            echo "Attempting to release version '$GEM_VERSION' of Blueprinter..."
+            bundle exec rake release || true # Don't fail when deploy does not take place
+    docker:
+      - image: ruby:2.5
 
 workflows:
   version: 2
@@ -37,3 +61,10 @@ workflows:
       - ruby-2.3
       - ruby-2.4
       - ruby-2.5
+  release:
+    jobs:
+      - release-gem:
+          filters:
+            branches:
+              only:
+                - master

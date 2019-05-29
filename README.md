@@ -13,7 +13,11 @@ It heavily relies on the idea of `views` which, similar to Rails views, are ways
 Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 
 ## Usage
-### Basic
+<details open>
+<summary>Basic</summary>
+
+---
+
 If you have an object you would like serialized, simply create a blueprint. Say, for example, you have a User record with the following attributes `[:uuid, :email, :first_name, :last_name, :password, :address]`.
 
 You may define a simple blueprint like so:
@@ -42,7 +46,48 @@ And the output would look like:
 }
 ```
 
-### Renaming
+---
+</details>
+
+
+<details>
+<summary>Collections</summary>
+
+---
+
+You can also pass a collection object or an array to the render method.
+
+```ruby
+puts UserBlueprint.render(User.all)
+```
+
+This will result in JSON that looks something like this:
+
+```json
+[
+  {
+    "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+    "email": "john.doe@some.fake.email.domain",
+    "first_name": "John",
+    "last_name": "Doe"
+  },
+  {
+    "uuid": "733f0758-8f21-4719-875f-743af262c3ec",
+    "email": "john.doe.2@some.fake.email.domain",
+    "first_name": "John",
+    "last_name": "Doe 2"
+  }
+]
+```
+
+---
+</details>
+
+
+<details>
+<summary>Renaming</summary>
+
+---
 
 You can rename the resulting JSON keys in both fields and associations by using the `name` option.
 
@@ -66,7 +111,15 @@ This will result in JSON that looks something like this:
 }
 ```
 
-### Views
+---
+</details>
+
+
+<details>
+<summary>Views</summary>
+
+---
+
 You may define different outputs by utilizing views:
 ```ruby
 class UserBlueprint < Blueprinter::Base
@@ -101,7 +154,102 @@ Output:
 }
 ```
 
-### Exclude fields
+---
+</details>
+
+
+<details>
+<summary>Root</summary>
+
+---
+
+You can also optionally pass in a root key to wrap your resulting json in:
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+  end
+end
+```
+
+Usage:
+```ruby
+puts UserBlueprint.render(user, view: :normal, root: :user)
+```
+
+Output:
+```json
+{
+  "user": {
+    "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+    "first_name": "John",
+    "last_name": "Doe",
+    "login": "john.doe@some.fake.email.domain"
+  }
+}
+```
+
+---
+</details>
+
+
+<details>
+<summary>Meta Attributes</summary>
+
+---
+
+You can additionally add meta-data to the json as well:
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+  end
+end
+```
+
+Usage:
+```ruby
+json = UserBlueprint.render(user, view: :normal, root: :user, meta: {links: [
+  'https://app.mydomain.com',
+  'https://alternate.mydomain.com'
+]})
+puts json
+```
+
+Output:
+```json
+{
+  "user": {
+    "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+    "first_name": "John",
+    "last_name": "Doe",
+    "login": "john.doe@some.fake.email.domain"
+  },
+  "meta": {
+    "links": [
+      "https://app.mydomain.com",
+      "https://alternate.mydomain.com"
+    ]
+  }
+}
+```
+_NOTE:_ For meta attributes, a [root](#root) is mandatory.
+
+---
+</details>
+
+
+<details>
+<summary>Exclude Fields</summary>
+
+---
+
 You can specifically choose to exclude certain fields for specific views
 ```ruby
 class UserBlueprint < Blueprinter::Base
@@ -135,7 +283,34 @@ Output:
 }
 ```
 
-### Associations
+Use `excludes` to exclude multiple fields at once inline.
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :age, :first_name, :last_name,
+  end
+
+  view :extended do
+    include_view :normal
+    field :address
+    excludes :age, :last_name
+  end
+end
+```
+
+---
+</details>
+
+
+<details>
+<summary>Associations</summary>
+
+---
+
 You may include associated objects. Say for example, a user has projects:
 ```ruby
 class ProjectBlueprint < Blueprinter::Base
@@ -179,8 +354,26 @@ Output:
 }
 ```
 
-### Default Association/Field Option
-By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as option on the association or field for cases when the association/field could potentially evaluate to `nil`.
+---
+</details>
+
+
+<details>
+<summary>Default Association/Field Option</summary>
+
+---
+
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
+
+#### Global Config Setting
+```ruby
+Blueprinter.configure do |config|
+  config.field_default = "N/A"
+  config.association_default = {}
+end
+```
+
+#### Field-level/Associaion-level Setting
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -192,7 +385,15 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
-### Supporting Dynamic Blueprints for associations
+---
+</details>
+
+
+<details>
+<summary>Supporting Dynamic Blueprints For Associations</summary>
+
+---
+
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
 ```ruby
 class Task < ActiveRecord::Base
@@ -216,9 +417,16 @@ class TaskBlueprint < Blueprinter::Base
   end
 end
 ```
-Note: `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
+_NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
-### Defining a field directly in the Blueprint
+---
+</details>
+
+
+<details>
+<summary>Defining A Field Directly In The Blueprint</summary>
+
+---
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
 
@@ -246,7 +454,14 @@ Output:
 }
 ```
 
-#### Defining an identifier directly in the Blueprint
+---
+</details>
+
+
+<details>
+<summary>Defining An Identifier Directly In The Blueprint</summary>
+
+---
 
 You can also pass a block to an identifier:
 
@@ -272,7 +487,14 @@ Output:
 }
 ```
 
-#### Defining an association directly in the Blueprint
+---
+</details>
+
+
+<details>
+<summary>Defining An Association Directly In The Blueprint</summary>
+
+---
 
 You can also pass a block to an association:
 
@@ -310,7 +532,14 @@ Output:
 }
 ```
 
-### Passing additional properties to `render`
+---
+</details>
+
+
+<details>
+<summary>Passing Additional Properties To #render</summary>
+
+---
 
 `render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:
 
@@ -338,43 +567,14 @@ Output:
 }
 ```
 
-### render_as_hash
-Same as `render`, returns a Ruby Hash.
+---
+</details>
 
-Usage:
 
-```ruby
-puts UserBlueprint.render_as_hash(user, company: company)
-```
+<details>
+<summary>Conditional Fields</summary>
 
-Output:
-
-```ruby
-{
-  uuid: "733f0758-8f21-4719-875f-262c3ec743af",
-  company_name: "My Company LLC"
-}
-```
-
-### render_as_json
-Same as `render`, returns a Ruby Hash JSONified. This will call JSONify all keys and values.
-
-Usage:
-
-```ruby
-puts UserBlueprint.render_as_json(user, company: company)
-```
-
-Output:
-
-```ruby
-{
-  "uuid" => "733f0758-8f21-4719-875f-262c3ec743af",
-  "company_name" => "My Company LLC"
-}
-```
-
-### Conditional fields
+---
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
 
@@ -395,12 +595,34 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
-The field-level setting overrides the global config setting (for the field) if both are set.
+_NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
-### Custom formatting for dates and times
-To define a custom format for a Date or DateTime field, include the option `datetime_format` with the associated `strptime` format.
+---
+</details>
 
-Usage:
+
+<details>
+<summary>Custom Formatting for Dates and Times</summary>
+
+---
+
+To define a custom format for a Date or DateTime field, include the option `datetime_format`.
+This global or field-level option can be either a string representing the associated `strftime` format,
+or a Proc which receives the original Date/DateTime object and returns the formatted value.
+When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
+
+
+#### Global Config Setting
+If a global datetime_format is set (either as a string format or a Proc), this option will be
+invoked and used to format all fields that respond to `strftime`.
+```ruby
+Blueprinter.configure do |config|
+  config.datetime_format = ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
+end
+```
+
+#### Field-level Setting
+Usage (String Option):
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :name
@@ -416,26 +638,33 @@ Output:
 }
 ```
 
-## Installation
-Add this line to your application's Gemfile:
-
+Usage (Proc Option):
 ```ruby
-gem 'blueprinter'
+class UserBlueprint < Blueprinter::Base
+  identifier :name
+  field :birthday, datetime_format: ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
+end
 ```
 
-And then execute:
-```bash
-$ bundle
+Output:
+```json
+{
+  "name": "John Doe",
+  "birthday": 762739200
+}
 ```
 
-Or install it yourself as:
-```bash
-$ gem install blueprinter
-```
+_NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
-You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
+---
+</details>
 
-## Sorting
+
+<details>
+<summary>Sorting Fields</summary>
+
+---
+
 By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, use the below configuration option.
 
 Usage:
@@ -462,6 +691,81 @@ Output:
   "birthday": "03/04/1994"
 }
 ```
+
+---
+</details>
+
+
+<details>
+<summary>render_as_hash</summary>
+
+---
+
+Same as `render`, returns a Ruby Hash.
+
+Usage:
+
+```ruby
+puts UserBlueprint.render_as_hash(user, company: company)
+```
+
+Output:
+
+```ruby
+{
+  uuid: "733f0758-8f21-4719-875f-262c3ec743af",
+  company_name: "My Company LLC"
+}
+```
+
+---
+</details>
+
+
+<details>
+<summary>render_as_json</summary>
+
+---
+
+Same as `render`, returns a Ruby Hash JSONified. This will call JSONify all keys and values.
+
+Usage:
+
+```ruby
+puts UserBlueprint.render_as_json(user, company: company)
+```
+
+Output:
+
+```ruby
+{
+  "uuid" => "733f0758-8f21-4719-875f-262c3ec743af",
+  "company_name" => "My Company LLC"
+}
+```
+
+---
+</details>
+
+
+## Installation
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'blueprinter'
+```
+
+And then execute:
+```bash
+$ bundle
+```
+
+Or install it yourself as:
+```bash
+$ gem install blueprinter
+```
+
+You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
 
 ## OJ
 
@@ -495,15 +799,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-Note: You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
-
-## How to Document
-
-We use [Yard](https://yardoc.org/) for documentation. Here are the following
-documentation rules:
-
-- Document all public methods we expect to be utilized by the end developers.
-- Methods that are not set to private due to ruby visibility rule limitations should be marked with `@api private`.
+_NOTE:_ You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
 
 ## Contributing
 Feel free to browse the issues, converse, and make pull requests. If you need help, first please see if there is already an issue for your problem. Otherwise, go ahead and make a new issue.
@@ -513,6 +809,14 @@ You can run tests with `bundle exec rake`.
 
 ### Maintain The Docs
 We use Yard for documentation. Here are the following documentation rules:
+
+- Document all public methods we expect to be utilized by the end developers.
+- Methods that are not set to private due to ruby visibility rule limitations should be marked with `@api private`.
+
+## How to Document
+
+We use [Yard](https://yardoc.org/) for documentation. Here are the following
+documentation rules:
 
 - Document all public methods we expect to be utilized by the end developers.
 - Methods that are not set to private due to ruby visibility rule limitations should be marked with `@api private`.

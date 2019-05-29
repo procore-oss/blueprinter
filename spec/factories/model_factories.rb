@@ -9,6 +9,7 @@ FactoryBot.define do
     company { 'Procore' }
     birthday { Date.new(1994, 3, 4) }
     deleted_at { nil }
+    active { false }
   end
 
   factory :vehicle do

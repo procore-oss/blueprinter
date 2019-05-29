@@ -10,6 +10,20 @@ shared_examples 'Base::render' do
     it('returns json with specified fields') { should eq(result) }
   end
 
+  context 'Given blueprint has ::field with all data types' do
+    let(:result) { '{"active":false,"birthday":"1994-03-04","deleted_at":null,"first_name":"Meg","id":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id # number
+        field :first_name # string
+        field :active # boolean
+        field :birthday # date
+        field :deleted_at # null
+      end
+    end
+    it('returns json with the correct values for each data type') { should eq(result) }
+  end
+
   context 'Given blueprint has ::fields' do
     let(:result) do
       '{"id":' + obj_id + ',"description":"A person","first_name":"Meg"}'
@@ -50,28 +64,75 @@ shared_examples 'Base::render' do
     it('returns json derived from a custom extractor') { should eq(result) }
   end
 
-  context 'Given blueprint has ::field with a :datetime_format argument' do
+  context 'Given blueprint has ::fields with :datetime_format argument and global datetime_format' do
+    before { Blueprinter.configure { |config| config.datetime_format = -> datetime { datetime.strftime("%s").to_i } } }
+    after { reset_blueprinter_config! }
+
     let(:result) do
-      '{"id":' + obj_id + ',"birthday":"03/04/1994","deleted_at":null}'
+      '{"id":' + obj_id + ',"birthday":762739200,"deleted_at":null}'
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
-        field :birthday,   datetime_format: "%m/%d/%Y"
+        field :birthday
         field :deleted_at, datetime_format: '%FT%T%:z'
       end
     end
     it('returns json with a formatted field') { should eq(result) }
   end
 
-  context 'Given blueprint has a :datetime_format argument on an invalid ::field' do
+  context 'Given blueprint has a string :datetime_format argument on an invalid ::field' do
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :first_name, datetime_format: "%m/%d/%Y"
       end
     end
-    it('raises a BlueprinterError') { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
+  end
+
+  context 'Given blueprint has ::field with a Proc :datetime_format argument' do
+    let(:result) do
+      '{"id":' + obj_id + ',"birthday":762739200,"deleted_at":null}'
+    end
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday,   datetime_format: -> datetime { datetime.strftime("%s").to_i }
+        field :deleted_at, datetime_format: -> datetime { datetime.strftime("%s").to_i }
+      end
+    end
+    it('returns json with a formatted field') { should eq(result) }
+  end
+
+  context 'Given blueprint has a Proc :datetime_format argument on an invalid ::field' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :first_name, datetime_format: -> datetime { datetime.capitalize }
+      end
+    end
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
+  end
+
+  context 'Given blueprint has a Proc :datetime_format which fails to process date' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday, datetime_format: -> datetime { datetime.invalid_method }
+      end
+    end
+    it('raises original error from Proc') { expect{subject}.to raise_error(NoMethodError) }
+  end
+
+  context 'Given blueprint has ::field with an invalid :datetime_format argument' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :birthday, datetime_format: :invalid_symbol_format
+      end
+    end
+    it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
   end
 
   context "Given blueprint has ::field with nil value" do
@@ -79,28 +140,66 @@ shared_examples 'Base::render' do
       obj[:first_name] = nil
     end
 
-    context "Given default value is not provided" do
-      let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :id
-          field :first_name
+    context "Given global default field value is specified" do
+      before { Blueprinter.configure { |config| config.field_default = "N/A" } }
+      after { reset_blueprinter_config! }
+
+      context "Given default field value is not provided" do
+        let(:result) { '{"first_name":"N/A","id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name
+          end
         end
+        it('global default value is rendered for nil field') { should eq(result) }
       end
-      it('returns json with specified fields') { should eq(result) }
+
+      context "Given default field value is provided" do
+        let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name, default: "Unknown"
+          end
+        end
+        it('field-level default value is rendered for nil field') { should eq(result) }
+      end
+
+      context "Given default field value is provided but is nil" do
+        let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name, default: nil
+          end
+        end
+        it('field-level default value is rendered for nil field') { should eq(result) }
+      end
     end
 
-    context "Given default value is provided" do
-      let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :id
-          field :first_name, default: "Unknown"
+    context "Given global default value is not specified" do
+      context "Given default field value is not provided" do
+        let(:result) { '{"first_name":null,"id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name
+          end
         end
+        it('returns json with specified fields') { should eq(result) }
       end
-      it('returns json with specified fields') {
-        should eq(result)
-      }
+
+      context "Given default field value is provided" do
+        let(:result) { '{"first_name":"Unknown","id":' + obj_id + '}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :id
+            field :first_name, default: "Unknown"
+          end
+        end
+        it('field-level default value is rendered for nil field') { should eq(result) }
+      end
     end
   end
 
@@ -199,40 +298,80 @@ shared_examples 'Base::render' do
   end
 
   context 'Given blueprint has ::view' do
+    let(:identifier) do
+      '{"id":' + obj_id + '}'
+    end
+    let(:no_view) do
+      ['{"id":' + obj_id + '', '"first_name":"Meg"' + '}'].join(',')
+    end
     let(:normal) do
       ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',
-      '"position":"Manager"}'].join(',')
+      '"last_name":"' + obj[:last_name] + '"', '"position":"Manager"}'].join(',')
     end
     let(:ext) do
       ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
       '"first_name":"Meg"', '"position":"Manager"}'].join(',')
     end
     let(:special) do
-      ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
+      ['{"id":' + obj_id + '', '"description":"A person"',
       '"first_name":"Meg"}'].join(',')
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
+        field :first_name
         view :normal do
-          fields :first_name, :position
+          fields :last_name, :position
           field :company, name: :employer
         end
         view :extended do
           include_view :normal
           field :description
+          exclude :last_name
         end
         view :special do
           include_view :extended
-          exclude :position
+          excludes :employer, :position
         end
       end
     end
     it('returns json derived from a view') do
-      expect(blueprint.render(obj, view: :normal)).to eq(normal)
-      expect(blueprint.render(obj, view: :extended)).to eq(ext)
-      expect(blueprint.render(obj, view: :special)).to eq(special)
+      expect(blueprint.render(obj)).to                    eq(no_view)
+      expect(blueprint.render(obj, view: :identifier)).to eq(identifier)
+      expect(blueprint.render(obj, view: :normal)).to     eq(normal)
+      expect(blueprint.render(obj, view: :extended)).to   eq(ext)
+      expect(blueprint.render(obj, view: :special)).to    eq(special)
     end
+  end
+
+  context 'Given blueprint has :root' do
+    let(:result) { '{"root":{"id":' + obj_id + ',"position_and_company":"Manager at Procore"}}' }
+    let(:blueprint) { blueprint_with_block }
+    it('returns json with a root') do
+      expect(blueprint.render(obj, root: :root)).to eq(result)
+    end
+  end
+
+  context 'Given blueprint has :meta' do
+    let(:result) { '{"root":{"id":' + obj_id + ',"position_and_company":"Manager at Procore"},"meta":"meta_value"}' }
+    let(:blueprint) { blueprint_with_block }
+    it('returns json with a root') do
+      expect(blueprint.render(obj, root: :root, meta: 'meta_value')).to eq(result)
+    end
+  end
+
+  context 'Given blueprint has :meta without :root' do
+    let(:blueprint) { blueprint_with_block }
+    it('raises a BlueprinterError') {
+      expect{blueprint.render(obj, meta: 'meta_value')}.to raise_error(Blueprinter::BlueprinterError)
+    }
+  end
+
+  context 'Given blueprint has root as a non-supported object' do
+    let(:blueprint) { blueprint_with_block }
+    it('raises a BlueprinterError') {
+      expect{blueprint.render(obj, root: {some_key: "invalid root"})}.to raise_error(Blueprinter::BlueprinterError)
+    }
   end
 
   context 'Given blueprint has ::field with a block' do

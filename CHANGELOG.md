@@ -1,3 +1,8 @@
+## 0.18.0  - 2019/05/29
+
+* ⚠️ [DEPRECATION] :if/:unless procs with two arguments are now deprecated. *These procs now take in three arguments (field_name, obj, options) instead of just (obj, options).*
+  In order to be compliant with the the next major release, all conditional :if/:unless procs must be augmented to take in three arguments instead of two. i.e. `(obj, options)` to `(field_name, obj, options)`.
+
 ## 0.17.0  - 2019/05/23
 * 🐛 [BUGFIX] Fixing view: :identifier including non-identifier fields. [#154](https://github.com/procore/blueprinter/pull/154). Thanks to [@AllPurposeName](https://github.com/AllPurposeName).
 

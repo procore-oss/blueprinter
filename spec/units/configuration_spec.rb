@@ -28,7 +28,7 @@ describe 'Blueprinter' do
     end
 
     it 'should set the `if` option' do
-      if_lambda = -> obj, options { true }
+      if_lambda = -> _field_name, obj, options { true }
       Blueprinter.configure { |config|
         config.if = if_lambda
       }
@@ -36,7 +36,7 @@ describe 'Blueprinter' do
     end
 
     it 'should set the `unless` option' do
-      unless_lambda = -> obj, options { false }
+      unless_lambda = -> _field_name, obj, options { false }
       Blueprinter.configure { |config|
         config.unless = unless_lambda
       }

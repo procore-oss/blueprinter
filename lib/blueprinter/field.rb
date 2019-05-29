@@ -31,6 +31,17 @@ class Blueprinter::Field
   end
 
   def callable_from(condition)
+    callable = old_callable_from(condition)
+
+    if callable && callable.arity == 2
+      warn "[DEPRECATION] Blueprinter :#{condition} conditions now expects 3 arguments instead of 2."
+      ->(_field_name, obj, options) { callable.call(obj, options) }
+    else
+      callable
+    end
+  end
+
+  def old_callable_from(condition)
     config = Blueprinter.configuration
 
     # Use field-level callable, or when not defined, try global callable

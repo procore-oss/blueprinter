@@ -78,11 +78,11 @@ module Blueprinter
     #   on the Date/DateTime object.
     # @option options [Symbol,Proc] :if Specifies a method, proc or string to
     #   call to determine if the field should be included (e.g.
-    #   `if: :include_first_name?, or if: Proc.new { |user, options| options[:current_user] == user }).
+    #   `if: :include_first_name?, or if: Proc.new { |_field_name, user, options| options[:current_user] == user }).
     #   The method, proc or string should return or evaluate to a true or false value.
     # @option options [Symbol,Proc] :unless Specifies a method, proc or string
     #   to call to determine if the field should be included (e.g.
-    #   `unless: :include_first_name?, or unless: Proc.new { |user, options| options[:current_user] != user }).
+    #   `unless: :include_first_name?, or unless: Proc.new { |_field_name, user, options| options[:current_user] != user }).
     #   The method, proc or string should return or evaluate to a true or false value.
     # @yield [object, options] The object and the options passed to render are
     #   also yielded to the block.
@@ -101,14 +101,14 @@ module Blueprinter
     #     # other code
     #   end
     #
-    # @example Passing an if proc and unless method..
+    # @example Passing an if proc and unless method.
     #   class UserBlueprint < Blueprinter::Base
-    #     def skip_first_name?(user, options)
+    #     def skip_first_name?(_field_name, user, options)
     #       user.first_name == options[:first_name]
     #     end
     #
     #     field :first_name, unless: :skip_first_name?
-    #     field :last_name, if: ->(user, options) { user.first_name != options[:first_name] }
+    #     field :last_name, if: ->(_field_name, user, options) { user.first_name != options[:first_name] }
     #     # other code
     #   end
     #

@@ -36,26 +36,37 @@ module Blueprinter
       views[:identifier].fields.values
     end
 
+    def default_field_names
+      @default_field_names ||= default_fields.keys
+    end
+
+    def default_fields
+      views[:default].fields
+    end
+
     def sortable_fields(view_name)
-      fields = views[:default].fields
-      fields = merge_fields(fields, views[view_name].fields)
+      fields = merge_fields(default_fields,views[view_name].fields)
       views[view_name].included_view_names.each do |included_view_name|
         if view_name != included_view_name
           fields = merge_fields(fields, sortable_fields(included_view_name))
         end
       end
 
-      views[view_name].excluded_field_names.each do |name|
-        fields.delete(name)
-      end
+      remove_fields(fields,views[view_name].excluded_field_names)
 
       views[view_name].excluded_view_names.each do |excluded_view_name|
         next if view_name == excluded_view_name
-        fields.except!(*views[excluded_view_name].fields.keys)
+        fields_to_exclude = sortable_fields(excluded_view_name).keys - default_field_names
+        remove_fields(fields,fields_to_exclude)
       end
 
       fields
     end
+
+    def remove_fields(field_list,exclude_list)
+      exclude_list.each {|name| field_list.delete(name) }
+    end
+
 
     def merge_fields(source_fields, included_fields)
       if sort_by_definition

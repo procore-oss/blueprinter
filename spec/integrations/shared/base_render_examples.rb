@@ -384,4 +384,48 @@ shared_examples 'Base::render' do
     end
     it('returns json with values derived from options') { should eq(result) }
   end
+
+  context 'Given blueprint has excluded ::views' do
+    let(:exclude_minimal) do
+      ['{"id":' + obj_id + '','"description":"A person"',
+      '"employer":"Procore"', '"first_name":"Meg"','"position":"Manager"}'].join(',')
+    end
+    let(:exclude_normal) do
+      ['{"id":' + obj_id + '','"description":"A person"','"first_name":"Meg"}'].join(',')
+    end
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        view :minimal do
+          fields :last_name
+        end
+        view :default do
+          fields :first_name
+        end
+        view :normal do
+          include_view :minimal
+          fields :position
+          field :company, name: :employer
+        end
+        view :extended do
+          include_view :normal
+          field :description
+        end
+        view :exclude_minimal do
+          include_view :extended
+          exclude_view :minimal
+        end
+
+        view :exclude_normal do
+          include_view :extended
+          exclude_view :normal
+        end
+      end
+    end
+    it('returns json with view fields excluded') do
+      expect(blueprint.render(obj, view: :exclude_minimal)).to eq(exclude_minimal)
+      expect(blueprint.render(obj, view: :exclude_normal)).to eq(exclude_normal)
+    end
+  end
+
 end

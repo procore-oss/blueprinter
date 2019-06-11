@@ -13,9 +13,9 @@ class Blueprinter::Field
     extractor.extract(method, object, local_options, options)
   end
 
-  def skip?(object, local_options)
-    return true if if_callable && !if_callable.call(object, local_options)
-    unless_callable && unless_callable.call(object, local_options)
+  def skip?(field_name, object, local_options)
+    return true if if_callable && !if_callable.call(field_name, object, local_options)
+    unless_callable && unless_callable.call(field_name, object, local_options)
   end
 
   private
@@ -31,6 +31,17 @@ class Blueprinter::Field
   end
 
   def callable_from(condition)
+    callable = old_callable_from(condition)
+
+    if callable && callable.arity == 2
+      warn "[DEPRECATION] Blueprinter :#{condition} conditions now expects 3 arguments instead of 2."
+      ->(_field_name, obj, options) { callable.call(obj, options) }
+    else
+      callable
+    end
+  end
+
+  def old_callable_from(condition)
     config = Blueprinter.configuration
 
     # Use field-level callable, or when not defined, try global callable

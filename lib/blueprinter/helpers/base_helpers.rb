@@ -38,14 +38,14 @@ module Blueprinter
         ret = { root => data }
         meta ? ret.merge!(meta: meta) : ret
       end
-      
+
       def inherited(subclass)
         subclass.send(:view_collection).inherit(view_collection)
       end
 
       def object_to_hash(object, view_name:, local_options:)
         view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-          next if field.skip?(object, local_options)
+          next if field.skip?(field.name, object, local_options)
           hash[field.name] = field.extract(object, local_options)
         end
       end

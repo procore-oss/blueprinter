@@ -581,8 +581,8 @@ Both the `field` and the global Blueprinter Configuration supports `:if` and `:u
 #### Global Config Setting
 ```ruby
 Blueprinter.configure do |config|
-  config.if = ->(obj, _options) { obj.is_a?(Foo) }
-  config.unless = ->(obj, _options) { obj.is_a?(Bar) }
+  config.if = ->(field_name, obj, _options) { !obj[field_name].nil? }
+  config.unless = ->(field_name, obj, _options) { obj[field_name].nil? }
 end
 ```
 

@@ -78,11 +78,11 @@ module Blueprinter
     #   on the Date/DateTime object.
     # @option options [Symbol,Proc] :if Specifies a method, proc or string to
     #   call to determine if the field should be included (e.g.
-    #   `if: :include_first_name?, or if: Proc.new { |user, options| options[:current_user] == user }).
+    #   `if: :include_first_name?, or if: Proc.new { |_field_name, user, options| options[:current_user] == user }).
     #   The method, proc or string should return or evaluate to a true or false value.
     # @option options [Symbol,Proc] :unless Specifies a method, proc or string
     #   to call to determine if the field should be included (e.g.
-    #   `unless: :include_first_name?, or unless: Proc.new { |user, options| options[:current_user] != user }).
+    #   `unless: :include_first_name?, or unless: Proc.new { |_field_name, user, options| options[:current_user] != user }).
     #   The method, proc or string should return or evaluate to a true or false value.
     # @yield [object, options] The object and the options passed to render are
     #   also yielded to the block.
@@ -101,14 +101,14 @@ module Blueprinter
     #     # other code
     #   end
     #
-    # @example Passing an if proc and unless method..
+    # @example Passing an if proc and unless method.
     #   class UserBlueprint < Blueprinter::Base
-    #     def skip_first_name?(user, options)
+    #     def skip_first_name?(_field_name, user, options)
     #       user.first_name == options[:first_name]
     #     end
     #
     #     field :first_name, unless: :skip_first_name?
-    #     field :last_name, if: ->(user, options) { user.first_name != options[:first_name] }
+    #     field :last_name, if: ->(_field_name, user, options) { user.first_name != options[:first_name] }
     #     # other code
     #   end
     #
@@ -316,15 +316,15 @@ module Blueprinter
     def self.exclude(field_name)
       current_view.exclude_field(field_name)
     end
-    
+
     # When mixing multiple views under a single view, some fields may required to be excluded from
     # current view
-    # 
+    #
     # @param [Array<Symbol>] the fields to exclude from the current view.
     #
     # @example Excluding mutiple fields from being included into the current view.
     #   view :normal do
-    #     fields :name,:address,:position, 
+    #     fields :name,:address,:position,
     #           :company, :contact
     #   end
     #   view :special do
@@ -335,7 +335,7 @@ module Blueprinter
     #   => [:name, :company, :contact, :birthday, :joining_anniversary]
     #
     # @return [Array<Symbol>] an array of field names
-    
+
     def self.excludes(*field_names)
       current_view.exclude_fields(field_names)
     end

@@ -248,6 +248,7 @@ module Blueprinter
     #
     # @api private
     def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
+      view_name = view_name.is_a?(Proc) ? view_name.call(object, local_options) : view_name  
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
@@ -292,8 +293,8 @@ module Blueprinter
     #   end
     #
     # @return [Array<Symbol>] an array of view names.
-    def self.include_view(view_name)
-      current_view.include_view(view_name)
+    def self.include_view(view_name = nil)
+      current_view.include_view(view_name || Proc.new)
     end
 
 

@@ -44,7 +44,10 @@ module Blueprinter
       end
 
       def object_to_hash(object, view_name:, local_options:)
-        view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
+        fields = view_collection.fields_for view_name do |name|
+          name.is_a?(Proc) ? name.call(object, local_options) : name
+        end
+        fields.each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
           hash[field.name] = field.extract(object, local_options)
         end

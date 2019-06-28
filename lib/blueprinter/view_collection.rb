@@ -21,9 +21,11 @@ module Blueprinter
     end
 
     def fields_for(view_name)
+      name_cast = block_given? ? Proc.new : nil 
+      view_name = name_cast.call(view_name) if name_cast
       return identifier_fields if view_name == :identifier
 
-      fields = sortable_fields(view_name).values
+      fields = sortable_fields(view_name, &name_cast).values
       sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
       identifier_fields + sorted_fields
     end
@@ -42,6 +44,7 @@ module Blueprinter
       fields = views[:default].fields
       fields = merge_fields(fields, views[view_name].fields)
       views[view_name].included_view_names.each do |included_view_name|
+        included_view_name = yield(included_view_name) if block_given?
         if view_name != included_view_name
           fields = merge_fields(fields, sortable_fields(included_view_name))
         end

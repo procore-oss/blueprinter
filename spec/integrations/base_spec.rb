@@ -104,6 +104,22 @@ describe '::Base' do
             expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({"id"=>obj.id})
           end
         end
+        context "Given association with dynamic view", focus: true do
+          let(:blueprint) do
+            class UserBlueprint < Blueprinter::Base
+              fields :id
+              view :custom do 
+                field :description
+              end
+            end
+            Class.new(Blueprinter::Base) do
+              association :user, blueprint: UserBlueprint, view: -> (o, _) {:custom}
+            end
+          end
+          it "should render the association with dynamic blueprint" do
+            expect(JSON.parse(blueprint.render(vehicle))['user']).to eq({"id"=>obj.id, "description"=>obj.description})
+          end
+        end
         context 'Given block is passed' do
           let(:blueprint) do
             vehicle_blueprint = Class.new(Blueprinter::Base) do
@@ -285,6 +301,23 @@ describe '::Base' do
         expect(rendered).to eq(id: 84)
       end
     end
+  end
+
+  describe 'Using dynamic include view' do
+    let(:obj) { OpenStruct.new(id: 1, view: :custom, name: 'Meg') }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        include_view {|o| o.view }
+
+        view :custom do
+          field :name 
+        end
+      end
+    end
+    
+    subject { blueprint.render_as_hash(obj) }
+    it('includes view fields') { expect(subject[:name]).to eq(obj.name) }
   end
 
   describe 'Using the ApplicationBlueprint pattern' do

@@ -426,13 +426,13 @@ shared_examples 'Base::render' do
     it('returns json with values derived from options') { should eq(result) }
   end
 
-  context 'Given ::field with flatten option' do
+  context 'Given ::field with merge option' do
     subject { blueprint.render(obj) }
     let(:result) { '{"id":' + obj_id + ',"full_name":"Meg Ryan"}' }
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
-        field :dynamic_fields, flatten: true
+        field :dynamic_fields, merge: true
       end
     end
     it('returns json with values derived from options') { should eq(result) }

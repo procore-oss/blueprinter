@@ -47,7 +47,7 @@ module Blueprinter
         view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
           val = field.extract(object, local_options)
-          hash.merge!(val) and next if field.options[:flatten] and val.is_a? Hash
+          hash.merge!(val) and next if field.options[:merge] and val.is_a? Hash
           hash[field.name] = val
         end
       end

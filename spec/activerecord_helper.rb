@@ -13,6 +13,10 @@ end
 class User < ActiveRecord::Base
   attr_accessor :company, :description, :position, :active
   has_many :vehicles
+
+  def dynamic_fields
+    {"full_name" => "#{first_name} #{last_name}"}
+  end
 end
 
 ActiveRecord::Schema.define(version: 20181116094242) do

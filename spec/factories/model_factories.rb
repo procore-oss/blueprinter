@@ -3,7 +3,7 @@ require 'factory_bot'
 FactoryBot.define do
   factory :user do
     first_name { 'Meg' }
-    last_name  { 'Jones' }
+    last_name  { 'Ryan' }
     position { 'Manager' }
     description { 'A person' }
     company { 'Procore' }

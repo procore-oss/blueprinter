@@ -21,7 +21,8 @@ describe '::Base' do
       company: 'Procore',
       birthday: Date.new(1994, 3, 4),
       deleted_at: nil,
-      active: false
+      active: false,
+      dynamic_fields: {"full_name" => "Meg Ryan"}
     }
   end
   let(:object_with_attributes) { OpenStruct.new(obj_hash) }

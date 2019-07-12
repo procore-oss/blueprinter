@@ -1,13 +1,14 @@
 module Blueprinter
   # @api private
   class View
-    attr_reader :excluded_field_names, :fields, :included_view_names, :name
+    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers
 
-    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [])
+    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [],transformers: [])
       @name = name
       @fields = fields
       @included_view_names = included_view_names
       @excluded_field_names = excluded_view_names
+      @transformers =  transformers
     end
 
     def inherit(view)
@@ -21,6 +22,10 @@ module Blueprinter
 
       view.excluded_field_names.each do |field_name|
         exclude_field(field_name)
+      end
+      
+      view.transformers.each do |transformer|
+        self * transformer
       end
     end
 
@@ -36,6 +41,10 @@ module Blueprinter
       field_names.each do |field_name|
         excluded_field_names << field_name
       end
+    end
+
+    def *(custom_transformer)
+      transformers << custom_transformer
     end
 
     def <<(field)

@@ -426,13 +426,19 @@ shared_examples 'Base::render' do
     it('returns json with values derived from options') { should eq(result) }
   end
 
-  context 'Given ::field with merge option' do
+  context 'Given blueprint has a transformer' do
     subject { blueprint.render(obj) }
     let(:result) { '{"id":' + obj_id + ',"full_name":"Meg Ryan"}' }
     let(:blueprint) do
+      DynamicFieldsTransformer = Class.new(Blueprinter::Transformer) do
+        def transform(result_hash, object, options={})
+          dynamic_fields = (object.is_a? Hash) ? object[:dynamic_fields] : object.dynamic_fields
+          result_hash.merge!(dynamic_fields)
+        end
+      end
       Class.new(Blueprinter::Base) do
         identifier :id
-        field :dynamic_fields, merge: true
+        transform DynamicFieldsTransformer
       end
     end
     it('returns json with values derived from options') { should eq(result) }

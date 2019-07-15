@@ -354,6 +354,23 @@ Output:
 }
 ```
 
+Associations can also use AMS to render the association:
+
+```ruby
+class UserSerializer < ActiveModelSerializers::Model
+  attributes :id
+end
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+    foreign_association :user, serializer_type: :ams
+  end
+end
+```
+
 ---
 </details>
 

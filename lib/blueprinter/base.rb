@@ -2,6 +2,7 @@ require_relative 'blueprinter_error'
 require_relative 'configuration'
 require_relative 'extractor'
 require_relative 'extractors/association_extractor'
+require_relative 'extractors/ams_extractor'
 require_relative 'extractors/auto_extractor'
 require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
@@ -160,6 +161,19 @@ module Blueprinter
         options.merge(
           association: true,
           extractor: options.fetch(:extractor) { AssociationExtractor.new },
+        ),
+        &block
+      )
+    end
+
+    def self.foreign_association(method, options = {}, &block)
+      raise BlueprinterError, 'ams serializer is required' unless options[:serializer_type] == :ams
+
+      field(
+        method,
+        options.merge(
+          association: true,
+          extractor: options.fetch(:extractor) { AMSExtractor.new },
         ),
         &block
       )

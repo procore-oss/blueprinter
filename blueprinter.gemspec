@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "pry"
   s.add_development_dependency "rake"
   s.add_development_dependency "activerecord", "~> 5.1.2"
+  s.add_development_dependency "active_model_serializers"
   s.add_development_dependency "rspec", "~> 3.7"
   s.add_development_dependency "sqlite3", '~> 1.3.6'
   s.add_development_dependency "yard", "~> 0.9.11"

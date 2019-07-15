@@ -1,6 +1,7 @@
 require 'activerecord_helper'
 require 'ostruct'
 require_relative 'shared/base_render_examples'
+require 'active_model_serializers'
 
 describe '::Base' do
   let(:blueprint_with_block) do
@@ -104,6 +105,21 @@ describe '::Base' do
             expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({"id"=>obj.id})
           end
         end
+
+        context "Given association with active model serializer" do
+          class UserSerializer < ActiveModelSerializers::Model
+            attributes :id
+          end
+          let(:blueprint) do
+            Class.new(Blueprinter::Base) do
+              foreign_association :user, serializer_type: :ams
+            end
+          end
+          it "should render the association with dynamic blueprint" do
+            expect(JSON.parse(blueprint.render(vehicle))["user"]["id"]).to eq(obj.id)
+          end
+        end
+
         context 'Given block is passed' do
           let(:blueprint) do
             vehicle_blueprint = Class.new(Blueprinter::Base) do

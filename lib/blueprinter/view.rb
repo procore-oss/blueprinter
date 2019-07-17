@@ -43,7 +43,7 @@ module Blueprinter
       end
     end
 
-    def *(custom_transformer)
+    def transform(custom_transformer)
       transformers << custom_transformer
     end
 

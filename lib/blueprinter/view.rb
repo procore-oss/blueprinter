@@ -25,7 +25,7 @@ module Blueprinter
       end
       
       view.transformers.each do |transformer|
-        self * transformer
+        self.add_transformer(transformer)
       end
     end
 
@@ -43,7 +43,7 @@ module Blueprinter
       end
     end
 
-    def transform(custom_transformer)
+    def add_transformer(custom_transformer)
       transformers << custom_transformer
     end
 

@@ -308,7 +308,7 @@ module Blueprinter
     #
     # @return [Array<Class>] an array of transformers
     def self.transform(transformer)
-      current_view.transform(transformer)
+      current_view.add_transformer(transformer)
     end
 
 

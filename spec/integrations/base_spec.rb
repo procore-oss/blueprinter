@@ -289,20 +289,29 @@ describe '::Base' do
   end
 
   describe 'Using the ApplicationBlueprint pattern' do
-    let(:obj) { OpenStruct.new(id: 1, name: 'Meg', age: 32) }
+    let(:obj) { OpenStruct.new(id: 1, first_name: 'Meg',last_name:'Ryan', age: 32) }
+    let(:transformer) do
+      Class.new(Blueprinter::Transformer) do
+        def transform(result_hash, object, options={})
+         result_hash.merge!({full_name: "#{object.first_name} #{object.last_name}"})
+        end
+      end
+    end
     let(:application_blueprint) do
+      custom_transformer = transformer
       Class.new(Blueprinter::Base) do
         identifier :id
-        field :name
+        field :first_name
         field(:overridable) { |o| o.name }
 
         view :with_age do
           field :age
+          transform custom_transformer
         end
 
         view :anonymous_age do
           include_view :with_age
-          exclude :name
+          exclude :first_name
         end
       end
     end
@@ -313,7 +322,11 @@ describe '::Base' do
 
         view :only_age do
           include_view :with_age
-          exclude :name
+          exclude :first_name
+        end
+
+        view :with_age do
+          field :last_name
         end
       end
     end
@@ -321,7 +334,7 @@ describe '::Base' do
     subject { blueprint.render_as_hash(obj) }
 
     it('inherits identifier') { expect(subject[:id]).to eq(obj.id) }
-    it('inherits field') { expect(subject[:name]).to eq(obj.name) }
+    it('inherits field') { expect(subject[:first_name]).to eq(obj.first_name) }
     it('overrides field definition') { expect(subject[:overridable]).to eq(obj.age) }
 
     describe 'Inheriting views' do
@@ -329,22 +342,24 @@ describe '::Base' do
       subject { blueprint.render_as_hash(obj, view: view) }
 
       it('includes identifier') { expect(subject[:id]).to eq(obj.id) }
-      it('includes base fields') { expect(subject[:name]).to eq(obj.name) }
+      it('includes base fields') { expect(subject[:first_name]).to eq(obj.first_name) }
       it('includes view fields') { expect(subject[:age]).to eq(obj.age) }
+      it('inherits base fields') { expect(subject[:last_name]).to eq(obj.last_name) }
+      it('inherits transformer fields') { expect(subject[:full_name]).to eq("#{obj.first_name} #{obj.last_name}") }
 
       describe 'With complex views' do
         let(:view) { :anonymous_age }
 
         it('includes identifier') { expect(subject[:id]).to eq(obj.id) }
         it('includes include_view fields') { expect(subject[:age]).to eq(obj.age) }
-        it('excludes excluded fields') { expect(subject).to_not have_key(:name) }
+        it('excludes excluded fields') { expect(subject).to_not have_key(:first_name) }
       end
 
       describe 'Referencing views from parent blueprint' do
         let(:view) { :only_age }
 
         it('includes include_view fields') { expect(subject[:age]).to eq(obj.age) }
-        it('excludes excluded fields') { expect(subject).not_to have_key(:name) }
+        it('excludes excluded fields') { expect(subject).not_to have_key(:first_name) }
       end
     end
   end

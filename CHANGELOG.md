@@ -1,3 +1,6 @@
+## 0.19.0  - 2019/07/24
+* 🚀 [FEATURE] Added ability to specify transformers for Blueprinter views to further process the resulting hash before serialization. [#164](https://github.com/procore/blueprinter/pull/164). Thanks to [@amalarayfreshworks](https://github.com/amalarayfreshworks).
+
 ## 0.18.0  - 2019/05/29
 
 * ⚠️ [DEPRECATION] :if/:unless procs with two arguments are now deprecated. *These procs now take in three arguments (field_name, obj, options) instead of just (obj, options).*

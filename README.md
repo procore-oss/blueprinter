@@ -665,8 +665,8 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 
 ---
 
-Blueprinter provides the ability to specify `transform`s on views, which will enable
-the processing and transforming of resulting view field hashes prior to serialization.
+Blueprinter provides the ability to specify `transform`s on views, which enable further
+processing and transforming of resulting view field hashes prior to serialization.
 
 Use `transform` to specify one transformer to be included for serialization.
 A transformer is a class, extending `Blueprinter::Transformer` and implementing the `transform` method.

@@ -661,6 +661,53 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 
 
 <details>
+<summary>Transform Classes</summary>
+
+---
+
+Blueprinter provides the ability to specify `transform`s on views, which will enable
+the processing and transforming of resulting view field hashes prior to serialization.
+
+Use `transform` to specify one transformer to be included for serialization.
+A transformer is a class, extending `Blueprinter::Transformer` and implementing the `transform` method.
+Whatever is returned from this `transform` method will end up being the resulting hash passed to serialization.
+
+#### Example
+
+Create a Transform class extending from `Blueprinter::Transformer`
+```ruby
+class DynamicFieldTransformer < Blueprinter::Transformer
+  def transform(hash, object, options)
+    hash.merge!(object.dynamic_fields)
+  end
+end
+```
+
+```ruby
+class User
+  def custom_columns
+    self.dynamic_fields #which is an array of some columns
+  end
+
+  def custom_fields
+    custom_columns.each_with_object({}){|col,result|  result[col] = self.send(col)}
+  end
+end
+```
+
+Then specify the transform to use for the view.
+```ruby
+class UserBlueprint < Blueprinter::Base
+  fields :first_name, :last_name
+  transform DynamicTransformer
+end
+```
+
+---
+</details>
+
+
+<details>
 <summary>Sorting Fields</summary>
 
 ---

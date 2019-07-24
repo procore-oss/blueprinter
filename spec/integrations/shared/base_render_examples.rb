@@ -393,6 +393,14 @@ shared_examples 'Base::render' do
     let(:exclude_normal) do
       ['{"id":' + obj_id + '','"description":"A person"','"first_name":"Meg"}'].join(',')
     end
+    let(:exclude_default) do
+      ['{"id":' + obj_id + '','"employer":"Procore"', 
+       '"position":"Manager"}'].join(',')
+    end
+    let(:test_exclude_default) do
+      ['{"id":' + obj_id + '','"employer":"Procore"','"first_name":"Meg"',
+       '"position":"Manager"}'].join(',')
+    end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
@@ -420,11 +428,43 @@ shared_examples 'Base::render' do
           include_view :extended
           exclude_view :normal
         end
+        
+        view :exclude_default do
+          exclude_view :default
+          exclude_view :minimal
+          include_view :normal
+        end
+        
+        view :excludes_default do
+          excludes :first_name
+          exclude_view :minimal
+          include_view :normal
+        end
+        
+        view :test_excludes_default do
+          include_view :excludes_default
+        end
+        
+        view :test_exclude_default do
+          include_view :exclude_default
+        end
+        
       end
     end
-    it('returns json with view fields excluded') do
+    
+    it('returns json with views excluded') do
       expect(blueprint.render(obj, view: :exclude_minimal)).to eq(exclude_minimal)
       expect(blueprint.render(obj, view: :exclude_normal)).to eq(exclude_normal)
+    end
+    
+    it('return json with default view excluded') do
+      expect(blueprint.render(obj, view: :exclude_default)).to eq(exclude_default)
+      expect(blueprint.render(obj, view: :excludes_default)).to eq(exclude_default)
+    end
+    
+    it('return json with exclude_view default should match excludes default_fields') do
+      expect(blueprint.render(obj, view: :test_exclude_default)).to eq(test_exclude_default)
+      expect(blueprint.render(obj, view: :test_excludes_default)).to eq(test_exclude_default)
     end
   end
 

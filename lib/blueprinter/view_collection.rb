@@ -35,11 +35,7 @@ module Blueprinter
     def identifier_fields
       views[:identifier].fields.values
     end
-
-    def default_field_names
-      @default_field_names ||= default_fields.keys
-    end
-
+    
     def default_fields
       views[:default].fields
     end
@@ -56,7 +52,8 @@ module Blueprinter
 
       views[view_name].excluded_view_names.each do |excluded_view_name|
         next if view_name == excluded_view_name
-        fields_to_exclude = sortable_fields(excluded_view_name).keys - default_field_names
+        fields_to_exclude = sortable_fields(excluded_view_name).keys
+        fields_to_exclude = fields_to_exclude - default_fields.keys if excluded_view_name != :default 
         remove_fields(fields,fields_to_exclude)
       end
 

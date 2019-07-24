@@ -11,6 +11,7 @@ require_relative 'field'
 require_relative 'helpers/base_helpers'
 require_relative 'view'
 require_relative 'view_collection'
+require_relative 'transformer'
 
 module Blueprinter
   class Base
@@ -273,6 +274,43 @@ module Blueprinter
         field(field_name)
       end
     end
+
+
+
+    # Specify one transformer to be included for serialization.
+    # Takes a class which extends Blueprinter::Transformer
+    #
+    # @param class name [Class] which implements the method transform to include for
+    #   serialization.
+    #
+    #    
+    # @example Specifying a DynamicFieldTransformer transformer for including dynamic fields to be serialized.
+    #   class User 
+    #      def custom_columns
+    #         self.dynamic_fields #which is an array of some columns
+    #      end
+    #      def custom_fields
+    #         custom_columns.each_with_object({}){|col,result|  result[col] = self.send(col)}
+    #      end
+    #   end
+    #
+    #   class UserBlueprint < Blueprinter::Base
+    #     fields :first_name, :last_name
+    #     transform DynamicTransformer  
+    #     # other code
+    #   end
+    #
+    #   class DynamicFieldTransformer < Blueprinter::Transformer
+    #     def transform(hash, object, options)
+    #       hash.merge!(object.dynamic_fields)
+    #     end
+    #   end
+    #
+    # @return [Array<Class>] an array of transformers
+    def self.transform(transformer)
+      current_view.add_transformer(transformer)
+    end
+
 
     # Specify another view that should be mixed into the current view.
     #

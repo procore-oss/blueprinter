@@ -28,6 +28,10 @@ module Blueprinter
       identifier_fields + sorted_fields
     end
 
+    def transformers(view_name)
+      views[view_name].transformers
+    end
+
     def [](view_name)
       @views[view_name] ||= View.new(view_name)
     end

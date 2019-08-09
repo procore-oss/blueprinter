@@ -286,17 +286,18 @@ module Blueprinter
     #    
     # @example Specifying a DynamicFieldTransformer transformer for including dynamic fields to be serialized.
     #   class User 
-    #      def custom_columns
-    #         self.dynamic_fields #which is an array of some columns
-    #      end
-    #      def custom_fields
-    #         custom_columns.each_with_object({}){|col,result|  result[col] = self.send(col)}
-    #      end
+    #     def custom_columns
+    #       self.dynamic_fields # which is an array of some columns
+    #     end
+    #
+    #     def custom_fields
+    #       custom_columns.each_with_object({}) { |col,result| result[col] = self.send(col) }
+    #     end
     #   end
     #
     #   class UserBlueprint < Blueprinter::Base
     #     fields :first_name, :last_name
-    #     transform DynamicTransformer  
+    #     transform DynamicFieldTransformer  
     #     # other code
     #   end
     #

@@ -291,7 +291,7 @@ module Blueprinter
     #     end
     #
     #     def custom_fields
-    #       custom_columns.each_with_object({}){|col,result|  result[col] = self.send(col)}
+    #       custom_columns.each_with_object({}) { |col,result| result[col] = self.send(col) }
     #     end
     #   end
     #

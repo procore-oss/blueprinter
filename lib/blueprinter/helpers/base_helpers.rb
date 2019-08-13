@@ -16,20 +16,16 @@ module Blueprinter
         root = options.delete(:root)
         meta = options.delete(:meta)
         validate_root_and_meta(root, meta)
-        prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
+        prepare(object, view_name, options, root, meta)
       end
 
       def prepare_data(object, view_name, local_options)
         if array_like?(object)
           object.map do |obj|
-            object_to_hash(obj,
-                          view_name: view_name,
-                          local_options: local_options)
+            object_to_hash(obj, view_name, local_options)
           end
         else
-          object_to_hash(object,
-                        view_name: view_name,
-                        local_options: local_options)
+          object_to_hash(object, view_name, local_options)
         end
       end
 
@@ -43,7 +39,7 @@ module Blueprinter
         subclass.send(:view_collection).inherit(view_collection)
       end
 
-      def object_to_hash(object, view_name:, local_options:)
+      def object_to_hash(object, view_name, local_options)
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
            hash[field.name] = field.extract(object, local_options)

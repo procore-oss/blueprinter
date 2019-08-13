@@ -248,7 +248,7 @@ module Blueprinter
     # so we rename it for clarity
     #
     # @api private
-    def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
+    def self.prepare(object, view_name, local_options, root= nil, meta= nil)
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end

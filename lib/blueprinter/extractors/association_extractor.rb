@@ -10,7 +10,7 @@ module Blueprinter
       return default_value(options) if value.nil?
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
-      blueprint.prepare(value, view_name: view, local_options: local_options)
+      blueprint.prepare(value, view, local_options)
     end
 
     private

@@ -1,3 +1,6 @@
+## 0.19.1  - 2019/08/13
+* 💅 [ENHANCEMENT] Moved away from hash based named parameters to reduce object allocations. [#175](https://github.com/procore/blueprinter/pull/175). Thanks to [@ritikesh](https://github.com/ritikesh).
+
 ## 0.19.0  - 2019/07/24
 * 🚀 [FEATURE] Added ability to specify transformers for Blueprinter views to further process the resulting hash before serialization. [#164](https://github.com/procore/blueprinter/pull/164). Thanks to [@amalarayfreshworks](https://github.com/amalarayfreshworks).
 

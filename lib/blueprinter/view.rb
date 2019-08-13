@@ -3,13 +3,12 @@ module Blueprinter
   class View
     attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers
 
-    def initialize(name, fields = {}, included_view_names = [], 
-        excluded_view_names = [], transformers = [])
+    def initialize(name)
       @name = name
-      @fields = fields
-      @included_view_names = included_view_names
-      @excluded_field_names = excluded_view_names
-      @transformers =  transformers
+      @fields = {}
+      @included_view_names = []
+      @excluded_field_names = []
+      @transformers =  []
     end
 
     def inherit(view)

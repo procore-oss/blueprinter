@@ -65,7 +65,7 @@ module Blueprinter
 
       def fields
         fs = if options["detect_fields"]
-               [].concat(options["fields"], introspected_fields)
+               Array.new(options["fields"]).concat(introspected_fields)
              else
                options["fields"]
              end
@@ -98,7 +98,7 @@ module Blueprinter
 
       def associations
         as = if options["detect_associations"]
-               [].concat(options["associations"], introspected_associations.keys)
+               Array.new(options["associations"]).concat(introspected_associations.keys)
              else
                options["associations"]
              end
@@ -123,7 +123,11 @@ module Blueprinter
       end
 
       def association_class(association_name)
-        introspected_name = introspected_associations[association_name]&.klass&.to_s
+        introspected_name = if introspected_associations[association_name].respond_to?(:klass)
+                              introspected_associations[association_name].klass.to_s
+                            else
+                              nil
+                            end
         "#{introspected_name || association_name.camelcase}Blueprint"
       end
 

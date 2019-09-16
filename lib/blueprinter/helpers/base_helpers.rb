@@ -44,14 +44,20 @@ module Blueprinter
       end
 
       def object_to_hash(object, view_name:, local_options:)
-        result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-          next if field.skip?(field.name, object, local_options)
-           hash[field.name] = field.extract(object, local_options)
+        @object_to_hash ||= Hash.new do |hash_cache, key|
+          result_hash = view_collection.fields_for(key).each_with_object({}) do |field, hash|
+            next if field.skip?(field.name, object, local_options)
+
+            hash[field.name] = field.extract(object, local_options)
+          end
+
+          view_collection.transformers(key).each do |transformer|
+            transformer.transform(result_hash, object, local_options)
+          end
+
+          hash_cache[key] = result_hash
         end
-        view_collection.transformers(view_name).each do |transformer|
-           transformer.transform(result_hash,object,local_options)
-        end
-        result_hash
+        @object_to_hash[view_name]
       end
 
       def validate_root_and_meta(root, meta)

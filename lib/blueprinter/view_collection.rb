@@ -23,9 +23,13 @@ module Blueprinter
     def fields_for(view_name)
       return identifier_fields if view_name == :identifier
 
-      fields = sortable_fields(view_name).values
-      sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
-      identifier_fields + sorted_fields
+      @fields_for ||= Hash.new do |hash, key|
+        fields = sortable_fields(key).values
+        sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
+        hash[key] = identifier_fields + sorted_fields
+      end
+
+      @fields_for[view_name]
     end
 
     def transformers(view_name)

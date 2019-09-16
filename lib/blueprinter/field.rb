@@ -10,7 +10,7 @@ class Blueprinter::Field
   end
 
   def extract(object, local_options)
-    extractor.extract(method, object, local_options, options)
+    @extracted ||= extractor.extract(method, object, local_options, options)
   end
 
   def skip?(field_name, object, local_options)

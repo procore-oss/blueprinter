@@ -1,4 +1,5 @@
 module Blueprinter
+  # @api private
   class AutoExtractor < Extractor
     def initialize
       @hash_extractor = HashExtractor.new

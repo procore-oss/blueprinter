@@ -1,4 +1,5 @@
 module Blueprinter
+  # @api private
   class AssociationExtractor < Extractor
     def initialize
       @extractor = AutoExtractor.new

@@ -336,6 +336,34 @@ module Blueprinter
     end
 
 
+    # Specify another view that should be mixed into the current view.
+    #
+    # @param view_name [Symbol] the view to mix into the current view.
+    #
+    # @example Including a normal view into an extended view.
+    #   class UserBlueprint < Blueprinter::Base
+    #     # other code...
+    #     view :normal do
+    #       fields :first_name, :last_name
+    #     end
+    #     view :special do 
+    #       fields :birthday, :company
+    #     end 
+    #     view :extended do
+    #       include_views :normal, :special # include fields specified from above.
+    #       field :description
+    #     end
+    #     #=> [:first_name, :last_name, :birthday, :company, :description]
+    #   end
+    #
+    # @return [Array<Symbol>] an array of view names.
+
+
+    def self.include_views(*view_names)
+        current_view.include_views(view_names)
+    end 
+
+
     # Exclude a field that was mixed into the current view.
     #
     # @param field_name [Symbol] the field to exclude from the current view.

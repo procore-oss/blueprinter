@@ -590,8 +590,8 @@ end
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :last_name, if: ->(user, options) { user.first_name != options[:first_name] }
-  field :age, unless: ->(user, _options) { user.age < 18 }
+  field :last_name, if: ->(_field_name, user, options) { user.first_name != options[:first_name] }
+  field :age, unless: ->(_field_name, user, _options) { user.age < 18 }
 end
 ```
 

@@ -336,11 +336,11 @@ module Blueprinter
     end
 
 
-    # Specify another view that should be mixed into the current view.
+    # Specify additional views that should be mixed into the current view.
     #
-    # @param view_name [Symbol] the view to mix into the current view.
+    #  @param view_name [Array<Symbol>] the views to mix into the current view.
     #
-    # @example Including a normal view into an extended view.
+    # @example Including the normal and special views into an extended view.
     #   class UserBlueprint < Blueprinter::Base
     #     # other code...
     #     view :normal do

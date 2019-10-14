@@ -59,7 +59,7 @@ module Blueprinter
     end
 
     def merge_fields(source_fields, included_fields)
-      if sort_by_definition
+      if sort_by_definition && source_fields.blank?
         included_fields.merge(source_fields)
       else
         source_fields.merge(included_fields)

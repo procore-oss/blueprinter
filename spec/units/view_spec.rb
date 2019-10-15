@@ -12,6 +12,16 @@ describe '::View' do
     end
   end
 
+  describe '#include_views(:view_name)' do
+    it 'should return [:view_name]' do
+      expect(view.include_views([:normal, :special])).to eq([:normal, :special])
+    end
+    it 'should set #included_view_names to [:view_name]' do
+      view.include_views([:normal, :special])
+      expect(view.included_view_names).to eq([:normal, :special])
+    end
+  end
+
   describe '#exclude_field(:view_name)' do
     it 'should return [:view_name]' do
       expect(view.exclude_field(:last_name)).to eq([:last_name])

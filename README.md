@@ -137,7 +137,7 @@ class UserBlueprint < Blueprinter::Base
   end
 end
 ```
-A view can include fields from another view by utlizing `include_view` and `include_views`.
+A view can include fields from another view by utilizing `include_view` and `include_views`.
 
 Usage:
 ```ruby

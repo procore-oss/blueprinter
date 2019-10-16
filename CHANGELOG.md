@@ -1,3 +1,12 @@
+## 0.20.0  - 2019/10/15
+* 🚀 [FEATURE] Ability to include multiple views in a single method call with `include_views`. [184](https://github.com/procore/blueprinter/pull/184). Thanks to [@narendranvelmurugan](https://github.com/narendranvelmurugan).
+
+* 💅 [ENHANCEMENT] Update field-level conditional settings to reflect new three-argument syntax. [183](https://github.com/procore/blueprinter/pull/183). Thanks to [@danirod](https://github.com/danirod).
+
+* 💅 [ENHANCEMENT] Modify Extractor access control in documentation. [182](https://github.com/procore/blueprinter/pull/182). Thanks to [@cagmz](https://github.com/cagmz).
+
+* 💅 [ENHANCEMENT] Fix the Transformer example documentation. [174](https://github.com/procore/blueprinter/pull/174). Thanks to [@tjwallace](https://github.com/tjwallace).
+
 ## 0.19.0  - 2019/07/24
 * 🚀 [FEATURE] Added ability to specify transformers for Blueprinter views to further process the resulting hash before serialization. [#164](https://github.com/procore/blueprinter/pull/164). Thanks to [@amalarayfreshworks](https://github.com/amalarayfreshworks).
 

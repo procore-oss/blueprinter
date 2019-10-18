@@ -11,7 +11,7 @@ class Blueprinter::ActiveRecordBigOTest < Minitest::Benchmark
       fields :first_name, :last_name
     end
     @prepared_objects = self.class.bench_range.inject({}) do |hash, n|
-      hash.merge n => n.times.map {|i| create(:user)}
+      hash.merge n => n.times.map { create(:user) }
     end
   end
 

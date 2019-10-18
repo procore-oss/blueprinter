@@ -252,6 +252,7 @@ module Blueprinter
       unless view_collection.has_view? view_name
         raise BlueprinterError, "View '#{view_name}' is not defined"
       end
+
       data = prepare_data(object, view_name, local_options)
       prepend_root_and_meta(data, root, meta)
     end
@@ -360,8 +361,8 @@ module Blueprinter
 
 
     def self.include_views(*view_names)
-        current_view.include_views(view_names)
-    end 
+      current_view.include_views(view_names)
+    end
 
 
     # Exclude a field that was mixed into the current view.

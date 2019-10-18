@@ -46,10 +46,10 @@ class Blueprinter::Field
 
     # Use field-level callable, or when not defined, try global callable
     tmp = if options.key?(condition)
-      options.fetch(condition)
-    elsif config.valid_callable?(condition)
-      config.public_send(condition)
-    end
+            options.fetch(condition)
+          elsif config.valid_callable?(condition)
+            config.public_send(condition)
+          end
 
     return false unless tmp
 

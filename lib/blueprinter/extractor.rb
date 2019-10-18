@@ -1,6 +1,6 @@
 module Blueprinter
   class Extractor
-    def extract(field_name, object, local_options, options={})
+    def extract(_field_name, _object, _local_options, _options={})
       fail NotImplementedError, "An Extractor must implement #extract"
     end
 

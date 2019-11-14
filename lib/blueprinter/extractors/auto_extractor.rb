@@ -11,7 +11,9 @@ module Blueprinter
     def extract(field_name, object, local_options, options = {})
       extraction = extractor(object, options).extract(field_name, object, local_options, options)
       value = @datetime_formatter.format(extraction, options)
-      value.nil? ? default_value(options) : value
+      return default_value(options) if value.nil? || (value.blank? && value.is_a?(ActiveRecord::Associations::CollectionProxy))
+
+      value
     end
 
     private

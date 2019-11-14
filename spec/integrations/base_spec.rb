@@ -234,6 +234,31 @@ describe '::Base' do
           end
         end
       end
+
+      context "Given association is empty" do
+        before do
+          empty_relation = obj.vehicles
+          expect(obj).to receive(:vehicles).and_return(empty_relation)
+        end
+  
+        context "Given default association value is provided and is empty" do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":null}' }
+          
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+            end
+            
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles, 
+                          blueprint: vehicle_blueprint,
+                          default: nil
+            end
+          end
+          it('should render the default value provided for the association') { should eq(result) }
+        end
+      end
     end
   end
   describe '::render_as_hash' do

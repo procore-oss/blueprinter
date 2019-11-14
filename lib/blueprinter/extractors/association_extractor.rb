@@ -8,7 +8,8 @@ module Blueprinter
     def extract(association_name, object, local_options, options={})
       options_without_default = options.reject { |k,_| k == :default }
       value = @extractor.extract(association_name, object, local_options, options_without_default)
-      return default_value(options) if value.nil?
+      return default_value(options) if value.nil? || (value.blank? && value.is_a?(ActiveRecord::Associations::CollectionProxy))
+      
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
       blueprint.prepare(value, view_name: view, local_options: local_options)

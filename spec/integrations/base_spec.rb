@@ -236,11 +236,6 @@ describe '::Base' do
       end
 
       context "Given association is empty" do
-        before do
-          empty_relation = obj.vehicles
-          expect(obj).to receive(:vehicles).and_return(empty_relation)
-        end
-  
         context "Given default association value is provided and is empty" do
           let(:result) { '{"id":' + obj_id + ',"vehicles":null}' }
           

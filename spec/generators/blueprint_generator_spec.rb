@@ -149,28 +149,6 @@ RSpec.describe Blueprinter::Generators::BlueprintGenerator, :type => :generator 
       end
     end
 
-    describe "given --detect_associations --dynamic_association" do
-      include_examples "generated_file"
-      before do
-        run_generator %W(#{model} --detect_associations --dynamic_association)
-      end
-
-      it "blueprint file has detected association" do
-        is_expected.to contain(/blueprint: ->\(user\) {user.blueprint}/)
-      end
-    end
-
-    describe "given --detect_associations --default_association" do
-      include_examples "generated_file"
-      before do
-        run_generator %W(#{model} --detect_associations --default_association)
-      end
-
-      it "blueprint file has default association" do
-        is_expected.to contain(/default: {}/)
-      end
-    end
-
     describe "given --detect_associations --detect_fields --indentation=tab" do
       include_examples "generated_file"
       before do

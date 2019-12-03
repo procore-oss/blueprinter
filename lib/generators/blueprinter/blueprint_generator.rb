@@ -27,10 +27,6 @@ module Blueprinter
 
       class_option :detect_associations, type: :boolean, default: false, desc: "Introspect on the model to set associations in the generated blueprint. Will be merged with any manually specified"
 
-      class_option :dynamic_association, type: :boolean, default: false, desc: "Generate dynamic-style associations instead of default class-style"
-
-      class_option :default_association, type: :boolean, default: false, desc: "Generated associations specify \"default: {}\""
-
 
 
       class_option :wrap_at, type: :numeric, default: 80, desc: "Maximum length of generated fields line", aliases: "-w"
@@ -110,16 +106,7 @@ module Blueprinter
       end
 
       def association_blueprint(association_name)
-        style = if options["dynamic_association"]
-                  association_dynamic(association_name)
-                else
-                  association_class(association_name)
-                end
-        ", blueprint: #{style}#{association_default}"
-      end
-
-      def association_dynamic(association_name)
-        "->(#{association_name}) {#{association_name}.blueprint}"
+        ", blueprint: #{association_class(association_name)}"
       end
 
       def association_class(association_name)
@@ -129,12 +116,6 @@ module Blueprinter
                               nil
                             end
         "#{introspected_name || association_name.camelcase}Blueprint"
-      end
-
-      def association_default
-        if options["default_association"]
-          ", default: {}"
-        end
       end
 
       def indent

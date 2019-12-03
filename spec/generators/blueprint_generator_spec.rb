@@ -48,7 +48,18 @@ RSpec.describe Blueprinter::Generators::BlueprintGenerator, :type => :generator 
       end
 
       it "blueprint file has identifier" do
-        is_expected.to contain(/identifier/)
+        is_expected.to contain(/identifier :id/)
+      end
+    end
+
+    describe "given -i customid" do
+      include_examples "generated_file"
+      before do
+        run_generator %W(#{model} -i customid)
+      end
+
+      it "blueprint file has customid" do
+        is_expected.to contain(/customid/)
       end
     end
 
@@ -71,6 +82,34 @@ RSpec.describe Blueprinter::Generators::BlueprintGenerator, :type => :generator 
 
       it "blueprint file has detected fields" do
         is_expected.to contain(/:make, :model, :miles/)
+      end
+    end
+
+    describe "given --detect_fields --fields=mooo" do
+      include_examples "generated_file"
+      before do
+        run_generator %W(#{model} --detect_fields  --fields=mooo)
+      end
+
+      it "blueprint file has detected fields and manual field" do
+        is_expected.to contain(/:make, :model, :miles/)
+        is_expected.to contain(/:mooo/)
+      end
+    end
+
+    describe "given --detect_fields --fields=make model moooo" do
+      include_examples "generated_file"
+      before do
+        run_generator %W(#{model} --detect_fields  --fields=make model moooo)
+      end
+
+      it "blueprint file has deduped detected fields and manual fields" do
+        File.open(subject) do |f|
+          generated = f.read
+          expect(generated.scan('make').size).to eq(1)
+          expect(generated.scan('model').size).to eq(1)
+        end
+        is_expected.to contain(/:mooo/)
       end
     end
 

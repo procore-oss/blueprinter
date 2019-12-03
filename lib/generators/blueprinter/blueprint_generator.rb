@@ -59,7 +59,7 @@ module Blueprinter
 
       def identifier_symbol
         if options['identifier']
-           options['identifier'] == "identifier" ? :id : options['set_identifier']
+           options['identifier'] == "identifier" ? :id : options['identifier']
         end
       end
 

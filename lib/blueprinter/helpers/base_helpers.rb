@@ -5,6 +5,8 @@ module Blueprinter
     end
 
     module SingletonMethods
+      include TypeHelpers
+
       private
       def active_record_relation?(object)
         !!(defined?(ActiveRecord::Relation) &&

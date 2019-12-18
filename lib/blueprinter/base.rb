@@ -9,6 +9,8 @@ require_relative 'extractors/public_send_extractor'
 require_relative 'formatters/date_time_formatter'
 require_relative 'field'
 require_relative 'helpers/base_helpers'
+require_relative 'helpers/type_helpers'
+require_relative 'nillables'
 require_relative 'view'
 require_relative 'view_collection'
 require_relative 'transformer'
@@ -284,9 +286,9 @@ module Blueprinter
     # @param class name [Class] which implements the method transform to include for
     #   serialization.
     #
-    #    
+    #
     # @example Specifying a DynamicFieldTransformer transformer for including dynamic fields to be serialized.
-    #   class User 
+    #   class User
     #     def custom_columns
     #       self.dynamic_fields # which is an array of some columns
     #     end
@@ -298,7 +300,7 @@ module Blueprinter
     #
     #   class UserBlueprint < Blueprinter::Base
     #     fields :first_name, :last_name
-    #     transform DynamicFieldTransformer  
+    #     transform DynamicFieldTransformer
     #     # other code
     #   end
     #
@@ -347,9 +349,9 @@ module Blueprinter
     #     view :normal do
     #       fields :first_name, :last_name
     #     end
-    #     view :special do 
+    #     view :special do
     #       fields :birthday, :company
-    #     end 
+    #     end
     #     view :extended do
     #       include_views :normal, :special # include fields specified from above.
     #       field :description

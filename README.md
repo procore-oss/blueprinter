@@ -360,6 +360,56 @@ Output:
 
 
 <details>
+<summary>Nillables</summary>
+
+---
+
+Sometimes, you may want certain "empty" values to be treated as `nil`.
+Blueprinter provides the ability to treat the following empty types as `nil`.
+
+#### Blueprinter::EMPTY_COLLECTION
+Any empty array or empty active record collection.
+
+#### Blueprinter::EMPTY_HASH
+Any empty hash.
+
+#### Blueprinter::EMPTY_STRING
+Any empty string or symbol.
+
+#### Field-level/Association-level Setting
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    # If first_name is an empty string, it will become nil
+    field :first_name, nillable: Blueprinter::EmptyString
+    # If the projects association collection is empty, it will become nil
+    association :projects, blueprint: ProjectBlueprint, nillable: Blueprinter::EmptyCollection
+  end
+end
+```
+
+#### Combining With Defaults
+It is possible to combine the `nillable` option with the `default` option to resolve an "empty" value to the default value provided.
+
+Example:
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    # If first_name is an empty string, it will become "N/A"
+    field :first_name, nillable: Blueprinter::EmptyString, default: "N/A"
+  end
+end
+```
+
+---
+</details>
+
+
+<details>
 <summary>Default Association/Field Option</summary>
 
 ---
@@ -374,7 +424,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-#### Field-level/Associaion-level Setting
+#### Field-level/Association-level Setting
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid

@@ -13,7 +13,7 @@ module Blueprinter
     def extract(field_name, object, local_options, options = {})
       extraction = extractor(object, options).extract(field_name, object, local_options, options)
       value = @datetime_formatter.format(extraction, options)
-      use_default_value?(value, options.default_if) ? default_value(options) : value
+      use_default_value?(value, options[:default_if]) ? default_value(options) : value
     end
 
     private

@@ -360,6 +360,37 @@ Output:
 
 
 <details>
+<summary>Default Association/Field Option</summary>
+
+---
+
+By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
+
+#### Global Config Setting
+```ruby
+Blueprinter.configure do |config|
+  config.field_default = "N/A"
+  config.association_default = {}
+end
+```
+
+#### Field-level/Association-level Setting
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    field :first_name, default: "N/A"
+    association :company, blueprint: CompanyBlueprint, default: {}
+  end
+end
+```
+
+---
+</details>
+
+
+<details>
 <summary>default_if</summary>
 
 ---
@@ -386,37 +417,6 @@ class UserBlueprint < Blueprinter::Base
     field :first_name, default_if: Blueprinter::EmptyString, default: "N/A"
     # If the projects association collection is empty, it will become nil
     association :projects, blueprint: ProjectBlueprint, default_if: Blueprinter::EmptyCollection
-  end
-end
-```
-
----
-</details>
-
-
-<details>
-<summary>Default Association/Field Option</summary>
-
----
-
-By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
-
-#### Global Config Setting
-```ruby
-Blueprinter.configure do |config|
-  config.field_default = "N/A"
-  config.association_default = {}
-end
-```
-
-#### Field-level/Association-level Setting
-```ruby
-class UserBlueprint < Blueprinter::Base
-  identifier :uuid
-
-  view :normal do
-    field :first_name, default: "N/A"
-    association :company, blueprint: CompanyBlueprint, default: {}
   end
 end
 ```

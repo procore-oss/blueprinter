@@ -1,6 +1,8 @@
 module Blueprinter
   # @api private
   class AssociationExtractor < Extractor
+    include EmptyTypeHelper
+
     def initialize
       @extractor = AutoExtractor.new
     end
@@ -8,8 +10,7 @@ module Blueprinter
     def extract(association_name, object, local_options, options={})
       options_without_default = options.reject { |k,_| k == :default }
       value = @extractor.extract(association_name, object, local_options, options_without_default)
-      value = convert_to_nil?(value, options.nillable) ? nil : value
-      return default_value(options) if value.nil?
+      return default_value(options) if use_default_value?(value, options.default_if)
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
       blueprint.prepare(value, view_name: view, local_options: local_options)

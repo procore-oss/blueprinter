@@ -1,3 +1,6 @@
+## 0.21.0  - 2019/12/19
+* 🚀 [FEATURE] Ability to specify `default_if` field/association option for more control on when the default value is applied. [191](https://github.com/procore/blueprinter/pull/191). Thanks to [@mcclayton](https://github.com/mcclayton).
+
 ## 0.20.0  - 2019/10/15
 * 🚀 [FEATURE] Ability to include multiple views in a single method call with `include_views`. [184](https://github.com/procore/blueprinter/pull/184). Thanks to [@narendranvelmurugan](https://github.com/narendranvelmurugan).
 

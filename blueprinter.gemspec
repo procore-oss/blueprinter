@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 3.7"
   s.add_development_dependency "sqlite3", '~> 1.3.6'
   s.add_development_dependency "yard", "~> 0.9.11"
+  s.add_development_dependency "ammeter", "~> 1.1.4"
 end

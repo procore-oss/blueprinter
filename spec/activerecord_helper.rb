@@ -10,6 +10,11 @@ class Vehicle < ActiveRecord::Base
   belongs_to :user
 end
 
+module Electric # must move above require 'factories/model_factories.rb' to enable a factory
+  class Truck < ::Vehicle
+  end
+end
+
 class User < ActiveRecord::Base
   attr_accessor :company, :description, :position, :active
   has_many :vehicles

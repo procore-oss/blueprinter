@@ -1,7 +1,7 @@
 module Blueprinter
   # @api private
   class AssociationExtractor < Extractor
-    include EmptyTypeHelper
+    include EmptyTypes
 
     def initialize
       @extractor = AutoExtractor.new

@@ -5,7 +5,7 @@ module Blueprinter
   EMPTY_HASH = "empty_hash".freeze
   EMPTY_STRING = "empty_string".freeze
 
-  module EmptyTypeHelper
+  module EmptyTypes
     include TypeHelpers
     private
 

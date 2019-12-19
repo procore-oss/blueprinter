@@ -1,7 +1,7 @@
 module Blueprinter
   # @api private
   class AutoExtractor < Extractor
-    include EmptyTypeHelper
+    include EmptyTypes
 
     def initialize
       @hash_extractor = HashExtractor.new

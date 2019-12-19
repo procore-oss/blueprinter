@@ -105,6 +105,71 @@ describe '::Base' do
             expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq({"id"=>obj.id})
           end
         end
+        context "Given default_if option is Blueprinter::EMPTY_HASH" do
+          before do
+            expect(vehicle).to receive(:user).and_return({})
+          end
+
+          context "Given a default value" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default: "empty_hash",
+                  default_if: Blueprinter::EMPTY_HASH
+              end
+            end
+            it('uses the correct default value') do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq("empty_hash")
+            end
+          end
+
+          context "Given no default value" do
+            let(:blueprint) do
+              Class.new(Blueprinter::Base) do
+                association :user,
+                  blueprint: Class.new(Blueprinter::Base) { identifier :id },
+                  default_if: Blueprinter::EMPTY_HASH
+              end
+            end
+            it('uses the correct default value') do
+              expect(JSON.parse(blueprint.render(vehicle))["user"]).to eq(nil)
+            end
+          end
+        end
+
+        context "Given default_if option is Blueprinter::EMPTY_COLLECTION" do
+          before { vehicle.update(user: nil) }
+          after { vehicle.update(user: obj) }
+
+          context "Given a default value" do
+            let(:result) do
+              '{"id":' + obj_id + ',"vehicles":"foo"}'
+            end
+            let(:blueprint) do
+              vehicle_blueprint = Class.new(Blueprinter::Base) {}
+              Class.new(Blueprinter::Base) do
+                identifier :id
+                association :vehicles, blueprint: vehicle_blueprint, default: "foo", default_if: Blueprinter::EMPTY_COLLECTION
+              end
+            end
+            it('returns json with association') { should eq(result) }
+          end
+
+          context "Given no default value" do
+            let(:result) do
+              '{"id":' + obj_id + ',"vehicles":null}'
+            end
+            let(:blueprint) do
+              vehicle_blueprint = Class.new(Blueprinter::Base) {}
+              Class.new(Blueprinter::Base) do
+                identifier :id
+                association :vehicles, blueprint: vehicle_blueprint, default_if: Blueprinter::EMPTY_COLLECTION
+              end
+            end
+            it('returns json with association') { should eq(result) }
+          end
+        end
         context 'Given block is passed' do
           let(:blueprint) do
             vehicle_blueprint = Class.new(Blueprinter::Base) do

@@ -5,12 +5,9 @@ module Blueprinter
     end
 
     module SingletonMethods
-      private
-      def active_record_relation?(object)
-        !!(defined?(ActiveRecord::Relation) &&
-          object.is_a?(ActiveRecord::Relation))
-      end
+      include TypeHelpers
 
+      private
       def prepare_for_render(object, options)
         view_name = options.delete(:view) || :default
         root = options.delete(:root)
@@ -75,10 +72,6 @@ module Blueprinter
 
       def view_collection
         @view_collection ||= ViewCollection.new
-      end
-
-      def array_like?(object)
-        object.is_a?(Array) || active_record_relation?(object)
       end
 
       def associations(view_name = :default)

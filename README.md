@@ -374,7 +374,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-#### Field-level/Associaion-level Setting
+#### Field-level/Association-level Setting
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -382,6 +382,41 @@ class UserBlueprint < Blueprinter::Base
   view :normal do
     field :first_name, default: "N/A"
     association :company, blueprint: CompanyBlueprint, default: {}
+  end
+end
+```
+
+---
+</details>
+
+
+<details>
+<summary>default_if</summary>
+
+---
+
+Sometimes, you may want certain "empty" values to pass through to the default value.
+Blueprinter provides the ability to treat the following empty types as the default value (or `nil` if no default provided).
+
+#### Blueprinter::EMPTY_COLLECTION
+An empty array or empty active record collection.
+
+#### Blueprinter::EMPTY_HASH
+An empty hash.
+
+#### Blueprinter::EMPTY_STRING
+An empty string or symbol.
+
+#### Field-level/Association-level Setting
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    # If first_name is an empty string, it will become "N/A"
+    field :first_name, default_if: Blueprinter::EmptyString, default: "N/A"
+    # If the projects association collection is empty, it will become nil
+    association :projects, blueprint: ProjectBlueprint, default_if: Blueprinter::EmptyCollection
   end
 end
 ```

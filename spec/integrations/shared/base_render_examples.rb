@@ -135,6 +135,23 @@ shared_examples 'Base::render' do
     it('raises an InvalidDateTimeFormatterError') { expect{subject}.to raise_error(Blueprinter::DateTimeFormatter::InvalidDateTimeFormatterError) }
   end
 
+  context "Given default_if option is Blueprinter::EMPTY_STRING" do
+    before do
+      obj[:first_name] = ""
+      obj[:last_name] = ""
+    end
+
+    let(:result) { '{"first_name":"Unknown","id":' + obj_id + ',"last_name":null}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id
+        field :first_name, default_if: Blueprinter::EMPTY_STRING, default: "Unknown"
+        field :last_name, default_if: Blueprinter::EMPTY_STRING
+      end
+    end
+    it('uses the correct default values') { should eq(result) }
+  end
+
   context "Given blueprint has ::field with nil value" do
     before do
       obj[:first_name] = nil

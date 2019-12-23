@@ -697,6 +697,47 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 
 
 <details>
+<summary>before_render callbacks</summary>
+
+---
+
+Callback called before fields are serialized. This can be used to compute
+values used in your fields and storing computed valued inside the
+options hash.
+
+#### Example
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  before_render do |object, options|
+    options[:address] = "REDACTED" if options[:redact]
+  end
+
+  identifier :uuid
+  field :address { |object, options| options[:address] || object.address }
+end
+```
+
+Useage:
+
+```ruby
+puts UserBlueprint.render(user, view: :extended, redact: true)
+```
+
+Output:
+
+```ruby
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "address": "REDACTED"
+}
+```
+
+---
+</details>
+
+
+<details>
 <summary>Transform Classes</summary>
 
 ---

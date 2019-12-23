@@ -1,10 +1,11 @@
 module Blueprinter
   # @api private
   class View
-    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers
+    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :before_renders, :transformers
 
-    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [],transformers: [])
+    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [], before_renders: [], transformers: [])
       @name = name
+      @before_renders = before_renders
       @fields = fields
       @included_view_names = included_view_names
       @excluded_field_names = excluded_view_names
@@ -27,6 +28,10 @@ module Blueprinter
       view.transformers.each do |transformer|
         self.add_transformer(transformer)
       end
+
+      view.before_renders.each do |before_render|
+        add_before_render(before_render)
+      end
     end
 
     def include_view(view_name)
@@ -47,6 +52,10 @@ module Blueprinter
       field_names.each do |field_name|
         excluded_field_names << field_name
       end
+    end
+
+    def add_before_render(before_render)
+      before_renders << before_render
     end
 
     def add_transformer(custom_transformer)

@@ -1,3 +1,4 @@
+require_relative 'before_render'
 require_relative 'blueprinter_error'
 require_relative 'configuration'
 require_relative 'empty_types'
@@ -278,6 +279,26 @@ module Blueprinter
       end
     end
 
+    # Callback called before fields are serialized. This can be used to compute
+    # values used in your fields and storing computed valued inside the
+    # options hash.
+    #
+    # @yield [object, options] The object and the options passed to render are
+    #   yielded to the block.
+    #
+    # @example Redacting address conditionally.
+    #   class UserBlueprint < Blueprinter::Base
+    #     before_render do |object, options|
+    #       options[:address] = "REDACTED" if options[:redact]
+    #     end
+    #
+    #     field :address { |object, options| options[:address] || object.address }
+    #   end
+    #
+    # @return [BeforeRender] a BeforeRender object.
+    def self.before_render(&block)
+      current_view.add_before_render(BeforeRender.new(block))
+    end
 
 
     # Specify one transformer to be included for serialization.

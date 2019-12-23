@@ -196,6 +196,44 @@ describe '::Base' do
           it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
         end
 
+        context 'Given before_render block' do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+            end
+
+            Class.new(Blueprinter::Base) do
+              before_render do |object, options|
+                options[:id] = 'Car'
+              end
+
+              identifier(:id) { |object, options| options[:id] || object.id }
+              association(:automobiles, blueprint: vehicle_blueprint) { |o| o.vehicles }
+
+              view :my_car do
+                before_render do |object, options|
+                  options[:id] = "Amazing #{options[:id]}"
+                end
+                before_render do |object, options|
+                  options[:id] = "My #{options[:id]}"
+                end
+              end
+            end
+          end
+          let(:result) do
+            '{"id":"Car","automobiles":[{"make":"Super Car"}]}'
+          end
+          it('returns json with before_render called') { should eq(result) }
+
+          context 'before_render in view' do
+            subject { blueprint.render(obj, view: :my_car) }
+            let(:result) do
+              '{"id":"My Amazing Car","automobiles":[{"make":"Super Car"}]}'
+            end
+            it('returns json with both before_renders called') { should eq(result) }
+          end
+        end
+
         context 'Given an association :extractor option' do
           let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
           let(:blueprint) do

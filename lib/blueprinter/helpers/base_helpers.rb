@@ -41,10 +41,15 @@ module Blueprinter
       end
 
       def object_to_hash(object, view_name:, local_options:)
+        view_collection.before_renders(view_name).each do |before_render|
+          before_render.call(object, local_options)
+        end
+
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
            hash[field.name] = field.extract(object, local_options)
         end
+
         view_collection.transformers(view_name).each do |transformer|
            transformer.transform(result_hash,object,local_options)
         end

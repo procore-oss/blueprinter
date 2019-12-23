@@ -20,6 +20,10 @@ module Blueprinter
       views.has_key? view_name
     end
 
+    def before_renders(view_name)
+      (views[:default].before_renders + views[view_name].before_renders).uniq
+    end
+
     def fields_for(view_name)
       return identifier_fields if view_name == :identifier
 

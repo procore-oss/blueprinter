@@ -1,3 +1,6 @@
+## 0.22.0  - 2019/12/26
+* 🚀 [FEATURE] Add rails generators. See `rails g blueprinter:blueprint --help` for usage. Introduced in [#176](https://github.com/procore/blueprinter/pull/176) by [@wlkrw](https://github.com/wlkrw).
+
 ## 0.21.0  - 2019/12/19
 * 🚀 [FEATURE] Ability to specify `default_if` field/association option for more control on when the default value is applied. [191](https://github.com/procore/blueprinter/pull/191). Thanks to [@mcclayton](https://github.com/mcclayton).
 

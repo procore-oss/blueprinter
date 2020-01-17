@@ -18,9 +18,14 @@ RSpec.shared_context "vehicle_subject", :shared_context => :metadata do
   subject { file('app/blueprints/vehicle_blueprint.rb') }
 end
 
+RSpec.shared_context "initializer_subject", :shared_context => :metadata  do
+  subject { file('config/initializers/blueprinter.rb') }
+end
+
 RSpec.configure do |rspec|
   rspec.include_context "generator_destination", :include_shared => true
   rspec.include_context "vehicle_subject", :include_shared => true
+  rspec.include_context "initializer_subject", :include_shared => true
 end
 
 require 'spec_helper'

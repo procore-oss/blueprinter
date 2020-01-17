@@ -13,7 +13,7 @@ RSpec.describe Blueprinter::Generators::InitializerGenerator, :type => :generato
   end
 
   include_context "initializer_subject" do
-    describe 'generates an empty initializer' do
+    describe 'generates a default initializer' do
       include_examples "generated_file"
       before do
         run_generator
@@ -64,6 +64,7 @@ RSpec.describe Blueprinter::Generators::InitializerGenerator, :type => :generato
 
       it "method declaration" do
         is_expected.to contain(/config.method = :encode/)
+        is_expected.not_to contain(/#  config.method = :encode/)
       end
     end
 
@@ -107,6 +108,7 @@ RSpec.describe Blueprinter::Generators::InitializerGenerator, :type => :generato
 
       it "method declaration" do
         is_expected.to contain(/config.association_default = {}/)
+        is_expected.not_to contain(/#  config.association_default = {}/)
       end
     end
 
@@ -118,6 +120,7 @@ RSpec.describe Blueprinter::Generators::InitializerGenerator, :type => :generato
 
       it "method declaration" do
         is_expected.to contain(/config.sort_fields_by = :definition/)
+        is_expected.not_to contain(/#  config.sort_fields_by = :definition/)
       end
     end
 

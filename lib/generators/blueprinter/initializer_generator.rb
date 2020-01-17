@@ -15,7 +15,7 @@ module Blueprinter
 
 
 
-      class_option :generator, default: nil, desc: "What gem to use for JSON", banner: "oj|yajl"
+      class_option :generator, default: "json", desc: "What gem to use for JSON", banner: "oj|yajl"
 
       class_option :method, default: nil, desc: "What method to call on the generator", banner: "encode"
 
@@ -44,7 +44,7 @@ module Blueprinter
       private
 
       def generator_gem
-        {oj: "Oj", yajl: "Yajl::Encoder"}[options["generator"].intern] if options["generator"]
+        {json: "JSON", oj: "Oj", yajl: "Yajl::Encoder"}[options["generator"].intern]
       end
 
       def empty_string(default)

@@ -1,7 +1,7 @@
 module Blueprinter
   # @api private
   class View
-    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers
+    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers, :definition_order
 
     def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [],transformers: [])
       @name = name
@@ -9,6 +9,14 @@ module Blueprinter
       @included_view_names = included_view_names
       @excluded_field_names = excluded_view_names
       @transformers =  transformers
+      @definition_order = []
+      @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+    end
+
+    def track_definition_order(method)
+      if @sort_by_definition
+        @definition_order << method
+      end
     end
 
     def inherit(view)
@@ -30,11 +38,13 @@ module Blueprinter
     end
 
     def include_view(view_name)
+      track_definition_order(view_name => nil)
       included_view_names << view_name
     end
 
     def include_views(view_names)
       view_names.each do |view_name|
+        track_definition_order(view_name => nil)
         included_view_names << view_name
       end
     end
@@ -54,6 +64,7 @@ module Blueprinter
     end
 
     def <<(field)
+      track_definition_order(field.name)
       fields[field.name] = field
     end
   end

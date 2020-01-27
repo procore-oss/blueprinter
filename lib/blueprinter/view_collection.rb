@@ -23,8 +23,8 @@ module Blueprinter
     def fields_for(view_name)
       return identifier_fields if view_name == :identifier
 
-      fields = sortable_fields(view_name).values
-      sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
+      fields_hash = sortable_fields(view_name)
+      sorted_fields = sort_by_definition ? sort_by_def(view_name, fields_hash) : fields_hash.values.sort_by(&:name)
       identifier_fields + sorted_fields
     end
 
@@ -58,12 +58,32 @@ module Blueprinter
       fields
     end
 
-    def merge_fields(source_fields, included_fields)
-      if sort_by_definition
-        included_fields.merge(source_fields)
-      else
-        source_fields.merge(included_fields)
+    def sort_by_def(view_name, fields)
+      result = views[:default].definition_order.reduce({}) do |memo, key|
+        if key.is_a?(Hash)
+          reduce_helper(memo, key, fields) if view_name == key.keys.first # recur all the way down on the given view_name but no others!
+        else
+          memo[key] = fields[key]
+        end
+        memo
       end
+      result.values
+    end
+
+    def reduce_helper(memo, key, fields)
+      # recur for all included views
+      if key.is_a?(Hash)
+        reduce_helper(memo,views[key.keys.first].definition_order,fields)
+      elsif key.is_a?(Array)
+        key.each {|x| reduce_helper(memo, x, fields)  }
+      else
+        memo[key] = fields[key]
+      end
+      memo
+    end
+
+    def merge_fields(source_fields, included_fields)
+      source_fields.merge! included_fields
     end
   end
 end

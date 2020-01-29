@@ -6,6 +6,10 @@ describe 'Blueprinter' do
     before { Blueprinter.configure { |config| config.generator = JSON } }
     after { reset_blueprinter_config! }
 
+    let(:extractor) do
+      class FoodDehydrator < Blueprinter::Extractor; end
+    end
+
     it 'should set the `generator`' do
       Blueprinter.configure { |config| config.generator = Oj }
       expect(Blueprinter.configuration.generator).to be(Oj)
@@ -57,6 +61,16 @@ describe 'Blueprinter' do
       Blueprinter.configure { |config| config.datetime_format = "%m/%d/%Y" }
       expect(Blueprinter.configuration.datetime_format).to eq("%m/%d/%Y")
     end
+
+    it 'should set the `extractor_default` option' do
+      Blueprinter.configure { |config| config.extractor_default = extractor }
+      expect(Blueprinter.configuration.extractor_default).to eq(extractor)
+    end
+
+    it 'should default the `extractor_default` option' do
+      expect(Blueprinter.configuration.extractor_default).to eq(Blueprinter::AutoExtractor)
+    end
+
   end
 
   describe "::Configuration" do

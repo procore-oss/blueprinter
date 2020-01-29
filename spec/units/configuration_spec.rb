@@ -7,7 +7,7 @@ describe 'Blueprinter' do
     after { reset_blueprinter_config! }
 
     let(:extractor) do
-      class FoodDehydrator < Blueprinter::Extractor; end
+      class FoodDehydrator < Blueprinter::AutoExtractor; end
     end
 
     it 'should set the `generator`' do

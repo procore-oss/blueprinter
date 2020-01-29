@@ -754,7 +754,7 @@ Blueprinter gets a given objects' values from the fields definitions using extra
 For a specific kind of field, create an extractor class extending from `Blueprinter::Extractor`
 ```ruby
 class MyFieldExtractor < Blueprinter::Extractor
-  def extract(_field_name, _object, _local_options, _options={}
+  def extract(_field_name, _object, _local_options, _options={})
     # process your obscure_object
     _object.clarified
   end

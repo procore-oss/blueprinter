@@ -48,20 +48,39 @@ shared_examples 'Base::render' do
     it('returns json with a renamed field') { should eq(result) }
   end
 
-  context 'Given blueprint has ::field with a :extractor argument' do
-    let(:result) { '{"first_name":"MEG","id":' + obj_id + '}' }
-    let(:blueprint) do
-      extractor = Class.new(Blueprinter::Extractor) do
+  context 'non-default extractor' do
+    let(:extractor) do
+      Class.new(Blueprinter::Extractor) do
         def extract(field_name, object, _local_options, _options={})
-          object[field_name].upcase
+          object[field_name].respond_to?(:upcase) ? object[field_name].upcase : object[field_name]
         end
       end
-      Class.new(Blueprinter::Base) do
-        field :id
-        field :first_name, extractor: extractor
-      end
     end
-    it('returns json derived from a custom extractor') { should eq(result) }
+    let(:result) { '{"first_name":"MEG","id":' + obj_id + '}' }
+
+    context 'Given blueprint has ::field with a :extractor argument' do
+      let(:blueprint) do
+        ex = extractor
+        Class.new(Blueprinter::Base) do
+          field :id
+          field :first_name, extractor: ex
+        end
+      end
+      it('returns json derived from a custom extractor') { should eq(result) }
+    end
+
+    context 'Given a non-default global extractor configured' do
+      before { Blueprinter.configure { |config| config.extractor_default = extractor } }
+      after { reset_blueprinter_config! }
+
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          field :id
+          field :first_name
+        end
+      end
+      it('returns json derived from a custom extractor') { should eq(result) }
+    end
   end
 
   context 'Given blueprint has ::fields with :datetime_format argument and global datetime_format' do

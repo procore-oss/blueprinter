@@ -51,7 +51,7 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.identifier(method, name: method, extractor: AutoExtractor.new, &block)
+    def self.identifier(method, name: method, extractor: Blueprinter.configuration.extractor_default.new, &block)
       view_collection[:identifier] << Field.new(
         method,
         name,
@@ -120,7 +120,7 @@ module Blueprinter
       current_view << Field.new(
         method,
         options.fetch(:name) { method },
-        options.fetch(:extractor) { AutoExtractor.new },
+        options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
         self,
         options.merge(block: block),
       )

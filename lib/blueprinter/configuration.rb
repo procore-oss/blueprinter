@@ -1,6 +1,6 @@
 module Blueprinter
   class Configuration
-    attr_accessor :association_default, :datetime_format, :field_default, :generator, :if, :method, :sort_fields_by, :unless
+    attr_accessor :association_default, :datetime_format, :field_default, :generator, :if, :method, :sort_fields_by, :unless, :extractor_default
 
     VALID_CALLABLES = %i(if unless).freeze
 
@@ -13,6 +13,7 @@ module Blueprinter
       @method = :generate
       @sort_fields_by = :name_asc
       @unless = nil
+      @extractor_default = AutoExtractor
     end
 
     def jsonify(blob)

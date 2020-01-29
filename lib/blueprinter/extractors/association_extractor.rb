@@ -4,7 +4,7 @@ module Blueprinter
     include EmptyTypes
 
     def initialize
-      @extractor = AutoExtractor.new
+      @extractor = Blueprinter.configuration.extractor_default.new
     end
 
     def extract(association_name, object, local_options, options={})

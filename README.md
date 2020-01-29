@@ -742,6 +742,57 @@ end
 ---
 </details>
 
+<details>
+<summary>Configurable Extractors</summary>
+
+---
+
+Blueprinter gets a given objects' values from the fields definitions using extractor classes. You can substitute your own extractor class globally or per-field.
+
+#### Examples
+
+For a specific kind of field, create an extractor class extending from `Blueprinter::Extractor`
+```ruby
+class MyFieldExtractor < Blueprinter::Extractor
+  def extract(_field_name, _object, _local_options, _options={})
+    # process your obscure_object
+    _object.clarified
+  end
+end
+```
+
+```ruby
+class MysteryBlueprint < Blueprinter::Base
+  field :obscure_object, extractor: MyFieldExtractor
+end
+```
+
+For a global default, create an extractor class extending from `Blueprinter::AutoExtractor` and set the `extractor_default` configuration
+```ruby
+class MyAutoExtractor < Blueprinter::AutoExtractor
+  def initialize
+    super
+    @my_field_extractor = MyFieldExtractor.new
+  end
+  def extractor(object, options)
+    # dispatch to any class AutoExtractor can, plus more
+    if detect_obscurity(object)
+      @my_field_extractor
+    else
+      super
+    end
+  end
+end
+```
+
+```ruby
+Blueprinter.configure do |config|
+  config.extractor_default = MyAutoExtractor
+end
+```
+
+---
+</details>
 
 <details>
 <summary>Sorting Fields</summary>

@@ -1,3 +1,11 @@
+## 0.23.0  - 2019/1/31
+* 🚀 [FEATURE] Configurable default extractor introduced in [#198](https://github.com/procore/blueprinter/pull/198) by [@wlkrw](https://github.com/wlkrw). You can now set a default extractor like so:
+```
+Blueprinter.configure do |config|
+  config.extractor_default = MyAutoExtractor
+end
+```
+
 ## 0.22.0  - 2019/12/26
 * 🚀 [FEATURE] Add rails generators. See `rails g blueprinter:blueprint --help` for usage. Introduced in [#176](https://github.com/procore/blueprinter/pull/176) by [@wlkrw](https://github.com/wlkrw).
 

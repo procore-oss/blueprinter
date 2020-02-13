@@ -59,27 +59,27 @@ module Blueprinter
     end
 
     def sort_by_def(view_name, fields)
-      result = views[:default].definition_order.reduce({}) do |memo, key|
-        if key.is_a?(Hash)
-          reduce_helper(memo, key, fields) if view_name == key.keys.first # recur all the way down on the given view_name but no others!
+      result = views[:default].definition_order.reduce({}) do |ordered_fields, definition|
+        if definition.for_a_view?
+          add_to_ordered_fields(ordered_fields, definition, fields) if view_name == definition.name #key.keys.first # recur all the way down on the given view_name but no others!
         else
-          memo[key] = fields[key]
+          ordered_fields[definition.name] = fields[definition.name]
         end
-        memo
+        ordered_fields
       end
       result.values
     end
 
-    def reduce_helper(memo, key, fields)
-      # recur for all included views
-      if key.is_a?(Hash)
-        reduce_helper(memo,views[key.keys.first].definition_order,fields)
-      elsif key.is_a?(Array)
-        key.each {|x| reduce_helper(memo, x, fields)  }
+    def add_to_ordered_fields(ordered_fields, definition, fields)
+      if definition.is_a?(Array)
+        definition.each {|x| add_to_ordered_fields(ordered_fields, x, fields)  }
+      elsif definition.for_a_view?
+        add_to_ordered_fields(ordered_fields,views[definition.name].definition_order,fields)
       else
-        memo[key] = fields[key]
+        ordered_fields[definition.name] = fields[definition.name]
       end
-      memo
+
+      ordered_fields
     end
 
     def merge_fields(source_fields, included_fields)

@@ -58,28 +58,23 @@ module Blueprinter
       fields
     end
 
+    # select and order members of fields according to traversal of the definition_orders
     def sort_by_def(view_name, fields)
-      result = views[:default].definition_order.reduce({}) do |ordered_fields, definition|
-        if definition.for_a_view?
-          add_to_ordered_fields(ordered_fields, definition, fields) if view_name == definition.name #key.keys.first # recur all the way down on the given view_name but no others!
-        else
-          ordered_fields[definition.name] = fields[definition.name]
-        end
-        ordered_fields
-      end
-      result.values
+      ordered_fields = {}
+      views[:default].definition_order.each { |definition| add_to_ordered_fields(ordered_fields, definition, fields, view_name)  }
+      ordered_fields.values
     end
 
-    def add_to_ordered_fields(ordered_fields, definition, fields)
-      if definition.is_a?(Array)
-        definition.each {|x| add_to_ordered_fields(ordered_fields, x, fields)  }
-      elsif definition.for_a_view?
-        add_to_ordered_fields(ordered_fields,views[definition.name].definition_order,fields)
+    # view_name_filter allows to follow definition order all the way down starting from the view_name given to sort_by_def()
+    # but include no others at the top-level
+    def add_to_ordered_fields(ordered_fields, definition, fields, view_name_filter = nil)
+      if definition.for_a_view?
+        if view_name_filter.nil? || view_name_filter == definition.name
+          views[definition.name].definition_order.each { |_definition| add_to_ordered_fields(ordered_fields, _definition, fields) }
+        end
       else
         ordered_fields[definition.name] = fields[definition.name]
       end
-
-      ordered_fields
     end
 
     def merge_fields(source_fields, included_fields)

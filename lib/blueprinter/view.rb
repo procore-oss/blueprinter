@@ -1,6 +1,6 @@
 module Blueprinter
   # @api private
-  DefinitionPlaceholder = Struct.new :name, :for_a_view?
+  DefinitionPlaceholder = Struct.new :name, :view?
   class View
     attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers, :definition_order
 

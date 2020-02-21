@@ -68,7 +68,7 @@ module Blueprinter
     # view_name_filter allows to follow definition order all the way down starting from the view_name given to sort_by_def()
     # but include no others at the top-level
     def add_to_ordered_fields(ordered_fields, definition, fields, view_name_filter = nil)
-      if definition.for_a_view?
+      if definition.view?
         if view_name_filter.nil? || view_name_filter == definition.name
           views[definition.name].definition_order.each { |_definition| add_to_ordered_fields(ordered_fields, _definition, fields) }
         end

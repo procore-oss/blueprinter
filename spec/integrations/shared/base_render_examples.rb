@@ -569,6 +569,24 @@ shared_examples 'Base::render' do
     # bc of depth first traversal at sorting time and not tracking state of @definition_order at time of each block entry
     let(:view_middle_and_last_keys) { [:first_name, :company, :active, :deleted_at, :description, :last_name] }
 
+    let(:view_include_cycle) do
+      Class.new(Blueprinter::Base) do
+        view :description do
+          field :description
+          include_view :active
+        end
+        view :active do
+          field :active
+          include_view :expanded
+        end
+        view :expanded do
+          field :last_name
+          include_view :description
+        end
+      end
+    end
+    let(:view_include_cycle_keys) {[:last_name, :description, :active, :foo]}
+
     subject { blueprint.render_as_hash(object_with_attributes, view: :expanded).keys }
 
     context "Middle" do
@@ -605,6 +623,13 @@ shared_examples 'Base::render' do
       let(:blueprint) { view_middle_and_last }
       it "order preserved" do
         should(eq(view_middle_and_last_keys))
+      end
+    end
+    context "Cycle" do
+      let(:blueprint) { view_include_cycle }
+      it "falls over and dies" do
+        #should(eq(view_include_cycle_keys))
+        expect {should}.to raise_error(SystemStackError)
       end
     end
 

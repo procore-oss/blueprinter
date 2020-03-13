@@ -23,8 +23,8 @@ module Blueprinter
     def fields_for(view_name)
       return identifier_fields if view_name == :identifier
 
-      fields = sortable_fields(view_name).values
-      sorted_fields = sort_by_definition ? fields : fields.sort_by(&:name)
+      fields_hash = sortable_fields(view_name)
+      sorted_fields = sort_by_definition ? sort_by_def(view_name, fields_hash) : fields_hash.values.sort_by(&:name)
       identifier_fields + sorted_fields
     end
 
@@ -58,12 +58,27 @@ module Blueprinter
       fields
     end
 
-    def merge_fields(source_fields, included_fields)
-      if sort_by_definition
-        included_fields.merge(source_fields)
+    # select and order members of fields according to traversal of the definition_orders
+    def sort_by_def(view_name, fields)
+      ordered_fields = {}
+      views[:default].definition_order.each { |definition| add_to_ordered_fields(ordered_fields, definition, fields, view_name)  }
+      ordered_fields.values
+    end
+
+    # view_name_filter allows to follow definition order all the way down starting from the view_name given to sort_by_def()
+    # but include no others at the top-level
+    def add_to_ordered_fields(ordered_fields, definition, fields, view_name_filter = nil)
+      if definition.view?
+        if view_name_filter.nil? || view_name_filter == definition.name
+          views[definition.name].definition_order.each { |_definition| add_to_ordered_fields(ordered_fields, _definition, fields) }
+        end
       else
-        source_fields.merge(included_fields)
+        ordered_fields[definition.name] = fields[definition.name]
       end
+    end
+
+    def merge_fields(source_fields, included_fields)
+      source_fields.merge! included_fields
     end
   end
 end

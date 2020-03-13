@@ -427,6 +427,7 @@ module Blueprinter
     # @return [View] a Blueprinter::View object
     def self.view(view_name)
       @current_view = view_collection[view_name]
+      view_collection[:default].track_definition_order(view_name)
       yield
       @current_view = view_collection[:default]
     end

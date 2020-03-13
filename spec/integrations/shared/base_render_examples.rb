@@ -479,4 +479,196 @@ shared_examples 'Base::render' do
     end
     it('returns json with values derived from options') { should eq(result) }
   end
+
+  context "Ordering of fields from inside a view by definition" do
+    before { Blueprinter.configure { |config| config.sort_fields_by = :definition } }
+    after { reset_blueprinter_config! }
+
+
+    let(:view_default) do
+      Class.new(Blueprinter::Base) do
+        view :expanded do
+          field :company
+        end
+        field :first_name
+        field :last_name
+      end
+    end
+    let(:view_default_keys) { [:first_name, :last_name] }
+
+    let(:view_first) do
+      Class.new(Blueprinter::Base) do
+        view :expanded do
+          field :company
+        end
+        identifier :id
+        field :first_name
+        field :last_name
+      end
+    end
+    let(:view_first_keys) { [:id, :company, :first_name, :last_name] }
+
+    let(:view_last) do
+      Class.new(Blueprinter::Base) do
+        field :first_name
+        field :last_name
+        view :expanded do
+          field :company
+        end
+      end
+    end
+    let(:view_last_keys) { [:first_name, :last_name , :company] }
+
+    let(:view_middle) do
+      Class.new(Blueprinter::Base) do
+        field :first_name
+        view :expanded do
+          field :company
+        end
+        field :last_name
+      end
+    end
+    let(:view_middle_keys) { [:first_name, :company, :last_name] }
+
+    let(:view_middle_include) do
+      Class.new(Blueprinter::Base) do
+        field :first_name
+        view :active do
+          field :active
+        end
+        view :expanded do
+          field :company
+          include_view :active
+        end
+        field :last_name
+      end
+    end
+    let(:view_middle_include_keys) { [:first_name, :company, :active, :last_name] }
+
+    let(:view_middle_includes) do
+      Class.new(Blueprinter::Base) do
+        field :first_name
+        view :active do
+          field :active
+        end
+        view :description do
+          field :description
+        end
+        view :expanded do
+          field :company
+          include_views :active, :description
+        end
+        field :last_name
+      end
+    end
+    let(:view_middle_includes_keys) { [:first_name, :company, :active, :description, :last_name] }
+
+    let(:view_middle_and_last) do
+      Class.new(Blueprinter::Base) do
+        view :description do
+          field :description
+        end
+        view :active do
+          field :active
+          field :deleted_at
+        end
+
+        field :first_name
+        view :expanded do
+          field :company
+          include_view :active
+        end
+        field :last_name
+        view :expanded do
+          include_view :description
+        end
+      end
+    end
+    # all :expanded blocks' fields got into the order at the point where the :expanded block was entered the first time
+    # bc of depth first traversal at sorting time and not tracking state of @definition_order at time of each block entry
+    let(:view_middle_and_last_keys) { [:first_name, :company, :active, :deleted_at, :description, :last_name] }
+
+    let(:view_include_cycle) do
+      Class.new(Blueprinter::Base) do
+        view :description do
+          field :description
+          include_view :active
+        end
+        view :active do
+          field :active
+          include_view :expanded
+        end
+        view :expanded do
+          field :last_name
+          include_view :description
+        end
+      end
+    end
+    let(:view_include_cycle_keys) {[:last_name, :description, :active, :foo]}
+
+    subject { blueprint.render_as_hash(object_with_attributes, view: :expanded).keys }
+
+    context "Middle" do
+      let(:blueprint) { view_middle }
+      it "order preserved" do
+        should(eq(view_middle_keys))
+      end
+    end
+    context "First" do
+      let(:blueprint) { view_first }
+      it "order preserved" do
+        should(eq(view_first_keys))
+      end
+    end
+    context "Last" do
+      let(:blueprint) { view_last }
+      it "order preserved" do
+        should(eq(view_last_keys))
+      end
+    end
+    context "include_view" do
+      let(:blueprint) { view_middle_include }
+      it "order preserved" do
+        should(eq(view_middle_include_keys))
+      end
+    end
+    context "include_views" do
+      let(:blueprint) { view_middle_includes }
+      it "order preserved" do
+        should(eq(view_middle_includes_keys))
+      end
+    end
+    context "Middle and Last" do
+      let(:blueprint) { view_middle_and_last }
+      it "order preserved" do
+        should(eq(view_middle_and_last_keys))
+      end
+    end
+    context "Cycle" do
+      let(:blueprint) { view_include_cycle }
+      it "falls over and dies" do
+        #should(eq(view_include_cycle_keys))
+        expect {should}.to raise_error(SystemStackError)
+      end
+    end
+
+    context "Default" do
+      context "explicit" do
+        subject { blueprint.render_as_hash(object_with_attributes, view: :default).keys }
+        let(:blueprint) { view_default }
+        it "order preserved" do
+          should(eq(view_default_keys))
+        end
+      end
+      context "implicit" do
+        subject { blueprint.render_as_hash(object_with_attributes).keys }
+        let(:blueprint) { view_default }
+        it "order preserved" do
+          should(eq(view_default_keys))
+        end
+      end
+    end
+
+  end
+
 end

@@ -1,3 +1,6 @@
+## 0.23.1  - 2019/3/13
+* 🚀 [BUGFIX] Fixes #172 where views would unintentionally ignore `sort_fields_by: :definition` configuration. Resolved in [#197](https://github.com/procore/blueprinter/pull/197) by [@wlkrw](https://github.com/wlkrw).
+
 ## 0.23.0  - 2019/1/31
 * 🚀 [FEATURE] Configurable default extractor introduced in [#198](https://github.com/procore/blueprinter/pull/198) by [@wlkrw](https://github.com/wlkrw). You can now set a default extractor like so:
 ```

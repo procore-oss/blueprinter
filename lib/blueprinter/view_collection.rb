@@ -78,7 +78,7 @@ module Blueprinter
     end
 
     def merge_fields(source_fields, included_fields)
-      source_fields.merge! included_fields
+      source_fields.merge included_fields
     end
   end
 end

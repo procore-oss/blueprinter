@@ -409,6 +409,7 @@ shared_examples 'Base::render' do
       expect(blueprint.render(obj, view: :normal)).to     eq(normal)
       expect(blueprint.render(obj, view: :extended)).to   eq(ext)
       expect(blueprint.render(obj, view: :special)).to    eq(special)
+      expect(blueprint.render(obj)).to                    eq(no_view)
     end
   end
 

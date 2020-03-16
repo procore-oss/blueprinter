@@ -1,3 +1,6 @@
+## 0.23.2  - 2019/3/16
+* 🚀 [BUGFIX] Fixes issue where fields "bled" into other views due to merge side-effects. Resolved issue [205](https://github.com/procore/blueprinter/issues/205) in [#204](https://github.com/procore/blueprinter/pull/204) by [@trevorrjohn](https://github.com/trevorrjohn).
+
 ## 0.23.1  - 2019/3/13
 * 🚀 [BUGFIX] Fixes #172 where views would unintentionally ignore `sort_fields_by: :definition` configuration. Resolved in [#197](https://github.com/procore/blueprinter/pull/197) by [@wlkrw](https://github.com/wlkrw).
 

@@ -672,4 +672,31 @@ shared_examples 'Base::render' do
 
   end
 
+  context 'field exclusion' do
+    let(:view) do
+      Class.new(Blueprinter::Base) do
+        view :exclude_first_name do
+          exclude :first_name
+        end
+
+        identifier :id
+        field :first_name
+        field :last_name
+
+        view :excluded do
+          field :middle_name
+          exclude :id
+          include_view :exclude_first_name
+        end
+      end
+    end
+    let(:excluded_view_keys) { %i[last_name middle_name] }
+    let(:blueprint) { view }
+
+    subject { blueprint.render_as_hash(object_with_attributes, view: :excluded).keys }
+
+    it 'excludes fields' do
+      should(eq(excluded_view_keys))
+    end
+  end
 end

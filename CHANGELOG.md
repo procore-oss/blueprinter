@@ -1,3 +1,6 @@
+## 0.23.3  - 2019/4/7
+* 🐛 [BUGFIX] Fixes issue where `exclude` fields in deeply nested views were not respected. Resolved issue [207](https://github.com/procore/blueprinter/issues/207) in [#208](https://github.com/procore/blueprinter/pull/208) by [@tpltn](https://github.com/tpltn).
+
 ## 0.23.2  - 2019/3/16
 * 🐛 [BUGFIX] Fixes issue where fields "bled" into other views due to merge side-effects. Resolved issue [205](https://github.com/procore/blueprinter/issues/205) in [#204](https://github.com/procore/blueprinter/pull/204) by [@trevorrjohn](https://github.com/trevorrjohn).
 

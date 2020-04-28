@@ -1,5 +1,5 @@
 ## 0.23.4  - 2020/4/28
-* 🚀 [FEATURE] Public class method `has_view?` on Blueprinter::Base subclasses introduced in [#?](https://github.com/procore/blueprinter/pull/). Thanks to [@spencerneste](https://github.com/spencerneste).
+* 🚀 [FEATURE] Public class method `has_view?` on Blueprinter::Base subclasses introduced in [#213](https://github.com/procore/blueprinter/pull/213). Thanks to [@spencerneste](https://github.com/spencerneste).
 
 ## 0.23.3  - 2019/4/7
 * 🐛 [BUGFIX] Fixes issue where `exclude` fields in deeply nested views were not respected. Resolved issue [207](https://github.com/procore/blueprinter/issues/207) in [#208](https://github.com/procore/blueprinter/pull/208) by [@tpltn](https://github.com/tpltn).

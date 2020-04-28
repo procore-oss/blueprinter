@@ -431,5 +431,26 @@ module Blueprinter
       yield
       @current_view = view_collection[:default]
     end
+
+    # Check whether or not a Blueprint supports the supplied view.
+    # It accepts a view name.
+    #
+    # @param view_name [Symbol] the view name
+    #
+    # @example With the following Blueprinter
+    #
+    # class ExampleBlueprinter < Blueprinter::Base
+    #  view :custom do
+    #  end
+    # end
+    #
+    #  ExampleBlueprinter.has_view?(:custom) => true
+    #  ExampleBlueprinter.has_view?(:doesnt_exist) => false
+    #
+    # @return [Boolean] a boolean value indicating if the view is
+    # suppored by this Blueprinter.
+    def self.has_view?(view_name)
+      view_collection.has_view? view_name
+    end
   end
 end

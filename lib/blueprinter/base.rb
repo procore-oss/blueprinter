@@ -444,8 +444,8 @@ module Blueprinter
     #  end
     # end
     #
-    #  ExampleBlueprinter.has_view?(:custom) => true
-    #  ExampleBlueprinter.has_view?(:doesnt_exist) => false
+    #  ExampleBlueprint.has_view?(:custom) => true
+    #  ExampleBlueprint.has_view?(:doesnt_exist) => false
     #
     # @return [Boolean] a boolean value indicating if the view is
     # suppored by this Blueprint.

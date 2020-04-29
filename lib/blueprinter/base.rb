@@ -437,9 +437,9 @@ module Blueprinter
     #
     # @param view_name [Symbol] the view name
     #
-    # @example With the following Blueprinter
+    # @example With the following Blueprint
     #
-    # class ExampleBlueprinter < Blueprinter::Base
+    # class ExampleBlueprint < Blueprinter::Base
     #  view :custom do
     #  end
     # end
@@ -448,7 +448,7 @@ module Blueprinter
     #  ExampleBlueprinter.has_view?(:doesnt_exist) => false
     #
     # @return [Boolean] a boolean value indicating if the view is
-    # suppored by this Blueprinter.
+    # suppored by this Blueprint.
     def self.has_view?(view_name)
       view_collection.has_view? view_name
     end

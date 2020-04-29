@@ -364,12 +364,12 @@ describe '::Base' do
       end
     end
 
-    context 'when the blueprinter has the supplied view' do
+    context 'when the blueprint has the supplied view' do
       let(:view) { :custom }
       it { is_expected.to eq(true) }
     end
 
-    context 'when the blueprinter does not have the supplied view' do
+    context 'when the blueprint does not have the supplied view' do
       let(:view) { :does_not_exist }
       it { is_expected.to eq(false) }
     end

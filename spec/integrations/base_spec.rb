@@ -353,6 +353,28 @@ describe '::Base' do
     end
   end
 
+  describe 'has_view?' do
+    subject { blueprint.has_view?(view) }
+
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :uid
+        view :custom do
+        end
+      end
+    end
+
+    context 'when the blueprint has the supplied view' do
+      let(:view) { :custom }
+      it { is_expected.to eq(true) }
+    end
+
+    context 'when the blueprint does not have the supplied view' do
+      let(:view) { :does_not_exist }
+      it { is_expected.to eq(false) }
+    end
+  end
+
   describe 'Using the ApplicationBlueprint pattern' do
     let(:obj) { OpenStruct.new(id: 1, first_name: 'Meg',last_name:'Ryan', age: 32) }
     let(:transformer) do

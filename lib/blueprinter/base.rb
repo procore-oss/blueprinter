@@ -448,7 +448,7 @@ module Blueprinter
     #  ExampleBlueprint.has_view?(:doesnt_exist) => false
     #
     # @return [Boolean] a boolean value indicating if the view is
-    # suppored by this Blueprint.
+    # supported by this Blueprint.
     def self.has_view?(view_name)
       view_collection.has_view? view_name
     end

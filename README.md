@@ -306,6 +306,49 @@ end
 ---
 </details>
 
+<details>
+<summary>Delegate</summary>
+
+---
+
+You can use the delegate instead of the block.
+
+With Block:
+```ruby
+class ProjectBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :company_name do |project, _options|
+    project.user.company
+  end
+end
+```
+
+Instead with Delegate:
+```ruby
+class ProjectBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :company_name, delegate: { to: :user, source: :company }
+end
+```
+
+Usage:
+
+```ruby
+puts ProjectBlueprint.render(project)
+```
+
+Output:
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "company_name": "My Company LLC"
+}
+
+```
+
+---
+</details>
+
 
 <details>
 <summary>Associations</summary>

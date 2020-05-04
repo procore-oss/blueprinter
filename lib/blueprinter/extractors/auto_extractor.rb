@@ -8,6 +8,7 @@ module Blueprinter
       @public_send_extractor = PublicSendExtractor.new
       @block_extractor = BlockExtractor.new
       @datetime_formatter = DateTimeFormatter.new
+      @delegate_extractor = DelegateExtractor.new
     end
 
     def extract(field_name, object, local_options, options = {})
@@ -25,6 +26,8 @@ module Blueprinter
     def extractor(object, options)
       if options[:block]
         @block_extractor
+      elsif options[:delegate]
+        @delegate_extractor
       elsif object.is_a?(Hash)
         @hash_extractor
       else

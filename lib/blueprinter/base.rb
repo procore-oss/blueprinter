@@ -7,6 +7,7 @@ require_relative 'extractors/auto_extractor'
 require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
+require_relative 'extractors/delegate_extractor'
 require_relative 'formatters/date_time_formatter'
 require_relative 'field'
 require_relative 'helpers/type_helpers'
@@ -101,6 +102,12 @@ module Blueprinter
     #     field :full_name do |object, options|
     #       "options[:title_prefix] #{object.first_name} #{object.last_name}"
     #     end
+    #     # other code
+    #   end
+    #
+    # @example Passing a delegate method.
+    #   class UserBlueprint < Blueprinter::Base
+    #     field :city, delegate: { to: :city, source: :name }
     #     # other code
     #   end
     #

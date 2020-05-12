@@ -37,6 +37,17 @@ shared_examples 'Base::render' do
     it('returns json with specified fields') { should eq(result) }
   end
 
+  context 'Given blueprint has ::field with a :method argument' do
+    let(:result) { '{"first_name":"Meg","identifier":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :identifier, method: :id
+        field :first_name
+      end
+    end
+    it('returns json with a value assigned to the key') { should eq(result) }
+  end
+
   context 'Given blueprint has ::field with a :name argument' do
     let(:result) { '{"first_name":"Meg","identifier":' + obj_id + '}' }
     let(:blueprint) do

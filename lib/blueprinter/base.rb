@@ -57,23 +57,28 @@ module Blueprinter
         name,
         extractor,
         self,
-        block: block,
+        block: block
       )
     end
 
     # Specify a field or method name to be included for serialization.
     # Takes a required method and an option.
     #
-    # @param method [Symbol] the field or method name you want to include for
-    #   serialization.
+    # @param key [Symbol] the field or name you want to include for
+    #   serialization. If :method is not specified as an option, this param
+    #   indicates the method name used to access the value to be serialized.
     # @param options [Hash] options to overide defaults.
     # @option options [AssociationExtractor,BlockExtractor,HashExtractor,PublicSendExtractor] :extractor
     #   Kind of extractor to use.
     #   Either define your own or use Blueprinter's premade extractors. The
     #   Default extractor is AutoExtractor
+    # @option options [Symbol] :method If this is provided, the given method is called
+    #   against the object to retrieve the value to be serialized.
+    #   `:method` and `:name` may not be used together.
     # @option options [Symbol] :name Use this to rename the method. Useful if
     #   if you want your JSON key named differently in the output than your
     #   object's field or method name.
+    #   `:method` and `:name` may not be used together.
     # @option options [String,Proc] :datetime_format Format Date or DateTime object
     #   If the option provided is a String, the object will be formatted with given strftime
     #   formatting.
@@ -116,14 +121,18 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.field(method, options = {}, &block)
-      current_view << Field.new(
-        method,
-        options.fetch(:name) { method },
-        options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
-        self,
-        options.merge(block: block),
-      )
+    def self.field(key, options = {}, &block)
+      if options[:method]
+        name = key
+        method = options[:method]
+      else
+        method = key
+        name = options.fetch(:name) { key }
+      end
+
+      extractor = options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new }
+
+      current_view << Field.new(method, name, extractor, self, options.merge(block: block))
     end
 
     # Specify an associated object to be included for serialization.

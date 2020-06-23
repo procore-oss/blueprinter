@@ -210,7 +210,7 @@ describe '::Base' do
               association :vehicles, blueprint: vehicle_blueprint, options: { modifier: 'Enhanced' }
             end
           end
-          it('returns json derived from a custom extractor') { should eq(result) }
+          it('returns json using the association options') { should eq(result) }
         end
 
         context 'Given an association :extractor option' do

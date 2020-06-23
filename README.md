@@ -361,7 +361,7 @@ For example:
 class VehicleBlueprint < Blueprinter::Base
   identifier :uuid
   field :full_name do |vehicle, options|
-    "#{vehicle.model} #{options[:trim]}}"
+    "#{vehicle.model} #{options[:trim]}"
   end
 end
 

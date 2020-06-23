@@ -10,6 +10,9 @@ class Blueprinter::Field
   end
 
   def extract(object, local_options)
+    # If this is an association field, merge the association field options in
+    # to the render options
+    local_options = local_options.merge(options[:options]) if association? && options[:options]
     extractor.extract(method, object, local_options, options)
   end
 
@@ -19,6 +22,10 @@ class Blueprinter::Field
   end
 
   private
+
+  def association?
+    !!options[:association]
+  end
 
   def if_callable
     return @if_callable if defined?(@if_callable)

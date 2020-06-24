@@ -1,4 +1,4 @@
-## 0.23.5  - 2020/6/22
+## 0.24.0  - 2020/6/22
 * 🚀 [FEATURE] Add an `options` option to associations to facilitate passing options from one blueprint to another. [#220](https://github.com/procore/blueprinter/pull/220). Thanks to [@mcclayton](https://github.com/mcclayton).
 
 ## 0.23.4  - 2020/4/28

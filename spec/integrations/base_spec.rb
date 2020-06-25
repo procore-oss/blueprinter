@@ -196,6 +196,23 @@ describe '::Base' do
           it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
         end
 
+        context 'Given an association :options option' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car Enhanced"}]}' }
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              field :make do |vehicle, options|
+                "#{vehicle.make} #{options[:modifier]}"
+              end
+            end
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association :vehicles, blueprint: vehicle_blueprint, options: { modifier: 'Enhanced' }
+            end
+          end
+          it('returns json using the association options') { should eq(result) }
+        end
+
         context 'Given an association :extractor option' do
           let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
           let(:blueprint) do

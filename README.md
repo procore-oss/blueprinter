@@ -355,6 +355,26 @@ Output:
 }
 ```
 
+It is also possible to pass options from one Blueprint to another via an association.
+For example:
+```ruby
+class VehicleBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :full_name do |vehicle, options|
+    "#{vehicle.model} #{options[:trim]}"
+  end
+end
+
+class DriverBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    fields :first_name, :last_name
+    association :vehicles, blueprint: vehicle_blueprint, options: { trim: 'LX' }
+  end
+end
+```
+
 ---
 </details>
 

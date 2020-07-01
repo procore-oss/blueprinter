@@ -4,12 +4,12 @@ module Blueprinter
   class View
     attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers, :definition_order
 
-    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [],transformers: [])
+    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [], transformers: [Blueprinter.configuration.transform_default].compact)
       @name = name
       @fields = fields
       @included_view_names = included_view_names
       @excluded_field_names = excluded_view_names
-      @transformers =  transformers
+      @transformers = transformers
       @definition_order = []
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
     end
@@ -34,7 +34,7 @@ module Blueprinter
       end
 
       view.transformers.each do |transformer|
-        self.add_transformer(transformer)
+        add_transformer(transformer)
       end
     end
 

@@ -9,6 +9,9 @@ describe 'Blueprinter' do
     let(:extractor) do
       class FoodDehydrator < Blueprinter::AutoExtractor; end
     end
+    let(:transform) do
+      class UpcaseTransform < Blueprinter::Transformer; end
+    end
 
     it 'should set the `generator`' do
       Blueprinter.configure { |config| config.generator = Oj }
@@ -71,6 +74,10 @@ describe 'Blueprinter' do
       expect(Blueprinter.configuration.extractor_default).to eq(Blueprinter::AutoExtractor)
     end
 
+    it 'should set the `transform_default` option' do
+      Blueprinter.configure { |config| config.transform_default = transform }
+      expect(Blueprinter.configuration.transform_default).to eq(transform)
+    end
   end
 
   describe "::Configuration" do

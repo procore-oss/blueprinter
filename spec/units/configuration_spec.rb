@@ -74,9 +74,9 @@ describe 'Blueprinter' do
       expect(Blueprinter.configuration.extractor_default).to eq(Blueprinter::AutoExtractor)
     end
 
-    it 'should set the `transform_default` option' do
-      Blueprinter.configure { |config| config.transform_default = transform }
-      expect(Blueprinter.configuration.transform_default).to eq(transform)
+    it 'should set the `default_transformers` option' do
+      Blueprinter.configure { |config| config.default_transformers = [transform] }
+      expect(Blueprinter.configuration.default_transformers).to eq([transform])
     end
   end
 

@@ -78,18 +78,32 @@ describe '::View' do
   end
 
   context 'with default transform' do
-    let(:transform) do
-      class UpcaseTransform < Blueprinter::Transformer; end
-      UpcaseTransform
+    let(:default_transform) do
+      class DefaultTransform < Blueprinter::Transformer; end
+      DefaultTransform
     end
-    let(:view) do
-      Blueprinter.configure { |config| config.transform_default = transform }
+    let(:override_transform) do
+      class OverrideTransform < Blueprinter::Transformer; end
+      OverrideTransform
+    end
+    let(:view_with_default_transform) do
       Blueprinter::View.new('View with default transform')
+    end
+    let(:view_with_override_transform) do
+      Blueprinter::View.new('View with override transform', transformers: [override_transform])
+    end
+
+    before do
+      Blueprinter.configure { |config| config.default_transformers = [default_transform] }
     end
 
     describe '#transformers' do
-      it 'should return the default transformer' do
-        expect(view.transformers).to eq([UpcaseTransform])
+      it 'should return the default transformers' do
+        expect(view_with_default_transform.transformers).to eq([default_transform])
+      end
+
+      it 'should allow for overriding the default transformers' do
+        expect(view_with_override_transform.transformers).to eq([override_transform])
       end
     end
   end

@@ -759,6 +759,25 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
+#### Global Transforms
+
+You can also specify global default transformers. Create one or more transformer classes extending from `Blueprinter::Transformer` and set the `default_transformers` configuration
+```ruby
+class LowerCamelTransformer < Blueprinter::Transformer
+  def transform(hash, _object, _options)
+    hash.transform_keys! { |key| key.to_s.camelize(:lower).to_sym }
+  end
+end
+```
+
+```ruby
+Blueprinter.configure do |config|
+  config.default_transformers = [LowerCamelTransformer]
+end
+```
+
+**Note: Any transforms specified on a per-blueprint or per-view level will override the `default_transformers` in the configuration.**
+
 ---
 </details>
 

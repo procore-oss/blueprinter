@@ -481,6 +481,35 @@ shared_examples 'Base::render' do
     it('returns json with values derived from options') { should eq(result) }
   end
 
+  context 'Given blueprint has a transformer with a default configured' do
+    let(:default_transform) do
+      UpcaseKeysTransformer = Class.new(Blueprinter::Transformer) do
+        def transform(hash, _object, _options)
+          hash.transform_keys! { |key| key.to_s.upcase.to_sym }
+        end
+      end
+    end
+    before do
+      Blueprinter.configure { |config| config.default_transformers = [default_transform] }
+    end
+    after { reset_blueprinter_config! }
+    subject { blueprint.render(obj) }
+    let(:result) { '{"id":' + obj_id + ',"full_name":"Meg Ryan"}' }
+    let(:blueprint) do
+      DynamicFieldsTransformer = Class.new(Blueprinter::Transformer) do
+        def transform(result_hash, object, options={})
+          dynamic_fields = (object.is_a? Hash) ? object[:dynamic_fields] : object.dynamic_fields
+          result_hash.merge!(dynamic_fields)
+        end
+      end
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        transform DynamicFieldsTransformer
+      end
+    end
+    it('overrides the configured default transformer') { should eq(result) }
+  end
+
   context "Ordering of fields from inside a view by definition" do
     before { Blueprinter.configure { |config| config.sort_fields_by = :definition } }
     after { reset_blueprinter_config! }

@@ -2,16 +2,20 @@ module Blueprinter
   # @api private
   DefinitionPlaceholder = Struct.new :name, :view?
   class View
-    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :transformers, :definition_order
+    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :view_transformers, :definition_order
 
     def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [], transformers: [])
       @name = name
       @fields = fields
       @included_view_names = included_view_names
       @excluded_field_names = excluded_view_names
-      @transformers = transformers.empty? ? Blueprinter.configuration.default_transformers.clone : transformers
+      @view_transformers = transformers
       @definition_order = []
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+    end
+
+    def transformers
+      view_transformers.empty? ? Blueprinter.configuration.default_transformers.clone : view_transformers
     end
 
     def track_definition_order(method, is_view = true)
@@ -33,7 +37,7 @@ module Blueprinter
         exclude_field(field_name)
       end
 
-      view.transformers.each do |transformer|
+      view.view_transformers.each do |transformer|
         add_transformer(transformer)
       end
     end
@@ -61,7 +65,7 @@ module Blueprinter
     end
 
     def add_transformer(custom_transformer)
-      transformers << custom_transformer
+      view_transformers << custom_transformer
     end
 
     def <<(field)

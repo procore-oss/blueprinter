@@ -15,7 +15,7 @@ module Blueprinter
     end
 
     def transformers
-      view_transformers.empty? ? Blueprinter.configuration.default_transformers.clone : view_transformers
+      view_transformers.empty? ? Blueprinter.configuration.default_transformers : view_transformers
     end
 
     def track_definition_order(method, is_view = true)

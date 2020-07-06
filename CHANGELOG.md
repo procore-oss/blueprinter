@@ -1,3 +1,6 @@
+## 0.25.0  - 2020/7/06
+* 🚀 [FEATURE] Enable default `Blueprinter::Transformer`s to be set in the global configuration. [#222](https://github.com/procore/blueprinter/pull/222). Thanks to [@supremebeing7](https://github.com/supremebeing7).
+
 ## 0.24.0  - 2020/6/22
 * 🚀 [FEATURE] Add an `options` option to associations to facilitate passing options from one blueprint to another. [#220](https://github.com/procore/blueprinter/pull/220). Thanks to [@mcclayton](https://github.com/mcclayton).
 

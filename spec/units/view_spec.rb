@@ -32,16 +32,16 @@ describe '::View' do
     end
   end
 
-  describe '#exclude_fields(:view_name)' do 
-    it 'should return [:view_name]' do 
+  describe '#exclude_fields(:view_name)' do
+    it 'should return [:view_name]' do
       expect(view.exclude_fields([:last_name,:middle_name])).to eq([:last_name,:middle_name])
     end
-    it 'should set #excluded_field_names to [:view_name]' do 
+    it 'should set #excluded_field_names to [:view_name]' do
       view.exclude_fields([:last_name,:middle_name])
       expect(view.excluded_field_names).to eq([:last_name,:middle_name])
     end
   end
-  
+
   describe '#<<(field)' do
     context 'Given a field that does not exist' do
       it('should return field') { expect(view << field).to eq(field) }
@@ -73,6 +73,37 @@ describe '::View' do
       before { view << field }
       it('should eq {field.name => field}') do
         expect(view.fields).to eq({first_name: field})
+      end
+    end
+  end
+
+  context 'with default transform' do
+    let(:default_transform) do
+      class DefaultTransform < Blueprinter::Transformer; end
+      DefaultTransform
+    end
+    let(:override_transform) do
+      class OverrideTransform < Blueprinter::Transformer; end
+      OverrideTransform
+    end
+    let(:view_with_default_transform) do
+      Blueprinter::View.new('View with default transform')
+    end
+    let(:view_with_override_transform) do
+      Blueprinter::View.new('View with override transform', transformers: [override_transform])
+    end
+
+    before do
+      Blueprinter.configure { |config| config.default_transformers = [default_transform] }
+    end
+
+    describe '#transformers' do
+      it 'should return the default transformers' do
+        expect(view_with_default_transform.transformers).to eq([default_transform])
+      end
+
+      it 'should allow for overriding the default transformers' do
+        expect(view_with_override_transform.transformers).to eq([override_transform])
       end
     end
   end

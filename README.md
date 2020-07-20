@@ -370,7 +370,7 @@ class DriverBlueprint < Blueprinter::Base
 
   view :normal do
     fields :first_name, :last_name
-    association :vehicles, blueprint: vehicle_blueprint, options: { trim: 'LX' }
+    association :vehicles, blueprint: VehicleBlueprint, options: { trim: 'LX' }
   end
 end
 ```

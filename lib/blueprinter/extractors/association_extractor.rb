@@ -7,8 +7,8 @@ module Blueprinter
       @extractor = Blueprinter.configuration.extractor_default.new
     end
 
-    def extract(association_name, object, local_options, options={})
-      options_without_default = options.reject { |k,_| k == :default || k == :default_if }
+    def extract(association_name, object, local_options, options = {})
+      options_without_default = options.reject { |k, _| k == :default || k == :default_if }
       # Merge in assocation options hash
       local_options = local_options.merge(options[:options]) if options[:options].is_a?(Hash)
       value = @extractor.extract(association_name, object, local_options, options_without_default)
@@ -28,12 +28,13 @@ module Blueprinter
       if blueprint.is_a?(Proc)
         blueprint.call(value)
       else
-        validate_blueprint(blueprint, association_name)
+        validate_blueprint_has_ancestors(blueprint, association_name)
+        validate_blueprinter_has_correct_ancestor(blueprint, association_name)
         blueprint
       end
     end
 
-    def validate_blueprint(blueprint, association_name)
+    def validate_blueprint_has_ancestors(blueprint, association_name)
       # If the class passed as a blueprint does not respond to ancestors
       # it means it, at the very least, does not have Blueprinter::Base as
       # one of its ancestor classes (e.g: Hash) and thus an error should
@@ -42,7 +43,9 @@ module Blueprinter
         raise BlueprinterError, "Blueprint provided for #{association_name} "\
                                 'association is not valid.'
       end
+    end
 
+    def validate_blueprinter_has_correct_ancestor(blueprint, association_name)
       # Guard clause in case Blueprinter::Base is present in the ancestor list
       # for the blueprint class provided.
       return if blueprint.ancestors.include? Blueprinter::Base

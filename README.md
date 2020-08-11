@@ -375,6 +375,32 @@ class DriverBlueprint < Blueprinter::Base
 end
 ```
 
+Support eager loading to fix N+1 queries for the association.
+For example:
+```ruby
+class TaskBlueprint < Blueprinter::Base
+  field :name
+  field :description
+end
+
+class ProjectBlueprint < Blueprinter::Base
+  field :name
+end
+
+class MemberBlueprint < Blueprinter::Base
+  field :email
+  association :tasks, blueprint: TaskBlueprint
+  association :projects, blueprint: ProjectBlueprint
+end
+
+class TeamBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  fields :name
+  association :members, blueprint: MemberBlueprint, includes: [:tasks, :projects]
+end
+```
+
 ---
 </details>
 

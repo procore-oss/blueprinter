@@ -13,7 +13,7 @@ module Blueprinter
         view_name = options.delete(:view) || :default
         root = options.delete(:root)
         meta = options.delete(:meta)
-        validate_root_and_meta(root, meta)
+        validate_root_and_meta!(root, meta)
         prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
       end
 
@@ -52,7 +52,7 @@ module Blueprinter
         result_hash
       end
 
-      def validate_root_and_meta(root, meta)
+      def validate_root_and_meta!(root, meta)
         case root
         when String, Symbol
           # no-op
@@ -67,19 +67,19 @@ module Blueprinter
         blueprint.is_a?(Proc)
       end
 
-      def validate_blueprint(blueprint, method)
-        validate_presence_of_blueprint(blueprint)
+      def validate_blueprint!(blueprint, method)
+        validate_presence_of_blueprint!(blueprint)
         unless dynamic_blueprint?(blueprint)
-          validate_blueprint_has_ancestors(blueprint, method)
-          validate_blueprint_has_blueprinter_base_ancestor(blueprint, method)
+          validate_blueprint_has_ancestors!(blueprint, method)
+          validate_blueprint_has_blueprinter_base_ancestor!(blueprint, method)
         end
       end
 
-      def validate_presence_of_blueprint(blueprint)
+      def validate_presence_of_blueprint!(blueprint)
         raise BlueprinterError, 'Blueprint required' unless blueprint
       end
 
-      def validate_blueprint_has_ancestors(blueprint, association_name)
+      def validate_blueprint_has_ancestors!(blueprint, association_name)
         # If the class passed as a blueprint does not respond to ancestors
         # it means it, at the very least, does not have Blueprinter::Base as
         # one of its ancestor classes (e.g: Hash) and thus an error should
@@ -90,7 +90,7 @@ module Blueprinter
         end
       end
 
-      def validate_blueprint_has_blueprinter_base_ancestor(blueprint, association_name)
+      def validate_blueprint_has_blueprinter_base_ancestor!(blueprint, association_name)
         # Guard clause in case Blueprinter::Base is present in the ancestor list
         # for the blueprint class provided.
         return if blueprint.ancestors.include? Blueprinter::Base

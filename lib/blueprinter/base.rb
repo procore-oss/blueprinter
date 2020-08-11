@@ -156,7 +156,7 @@ module Blueprinter
     #
     # @return [Field] A Field object
     def self.association(method, options = {}, &block)
-      validate_blueprint(options[:blueprint], method)
+      validate_blueprint!(options[:blueprint], method)
 
       field(
         method,

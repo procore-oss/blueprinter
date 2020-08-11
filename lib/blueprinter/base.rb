@@ -156,7 +156,11 @@ module Blueprinter
     #
     # @return [Field] A Field object
     def self.association(method, options = {}, &block)
-      raise BlueprinterError, 'blueprint required' unless options[:blueprint]
+      validate_presence_of_blueprint options[:blueprint]
+      unless dynamic_blueprint?(options[:blueprint])
+        validate_blueprint_has_ancestors(options[:blueprint], method)
+        validate_blueprint_has_blueprinter_base_ancestor(options[:blueprint], method)
+      end
 
       field(
         method,
@@ -214,7 +218,7 @@ module Blueprinter
     #   # => [{id:1, title: Hello},{id:2, title: My Day}]
     #
     # @return [Hash]
-    def self.render_as_hash(object, options= {})
+    def self.render_as_hash(object, options = {})
       prepare_for_render(object, options)
     end
 
@@ -239,7 +243,7 @@ module Blueprinter
     #   # => [{"id" => "1", "title" => "Hello"},{"id" => "2", "title" => "My Day"}]
     #
     # @return [Hash]
-    def self.render_as_json(object, options= {})
+    def self.render_as_json(object, options = {})
       prepare_for_render(object, options).as_json
     end
 
@@ -277,7 +281,6 @@ module Blueprinter
         field(field_name)
       end
     end
-
 
 
     # Specify one transformer to be included for serialization.

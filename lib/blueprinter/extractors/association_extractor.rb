@@ -12,6 +12,7 @@ module Blueprinter
       # Merge in assocation options hash
       local_options = local_options.merge(options[:options]) if options[:options].is_a?(Hash)
       value = @extractor.extract(association_name, object, local_options, options_without_default)
+      value = value.includes(options[:includes]) if options.key?(:includes)
       return default_value(options) if use_default_value?(value, options[:default_if])
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)

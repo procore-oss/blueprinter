@@ -156,11 +156,7 @@ module Blueprinter
     #
     # @return [Field] A Field object
     def self.association(method, options = {}, &block)
-      validate_presence_of_blueprint options[:blueprint]
-      unless dynamic_blueprint?(options[:blueprint])
-        validate_blueprint_has_ancestors(options[:blueprint], method)
-        validate_blueprint_has_blueprinter_base_ancestor(options[:blueprint], method)
-      end
+      validate_blueprint(options[:blueprint], method)
 
       field(
         method,

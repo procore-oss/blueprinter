@@ -67,6 +67,14 @@ module Blueprinter
         blueprint.is_a?(Proc)
       end
 
+      def validate_blueprint(blueprint, method)
+        validate_presence_of_blueprint(blueprint)
+        unless dynamic_blueprint?(blueprint)
+          validate_blueprint_has_ancestors(blueprint, method)
+          validate_blueprint_has_blueprinter_base_ancestor(blueprint, method)
+        end
+      end
+
       def validate_presence_of_blueprint(blueprint)
         raise BlueprinterError, 'Blueprint required' unless blueprint
       end

@@ -1,3 +1,6 @@
+## 0.25.1  - 2020/8/18
+* 🚀 [BUGFIX] Raise Blueprinter::BlueprinterError if Blueprint given is not of class Blueprinter::Base. Before it just raised a generic `undefined method 'prepare'`. See [#233](https://github.com/procore/blueprinter/pull/233) thanks to [@caws](https://github.com/caws)
+
 ## 0.25.0  - 2020/7/06
 * 🚀 [FEATURE] Enable default `Blueprinter::Transformer`s to be set in the global configuration. [#222](https://github.com/procore/blueprinter/pull/222). Thanks to [@supremebeing7](https://github.com/supremebeing7).
 

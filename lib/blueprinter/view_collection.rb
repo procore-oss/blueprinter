@@ -29,8 +29,10 @@ module Blueprinter
       (identifier_fields + sorted_fields).reject { |field| excluded_fields.include?(field.name) }
     end
 
-    def transformers(view_name)
-      views[view_name].transformers
+    def transformers_for(view_name)
+      view_transformers = Set.new(transformers(view_name))
+      views[view_name].included_view_names.each { |included_view_name| view_transformers |= transformers(included_view_name) }
+      view_transformers.any? ? view_transformers : view_transformers |= default_transformers
     end
 
     def [](view_name)
@@ -38,6 +40,14 @@ module Blueprinter
     end
 
     private
+
+    def default_transformers
+      Blueprinter.configuration.default_transformers
+    end
+
+    def transformers(view_name)
+      views[view_name].view_transformers
+    end
 
     def identifier_fields
       views[:identifier].fields.values

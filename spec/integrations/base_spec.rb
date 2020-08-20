@@ -484,6 +484,7 @@ describe '::Base' do
 
         it('includes include_view fields') { expect(subject[:age]).to eq(obj.age) }
         it('excludes excluded fields') { expect(subject).not_to have_key(:first_name) }
+        it('includes include_view transformer') { expect(subject[:full_name]).to eq("#{obj.first_name} #{obj.last_name}")}
       end
     end
   end

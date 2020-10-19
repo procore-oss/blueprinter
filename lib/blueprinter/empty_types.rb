@@ -10,6 +10,8 @@ module Blueprinter
     private
 
     def use_default_value?(value, empty_type)
+      return value.nil? unless empty_type
+
       case empty_type
       when Blueprinter::EMPTY_COLLECTION
         array_like?(value) && value.empty?
@@ -18,7 +20,7 @@ module Blueprinter
       when Blueprinter::EMPTY_STRING
         value.to_s == ""
       else
-        value.nil?
+        raise BlueprinterError, "Invalid empty type '#{empty_type}' received. Must be one of [nil, Blueprinter::EMPTY_COLLECTION, Blueprinter::EMPTY_HASH, Blueprinter::EMPTY_STRING]"
       end
     end
   end

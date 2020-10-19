@@ -1,3 +1,8 @@
+## 1.0.0  - `<RELEASE_DATE>`
+### Major Release
+*💥 [BREAKING] Raise `Blueprinter::BlueprinterError` when `default_if` is passed an invalid empty type.
+See [#]()
+
 ## 0.25.1  - 2020/8/18
 * 🚀 [BUGFIX] Raise Blueprinter::BlueprinterError if Blueprint given is not of class Blueprinter::Base. Before it just raised a generic `undefined method 'prepare'`. See [#233](https://github.com/procore/blueprinter/pull/233) thanks to [@caws](https://github.com/caws)
 

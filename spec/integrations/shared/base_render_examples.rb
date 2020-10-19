@@ -171,6 +171,18 @@ shared_examples 'Base::render' do
     it('uses the correct default values') { should eq(result) }
   end
 
+  context 'Given default_if option is invalid' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id
+        field :first_name, default_if: "INVALID_EMPTY_TYPE", default: "Unknown"
+      end
+    end
+    it('raises a BlueprinterError') {
+      expect{blueprint.render(obj)}.to raise_error(Blueprinter::BlueprinterError)
+    }
+  end
+
   context "Given blueprint has ::field with nil value" do
     before do
       obj[:first_name] = nil

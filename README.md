@@ -417,6 +417,7 @@ end
 
 Sometimes, you may want certain "empty" values to pass through to the default value.
 Blueprinter provides the ability to treat the following empty types as the default value (or `nil` if no default provided).
+_NOTE:_ A `Blueprinter::Error` is raised if an invalid empty type is passed.
 
 #### Blueprinter::EMPTY_COLLECTION
 An empty array or empty active record collection.

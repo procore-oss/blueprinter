@@ -1,3 +1,3 @@
 module Blueprinter
-  VERSION = '0.25.1'.freeze
+  VERSION = '1.0.0'.freeze
 end

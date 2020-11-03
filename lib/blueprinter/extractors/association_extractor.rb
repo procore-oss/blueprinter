@@ -15,10 +15,16 @@ module Blueprinter
       return default_value(options) if use_default_value?(value, options[:default_if])
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
+      exclude_fields(blueprint, options)
       blueprint.prepare(value, view_name: view, local_options: local_options)
     end
 
     private
+
+    def exclude_fields(blueprint, options)
+      blueprint.exclude(options[:exclude])
+      blueprint.excludes(*options[:excludes])
+    end
 
     def default_value(association_options)
       association_options.key?(:default) ? association_options.fetch(:default) : Blueprinter.configuration.association_default

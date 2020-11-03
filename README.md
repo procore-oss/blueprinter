@@ -355,6 +355,44 @@ Output:
 }
 ```
 
+You are also able to exclude unwanted fields from your association with parameter
+`exclude` with single or `excludes` with multiple fields
+
+```ruby
+class ProjectBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :name
+end
+
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :email, name: :login
+
+  view :normal do
+    fields :first_name, :last_name
+    association :projects, blueprint: ProjectBlueprint, exclude: :name
+  end
+end
+```
+
+Output:
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "first_name": "John",
+  "last_name": "Doe",
+  "login": "john.doe@some.fake.email.domain",
+  "projects": [
+    {
+      "uuid": "dca94051-4195-42bc-a9aa-eb99f7723c82"
+    },
+    {
+      "uuid": "eb881bb5-9a51-4d27-8a29-b264c30e6160"
+    }
+  ]
+}
+```
+
 It is also possible to pass options from one Blueprint to another via an association.
 For example:
 ```ruby

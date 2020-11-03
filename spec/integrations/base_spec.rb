@@ -251,6 +251,36 @@ describe '::Base' do
           end
           it('returns json derived from a custom extractor') { should eq(result) }
         end
+
+        context 'Given an association :excludes option' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{"sample_field_2":"sample_field_2"}]}' }
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+              field(:sample_field) { 'sample_field' }
+              field(:sample_field_2) { 'sample_field_2' }
+            end
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association(:vehicles, blueprint: vehicle_blueprint, excludes: %i[make sample_field])
+            end
+          end
+          it('returns json with excluded result') { should eq(result) }
+        end
+
+        context 'Give an association :excludes option' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{}]}' }
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) { fields :make }
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association(:vehicles, blueprint: vehicle_blueprint, exclude: :make)
+            end
+          end
+          it('returns json with excluded result') { should eq(result) }
+        end
       end
 
       context "Given association is nil" do

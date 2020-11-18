@@ -1,3 +1,23 @@
+# Shared transformers
+UpcaseKeysTransformer = Class.new(Blueprinter::Transformer) do
+  def transform(hash, _object, _options)
+    hash.transform_keys! { |key| key.to_s.upcase.to_sym }
+  end
+end
+
+TitlecaseKeysTransformer = Class.new(Blueprinter::Transformer) do
+  def transform(hash, _object, _options)
+    hash.transform_keys! { |key| key.to_s.titlecase.to_sym }
+  end
+end
+
+DynamicFieldsTransformer = Class.new(Blueprinter::Transformer) do
+  def transform(result_hash, object, options={})
+    dynamic_fields = (object.is_a? Hash) ? object[:dynamic_fields] : object.dynamic_fields
+    result_hash.merge!(dynamic_fields)
+  end
+end
+
 shared_examples 'Base::render' do
   context 'Given blueprint has ::field' do
     let(:result) { '{"first_name":"Meg","id":' + obj_id + '}' }
@@ -482,32 +502,52 @@ shared_examples 'Base::render' do
   end
 
   context 'Given blueprint has a transformer with a default configured' do
-    let(:default_transform) do
-      UpcaseKeysTransformer = Class.new(Blueprinter::Transformer) do
-        def transform(hash, _object, _options)
-          hash.transform_keys! { |key| key.to_s.upcase.to_sym }
-        end
-      end
-    end
     before do
-      Blueprinter.configure { |config| config.default_transformers = [default_transform] }
+      Blueprinter.configure { |config| config.default_transformers = [UpcaseKeysTransformer] }
     end
     after { reset_blueprinter_config! }
     subject { blueprint.render(obj) }
     let(:result) { '{"id":' + obj_id + ',"full_name":"Meg Ryan"}' }
     let(:blueprint) do
-      DynamicFieldsTransformer = Class.new(Blueprinter::Transformer) do
-        def transform(result_hash, object, options={})
-          dynamic_fields = (object.is_a? Hash) ? object[:dynamic_fields] : object.dynamic_fields
-          result_hash.merge!(dynamic_fields)
-        end
-      end
       Class.new(Blueprinter::Base) do
         identifier :id
         transform DynamicFieldsTransformer
       end
     end
     it('overrides the configured default transformer') { should eq(result) }
+
+    context 'with a view' do
+      subject { blueprint.render(obj, view: :expanded) }
+
+      context 'view use the class transformer' do
+        let(:result) { '{"id":' + obj_id + ',"company":"Procore","full_name":"Meg Ryan"}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            transform DynamicFieldsTransformer
+            view :expanded do
+              field :company
+            end
+          end
+        end
+        it { should eq(result) }
+      end
+
+      context 'view transformer overrides the class transformer' do
+        let(:result) { '{"Id":' + obj_id + ',"Company":"Procore"}' }
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            transform DynamicFieldsTransformer
+            view :expanded do
+              transform TitlecaseKeysTransformer
+              field :company
+            end
+          end
+        end
+        it { should eq(result) }
+      end
+    end
   end
 
   context "Ordering of fields from inside a view by definition" do

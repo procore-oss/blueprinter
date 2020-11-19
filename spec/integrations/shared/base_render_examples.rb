@@ -171,6 +171,20 @@ shared_examples 'Base::render' do
     it('uses the correct default values') { should eq(result) }
   end
 
+  context 'Given default_if option is invalid' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id
+        field :first_name, default_if: "INVALID_EMPTY_TYPE", default: "Unknown"
+      end
+    end
+    it('reports a deprecation message') do
+      allow(Blueprinter::Deprecation).to receive(:report)
+      blueprint.render(obj)
+      expect(Blueprinter::Deprecation).to have_received(:report).with(match(/Invalid empty type '.*' received. Blueprinter will raise an error in future versions./))
+    end
+  end
+
   context "Given blueprint has ::field with nil value" do
     before do
       obj[:first_name] = nil
@@ -241,11 +255,6 @@ shared_examples 'Base::render' do
 
   context 'Given blueprint has ::field with a conditional argument' do
     context 'Given conditional proc has deprecated two argument signature' do
-      before do
-        @orig_stderr = $stderr
-        $stderr = StringIO.new
-      end
-
       let(:if_proc) { ->(_obj, _local_opts) { true } }
       let(:unless_proc) { ->(_obj, _local_opts) { true } }
 
@@ -257,16 +266,11 @@ shared_examples 'Base::render' do
         end
       end
 
-      it('writes deprecation warning message to $stderr') do
-        blueprint.render(obj, root: :root)
-        $stderr.rewind
-        stderr_output = $stderr.string.chomp
-        expect(stderr_output).to include("[DEPRECATION] Blueprinter :if conditions now expects 3 arguments instead of 2.")
-        expect(stderr_output).to include("[DEPRECATION] Blueprinter :unless conditions now expects 3 arguments instead of 2.")
-      end
-
-      after do
-        $stderr = @orig_stderr
+      it('reports a deprecation warning') do
+        allow(Blueprinter::Deprecation).to receive(:report)
+        blueprint.render(obj)
+        expect(Blueprinter::Deprecation).to have_received(:report).with("`:if` conditions now expects 3 arguments instead of 2.")
+        expect(Blueprinter::Deprecation).to have_received(:report).with("`:unless` conditions now expects 3 arguments instead of 2.")
       end
     end
 

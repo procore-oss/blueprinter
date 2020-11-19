@@ -55,6 +55,11 @@ describe 'Blueprinter' do
       expect(Blueprinter.configuration.field_default).to eq("N/A")
     end
 
+    it 'should set the `deprecation` option' do
+      Blueprinter.configure { |config| config.deprecation = :silence }
+      expect(Blueprinter.configuration.deprecation).to eq(:silence)
+    end
+
     it 'should set the `association_default` option' do
       Blueprinter.configure { |config| config.association_default = {} }
       expect(Blueprinter.configuration.association_default).to eq({})

@@ -1,5 +1,6 @@
 require_relative 'blueprinter_error'
 require_relative 'configuration'
+require_relative 'deprecation'
 require_relative 'empty_types'
 require_relative 'extractor'
 require_relative 'extractors/association_extractor'

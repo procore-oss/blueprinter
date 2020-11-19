@@ -1,5 +1,5 @@
 ## 0.25.2  - 2020/11/19
-* 🚀 [FEATURE] Make deprecation behavior configurable (`:silence`, `:stderror`, `:raise`). See [#233](https://github.com/procore/blueprinter/pull/248) thanks to [@mcclayton](https://github.com/mcclayton)
+* 🚀 [FEATURE] Make deprecation behavior configurable (`:silence`, `:stderror`, `:raise`). See [#248](https://github.com/procore/blueprinter/pull/248) thanks to [@mcclayton](https://github.com/mcclayton)
 
 ## 0.25.1  - 2020/8/18
 * 🐛 [BUGFIX] Raise Blueprinter::BlueprinterError if Blueprint given is not of class Blueprinter::Base. Before it just raised a generic `undefined method 'prepare'`. See [#233](https://github.com/procore/blueprinter/pull/233) thanks to [@caws](https://github.com/caws)

@@ -181,7 +181,7 @@ shared_examples 'Base::render' do
     it('reports a deprecation message') do
       allow(Blueprinter::Deprecation).to receive(:report)
       blueprint.render(obj)
-      expect(Blueprinter::Deprecation).to have_received(:report).with(match(/Invalid empty type '.*' received. Blueprinter will raise an error in future versions./))
+      expect(Blueprinter::Deprecation).to have_received(:report).with(match(/Invalid empty type '.*' received. Blueprinter will raise an error in the next major version./))
     end
   end
 

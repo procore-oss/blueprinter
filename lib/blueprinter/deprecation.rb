@@ -6,13 +6,13 @@ module Blueprinter
       MESSAGE_PREFIX = "[DEPRECATION::WARNING] Blueprinter:".freeze
 
       def report(message)
-        full_msg = qualififed_message(message)
+        full_msg = qualified_message(message)
 
         case behavior
         when :silence
           # Silence deprecation (noop)
         when :stderror
-          warn qualififed_message(full_msg)
+          warn qualified_message(full_msg)
         when :raise
           raise BlueprinterError, full_msg
         end
@@ -20,12 +20,12 @@ module Blueprinter
 
       private
 
-      def qualififed_message(message)
+      def qualified_message(message)
         "#{MESSAGE_PREFIX} #{message}"
       end
 
       def behavior
-        configured = Blueprinter.configuration.deprecation
+        configured = Blueprinter.configuration.deprecations
         return configured unless !VALID_BEHAVIORS.include?(configured)
 
         :stderror

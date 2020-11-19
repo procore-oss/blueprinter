@@ -888,7 +888,7 @@ However, deprecations can be configured to report at three different levels:
 ### Example:
 ```ruby
 Blueprinter.configure do |config|
-  config.deprecation = :raise
+  config.deprecations = :raise
 end
 ```
 

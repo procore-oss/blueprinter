@@ -6,7 +6,7 @@ describe 'Blueprinter::Deprecation' do
 
     describe "when deprecation behavior is `:stderror`" do
       before do
-        Blueprinter.configure { |config| config.deprecation = :stderror }
+        Blueprinter.configure { |config| config.deprecations = :stderror }
         @orig_stderr = $stderr
         $stderr = StringIO.new
       end
@@ -25,7 +25,7 @@ describe 'Blueprinter::Deprecation' do
 
     describe "when deprecation behavior is `:silence`" do
       before do
-        Blueprinter.configure { |config| config.deprecation = :silence }
+        Blueprinter.configure { |config| config.deprecations = :silence }
         @orig_stderr = $stderr
         $stderr = StringIO.new
       end
@@ -44,7 +44,7 @@ describe 'Blueprinter::Deprecation' do
 
     describe "when deprecation behavior is `:raise`" do
       before do
-        Blueprinter.configure { |config| config.deprecation = :raise }
+        Blueprinter.configure { |config| config.deprecations = :raise }
       end
 
       it('raises BlueprinterDeprecationError with deprecation message') do

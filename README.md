@@ -874,16 +874,16 @@ Output:
 
 ---
 
-When functionality in Blueprinter becomes deprecated, the default behavior is to
-write a deprecation notice to stderror when that deprecated behavior is invoked.
+When functionality in Blueprinter is invoked, that has been deprecated, the default behavior is to
+write a deprecation notice to stderror.
 
-Deprecations can be configured to report at three different levels:
+However, deprecations can be configured to report at three different levels:
 
 |        Key        |                              Result                             |
 |:-----------------:|:---------------------------------------------------------------:|
-| :stderr (Default) | Deprecations will be written to stderror                        |
-| :raise            | Deprecations will be raised as `Blueprinter::BlueprinterError`s |
-| :silence          | Deprecations will be silenced and will not be raised or logged  |
+| `:stderr` (Default) | Deprecations will be written to stderror                        |
+| `:raise`            | Deprecations will be raised as `Blueprinter::BlueprinterError`s |
+| `:silence`          | Deprecations will be silenced and will not be raised or logged  |
 
 ### Example:
 ```ruby

@@ -15,7 +15,7 @@ describe 'Blueprinter::Deprecation' do
         Blueprinter::Deprecation.report(TEST_MESSAGE)
         $stderr.rewind
         stderr_output = $stderr.string.chomp
-        expect(stderr_output).to include("[DEPRECATION::WARNING] Blueprinter: #{TEST_MESSAGE}")
+        expect(stderr_output).to eql("[DEPRECATION::WARNING] Blueprinter: #{TEST_MESSAGE}")
       end
 
       after do

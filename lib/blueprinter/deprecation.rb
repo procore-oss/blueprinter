@@ -12,7 +12,7 @@ module Blueprinter
         when :silence
           # Silence deprecation (noop)
         when :stderror
-          warn qualified_message(full_msg)
+          warn full_msg
         when :raise
           raise BlueprinterError, full_msg
         end

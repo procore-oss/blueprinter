@@ -1,10 +1,11 @@
 module Blueprinter
   class Configuration
-    attr_accessor :association_default, :datetime_format, :field_default, :generator, :if, :method, :sort_fields_by, :unless, :extractor_default, :default_transformers
+    attr_accessor :association_default, :datetime_format, :deprecations, :field_default, :generator, :if, :method, :sort_fields_by, :unless, :extractor_default, :default_transformers
 
     VALID_CALLABLES = %i(if unless).freeze
 
     def initialize
+      @deprecations = :stderror
       @association_default = nil
       @datetime_format = nil
       @field_default = nil

@@ -49,6 +49,26 @@ And the output would look like:
 ---
 </details>
 
+<details open>
+<summary>Rails Controller</summary>
+
+---
+
+You can use your blueprint in a Rails API controller to render yout JSON:
+
+```ruby
+class UsersController < ActionController::API
+  ...
+  def show
+    user = UserBlueprint.render_as_hash(@user)
+    render json: user
+  end
+  ...
+end
+```
+
+---
+</details>
 
 <details>
 <summary>Collections</summary>

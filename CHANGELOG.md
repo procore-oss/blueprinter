@@ -1,3 +1,6 @@
+## 0.25.3 - 2020/12/25
+💅 [ENHANCEMENT] Add `frozen_string_literal: true` pragma to all files. [251](https://github.com/procore/blueprinter/pull/251). Thanks to [@ritikesh](https://github.com/ritikesh).
+
 ## 0.25.2  - 2020/11/19
 * 🚀 [FEATURE] Make deprecation behavior configurable (`:silence`, `:stderror`, `:raise`). See [#248](https://github.com/procore/blueprinter/pull/248) thanks to [@mcclayton](https://github.com/mcclayton)
 

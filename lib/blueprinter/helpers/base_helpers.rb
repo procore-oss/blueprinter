@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Blueprinter
   module BaseHelpers
     def self.included(base)
@@ -57,9 +59,9 @@ module Blueprinter
         when String, Symbol
           # no-op
         when NilClass
-          raise BlueprinterError, "meta requires a root to be passed" if meta
+          raise BlueprinterError, 'meta requires a root to be passed' if meta
         else
-          raise BlueprinterError, "root should be one of String, Symbol, NilClass"
+          raise BlueprinterError, 'root should be one of String, Symbol, NilClass'
         end
       end
 
@@ -86,7 +88,7 @@ module Blueprinter
         # be raised.
         unless blueprint.respond_to?(:ancestors)
           raise BlueprinterError, "Blueprint provided for #{association_name} "\
-                                'association is not valid.'
+                                    'association is not valid.'
         end
       end
 
@@ -97,8 +99,8 @@ module Blueprinter
 
         # Raise error describing what's wrong.
         raise BlueprinterError, "Class #{blueprint.name} does not inherit from "\
-                              'Blueprinter::Base and is not a valid Blueprinter '\
-                              "for #{association_name} association."
+                                  'Blueprinter::Base and is not a valid Blueprinter '\
+                                  "for #{association_name} association."
       end
 
       def jsonify(blob)

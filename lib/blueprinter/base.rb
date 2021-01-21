@@ -447,5 +447,12 @@ module Blueprinter
     def self.view?(view_name)
       view_collection.view? view_name
     end
+
+    # List all explicit defined views in this class.
+    #
+    # @return [Array<Symbol>] an array of view names.
+    def self.view_names
+      view_collection.public_view_names
+    end
   end
 end

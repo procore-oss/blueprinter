@@ -47,7 +47,7 @@ describe '::DateTimeFormatter' do
       context 'and Proc fails to process date' do
         let(:invalid_proc_field_options) { { datetime_format: -> datetime { datetime.invalid_method } } }
         it 'raises original error from Proc' do
-          expect{formatter.format(valid_date, invalid_proc_field_options)}.to raise_error(NoMethodError)
+          expect{formatter.format(valid_date, invalid_proc_field_options)}.to raise_error(an_instance_of(Blueprinter::DateTimeFormatter::DateTimeFormattingError).and(having_attributes(cause: an_instance_of(NoMethodError))))
         end
       end
 

@@ -143,7 +143,7 @@ shared_examples 'Base::render' do
         field :birthday, datetime_format: -> datetime { datetime.invalid_method }
       end
     end
-    it('raises original error from Proc') { expect{subject}.to raise_error(NoMethodError) }
+    it('raises original error wrapped in BlueprintError from Proc') { expect{subject}.to raise_error(an_instance_of(Blueprinter::DateTimeFormatter::DateTimeFormattingError).and(having_attributes({cause: an_instance_of(NoMethodError)}))) }
   end
 
   context 'Given blueprint has ::field with an invalid :datetime_format argument' do
@@ -402,6 +402,17 @@ shared_examples 'Base::render' do
       expect(blueprint.render(obj, view: :special)).to    eq(special)
       expect(blueprint.render(obj)).to                    eq(no_view)
     end
+  end
+
+  context 'Given blueprint refrences invalid view' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :first_name
+        include_view :not_existing
+      end
+    end
+    it('raises an BlueprinterError') {expect{subject}.to raise_error(Blueprinter::ViewCollection::InvalidViewError, /included view 'not_existing' does not exist/)}
   end
 
   context 'Given blueprint has :root' do

@@ -3,6 +3,8 @@
 module Blueprinter
   # @api private
   class ViewCollection
+    InvalidViewError = Class.new(BlueprinterError)
+
     attr_reader :views, :sort_by_definition
 
     def initialize
@@ -55,6 +57,10 @@ module Blueprinter
       fields = views[:default].fields.clone
       views[view_name].included_view_names.each do |included_view_name|
         next if view_name == included_view_name
+
+        unless view?(included_view_name)
+          raise InvalidViewError, "The included view '#{included_view_name}' does not exist - Included in view #{view_name}"
+        end
 
         view_fields, view_excluded_fields = sortable_fields(included_view_name)
         fields.merge!(view_fields)

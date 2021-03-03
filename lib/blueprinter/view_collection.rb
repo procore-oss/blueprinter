@@ -48,7 +48,6 @@ module Blueprinter
     def sortable_fields(view_name)
       excluded_fields = {}
       fields = views[:default].fields
-      fields = merge_fields(fields, views[view_name].fields)
       views[view_name].included_view_names.each do |included_view_name|
         next if view_name == included_view_name
 
@@ -56,6 +55,7 @@ module Blueprinter
         fields = merge_fields(fields, view_fields)
         excluded_fields.merge!(view_excluded_fields)
       end
+      fields = merge_fields(fields, views[view_name].fields)
 
       views[view_name].excluded_field_names.each { |name| excluded_fields[name] = nil }
 

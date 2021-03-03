@@ -251,6 +251,51 @@ describe '::Base' do
           end
           it('returns json derived from a custom extractor') { should eq(result) }
         end
+
+        context 'Given included view with re-defined association' do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+
+              view :with_size do
+                field :size do 10 end
+              end
+
+              view :with_height do
+                field :height do 2 end
+              end
+            end
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles, blueprint: vehicle_blueprint
+
+              view :with_size do
+                association :vehicles, blueprint: vehicle_blueprint, view: :with_size
+              end
+
+              view :with_height do
+                include_view :with_size
+                association :vehicles, blueprint: vehicle_blueprint, view: :with_height
+              end
+            end
+          end
+
+          let(:result_default) do
+            '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car"}]}'
+          end
+          let(:result_with_size) do
+            '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car","size":10}]}'
+          end
+          let(:result_with_height) do
+            '{"id":' + obj_id + ',"vehicles":[{"height":2,"make":"Super Car"}]}'
+          end
+
+          it 'returns json with association' do
+            expect(blueprint.render(obj)).to eq(result)
+            expect(blueprint.render(obj, view: :with_size)).to eq(result_with_size)
+            expect(blueprint.render(obj, view: :with_height)).to eq(result_with_height)
+          end
+        end
       end
 
       context "Given association is nil" do

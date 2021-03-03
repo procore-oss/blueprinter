@@ -374,32 +374,36 @@ shared_examples 'Base::render' do
       '{"id":' + obj_id + '}'
     end
     let(:no_view) do
-      ['{"id":' + obj_id + '', '"first_name":"Meg"' + '}'].join(',')
+      ['{"id":' + obj_id + '', '"first_name":"Meg"' + '', '"points":0' + '}'].join(',')
     end
     let(:normal) do
       ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',
-      '"last_name":"' + obj[:last_name] + '"', '"position":"Manager"}'].join(',')
+      '"last_name":"' + obj[:last_name] + '"', '"points":1', '"position":"Manager"}'].join(',')
     end
     let(:ext) do
       ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
-      '"first_name":"Meg"', '"position":"Manager"}'].join(',')
+      '"first_name":"Meg"', '"points":2', '"position":"Manager"}'].join(',')
     end
     let(:special) do
       ['{"id":' + obj_id + '', '"description":"A person"',
-      '"first_name":"Meg"}'].join(',')
+      '"first_name":"Meg"', '"points":2}'].join(',')
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :first_name
+        field :points do 0 end
+
         view :normal do
           fields :last_name, :position
           field :company, name: :employer
+          field :points do 1 end
         end
         view :extended do
           include_view :normal
           field :description
           exclude :last_name
+          field :points do 2 end
         end
         view :special do
           include_view :extended

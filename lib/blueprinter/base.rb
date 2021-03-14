@@ -253,7 +253,11 @@ module Blueprinter
     # @api private
     def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
       unless view_collection.has_view? view_name
-        raise BlueprinterError, "View '#{view_name}' is not defined"
+        if Blueprinter.configuration.missing_view.eql?(:default)
+          view_name = :default
+        else
+          raise BlueprinterError, "View '#{view_name}' is not defined"
+        end
       end
 
       data = prepare_data(object, view_name, local_options)

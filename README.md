@@ -868,6 +868,44 @@ Output:
 ---
 </details>
 
+<details>
+<summary>Missing Views</summary>
+
+---
+
+By default a BlueprinterError is raised if you call a view that doesn't exist. This is troublesome in some cases while using polymorphic relationships.
+If you set this config to `:default` it will render the default view instead of raising an error.
+
+Usage:
+
+```ruby
+Blueprinter.configure do |config|
+  config.missing_view = :default
+end
+```
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :name
+  field :email
+  field :birthday, datetime_format: "%m/%d/%Y"
+end
+
+
+puts UserBlueprint.render(user, view: :non_existant_view)
+```
+
+Output:
+```json
+{
+  "name": "John Doe",
+  "email": "john.doe@some.fake.email.domain",
+  "birthday": "03/04/1994"
+}
+```
+
+---
+</details>
 
 <details>
 <summary>Deprecations</summary>

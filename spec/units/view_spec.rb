@@ -107,6 +107,28 @@ describe '::View' do
       end
     end
   end
+
+  describe '#set_cache_store' do
+    let(:cache_store_instance) { ActiveSupport::Cache::MemoryStore.new }
+    let(:cache_store_options) { {} }
+
+    before { view.set_cache_store(cache_store_instance, cache_store_options) }
+
+    it('should set cache store instance') do
+      expect(view.cache_store_instance).to eq(cache_store_instance)
+    end
+
+    it('should have a default namespace in cache store options') do
+      expect(view.cache_store_options[:namespace]).to eq('blueprinter')
+    end
+
+    context 'has a custom namespace in the options' do
+      let(:cache_store_options) { {namespace: 'test'} }
+      it('should set custom cache store name space in options') do
+        expect(view.cache_store_options[:namespace]).to eq('test')
+      end
+    end
+  end
 end
 
 class MockField

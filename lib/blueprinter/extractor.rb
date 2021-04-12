@@ -7,5 +7,9 @@ module Blueprinter
     def self.extract(field_name, object, local_options, options={})
       self.new.extract(field_name, object, local_options, options)
     end
+
+    def cache_key
+      self.class.to_s
+    end
   end
 end

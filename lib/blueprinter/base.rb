@@ -452,5 +452,13 @@ module Blueprinter
     def self.has_view?(view_name)
       view_collection.has_view? view_name
     end
+
+
+    def self.cache(options)
+      current_view.set_cache_store(
+        options.fetch(:store),
+        options.except(:store)
+      )
+    end
   end
 end

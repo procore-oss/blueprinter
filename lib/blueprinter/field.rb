@@ -18,6 +18,10 @@ class Blueprinter::Field
     unless_callable && unless_callable.call(field_name, object, local_options)
   end
 
+  def cache_key
+    "#{name}/#{method}/#{extractor.cache_key}/#{options}"
+  end
+
   private
 
   def if_callable

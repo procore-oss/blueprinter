@@ -29,6 +29,11 @@ module Blueprinter
       (identifier_fields + sorted_fields).reject { |field| excluded_fields.include?(field.name) }
     end
 
+    def cache_key(view_name)
+      fields_cache_keys = fields_for(view_name).map(&:cache_key)
+      Digest::MD5.hexdigest(fields_cache_keys.to_s)
+    end
+
     def transformers(view_name)
       views[view_name].transformers
     end

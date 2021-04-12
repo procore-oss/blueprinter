@@ -42,14 +42,43 @@ module Blueprinter
       end
 
       def object_to_hash(object, view_name:, local_options:)
-        result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-          next if field.skip?(field.name, object, local_options)
-          hash[field.name] = field.extract(object, local_options)
-        end
-        view_collection.transformers(view_name).each do |transformer|
-          transformer.transform(result_hash, object, local_options)
+        if cache_store_instance
+          cache_key = object_view_cache_key(object, view_name: view_name, local_options: local_options)
+          puts "*"*10 + " Blueprinter caching"
+          puts "cache_key: #{cache_key}"
+          puts "cache exist?: #{cache_store_instance.exist?(cache_key, **cache_store_options)}"
+          result_hash = cache_store_instance.fetch(cache_key, **cache_store_options) do
+            temp_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
+              next if field.skip?(field.name, object, local_options)
+              hash[field.name] = field.extract(object, local_options)
+            end
+            view_collection.transformers(view_name).each do |transformer|
+              transformer.transform(temp_hash, object, local_options)
+            end
+            temp_hash
+          end
+        else
+          result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
+            next if field.skip?(field.name, object, local_options)
+            hash[field.name] = field.extract(object, local_options)
+          end
+          view_collection.transformers(view_name).each do |transformer|
+            transformer.transform(result_hash, object, local_options)
+          end
         end
         result_hash
+      end
+
+      def cache_store_instance
+        current_view.cache_store_instance
+      end
+
+      def cache_store_options
+        current_view.cache_store_options
+      end
+
+      def object_view_cache_key(object, view_name:, local_options:)
+        "#{view_name}/#{view_collection.cache_key(view_name)}/#{object.cache_key}/#{Digest::MD5.hexdigest(local_options.to_s)}"
       end
 
       def validate_root_and_meta!(root, meta)

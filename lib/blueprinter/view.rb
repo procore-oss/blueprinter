@@ -2,7 +2,7 @@ module Blueprinter
   # @api private
   DefinitionPlaceholder = Struct.new :name, :view?
   class View
-    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :view_transformers, :definition_order
+    attr_reader :excluded_field_names, :fields, :included_view_names, :name, :view_transformers, :definition_order, :cache_store_instance, :cache_store_options
 
     def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [], transformers: [])
       @name = name
@@ -12,6 +12,8 @@ module Blueprinter
       @view_transformers = transformers
       @definition_order = []
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+      @cache_store_instance = nil
+      @cache_store_options = {namespace: 'blueprinter'}
     end
 
     def transformers
@@ -40,6 +42,12 @@ module Blueprinter
       view.view_transformers.each do |transformer|
         add_transformer(transformer)
       end
+
+      view.set_cache_store(cache_store_instance, cache_store_options)
+    end
+
+    def cache_key
+      "#{name}/#{Digest::MD5.hexdigest(fields.to_s)}"
     end
 
     def include_view(view_name)
@@ -71,6 +79,11 @@ module Blueprinter
     def <<(field)
       track_definition_order(field.name,false)
       fields[field.name] = field
+    end
+
+    def set_cache_store(cache_store_instance, cache_store_options)
+      @cache_store_instance = cache_store_instance
+      @cache_store_options.merge!(cache_store_options)
     end
   end
 end

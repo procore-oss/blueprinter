@@ -160,6 +160,32 @@ Output:
 
 
 <details>
+<summary>Identifiers</summary>
+
+---
+
+`identifier`s are used to specify a field or method name used as an identifier. Usually, this is something like `:id`.
+
+Example:
+```rb
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+end
+```
+
+Blueprinter `identifier`s have a few properties that set them apart from `field`s.
+
+1. Identifiers are **always** rendered and considered their own view (the `:identifier` view).
+2. When rendering, identifier fields are always sorted first, before other fields.
+
+If either of the above two developer conveniences are not desired, you can simply create your identifier fields as regular `field`s.
+
+---
+
+</details>
+
+
+<details>
 <summary>Root</summary>
 
 ---

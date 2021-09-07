@@ -171,6 +171,20 @@ shared_examples 'Base::render' do
     it('uses the correct default values') { should eq(result) }
   end
 
+  context 'Given default_if option is Blueprinter::EMTPY_JSONB' do
+    before do
+      obj[:first_name] = "{}"
+    end
+
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :first_name, default_if: Blueprinter::EMPTY_JSONB, default: []
+      end
+    end
+    let(:result) { '{"first_name":[]}' }
+    it('raises a BlueprinterError') { should eq(result) }
+  end
+
   context "Given blueprint has ::field with nil value" do
     before do
       obj[:first_name] = nil

@@ -3,6 +3,7 @@ require_relative 'helpers/type_helpers'
 module Blueprinter
   EMPTY_COLLECTION = "empty_collection".freeze
   EMPTY_HASH = "empty_hash".freeze
+  EMPTY_JSONB = "empty_jsonb".freeze
   EMPTY_STRING = "empty_string".freeze
 
   module EmptyTypes
@@ -17,6 +18,8 @@ module Blueprinter
         value.is_a?(Hash) && value.empty?
       when Blueprinter::EMPTY_STRING
         value.to_s == ""
+      when Blueprinter::EMPTY_JSONB
+        JSON.parse(value).empty?
       else
         value.nil?
       end

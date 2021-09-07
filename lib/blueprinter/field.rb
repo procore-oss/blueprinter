@@ -34,7 +34,7 @@ class Blueprinter::Field
     callable = old_callable_from(condition)
 
     if callable && callable.arity == 2
-      warn "[DEPRECATION] Blueprinter :#{condition} conditions now expects 3 arguments instead of 2."
+      Blueprinter::Deprecation.report("`:#{condition}` conditions now expects 3 arguments instead of 2.")
       ->(_field_name, obj, options) { callable.call(obj, options) }
     else
       callable

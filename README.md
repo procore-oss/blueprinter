@@ -160,6 +160,32 @@ Output:
 
 
 <details>
+<summary>Identifiers</summary>
+
+---
+
+`identifier`s are used to specify a field or method name used as an identifier. Usually, this is something like `:id`.
+
+Example:
+```rb
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+end
+```
+
+Blueprinter `identifier`s have a few properties that set them apart from `field`s.
+
+1. Identifiers are **always** rendered and considered their own view (the `:identifier` view).
+2. When rendering, identifier fields are always sorted first, before other fields.
+
+If either of the above two developer conveniences are not desired, you can simply create your identifier fields as regular `field`s.
+
+---
+
+</details>
+
+
+<details>
 <summary>Root</summary>
 
 ---
@@ -866,6 +892,33 @@ Output:
   "email": "john.doe@some.fake.email.domain",
   "birthday": "03/04/1994"
 }
+```
+
+---
+</details>
+
+
+<details>
+<summary>Deprecations</summary>
+
+---
+
+When functionality in Blueprinter is invoked, that has been deprecated, the default behavior is to
+write a deprecation notice to stderror.
+
+However, deprecations can be configured to report at three different levels:
+
+|        Key        |                              Result                             |
+|:-----------------:|:---------------------------------------------------------------:|
+| `:stderr` (Default) | Deprecations will be written to stderror                        |
+| `:raise`            | Deprecations will be raised as `Blueprinter::BlueprinterError`s |
+| `:silence`          | Deprecations will be silenced and will not be raised or logged  |
+
+### Example:
+```ruby
+Blueprinter.configure do |config|
+  config.deprecations = :raise
+end
 ```
 
 ---

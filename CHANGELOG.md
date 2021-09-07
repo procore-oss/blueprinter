@@ -1,25 +1,31 @@
-## 0.25.1  - 2020/8/18
-* 🚀 [BUGFIX] Raise Blueprinter::BlueprinterError if Blueprint given is not of class Blueprinter::Base. Before it just raised a generic `undefined method 'prepare'`. See [#233](https://github.com/procore/blueprinter/pull/233) thanks to [@caws](https://github.com/caws)
+## 0.25.3  - 2021/03/03
+* 🐛 [BUGFIX] Fixes issue where fields and associations that are redefined by later views were not properly overwritten. See [#201](https://github.com/procore/blueprinter/pull/201) thanks to [@Berardpi](https://github.com/Berardpi).
 
-## 0.25.0  - 2020/7/06
+## 0.25.2  - 2020/11/19
+* 🚀 [FEATURE] Make deprecation behavior configurable (`:silence`, `:stderror`, `:raise`). See [#248](https://github.com/procore/blueprinter/pull/248) thanks to [@mcclayton](https://github.com/mcclayton).
+
+## 0.25.1  - 2020/08/18
+* 🐛 [BUGFIX] Raise Blueprinter::BlueprinterError if Blueprint given is not of class Blueprinter::Base. Before it just raised a generic `undefined method 'prepare'`. See [#233](https://github.com/procore/blueprinter/pull/233) thanks to [@caws](https://github.com/caws).
+
+## 0.25.0  - 2020/07/06
 * 🚀 [FEATURE] Enable default `Blueprinter::Transformer`s to be set in the global configuration. [#222](https://github.com/procore/blueprinter/pull/222). Thanks to [@supremebeing7](https://github.com/supremebeing7).
 
-## 0.24.0  - 2020/6/22
+## 0.24.0  - 2020/06/22
 * 🚀 [FEATURE] Add an `options` option to associations to facilitate passing options from one blueprint to another. [#220](https://github.com/procore/blueprinter/pull/220). Thanks to [@mcclayton](https://github.com/mcclayton).
 
-## 0.23.4  - 2020/4/28
+## 0.23.4  - 2020/04/28
 * 🚀 [FEATURE] Public class method `has_view?` on Blueprinter::Base subclasses introduced in [#213](https://github.com/procore/blueprinter/pull/213). Thanks to [@spencerneste](https://github.com/spencerneste).
 
-## 0.23.3  - 2020/4/7
+## 0.23.3  - 2020/04/07
 * 🐛 [BUGFIX] Fixes issue where `exclude` fields in deeply nested views were not respected. Resolved issue [207](https://github.com/procore/blueprinter/issues/207) in [#208](https://github.com/procore/blueprinter/pull/208) by [@tpltn](https://github.com/tpltn).
 
-## 0.23.2  - 2020/3/16
+## 0.23.2  - 2020/03/16
 * 🐛 [BUGFIX] Fixes issue where fields "bled" into other views due to merge side-effects. Resolved issue [205](https://github.com/procore/blueprinter/issues/205) in [#204](https://github.com/procore/blueprinter/pull/204) by [@trevorrjohn](https://github.com/trevorrjohn).
 
-## 0.23.1  - 2020/3/13
+## 0.23.1  - 2020/03/13
 * 🐛 [BUGFIX] Fixes #172 where views would unintentionally ignore `sort_fields_by: :definition` configuration. Resolved in [#197](https://github.com/procore/blueprinter/pull/197) by [@wlkrw](https://github.com/wlkrw).
 
-## 0.23.0  - 2020/1/31
+## 0.23.0  - 2020/01/31
 * 🚀 [FEATURE] Configurable default extractor introduced in [#198](https://github.com/procore/blueprinter/pull/198) by [@wlkrw](https://github.com/wlkrw). You can now set a default extractor like so:
 ```
 Blueprinter.configure do |config|
@@ -75,15 +81,15 @@ end
 * 🚀 [FEATURE] Added an option to render with a root key. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).
 * 🚀 [FEATURE] Added an option to render with a top-level meta attribute. [#135](https://github.com/procore/blueprinter/pull/135). Thanks to [@ritikesh](https://github.com/ritikesh).
 
-## 0.12.1  - 2019/1/24
+## 0.12.1  - 2019/01/24
 
 * 🐛 [BUGFIX] Fix boolean `false` values getting serialized as `null`. Please see PR [#132](https://github.com/procore/blueprinter/pull/132). Thanks to [@samsongz](https://github.com/samsongz).
 
-## 0.12.0  - 2019/1/16
+## 0.12.0  - 2019/01/16
 
 * 🚀 [FEATURE] Enables the setting of global `:field_default` and `:association_default` option value in the Blueprinter Configuration that will be used as default values for fields and associations that evaluate to nil. [#128](https://github.com/procore/blueprinter/pull/128). Thanks to [@mcclayton](https://github.com/mcclayton).
 
-## 0.11.0  - 2019/1/15
+## 0.11.0  - 2019/01/15
 
 * 🚀 [FEATURE] Enables the setting of a global `:if`/`:unless` proc in the Blueprinter Configuration that will be used to evaluate the conditional render of all fields. [#127](https://github.com/procore/blueprinter/pull/127). Thanks to [@mcclayton](https://github.com/mcclayton).
 

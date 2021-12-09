@@ -183,6 +183,8 @@ module Blueprinter
     # @option options [Any] :meta Defaults to nil.
     #   Render the json/hash with a meta attribute with provided value
     #   if both root and meta keys are provided in the options hash.
+    # @option options [Symbol] :allow_nil Defaults to false
+    #   Allow the rendering of nil object as NULL.
     #
     # @example Generating JSON with an extended view
     #   post = Post.all

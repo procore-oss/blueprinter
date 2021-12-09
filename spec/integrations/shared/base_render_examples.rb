@@ -736,4 +736,24 @@ shared_examples 'Base::render' do
       should(eq(excluded_view_keys))
     end
   end
+
+  context 'allowing nil object' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id
+      end
+    end
+
+    it 'renders nil' do
+      pending
+      result = blueprint.render(nil, allow_nil: true)
+      expect(result).to eq('null')
+    end
+
+    it 'renders nil with root' do
+      pending
+      result = blueprint.render(nil, root: :root, allow_nil: true)
+      expect(result).to eq('{"root":null}')
+    end
+  end
 end

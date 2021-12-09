@@ -18,6 +18,9 @@ module Blueprinter
       end
 
       def prepare_data(object, view_name, local_options)
+        allow_nil = local_options.delete(:allow_nil)
+        return if allow_nil && object.nil?
+
         if array_like?(object)
           object.map do |obj|
             object_to_hash(obj,

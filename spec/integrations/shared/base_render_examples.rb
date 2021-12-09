@@ -745,13 +745,11 @@ shared_examples 'Base::render' do
     end
 
     it 'renders nil' do
-      pending
       result = blueprint.render(nil, allow_nil: true)
       expect(result).to eq('null')
     end
 
     it 'renders nil with root' do
-      pending
       result = blueprint.render(nil, root: :root, allow_nil: true)
       expect(result).to eq('{"root":null}')
     end

@@ -18,7 +18,13 @@ module Blueprinter
       end
 
       def prepare_data(object, view_name, local_options)
-        if array_like?(object)
+        # instead of iterating over each task in object, I'd rather say object.includes(:predecessor_ids, :)
+        puts "i'm here"
+        puts 'view_name is: ' + view_name.to_s
+        # remove view_name == :extended
+        if active_record_relation?(object) && view_name == :extended
+          object_relation_to_hash(object, view_name: view_name, local_options: local_options)
+        elsif array_like?(object)
           object.map do |obj|
             object_to_hash(obj,
                            view_name: view_name,
@@ -41,9 +47,24 @@ module Blueprinter
         subclass.send(:view_collection).inherit(view_collection)
       end
 
+      def object_relation_to_hash(object_relation, view_name:, local_options:)
+        fields_to_eager_load = view_collection.fields_for(view_name).select{|f| f.eager_load?}.map{|e| e.name&.to_sym}
+        records_with_associations_loaded = object_relation.includes(fields_to_eager_load)
+        result_array = Array.new(records_with_associations_loaded.size)#create array of hashes
+        records_with_associations_loaded.each_with_index.map do |record, index|
+          record_hash = object_to_hash(record, view_name: view_name, local_options: local_options) #non-eager loaded
+          # fields_to_eager_load.each do |eager_field|
+          #   record_hash[eager_field] = record.send(eager_field)
+          # end
+          result_array[index] = record_hash
+        end
+        result_array
+      end
+
       def object_to_hash(object, view_name:, local_options:)
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-          next if field.skip?(field.name, object, local_options)
+          next if field.skip?(field.name, object, local_options) #|| field.eager_load?
+          puts 'name is: ' + field.name.to_s
           hash[field.name] = field.extract(object, local_options)
         end
         view_collection.transformers(view_name).each do |transformer|

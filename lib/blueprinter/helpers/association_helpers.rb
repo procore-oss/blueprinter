@@ -3,6 +3,24 @@ module Blueprinter
     # UNIT TEST THESE METHODS!!!!
     SINGULAR_ASSOCIATION_MACROS = [:belongs_to, :has_one].freeze
     COLLECTION_ASSOCIATION_MACROS = [:habtm, :has_many].freeze
+
+    # {:successor_ids => :successors, :successors => :successors}
+    def get_field_to_association_hash(object_relation)
+      full_hash = Hash.new
+      associations = object_relation.reflect_on_all_associations
+      associations.each do |association|
+        if SINGULAR_ASSOCIATION_MACROS.include?(association.macro)
+          full_hash.merge!(singular_associated_fields_hash(object_relation, association.name))
+        elsif COLLECTION_ASSOCIATION_MACROS.include?(association.macro)
+          full_hash.merge!(collection_associated_fields_hash(object_relation, association.name))
+        end
+      end
+
+      full_hash
+    end
+
+    private
+
     # belongs_to, belongs_to :polymorphic, has_one
     def singular_associated_fields_hash(object_relation, association_name_as_symbol)
       singular_association_hash = Hash.new
@@ -26,26 +44,5 @@ module Blueprinter
       end
       collection_associated_hash
     end
-
-    # {:successor_ids => :successors, :successors => :successors}
-    def get_field_to_association_hash(object_relation)
-      full_hash = Hash.new
-      associations = object_relation.reflect_on_all_associations
-      associations.each do |association|
-        if SINGULAR_ASSOCIATION_MACROS.include?(association.macro)
-          full_hash.merge!(singular_associated_fields_hash(object_relation, association.name))
-        elsif COLLECTION_ASSOCIATION_MACROS.include?(association.macro)
-          full_hash.merge!(collection_associated_fields_hash(object_relation, association.name))
-        end
-      end
-
-      full_hash
-    end
-
-    # if array like do the following
-    # get_full_association_hash field => association
-    # Find all associations for all fields specified
-    # preload associations
-    # call object_to_hash as I've always done
   end
 end

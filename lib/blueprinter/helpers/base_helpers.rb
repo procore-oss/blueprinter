@@ -21,7 +21,6 @@ module Blueprinter
       def prepare_data(object, view_name, local_options)
         if array_like?(object)
           if object.respond_to?(:reflect_on_all_associations)
-            # does this work for arrays that are not relations?
             object_relation_to_hash(local_options, object, view_name)
           else
             object.map do |obj|

@@ -8,6 +8,7 @@ module Blueprinter
         default: View.new(:default)
       }
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+      @fields_for = {}
     end
 
     def inherit(view_collection)
@@ -21,12 +22,15 @@ module Blueprinter
     end
 
     def fields_for(view_name)
-      return identifier_fields if view_name == :identifier
+      @fields_for[view_name] ||=
+        if view_name == :identifier
+          identifier_fields
+        else
+          fields, excluded_fields = sortable_fields(view_name)
+          sorted_fields = sort_by_definition ? sort_by_def(view_name, fields) : fields.values.sort_by(&:name)
 
-      fields, excluded_fields = sortable_fields(view_name)
-      sorted_fields = sort_by_definition ? sort_by_def(view_name, fields) : fields.values.sort_by(&:name)
-
-      (identifier_fields + sorted_fields).reject { |field| excluded_fields.include?(field.name) }
+          (identifier_fields + sorted_fields).reject { |field| excluded_fields.include?(field.name) }
+        end
     end
 
     def transformers(view_name)

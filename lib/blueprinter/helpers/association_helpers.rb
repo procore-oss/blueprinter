@@ -1,6 +1,5 @@
 module Blueprinter
   module AssociationHelpers
-    # UNIT TEST THESE METHODS!!!!
     SINGULAR_ASSOCIATION_MACROS = [:belongs_to, :has_one].freeze
     COLLECTION_ASSOCIATION_MACROS = [:habtm, :has_many].freeze
 

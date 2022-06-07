@@ -8,7 +8,6 @@ module Blueprinter
       @public_send_extractor = PublicSendExtractor.new
       @block_extractor = BlockExtractor.new
       @datetime_formatter = DateTimeFormatter.new
-      @config_field_default = Blueprinter.configuration.field_default
     end
 
     def extract(field_name, object, local_options, options = {})
@@ -20,7 +19,7 @@ module Blueprinter
     private
 
     def default_value(field_options)
-      field_options.key?(:default) ? field_options.fetch(:default) : @config_field_default
+      field_options.key?(:default) ? field_options.fetch(:default) : Blueprinter.configuration.field_default
     end
 
     def extractor(object, options)

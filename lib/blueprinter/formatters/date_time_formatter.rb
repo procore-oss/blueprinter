@@ -3,9 +3,8 @@ module Blueprinter
     InvalidDateTimeFormatterError = Class.new(BlueprinterError)
 
     def format(value, options)
-      return value if value.nil?
+      return value if value.nil? || !(field_format = options[:datetime_format] || Blueprinter.configuration.datetime_format)
 
-      field_format = options[:datetime_format]
       if value.respond_to?(:strftime)
         value = format_datetime(value, field_format)
       elsif field_format

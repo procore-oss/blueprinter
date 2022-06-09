@@ -17,10 +17,10 @@ module Blueprinter
 
     def format_datetime(value, field_format)
       case field_format
-      when Proc then format.call(value)
-      when String then value.strftime(format)
+      when Proc then field_format.call(value)
+      when String then value.strftime(field_format)
       else
-        raise InvalidDateTimeFormatterError, 'Cannot format DateTime object with invalid formatter: #{format.class}'
+        raise InvalidDateTimeFormatterError, 'Cannot format DateTime object with invalid formatter: #{field_format.class}'
       end
     end
   end

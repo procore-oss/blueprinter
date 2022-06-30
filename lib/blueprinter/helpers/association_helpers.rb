@@ -9,7 +9,8 @@ module Blueprinter
     # trying to derive.
     # Example: object_relation is an Account that has_one :user and has_many :subscriptions.
     # The hash returned would be {:user => :user, :subscriptions => :subscriptions,
-    # :subscription_ids => :subscriptions}. Then the calling method preload :subscriptions
+    # :subscription_ids => :subscriptions}. Then the calling method would preload
+    # :subscriptions and :user
     def get_field_to_association_hash(object_relation)
       full_hash = Hash.new
       associations = object_relation.reflect_on_all_associations

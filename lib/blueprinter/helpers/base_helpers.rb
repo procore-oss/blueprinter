@@ -1,5 +1,7 @@
+require_relative '../flags/feature_toggle'
 module Blueprinter
   module BaseHelpers
+
     def self.included(base)
       base.extend(SingletonMethods)
     end
@@ -7,6 +9,7 @@ module Blueprinter
     module SingletonMethods
       include TypeHelpers
       include AssociationHelpers
+      include Blueprinter::FeatureToggle
 
       private
 
@@ -18,9 +21,18 @@ module Blueprinter
         prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
       end
 
+      def preload_feature_flag_enabled?(object)
+        if object.count.positive?
+          res = FeatureToggle.active?('preload-associations', object[0]) # DELETE ME
+          res
+        else
+          false
+        end
+      end
+
       def prepare_data(object, view_name, local_options)
         if array_like?(object)
-          if object.respond_to?(:reflect_on_all_associations)
+          if object.respond_to?(:reflect_on_all_associations) && preload_feature_flag_enabled?(object)
             object_relation_to_hash(local_options, object, view_name)
           else
             object.map do |obj|
@@ -40,7 +52,7 @@ module Blueprinter
         field_to_association_hash = get_field_to_association_hash(object)
         list_of_associations_to_preload = []
         view_collection.fields_for(view_name).each do |field|
-          if field_to_association_hash.key?(field.name)
+          if field_to_association_hash.key?(field.name) # TODO: Maybe check list_of_associations_to_preload.include?(field_to_association_hash[field.name]. I don't think it matters though
             list_of_associations_to_preload << field_to_association_hash[field.name]
           end
         end

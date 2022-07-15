@@ -1,7 +1,5 @@
-require_relative '../flags/feature_toggle'
 module Blueprinter
   module BaseHelpers
-
     def self.included(base)
       base.extend(SingletonMethods)
     end
@@ -9,7 +7,7 @@ module Blueprinter
     module SingletonMethods
       include TypeHelpers
       include AssociationHelpers
-      include Blueprinter::FeatureToggle
+      @@should_preload_associations = false
 
       private
 
@@ -21,18 +19,21 @@ module Blueprinter
         prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
       end
 
-      def preload_feature_flag_enabled?(object)
-        if object.count.positive?
-          res = FeatureToggle.active?('preload-associations', object[0]) # DELETE ME
-          res
-        else
+      def self.set_should_preload_associations(should_preload_associations)
+        @@should_preload_associations = should_preload_associations
+      end
+
+      def preload_associations?
+        if @@should_preload_associations.nil? || @@should_preload_associations == false
           false
+        else
+          true
         end
       end
 
       def prepare_data(object, view_name, local_options)
         if array_like?(object)
-          if object.respond_to?(:reflect_on_all_associations) && preload_feature_flag_enabled?(object)
+          if object.respond_to?(:reflect_on_all_associations) && preload_associations?
             object_relation_to_hash(local_options, object, view_name)
           else
             object.map do |obj|
@@ -75,7 +76,7 @@ module Blueprinter
 
       def object_to_hash(object, view_name:, local_options:)
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
-          next if field.skip?(field.name, object, local_options) #|| field.eager_load?
+          next if field.skip?(field.name, object, local_options)
           puts 'name is: ' + field.name.to_s
           hash[field.name] = field.extract(object, local_options)
         end

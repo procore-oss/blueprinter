@@ -53,7 +53,8 @@ module Blueprinter
         field_to_association_hash = get_field_to_association_hash(object)
         list_of_associations_to_preload = []
         view_collection.fields_for(view_name).each do |field|
-          if field_to_association_hash.key?(field.name) # TODO: Maybe check list_of_associations_to_preload.include?(field_to_association_hash[field.name]. I don't think it matters though
+          if field_to_association_hash.key?(field.name) &&
+            !list_of_associations_to_preload.include?(field_to_association_hash[field.name])
             list_of_associations_to_preload << field_to_association_hash[field.name]
           end
         end
@@ -77,7 +78,6 @@ module Blueprinter
       def object_to_hash(object, view_name:, local_options:)
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
-          puts 'name is: ' + field.name.to_s
           hash[field.name] = field.extract(object, local_options)
         end
         view_collection.transformers(view_name).each do |transformer|

@@ -13,14 +13,6 @@ class Blueprinter::Field
     extractor.extract(method, object, local_options, options)
   end
 
-  def eager_load?
-    if @options.try(:[], :eager_load)
-      options[:eager_load]
-    else
-      false
-    end
-  end
-
   def skip?(field_name, object, local_options)
     return true if if_callable && !if_callable.call(field_name, object, local_options)
     unless_callable && unless_callable.call(field_name, object, local_options)

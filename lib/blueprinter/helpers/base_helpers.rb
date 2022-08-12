@@ -53,8 +53,7 @@ module Blueprinter
         field_to_association_hash = get_field_to_association_hash(object)
         list_of_associations_to_preload = []
         view_collection.fields_for(view_name).each do |field|
-          if field_to_association_hash.key?(field.name) &&
-            !list_of_associations_to_preload.include?(field_to_association_hash[field.name])
+          if preload_field?(field, field_to_association_hash, list_of_associations_to_preload, object)
             list_of_associations_to_preload << field_to_association_hash[field.name]
           end
         end
@@ -63,6 +62,13 @@ module Blueprinter
           object_to_hash(obj, view_name: view_name,
                          local_options: local_options)
         end
+      end
+
+      def preload_field?(field, field_to_association_hash, list_of_associations_to_preload, object)
+        field_to_association_hash.key?(field.name) &&
+          !list_of_associations_to_preload.include?(field_to_association_hash[field.name]) &&
+          object.size > 0 &&
+          !object.first.association(field_to_association_hash[field.name]).loaded?
       end
 
       def prepend_root_and_meta(data, root, meta)

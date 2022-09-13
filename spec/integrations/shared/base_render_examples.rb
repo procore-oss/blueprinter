@@ -419,6 +419,15 @@ shared_examples 'Base::render' do
       expect(blueprint.render(obj, view: :special)).to    eq(special)
       expect(blueprint.render(obj)).to                    eq(no_view)
     end
+
+    context 'with the same options' do
+      let(:options) { { view: :normal } }
+
+      it 'renders several objects with the same options' do
+        expect(blueprint.render(obj, options)).to eq(normal)
+        expect(blueprint.render(obj, options)).to eq(normal)
+      end
+    end
   end
 
   context 'Given blueprint has :root' do

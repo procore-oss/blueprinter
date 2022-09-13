@@ -10,6 +10,7 @@ module Blueprinter
       private
 
       def prepare_for_render(object, options)
+        options = options.dup
         view_name = options.delete(:view) || :default
         root = options.delete(:root)
         meta = options.delete(:meta)

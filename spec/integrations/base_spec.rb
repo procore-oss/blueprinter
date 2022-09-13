@@ -391,6 +391,28 @@ describe '::Base' do
         it 'returns a hash with expected format' do
           expect(subject).to eq({ id: obj.id, position_and_company: "#{obj.position} at #{obj.company}"})
         end
+
+        context 'with the same options' do
+          let(:blueprint) do
+            Class.new(Blueprinter::Base) do
+              identifier :id
+
+              field :first_name
+
+              view :with_last_name do
+                field :last_name
+              end
+            end
+          end
+          let(:options) { { view: :with_last_name } }
+          let(:expected_result) do
+            { id: obj.id, first_name: obj.first_name, last_name: obj.last_name }
+          end
+
+          it 'renders several objects with the same options' do
+            expect(blueprint.render_as_hash(obj, options)).to eq(expected_result)
+            expect(blueprint.render_as_hash(obj, options)).to eq(expected_result)
+          end
       end
     end
   end
@@ -402,6 +424,29 @@ describe '::Base' do
         let(:obj) { object_with_attributes }
         it 'returns a hash with expected format' do
           expect(subject).to eq({ "id" => obj.id, "position_and_company" => "#{obj.position} at #{obj.company}"})
+        end
+
+        context 'with the same options' do
+          let(:blueprint) do
+            Class.new(Blueprinter::Base) do
+              identifier :id
+
+              field :first_name
+
+              view :with_last_name do
+                field :last_name
+              end
+            end
+          end
+          let(:options) { { view: :with_last_name } }
+          let(:expected_result) do
+            { 'id' => obj.id, 'first_name' => obj.first_name, 'last_name' => obj.last_name }
+          end
+
+          it 'renders several objects with the same options' do
+            expect(blueprint.render_as_json(obj, options)).to eq(expected_result)
+            expect(blueprint.render_as_json(obj, options)).to eq(expected_result)
+          end
         end
       end
     end

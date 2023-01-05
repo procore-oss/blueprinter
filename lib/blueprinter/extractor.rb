@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Blueprinter
   class Extractor
     def extract(_field_name, _object, _local_options, _options={})

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'activerecord_helper'
 require 'ostruct'
 require_relative 'shared/base_render_examples'

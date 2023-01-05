@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples 'Base::render' do
   context 'Given blueprint has ::field' do
     let(:result) { '{"first_name":"Meg","id":' + obj_id + '}' }

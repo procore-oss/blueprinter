@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'blueprinter_error'
 require_relative 'configuration'
 require_relative 'deprecation'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Blueprinter
   # @api private
   class HashExtractor < Extractor

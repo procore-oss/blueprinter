@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Blueprinter
   module BaseHelpers
     def self.included(base)

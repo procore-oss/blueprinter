@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # @api private
 class Blueprinter::Field
   attr_reader :method, :name, :extractor, :options, :blueprint

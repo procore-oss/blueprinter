@@ -11,3 +11,4 @@ Gemfile.lock
 .vscode
 .DS_Store
 tmp/
+*.gem

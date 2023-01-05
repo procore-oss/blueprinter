@@ -7,11 +7,11 @@ require "blueprinter/version"
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "blueprinter"
+  s.name        = "blueprinter-rb"
   s.version     = Blueprinter::VERSION
-  s.authors     = ["Adam Hess", "Derek Carter"]
-  s.email       = ["adamhess1991@gmail.com"]
-  s.homepage    = "https://github.com/procore/blueprinter"
+  s.authors     = ["Adam Hess", "Derek Carter", "Ritikesh G"]
+  s.email       = ["ritikeshsisodiya@gmail.com"]
+  s.homepage    = "https://github.com/blueprinter-ruby/blueprinter"
   s.summary     = "Simple Fast Declarative Serialization Library"
   s.description = "Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant."
   s.license     = "MIT"

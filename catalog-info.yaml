@@ -1,0 +1,27 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: blueprinter
+  annotations:
+    github.com/project-slug: procore/blueprinter
+    github.com/team-slug: procore/team-ecosystem-core
+    circleci.com/project-slug: github/procore/blueprinter
+    bugsnag.com/project-name: Blueprinter
+  title: Blueprinter
+  description: JSON Object Presenter for Ruby
+  tags:
+    - ruby
+    - rails
+  links:
+    - url: https://procoretech.slack.com/archives/C1B30M371
+      title: Support
+      icon: help
+    - url: https://procoretech.slack.com/archives/C1B30M371
+      title: Team Slack
+      icon: chat
+spec:
+  type: library
+  lifecycle: ga
+  owner: team-ecosystem-core
+

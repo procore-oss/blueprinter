@@ -46,6 +46,46 @@ jobs:
     steps: *steps_spec
     docker:
       - image: ruby:2.5
+  ruby-2_6:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
+    steps: *steps_spec
+    docker:
+      - image: ruby:2.6
+  ruby-2_7:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
+    steps: *steps_spec
+    docker:
+      - image: ruby:2.7
+  ruby-3_0:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
+    steps: *steps_spec
+    docker:
+      - image: ruby:3.0
+  ruby-3_1:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
+    steps: *steps_spec
+    docker:
+      - image: ruby:3.1
+  ruby-3_2:
+    parameters:
+      benchmark:
+        type: boolean
+        default: true
+    steps: *steps_spec
+    docker:
+      - image: ruby:3.2
   release-gem:
     steps:
       - checkout
@@ -80,6 +120,11 @@ workflows:
       - ruby-2_3
       - ruby-2_4
       - ruby-2_5
+      - ruby-2_6
+      - ruby-2_7
+      - ruby-3_0
+      - ruby-3_1
+      - ruby-3_2
   release:
     jobs:
       - release-gem:

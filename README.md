@@ -1,18 +1,14 @@
-<img src="blueprinter_logo.svg" width="25%">
-
 # Blueprinter
 Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant.
 
 It heavily relies on the idea of `views` which, similar to Rails views, are ways of predefining output for data in different contexts.
 
 ## Documentation
-Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
+Docs can be found [here](http://www.rubydoc.info/gems/blueprinter-rb).
 
 ## Usage
-<details open>
+<details>
 <summary>Basic</summary>
-
----
 
 If you have an object you would like serialized, simply create a blueprint. Say, for example, you have a User record with the following attributes `[:uuid, :email, :first_name, :last_name, :password, :address]`.
 
@@ -41,15 +37,12 @@ And the output would look like:
   "last_name": "Doe"
 }
 ```
-
----
 </details>
 
 
 <details>
 <summary>Collections</summary>
 
----
 
 You can also pass a collection object or an array to the render method.
 
@@ -76,14 +69,12 @@ This will result in JSON that looks something like this:
 ]
 ```
 
----
 </details>
 
 
 <details>
 <summary>Renaming</summary>
 
----
 
 You can rename the resulting JSON keys in both fields and associations by using the `name` option.
 
@@ -107,14 +98,12 @@ This will result in JSON that looks something like this:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Views</summary>
 
----
 
 You may define different outputs by utilizing views:
 ```ruby
@@ -151,14 +140,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Identifiers</summary>
 
----
 
 `identifier`s are used to specify a field or method name used as an identifier. Usually, this is something like `:id`.
 
@@ -176,7 +163,6 @@ Blueprinter `identifier`s have a few properties that set them apart from `field`
 
 If either of the above two developer conveniences are not desired, you can simply create your identifier fields as regular `field`s.
 
----
 
 </details>
 
@@ -184,7 +170,6 @@ If either of the above two developer conveniences are not desired, you can simpl
 <details>
 <summary>Root</summary>
 
----
 
 You can also optionally pass in a root key to wrap your resulting json in:
 ```ruby
@@ -215,14 +200,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Meta Attributes</summary>
 
----
 
 You can additionally add meta-data to the json as well:
 ```ruby
@@ -264,14 +247,12 @@ Output:
 ```
 _NOTE:_ For meta attributes, a [root](#root) is mandatory.
 
----
 </details>
 
 
 <details>
 <summary>Exclude Fields</summary>
 
----
 
 You can specifically choose to exclude certain fields for specific views
 ```ruby
@@ -325,14 +306,12 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
----
 </details>
 
 
 <details>
 <summary>Associations</summary>
 
----
 
 You may include associated objects. Say for example, a user has projects:
 ```ruby
@@ -397,14 +376,12 @@ class DriverBlueprint < Blueprinter::Base
 end
 ```
 
----
 </details>
 
 
 <details>
 <summary>Default Association/Field Option</summary>
 
----
 
 By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
 
@@ -428,14 +405,12 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
----
 </details>
 
 
 <details>
 <summary>default_if</summary>
 
----
 
 Sometimes, you may want certain "empty" values to pass through to the default value.
 Blueprinter provides the ability to treat the following empty types as the default value (or `nil` if no default provided).
@@ -463,14 +438,12 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
----
 </details>
 
 
 <details>
 <summary>Supporting Dynamic Blueprints For Associations</summary>
 
----
 
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
 ```ruby
@@ -497,14 +470,12 @@ end
 ```
 _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
----
 </details>
 
 
 <details>
 <summary>Defining A Field Directly In The Blueprint</summary>
 
----
 
 You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
 
@@ -532,14 +503,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Defining An Identifier Directly In The Blueprint</summary>
 
----
 
 You can also pass a block to an identifier:
 
@@ -565,14 +534,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Defining An Association Directly In The Blueprint</summary>
 
----
 
 You can also pass a block to an association:
 
@@ -610,14 +577,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Passing Additional Properties To #render</summary>
 
----
 
 `render` takes an options hash which you can pass additional properties, allowing you to utilize those additional properties in the `field` block. For example:
 
@@ -645,14 +610,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Conditional Fields</summary>
 
----
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
 
@@ -675,14 +638,12 @@ end
 
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
----
 </details>
 
 
 <details>
 <summary>Custom Formatting for Dates and Times</summary>
 
----
 
 To define a custom format for a Date or DateTime field, include the option `datetime_format`.
 This global or field-level option can be either a string representing the associated `strftime` format,
@@ -734,14 +695,12 @@ Output:
 
 _NOTE:_ The field-level setting overrides the global config setting (for the field) if both are set.
 
----
 </details>
 
 
 <details>
 <summary>Transform Classes</summary>
 
----
 
 Blueprinter provides the ability to specify `transform`s on views, which enable further
 processing and transforming of resulting view field hashes prior to serialization.
@@ -800,13 +759,11 @@ end
 
 **Note: Any transforms specified on a per-blueprint or per-view level will override the `default_transformers` in the configuration.**
 
----
 </details>
 
 <details>
 <summary>Configurable Extractors</summary>
 
----
 
 Blueprinter gets a given objects' values from the fields definitions using extractor classes. You can substitute your own extractor class globally or per-field.
 
@@ -852,13 +809,11 @@ Blueprinter.configure do |config|
 end
 ```
 
----
 </details>
 
 <details>
 <summary>Sorting Fields</summary>
 
----
 
 By default the response sorts the keys by name. If you want the fields to be sorted in the order of definition, use the below configuration option.
 
@@ -887,14 +842,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>Deprecations</summary>
 
----
 
 When functionality in Blueprinter is invoked, that has been deprecated, the default behavior is to
 write a deprecation notice to stderror.
@@ -914,14 +867,12 @@ Blueprinter.configure do |config|
 end
 ```
 
----
 </details>
 
 
 <details>
 <summary>render_as_hash</summary>
 
----
 
 Same as `render`, returns a Ruby Hash.
 
@@ -940,14 +891,12 @@ Output:
 }
 ```
 
----
 </details>
 
 
 <details>
 <summary>render_as_json</summary>
 
----
 
 Same as `render`, returns a Ruby Hash JSONified. This will call JSONify all keys and values.
 
@@ -966,7 +915,6 @@ Output:
 }
 ```
 
----
 </details>
 
 

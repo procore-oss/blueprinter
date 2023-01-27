@@ -1,3 +1,6 @@
+## 1.0.0  - 2023/05/01
+* 🚀 [Official Release] Released [`blueprinter-rb`](https://rubygems.org/gems/blueprinter-rb) under a new organisation. More details can be found [here](https://github.com/procore/blueprinter/issues/288).
+
 ## 0.25.3  - 2021/03/03
 * 🐛 [BUGFIX] Fixes issue where fields and associations that are redefined by later views were not properly overwritten. See [#201](https://github.com/procore/blueprinter/pull/201) thanks to [@Berardpi](https://github.com/Berardpi).
 

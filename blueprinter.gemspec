@@ -9,20 +9,21 @@ require "blueprinter/version"
 Gem::Specification.new do |s|
   s.name        = "blueprinter-rb"
   s.version     = Blueprinter::VERSION
-  s.authors     = ["Adam Hess", "Derek Carter", "Ritikesh G"]
+  s.authors     = ["Ritikesh G"]
   s.email       = ["ritikeshsisodiya@gmail.com"]
   s.homepage    = "https://github.com/blueprinter-ruby/blueprinter"
   s.summary     = "Simple Fast Declarative Serialization Library"
   s.description = "Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant."
   s.license     = "MIT"
 
-  s.files = Dir["{app,config,db,lib}/**/*", "CHANGELOG.md", "MIT-LICENSE", "Rakefile", "README.md"]
+  s.files = Dir["{lib}/**/*", "MIT-LICENSE"]
 
   s.required_ruby_version = '>= 2.6.9'
 
+  s.add_runtime_dependency "oj", "~> 3.13"
+  s.add_runtime_dependency "yajl-ruby", "~> 1.4"
+
   s.add_development_dependency "factory_bot", "~> 6.2"
-  s.add_development_dependency "oj", "~> 3.13"
-  s.add_development_dependency "yajl-ruby", "~> 1.4"
   s.add_development_dependency "pry", "~> 0.14"
   s.add_development_dependency "activerecord", "~> 7.0"
   s.add_development_dependency "rspec", "~> 3.12"

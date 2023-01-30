@@ -28,7 +28,9 @@ module Blueprinter
       fields, excluded_fields = sortable_fields(view_name)
       sorted_fields = sort_by_definition ? sort_by_def(view_name, fields) : fields.values.sort_by(&:name)
 
-      (identifier_fields + sorted_fields).reject { |field| excluded_fields.include?(field.name) }
+      (identifier_fields + sorted_fields).tap do |fields|
+        fields.reject! { |field| excluded_fields.include?(field.name) }
+      end
     end
 
     def transformers(view_name)
@@ -49,15 +51,15 @@ module Blueprinter
     # @return [Array<(Hash, Hash<String, NilClass>)>] fields, excluded_fields
     def sortable_fields(view_name)
       excluded_fields = {}
-      fields = views[:default].fields
+      fields = views[:default].fields.clone
       views[view_name].included_view_names.each do |included_view_name|
         next if view_name == included_view_name
 
         view_fields, view_excluded_fields = sortable_fields(included_view_name)
-        fields = merge_fields(fields, view_fields)
+        fields.merge!(view_fields)
         excluded_fields.merge!(view_excluded_fields)
       end
-      fields = merge_fields(fields, views[view_name].fields)
+      fields.merge!(views[view_name].fields) unless view_name == :default
 
       views[view_name].excluded_field_names.each { |name| excluded_fields[name] = nil }
 
@@ -81,10 +83,6 @@ module Blueprinter
       else
         ordered_fields[definition.name] = fields[definition.name]
       end
-    end
-
-    def merge_fields(source_fields, included_fields)
-      source_fields.merge included_fields
     end
   end
 end

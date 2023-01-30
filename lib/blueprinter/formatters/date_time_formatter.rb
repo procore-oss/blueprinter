@@ -5,26 +5,22 @@ module Blueprinter
     def format(value, options)
       return value if value.nil?
 
-      field_format = options[:datetime_format]
-      if value.respond_to?(:strftime)
-        value = format_datetime(value, field_format)
-      elsif field_format
-        raise InvalidDateTimeFormatterError, 'Cannot format invalid DateTime object'
-      end
+      field_format = options[:datetime_format] || Blueprinter.configuration.datetime_format
+      return value if field_format.nil?
+ 
+      return format_datetime(value, field_format) if value.respond_to?(:strftime)
+      raise InvalidDateTimeFormatterError, 'Cannot format invalid DateTime object' if options[:datetime_format]
       value
     end
 
     private
 
     def format_datetime(value, field_format)
-      format = field_format || Blueprinter.configuration.datetime_format
-
-      case format
-      when NilClass then value
-      when Proc then format.call(value)
-      when String then value.strftime(format)
+      case field_format
+      when Proc then field_format.call(value)
+      when String then value.strftime(field_format)
       else
-        raise InvalidDateTimeFormatterError, 'Cannot format DateTime object with invalid formatter: #{format.class}'
+        raise InvalidDateTimeFormatterError, 'Cannot format DateTime object with invalid formatter: #{field_format.class}'
       end
     end
   end

@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "factory_bot", "~> 6.2"
   s.add_development_dependency "pry", "~> 0.14"
-  s.add_development_dependency "activerecord", "~> 7.0"
+  s.add_development_dependency "activerecord", ">= 5.2"
   s.add_development_dependency "rspec", "~> 3.12"
   s.add_development_dependency "rspec-rails", "~> 6.0"
   s.add_development_dependency "sqlite3", "~> 1.5"

@@ -72,6 +72,24 @@ This will result in JSON that looks something like this:
 ]
 ```
 
+
+You can also configure other classes to be treated like collections. For example, if you are using Mongoid, you can configure it to treat `Mongoid::Criteria` objects as collections:
+
+```ruby
+Blueprinter.configure do |config|
+  config.custom_array_like_classes = [Mongoid::Criteria]
+end
+```
+
+Or if you wanted it to treat the `Set` class as a collection:
+
+```ruby
+Blueprinter.configure do |config|
+  config.custom_array_like_classes = [Set]
+end
+```
+
+---
 </details>
 
 

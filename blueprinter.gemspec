@@ -20,8 +20,8 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 2.6.9'
 
-  s.add_runtime_dependency "oj", "~> 3.13"
-  s.add_runtime_dependency "yajl-ruby", "~> 1.4"
+  s.add_development_dependency "oj", "~> 3.13"
+  s.add_development_dependency "yajl-ruby", "~> 1.4"
 
   s.add_development_dependency "factory_bot", "~> 6.2"
   s.add_development_dependency "pry", "~> 0.14"

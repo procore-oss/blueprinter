@@ -12,5 +12,12 @@ gemspec
 # Git. Remember to move these dependencies to your gemspec before releasing
 # your gem to rubygems.org.
 
-# To use a debugger
-# gem 'byebug', group: [:development, :test]
+gem 'activerecord', '>= 5.2'
+gem 'ammeter', '~> 1.1'
+gem 'factory_bot', '~> 6.2'
+gem 'pry', '~> 0.14'
+gem 'rspec', '~> 3.12'
+gem 'rspec-rails', '~> 6.0'
+gem 'rubocop', '~> 1.44'
+gem 'sqlite3', '~> 1.5'
+gem 'yard', '~> 0.9'

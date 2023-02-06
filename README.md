@@ -1,5 +1,6 @@
 [![Gem Version](https://badge.fury.io/rb/blueprinter-rb.svg)](https://badge.fury.io/rb/blueprinter-rb)
 ![Tests](https://github.com/blueprinter-ruby/blueprinter/actions/workflows/tests.yml/badge.svg)
+![rubocop](https://github.com/blueprinter-ruby/blueprinter/actions/workflows/rubocop.yml/badge.svg)
 
 # Blueprinter
 Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant.

@@ -1,3 +1,6 @@
+## 1.1.2 - 2023/02/06
+* 💅 [ENHANCEMENT] Introduce rubocop and add a Github action for it
+
 ## 1.1.1 - 2023/02/06
 * 🐛 [BUGFIX] Fix accidental hard dependency requirement of yajl and oj in gemspec from a routine cleanup commit
 

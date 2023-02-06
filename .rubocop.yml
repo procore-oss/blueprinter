@@ -1,0 +1,26 @@
+AllCops:
+  TargetRubyVersion: 2.6.9
+  NewCops: enable
+  Exclude:
+    - 'lib/generators/**/*'
+    - 'tmp/**/*'
+    - 'spec/**/*'
+    - 'vendor/**/*' # added by github actions
+
+Style/Documentation:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 175
+
+Lint/MissingSuper:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Enabled: false

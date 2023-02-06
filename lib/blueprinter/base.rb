@@ -60,7 +60,7 @@ module Blueprinter
         name,
         extractor,
         self,
-        block: block,
+        block: block
       )
     end
 
@@ -125,7 +125,7 @@ module Blueprinter
         options.fetch(:name) { method },
         options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
         self,
-        options.merge(block: block),
+        options.merge(block: block)
       )
     end
 
@@ -165,7 +165,7 @@ module Blueprinter
         method,
         options.merge(
           association: true,
-          extractor: options.fetch(:extractor) { AssociationExtractor.new },
+          extractor: options.fetch(:extractor) { AssociationExtractor.new }
         ),
         &block
       )
@@ -254,9 +254,7 @@ module Blueprinter
     #
     # @api private
     def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
-      unless view_collection.has_view? view_name
-        raise BlueprinterError, "View '#{view_name}' is not defined"
-      end
+      raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view? view_name
 
       data = prepare_data(object, view_name, local_options)
       prepend_root_and_meta(data, root, meta)
@@ -280,7 +278,6 @@ module Blueprinter
         field(field_name)
       end
     end
-
 
     # Specify one transformer to be included for serialization.
     # Takes a class which extends Blueprinter::Transformer
@@ -317,7 +314,6 @@ module Blueprinter
       current_view.add_transformer(transformer)
     end
 
-
     # Specify another view that should be mixed into the current view.
     #
     # @param view_name [Symbol] the view to mix into the current view.
@@ -339,7 +335,6 @@ module Blueprinter
     def self.include_view(view_name)
       current_view.include_view(view_name)
     end
-
 
     # Specify additional views that should be mixed into the current view.
     #
@@ -363,11 +358,9 @@ module Blueprinter
     #
     # @return [Array<Symbol>] an array of view names.
 
-
     def self.include_views(*view_names)
       current_view.include_views(view_names)
     end
-
 
     # Exclude a field that was mixed into the current view.
     #
@@ -446,13 +439,13 @@ module Blueprinter
     #  end
     # end
     #
-    #  ExampleBlueprint.has_view?(:custom) => true
-    #  ExampleBlueprint.has_view?(:doesnt_exist) => false
+    #  ExampleBlueprint.view?(:custom) => true
+    #  ExampleBlueprint.view?(:doesnt_exist) => false
     #
     # @return [Boolean] a boolean value indicating if the view is
     # supported by this Blueprint.
-    def self.has_view?(view_name)
-      view_collection.has_view? view_name
+    def self.view?(view_name)
+      view_collection.view? view_name
     end
   end
 end

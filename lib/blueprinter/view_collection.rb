@@ -4,6 +4,7 @@ module Blueprinter
   # @api private
   class ViewCollection
     attr_reader :views, :sort_by_definition
+
     def initialize
       @views = {
         identifier: View.new(:identifier),
@@ -18,8 +19,8 @@ module Blueprinter
       end
     end
 
-    def has_view?(view_name)
-      views.has_key? view_name
+    def view?(view_name)
+      views.key? view_name
     end
 
     def fields_for(view_name)
@@ -28,8 +29,8 @@ module Blueprinter
       fields, excluded_fields = sortable_fields(view_name)
       sorted_fields = sort_by_definition ? sort_by_def(view_name, fields) : fields.values.sort_by(&:name)
 
-      (identifier_fields + sorted_fields).tap do |fields|
-        fields.reject! { |field| excluded_fields.include?(field.name) }
+      (identifier_fields + sorted_fields).tap do |fields_array|
+        fields_array.reject! { |field| excluded_fields.include?(field.name) }
       end
     end
 
@@ -69,7 +70,9 @@ module Blueprinter
     # select and order members of fields according to traversal of the definition_orders
     def sort_by_def(view_name, fields)
       ordered_fields = {}
-      views[:default].definition_order.each { |definition| add_to_ordered_fields(ordered_fields, definition, fields, view_name)  }
+      views[:default].definition_order.each do |definition|
+        add_to_ordered_fields(ordered_fields, definition, fields, view_name)
+      end
       ordered_fields.values
     end
 
@@ -78,7 +81,9 @@ module Blueprinter
     def add_to_ordered_fields(ordered_fields, definition, fields, view_name_filter = nil)
       if definition.view?
         if view_name_filter.nil? || view_name_filter == definition.name
-          views[definition.name].definition_order.each { |_definition| add_to_ordered_fields(ordered_fields, _definition, fields) }
+          views[definition.name].definition_order.each do |defined|
+            add_to_ordered_fields(ordered_fields, defined, fields)
+          end
         end
       else
         ordered_fields[definition.name] = fields[definition.name]

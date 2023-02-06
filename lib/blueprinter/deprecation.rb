@@ -4,8 +4,8 @@
 module Blueprinter
   class Deprecation
     class << self
-      VALID_BEHAVIORS = %i(silence stderror raise).freeze
-      MESSAGE_PREFIX = "[DEPRECATION::WARNING] Blueprinter:"
+      VALID_BEHAVIORS = %i[silence stderror raise].freeze
+      MESSAGE_PREFIX = '[DEPRECATION::WARNING] Blueprinter:'
 
       def report(message)
         full_msg = qualified_message(message)
@@ -28,7 +28,7 @@ module Blueprinter
 
       def behavior
         configured = Blueprinter.configuration.deprecations
-        return configured unless !VALID_BEHAVIORS.include?(configured)
+        return configured if VALID_BEHAVIORS.include?(configured)
 
         :stderror
       end

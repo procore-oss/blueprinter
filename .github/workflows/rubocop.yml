@@ -1,0 +1,21 @@
+name: "rubocop"
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Ruby and gems
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6.9'
+          bundler-cache: true
+      - name: Rubocop
+        # yard's rubocop.yml is interfering with the execution when using bundle exec
+        # without bundle exec github action isn't able to detect the executable
+        run: bundle exec rubocop --config ./.rubocop.yml

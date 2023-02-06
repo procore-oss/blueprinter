@@ -492,7 +492,7 @@ describe '::Base' do
   end
 
   describe 'has_view?' do
-    subject { blueprint.has_view?(view) }
+    subject { blueprint.view?(view) }
 
     let(:blueprint) do
       Class.new(Blueprinter::Base) do

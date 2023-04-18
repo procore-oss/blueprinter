@@ -21,7 +21,7 @@ metadata:
       title: Team Slack
       icon: chat
 spec:
-  system: App Management | Developer Metrics | Marketplace | Sidepanel | Support Documentation
+  system: App Management
   type: library
   lifecycle: ga
   owner: team-developer-marketplace-experience

@@ -5,7 +5,7 @@ metadata:
   name: blueprinter
   annotations:
     github.com/project-slug: procore/blueprinter
-    github.com/team-slug: procore/team-ecosystem-core
+    github.com/team-slug: procore/team-developer-marketplace-experience
     circleci.com/project-slug: github/procore/blueprinter
     bugsnag.com/project-name: Blueprinter
   title: Blueprinter
@@ -24,4 +24,4 @@ spec:
   system: App Management
   type: library
   lifecycle: ga
-  owner: team-ecosystem-core
+  owner: team-developer-marketplace-experience

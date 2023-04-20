@@ -16,6 +16,4 @@ jobs:
           ruby-version: '2.6.9'
           bundler-cache: true
       - name: Rubocop
-        # yard's rubocop.yml is interfering with the execution when using bundle exec
-        # without bundle exec github action isn't able to detect the executable
-        run: bundle exec rubocop --config ./.rubocop.yml
+        run: bundle exec rubocop

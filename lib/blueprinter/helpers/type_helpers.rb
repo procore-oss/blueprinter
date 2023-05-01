@@ -7,7 +7,7 @@ module Blueprinter
     end
 
     def array_like?(object)
-      object.is_a?(Array) || active_record_relation?(object)
+      object.is_a?(Enumerable) || active_record_relation?(object)
     end
   end
 end

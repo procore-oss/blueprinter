@@ -954,7 +954,7 @@ $ bundle
 
 Or install it yourself as:
 ```bash
-$ gem install blueprinter
+$ gem install blueprinter-rb
 ```
 
 You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.

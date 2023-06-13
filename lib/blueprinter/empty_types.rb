@@ -22,11 +22,6 @@ module Blueprinter
         value.is_a?(Hash) && value.empty?
       when Blueprinter::EMPTY_STRING
         value.to_s == ''
-      else
-        Blueprinter::Deprecation.report(
-          "Invalid empty type '#{empty_type}' received. Blueprinter will raise an error in the next major version." \
-          'Must be one of [nil, Blueprinter::EMPTY_COLLECTION, Blueprinter::EMPTY_HASH, Blueprinter::EMPTY_STRING]'
-        )
       end
     end
   end

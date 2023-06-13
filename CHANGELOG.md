@@ -1,3 +1,6 @@
+## 1.2.0 - 2023/06/13
+* 💅 [ENHANCEMENT] if/:unless procs with two arguments and invalid empty type deprecations are now removed
+
 ## 1.1.2 - 2023/02/06
 * 💅 [ENHANCEMENT] Introduce rubocop and add a Github action for it
 

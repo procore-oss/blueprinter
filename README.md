@@ -460,9 +460,9 @@ class UserBlueprint < Blueprinter::Base
 
   view :normal do
     # If first_name is an empty string, it will become "N/A"
-    field :first_name, default_if: Blueprinter::EmptyString, default: "N/A"
+    field :first_name, default_if: Blueprinter::EMPTY_STRING, default: "N/A"
     # If the projects association collection is empty, it will become nil
-    association :projects, blueprint: ProjectBlueprint, default_if: Blueprinter::EmptyCollection
+    association :projects, blueprint: ProjectBlueprint, default_if: Blueprinter::EMPTY_COLLECTION
   end
 end
 ```

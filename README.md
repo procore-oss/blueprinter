@@ -450,6 +450,9 @@ An empty array or empty active record collection.
 #### Blueprinter::EMPTY_HASH
 An empty hash.
 
+#### Blueprinter::EMPTY_JSONB
+An empty json blob.
+
 #### Blueprinter::EMPTY_STRING
 An empty string or symbol.
 

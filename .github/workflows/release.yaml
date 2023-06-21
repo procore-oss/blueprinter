@@ -1,0 +1,28 @@
+name: Release
+on:
+  workflow_run:
+    workflows: [Test]
+    types: [completed]
+    branches: [master, main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5 # (latest, untagged)
+      - name: Installing ruby dependencies
+        run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - name: Sign in to Github as Bot
+        run: |
+            git config --global user.email "$GIT_BOT_EMAIL"
+            git config --global user.name "$GIT_BOT_NAME"
+      - name: Auth RubyGems
+        run: |
+          mkdir ~/.gem
+          install -m 0600 /dev/null ~/.gem/credentials
+          echo -e "---\n:rubygems_api_key: $RUBY_GEMS_API_KEY" > ~/.gem/credentials
+      - name: Release New Gem Version
+        run: |
+          GEM_VERSION=$(ruby -r "./lib/blueprinter/version.rb" -e "puts Blueprinter::VERSION")
+          echo "Attempting to release version '$GEM_VERSION' of Blueprinter..."
+          bundle exec rake release || true # Don't fail when deploy does not take place

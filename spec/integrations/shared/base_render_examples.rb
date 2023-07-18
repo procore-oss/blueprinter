@@ -333,6 +333,43 @@ shared_examples 'Base::render' do
                 include_examples 'does not serialize the conditional field'
               end
             end
+
+            context 'roll_up_conditions is enabled' do
+              let(:local_options) { {x: 1, y: 2, v1: value, v2: other_value} }
+
+              before do
+                Blueprinter.configuration.roll_up_conditions = true
+                Blueprinter.configuration.if = ->(field_name, object, local_opts) {
+                  if local_opts[:sparse_fields]
+                    local_opts[:sparse_fields].include?(field_name.to_s)
+                  else
+                    value
+                  end
+                }
+                Blueprinter.configuration.unless = ->(_a,_b,_c) { other_value }
+              end
+              after do
+                Blueprinter.configuration.roll_up_conditions = false
+                Blueprinter.configuration.if = nil
+                Blueprinter.configuration.unless = nil
+              end
+
+              if value && !other_value
+                include_examples 'serializes the conditional field'
+
+                context 'and top level conditional triggered by local options' do
+                  let(:local_options) { {sparse_fields: ['first_name']} }
+
+                  it 'honors all configuration conditionals - only serializes specified field' do
+                    should eq(%({"first_name":"Meg"}))
+                  end
+                end
+              else
+                it 'nothing is serialized' do
+                  should eq('{}')
+                end
+              end
+            end
           end
         end
 

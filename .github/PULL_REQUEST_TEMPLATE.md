@@ -6,8 +6,8 @@ If the DCO check fails, one or more of your commits are not signed off. Please c
 
 Checklist:
 
-* [ ] I have bumped any necessary versions according to this project
+* [ ] I have bumped any necessary versions according to this project (lib/blueprinter/version.rb)
 * [ ] I have updated the necessary documentation
-* [ ] I have updated the changelog, if necessary
+* [ ] I have updated the changelog, if necessary (CHANGELOG.md)
 * [ ] I have signed off all my commits as required by [DCO](../CONTRIBUTING.md#legal)
 * [ ] My build is green

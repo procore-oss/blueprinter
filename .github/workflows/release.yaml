@@ -5,17 +5,36 @@ on:
     types: [completed]
     branches: [master, main]
 jobs:
-  release:
+  version-file-changed:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      output: ${{ steps.version-file-changed.outputs }}
     steps:
       - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5 # (latest, untagged)
-      - name: Installing ruby dependencies
+      - name: Version file changed
+        id: version-file-changed
+        uses: tj-actions/changed-files@v37
+        with:
+          files: lib/blueprinter/version.rb
+  release:
+    runs-on: ubuntu-latest
+    needs: version-file-changed
+    if: ${{ needs.version-file-changed.output.any_changed == 'true' }}
+    steps:
+      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5 # (latest, untagged)
+      - name: Version file changed
+        id: version-file-changed
+        uses: tj-actions/changed-files@v37
+        with:
+          files: lib/blueprinter/version.rb
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@250fcd6a742febb1123a77a841497ccaa8b9e939
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Installing dependencies
         run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
-      - name: Sign in to Github as Bot
-        run: |
-            git config --global user.email "$GIT_BOT_EMAIL"
-            git config --global user.name "$GIT_BOT_NAME"
       - name: Auth RubyGems
         run: |
           mkdir ~/.gem

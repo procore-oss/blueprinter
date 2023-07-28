@@ -1,0 +1,24 @@
+name: Release
+on:
+  workflow_run:
+    workflows: [Test]
+    types: [completed]
+    branches: [master, main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@96f53100ba2a5449eb71d2e6604bbcd94b9449b5 # (latest, untagged)
+      - name: Version file changed
+        id: version-file-changed
+        uses: tj-actions/changed-files@ea41e772876ff19a8d86e3315c52ceff3dae1941 # (latest, untagged)
+        with:
+          files: lib/blueprinter/version.rb
+      - name: Release New Gem Version
+        if: ${{ steps.version-file-changed.outputs.any_changed == 'true' }}
+        uses: cadwallion/publish-rubygems-action@94a6f4cd5350581749c569b5001eecc864e3ad0b # (latest, untagged)
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          RUBYGEMS_API_KEY: ${{secrets.RUBY_GEMS_API_KEY}}
+          RELEASE_COMMAND: bundle exec rake release || true # Don't fail when deploy does not take place

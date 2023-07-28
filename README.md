@@ -1,18 +1,21 @@
-[![CircleCI](https://circleci.com/gh/procore/blueprinter.svg?style=svg)](https://circleci.com/gh/procore/blueprinter)
+![Tests](https://github.com/procore/blueprinter/actions/workflows/test.yml/badge.svg?branch=master)
 [![Gem Version](https://badge.fury.io/rb/blueprinter.svg)](https://badge.fury.io/rb/blueprinter)
 [![Gitter chat](https://badges.gitter.im/procore/blueprinter.svg)](https://gitter.im/blueprinter-gem/community)
 
 <img src="blueprinter_logo.svg" width="25%">
 
 # Blueprinter
+
 Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant.
 
 It heavily relies on the idea of `views` which, similar to Rails views, are ways of predefining output for data in different contexts.
 
 ## Documentation
+
 Docs can be found [here](http://www.rubydoc.info/gems/blueprinter).
 
 ## Usage
+
 <details open>
 <summary>Basic</summary>
 
@@ -31,6 +34,7 @@ end
 ```
 
 and then, in your code:
+
 ```ruby
 puts UserBlueprint.render(user) # Output is a JSON string
 ```
@@ -48,7 +52,6 @@ And the output would look like:
 
 ---
 </details>
-
 
 <details>
 <summary>Collections</summary>
@@ -83,7 +86,6 @@ This will result in JSON that looks something like this:
 ---
 </details>
 
-
 <details>
 <summary>Renaming</summary>
 
@@ -114,13 +116,13 @@ This will result in JSON that looks something like this:
 ---
 </details>
 
-
 <details>
 <summary>Views</summary>
 
 ---
 
 You may define different outputs by utilizing views:
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -137,14 +139,17 @@ class UserBlueprint < Blueprinter::Base
   end
 end
 ```
+
 A view can include fields from another view by utilizing `include_view` and `include_views`.
 
 Usage:
+
 ```ruby
 puts UserBlueprint.render(user, view: :extended)
 ```
 
 Output:
+
 ```json
 {
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
@@ -158,7 +163,6 @@ Output:
 ---
 </details>
 
-
 <details>
 <summary>Identifiers</summary>
 
@@ -167,6 +171,7 @@ Output:
 `identifier`s are used to specify a field or method name used as an identifier. Usually, this is something like `:id`.
 
 Example:
+
 ```rb
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -184,13 +189,13 @@ If either of the above two developer conveniences are not desired, you can simpl
 
 </details>
 
-
 <details>
 <summary>Root</summary>
-
+<a name="root"></a>
 ---
 
 You can also optionally pass in a root key to wrap your resulting json in:
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -203,11 +208,13 @@ end
 ```
 
 Usage:
+
 ```ruby
 puts UserBlueprint.render(user, view: :normal, root: :user)
 ```
 
 Output:
+
 ```json
 {
   "user": {
@@ -222,13 +229,13 @@ Output:
 ---
 </details>
 
-
 <details>
 <summary>Meta Attributes</summary>
 
 ---
 
 You can additionally add meta-data to the json as well:
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -241,6 +248,7 @@ end
 ```
 
 Usage:
+
 ```ruby
 json = UserBlueprint.render(user, view: :normal, root: :user, meta: {links: [
   'https://app.mydomain.com',
@@ -250,6 +258,7 @@ puts json
 ```
 
 Output:
+
 ```json
 {
   "user": {
@@ -266,11 +275,11 @@ Output:
   }
 }
 ```
+
 _NOTE:_ For meta attributes, a [root](#root) is mandatory.
 
 ---
 </details>
-
 
 <details>
 <summary>Exclude Fields</summary>
@@ -278,6 +287,7 @@ _NOTE:_ For meta attributes, a [root](#root) is mandatory.
 ---
 
 You can specifically choose to exclude certain fields for specific views
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -296,11 +306,13 @@ end
 ```
 
 Usage:
+
 ```ruby
 puts UserBlueprint.render(user, view: :extended)
 ```
 
 Output:
+
 ```json
 {
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
@@ -332,13 +344,13 @@ end
 ---
 </details>
 
-
 <details>
 <summary>Associations</summary>
 
 ---
 
 You may include associated objects. Say for example, a user has projects:
+
 ```ruby
 class ProjectBlueprint < Blueprinter::Base
   identifier :uuid
@@ -357,11 +369,13 @@ end
 ```
 
 Usage:
+
 ```ruby
 puts UserBlueprint.render(user, view: :normal)
 ```
 
 Output:
+
 ```json
 {
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
@@ -383,6 +397,7 @@ Output:
 
 It is also possible to pass options from one Blueprint to another via an association.
 For example:
+
 ```ruby
 class VehicleBlueprint < Blueprinter::Base
   identifier :uuid
@@ -404,7 +419,6 @@ end
 ---
 </details>
 
-
 <details>
 <summary>Default Association/Field Option</summary>
 
@@ -412,7 +426,8 @@ end
 
 By default, an association or field that evaluates to `nil` is serialized as `nil`. A default serialized value can be specified as an option on the association or field for cases when the association/field could potentially evaluate to `nil`. You can also specify a global `field_default` or `association_default` in the Blueprinter config which will be used for all fields/associations that evaluate to nil.
 
-#### Global Config Setting
+### Global Config Setting
+
 ```ruby
 Blueprinter.configure do |config|
   config.field_default = "N/A"
@@ -420,7 +435,8 @@ Blueprinter.configure do |config|
 end
 ```
 
-#### Field-level/Association-level Setting
+### Field-level/Association-level Setting
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -435,7 +451,6 @@ end
 ---
 </details>
 
-
 <details>
 <summary>default_if</summary>
 
@@ -444,16 +459,20 @@ end
 Sometimes, you may want certain "empty" values to pass through to the default value.
 Blueprinter provides the ability to treat the following empty types as the default value (or `nil` if no default provided).
 
-#### Blueprinter::EMPTY_COLLECTION
+### Blueprinter::EMPTY_COLLECTION
+
 An empty array or empty active record collection.
 
-#### Blueprinter::EMPTY_HASH
+### Blueprinter::EMPTY_HASH
+
 An empty hash.
 
-#### Blueprinter::EMPTY_STRING
+### Blueprinter::EMPTY_STRING
+
 An empty string or symbol.
 
-#### Field-level/Association-level Setting
+#### Field-level/Association-level Setting - EMPTY_STRING
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -470,13 +489,13 @@ end
 ---
 </details>
 
-
 <details>
 <summary>Supporting Dynamic Blueprints For Associations</summary>
 
 ---
 
 When defining an association, we can dynamically evaluate the blueprint. This comes in handy when adding polymorphic associations, by allowing reuse of existing blueprints.
+
 ```ruby
 class Task < ActiveRecord::Base
   belongs_to :taskable, polymorphic: true
@@ -499,11 +518,11 @@ class TaskBlueprint < Blueprinter::Base
   end
 end
 ```
+
 _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `has_many` is not supported because of the very nature of polymorphic associations.
 
 ---
 </details>
-
 
 <details>
 <summary>Defining A Field Directly In The Blueprint</summary>
@@ -539,7 +558,6 @@ Output:
 ---
 </details>
 
-
 <details>
 <summary>Defining An Identifier Directly In The Blueprint</summary>
 
@@ -571,7 +589,6 @@ Output:
 
 ---
 </details>
-
 
 <details>
 <summary>Defining An Association Directly In The Blueprint</summary>
@@ -617,7 +634,6 @@ Output:
 ---
 </details>
 
-
 <details>
 <summary>Passing Additional Properties To #render</summary>
 
@@ -652,7 +668,6 @@ Output:
 ---
 </details>
 
-
 <details>
 <summary>Conditional Fields</summary>
 
@@ -660,7 +675,8 @@ Output:
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
 
-#### Global Config Setting
+### Global Config Setting - if and unless
+
 ```ruby
 Blueprinter.configure do |config|
   config.if = ->(field_name, obj, _options) { !obj[field_name].nil? }
@@ -669,6 +685,7 @@ end
 ```
 
 #### Field-level Setting
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
@@ -682,7 +699,6 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 ---
 </details>
 
-
 <details>
 <summary>Custom Formatting for Dates and Times</summary>
 
@@ -693,18 +709,21 @@ This global or field-level option can be either a string representing the associ
 or a Proc which receives the original Date/DateTime object and returns the formatted value.
 When using a Proc, it is the Proc's responsibility to handle any errors in formatting.
 
+#### Global Config Setting - datetime
 
-#### Global Config Setting
 If a global datetime_format is set (either as a string format or a Proc), this option will be
 invoked and used to format all fields that respond to `strftime`.
+
 ```ruby
 Blueprinter.configure do |config|
   config.datetime_format = ->(datetime) { datetime.nil? ? datetime : datetime.strftime("%s").to_i }
 end
 ```
 
-#### Field-level Setting
+#### Field-level Setting - datetime_format
+
 Usage (String Option):
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :name
@@ -713,6 +732,7 @@ end
 ```
 
 Output:
+
 ```json
 {
   "name": "John Doe",
@@ -721,6 +741,7 @@ Output:
 ```
 
 Usage (Proc Option):
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :name
@@ -729,6 +750,7 @@ end
 ```
 
 Output:
+
 ```json
 {
   "name": "John Doe",
@@ -740,7 +762,6 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 
 ---
 </details>
-
 
 <details>
 <summary>Transform Classes</summary>
@@ -757,6 +778,7 @@ Whatever is returned from this `transform` method will end up being the resultin
 #### Example
 
 Create a Transform class extending from `Blueprinter::Transformer`
+
 ```ruby
 class DynamicFieldTransformer < Blueprinter::Transformer
   def transform(hash, object, options)
@@ -778,6 +800,7 @@ end
 ```
 
 Then specify the transform to use for the view.
+
 ```ruby
 class UserBlueprint < Blueprinter::Base
   fields :first_name, :last_name
@@ -788,6 +811,7 @@ end
 #### Global Transforms
 
 You can also specify global default transformers. Create one or more transformer classes extending from `Blueprinter::Transformer` and set the `default_transformers` configuration
+
 ```ruby
 class LowerCamelTransformer < Blueprinter::Transformer
   def transform(hash, _object, _options)
@@ -817,6 +841,7 @@ Blueprinter gets a given objects' values from the fields definitions using extra
 #### Examples
 
 For a specific kind of field, create an extractor class extending from `Blueprinter::Extractor`
+
 ```ruby
 class MyFieldExtractor < Blueprinter::Extractor
   def extract(_field_name, _object, _local_options, _options={})
@@ -833,6 +858,7 @@ end
 ```
 
 For a global default, create an extractor class extending from `Blueprinter::AutoExtractor` and set the `extractor_default` configuration
+
 ```ruby
 class MyAutoExtractor < Blueprinter::AutoExtractor
   def initialize
@@ -883,6 +909,7 @@ end
 ```
 
 Output:
+
 ```json
 {
   "name": "John Doe",
@@ -893,7 +920,6 @@ Output:
 
 ---
 </details>
-
 
 <details>
 <summary>Deprecations</summary>
@@ -911,7 +937,8 @@ However, deprecations can be configured to report at three different levels:
 | `:raise`            | Deprecations will be raised as `Blueprinter::BlueprinterError`s |
 | `:silence`          | Deprecations will be silenced and will not be raised or logged  |
 
-### Example:
+### Example - deprecations
+
 ```ruby
 Blueprinter.configure do |config|
   config.deprecations = :raise
@@ -920,7 +947,6 @@ end
 
 ---
 </details>
-
 
 <details>
 <summary>render_as_hash</summary>
@@ -947,7 +973,6 @@ Output:
 ---
 </details>
 
-
 <details>
 <summary>render_as_json</summary>
 
@@ -973,8 +998,8 @@ Output:
 ---
 </details>
 
-
 ## Installation
+
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -982,13 +1007,15 @@ gem 'blueprinter'
 ```
 
 And then execute:
+
 ```bash
-$ bundle
+bundle
 ```
 
 Or install it yourself as:
+
 ```bash
-$ gem install blueprinter
+gem install blueprinter
 ```
 
 You should also have `require 'json'` already in your project if you are not using Rails or if you are not using Oj.
@@ -1028,12 +1055,15 @@ end
 _NOTE:_ You should be doing this only if you aren't using `yajl-ruby` through the JSON API by requiring `yajl/json_gem`. More details [here](https://github.com/brianmario/yajl-ruby#json-gem-compatibility-api). In this case, `JSON.generate` is patched to use `Yajl::Encoder.encode` internally.
 
 ## Contributing
-Feel free to browse the issues, converse, and make pull requests. If you need help, first please see if there is already an issue for your problem. Otherwise, go ahead and make a new issue.
+
+Please read our [Contributing](CONTRIBUTING.md) file
 
 ### Tests
+
 You can run tests with `bundle exec rake`.
 
 ### Maintain The Docs
+
 We use Yard for documentation. Here are the following documentation rules:
 
 - Document all public methods we expect to be utilized by the end developers.
@@ -1048,7 +1078,9 @@ documentation rules:
 - Methods that are not set to private due to ruby visibility rule limitations should be marked with `@api private`.
 
 ### Releasing a New Version
+
 To release a new version, change the version number in `version.rb`, and update the `CHANGELOG.md`. Finally, maintainers need to run `bundle exec rake release`, which will automatically create a git tag for the version, push git commits and tags to Github, and push the `.gem` file to rubygems.org.
 
 ## License
+
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).

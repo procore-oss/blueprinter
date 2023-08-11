@@ -4,6 +4,20 @@
 
 <img src="blueprinter_logo.svg" width="25%">
 
+# Recent Organization Move
+
+Please change your local remote to pull from this repository:
+
+```bash
+git remote set-url [previous-remote-name] git@github.com:procore-oss/blueprinter.git
+```
+
+to see the previous upstream remote name, run:
+
+```bash
+git remote -v
+```
+
 # Blueprinter
 
 Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant.

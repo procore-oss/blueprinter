@@ -1,4 +1,4 @@
-[![Test](https://github.com/procore/blueprinter/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/procore/blueprinter/actions/workflows/test.yaml)
+[![Test](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml)
 [![Gem Version](https://badge.fury.io/rb/blueprinter.svg)](https://badge.fury.io/rb/blueprinter)
 [![Gitter chat](https://badges.gitter.im/procore/blueprinter.svg)](https://gitter.im/blueprinter-gem/community)
 

@@ -1,5 +1,5 @@
-## 0.26.0  - 2023/00/00
-* 🐛 [FEATURE] Transition to GitHub Actions from CircleCI and update to handle Ruby versions 2.7, 3.0, 3.1, 3.2
+## 0.26.0  - 2023/08/17
+* 🐛 [BREAKING] Transition to GitHub Actions from CircleCI and update to handle Ruby versions 2.7, 3.0, 3.1, 3.2. Drop support for any ruby version less than 2.7. See [#307](https://github.com/procore-oss/blueprinter/pull/307)
 
 ## 0.25.3  - 2021/03/03
 * 🐛 [BUGFIX] Fixes issue where fields and associations that are redefined by later views were not properly overwritten. See [#201](https://github.com/procore/blueprinter/pull/201) thanks to [@Berardpi](https://github.com/Berardpi).

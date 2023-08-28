@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@7739b9ba2efcda9dde65ad1e3c2dbe65b41dfba7 # (latest, untagged)
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # (latest, untagged)
       - name: Version file changed
         id: version-file-changed
         uses: tj-actions/changed-files@c860b5c47fa71f461da850094ef2f6e3d6514e44 # (latest, untagged)

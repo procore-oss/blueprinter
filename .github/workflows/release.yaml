@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@7739b9ba2efcda9dde65ad1e3c2dbe65b41dfba7 # (latest, untagged)
       - name: Version file changed
         id: version-file-changed
-        uses: tj-actions/changed-files@a0585ff9904b77d046192a7846e59783d6ea287b # (latest, untagged)
+        uses: tj-actions/changed-files@c860b5c47fa71f461da850094ef2f6e3d6514e44 # (latest, untagged)
         with:
           files: lib/blueprinter/version.rb
       - name: Release New Gem Version

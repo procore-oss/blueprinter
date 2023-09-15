@@ -1,18 +1,10 @@
-## 1.2.0 - 2023/06/13
-* 💅 [ENHANCEMENT] if/:unless procs with two arguments and invalid empty type deprecations are now removed
-
-## 1.1.2 - 2023/02/06
-* 💅 [ENHANCEMENT] Introduce rubocop and add a Github action for it
-
-## 1.1.1 - 2023/02/06
-* 🐛 [BUGFIX] Fix accidental hard dependency requirement of yajl and oj in gemspec from a routine cleanup commit
-
-## 1.1.0 - 2023/02/02
+## 0.30  - 2023/09/16
 * 🚀 [FEATURE] Allow configuring custom array-like classes to be treated as collections when serializing.  More details can be found [here](https://github.com/blueprinter-ruby/blueprinter/pull/6). Thanks to [@toddnestor](https://github.com/toddnestor).
 * 💅 [ENHANCEMENT] Reduce object allocations in fields calculations to save some memory.  More details can be found [here](https://github.com/blueprinter-ruby/blueprinter/pull/5). Thanks to [@nametoolong](https://github.com/nametoolong).
-
-## 1.0.0  - 2023/01/05
-* 🚀 [Official Release] Released [`blueprinter-rb`](https://rubygems.org/gems/blueprinter-rb) under a new organisation. More details can be found [here](https://github.com/procore/blueprinter/issues/288).
+* 💅 [ENHANCEMENT] Introduce rubocop
+* 💅 [ENHANCEMENT] if/:unless procs with two arguments and invalid empty type deprecations are now removed
+## 0.26.0  - 2023/08/17
+* 🐛 [BREAKING] Transition to GitHub Actions from CircleCI and update to handle Ruby versions 2.7, 3.0, 3.1, 3.2. Drop support for any ruby version less than 2.7. See [#307](https://github.com/procore-oss/blueprinter/pull/307)
 
 ## 0.25.3  - 2021/03/03
 * 🐛 [BUGFIX] Fixes issue where fields and associations that are redefined by later views were not properly overwritten. See [#201](https://github.com/procore/blueprinter/pull/201) thanks to [@Berardpi](https://github.com/Berardpi).

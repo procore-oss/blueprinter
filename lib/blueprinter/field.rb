@@ -45,7 +45,6 @@ module Blueprinter
       [
         extract_callable_from(Blueprinter.configuration.if),
         extract_callable_from(options[:if])
-
       ].select { |callable| callable }
     end
 

@@ -109,7 +109,6 @@ Blueprinter.configure do |config|
 end
 ```
 
----
 </details>
 
 <details>
@@ -212,7 +211,6 @@ If either of the above two developer conveniences are not desired, you can simpl
 <details>
 <summary>Root</summary>
 <a name="root"></a>
----
 
 You can also optionally pass in a root key to wrap your resulting json in:
 

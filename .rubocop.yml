@@ -14,7 +14,7 @@ Style/SafeNavigation:
   Enabled: false
 
 Layout/LineLength:
-  Max: 175
+  Max: 125
 
 Lint/MissingSuper:
   Enabled: false

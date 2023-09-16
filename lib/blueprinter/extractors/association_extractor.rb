@@ -24,7 +24,9 @@ module Blueprinter
     private
 
     def default_value(association_options)
-      association_options.key?(:default) ? association_options.fetch(:default) : Blueprinter.configuration.association_default
+      return association_options.fetch(:default) if association_options.key?(:default)
+
+      Blueprinter.configuration.association_default
     end
 
     def association_blueprint(blueprint, value)

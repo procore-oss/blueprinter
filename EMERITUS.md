@@ -8,3 +8,4 @@ We thank them for their service to the project.
 | -------- | --------- |
 | Adam Hess | [hparker](https://github.com/hparker) |
 | Michael Clayton| [mcclayton](https://github.com/mcclayton) |
+| Philip Q Nguyen | [philipqnguyen](https://github.com/philipqnguyen) |

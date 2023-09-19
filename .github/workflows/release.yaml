@@ -33,3 +33,5 @@ jobs:
           token: ${{secrets.RUBY_GEMS_API_KEY}}
       - uses: fac/ruby-gem-push-action@81d77bf568ff6659d7fae0f0c5a036bb0aeacb1a # (latest, untagged)
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        with:
+          key: rubygems

@@ -984,7 +984,7 @@ Output:
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'blueprinter-rb'
+gem 'blueprinter'
 ```
 
 And then execute:

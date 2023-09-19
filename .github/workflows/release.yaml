@@ -25,6 +25,9 @@ jobs:
       - name: Installing dependencies
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
         run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - name: Build gem file
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        run: bundle exec rake build
       - uses: fac/ruby-gem-setup-credentials-action@5f62d5f2f56a11c7422a92f81fbb29af01e1c00f # (latest, untagged)
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
         with:

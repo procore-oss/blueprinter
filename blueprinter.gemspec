@@ -7,7 +7,7 @@ require 'blueprinter/version'
 Gem::Specification.new do |s|
   s.name        = 'blueprinter'
   s.version     = Blueprinter::VERSION
-  s.authors     = ['Derek Carter']
+  s.authors     = ['Procore Technologies, Inc.']
   s.email       = ['blueprinter@googlegroups.com']
   s.homepage    = 'https://github.com/procore-oss/blueprinter'
   s.summary     = 'Simple Fast Declarative Serialization Library'

@@ -334,11 +334,11 @@ shared_examples 'Base::render' do
               end
             end
 
-            context 'roll_up_conditions is enabled' do
+            context 'enforce_all_conditions is enabled' do
               let(:local_options) { {x: 1, y: 2, v1: value, v2: other_value} }
 
               before do
-                Blueprinter.configuration.roll_up_conditions = true
+                Blueprinter.configuration.enforce_all_conditions = true
                 Blueprinter.configuration.if = ->(field_name, object, local_opts) {
                   if local_opts[:sparse_fields]
                     local_opts[:sparse_fields].include?(field_name.to_s)
@@ -349,7 +349,7 @@ shared_examples 'Base::render' do
                 Blueprinter.configuration.unless = ->(_a,_b,_c) { other_value }
               end
               after do
-                Blueprinter.configuration.roll_up_conditions = false
+                Blueprinter.configuration.enforce_all_conditions = false
                 Blueprinter.configuration.if = nil
                 Blueprinter.configuration.unless = nil
               end

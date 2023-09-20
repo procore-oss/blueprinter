@@ -670,7 +670,7 @@ Output:
 
 
 Both the `field` and the global Blueprinter Configuration supports `:if` and `:unless` options that can be used to serialize fields conditionally.
-By default, field-level conditions override global conditions. By enabling `roll_up_conditions`, BOTH field-level and global conditions must be met in order for the field to be serialized.
+By default, field-level conditions override global conditions. By enabling `enforce_all_conditions`, BOTH field-level and global conditions must be met in order for the field to be serialized.
 
 ### Global Config Setting - if and unless
 
@@ -678,7 +678,7 @@ By default, field-level conditions override global conditions. By enabling `roll
 Blueprinter.configure do |config|
   config.if = ->(field_name, obj, _options) { !obj[field_name].nil? }
   config.unless = ->(field_name, obj, _options) { obj[field_name].nil? }
-  config.roll_up_conditions = true
+  config.enforce_all_conditions = true
 end
 ```
 

@@ -18,7 +18,7 @@ module Blueprinter
     end
 
     def skip?(field_name, object, local_options)
-      if Blueprinter.configuration.roll_up_conditions
+      if Blueprinter.configuration.enforce_all_conditions
         any_global_or_field_condition_failed?(field_name, object, local_options)
       else
         return true if if_callable && !if_callable.call(field_name, object, local_options)

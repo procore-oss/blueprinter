@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Blueprinter
   module BaseHelpers
     def self.included(base)
@@ -33,7 +35,8 @@ module Blueprinter
 
       def prepend_root_and_meta(data, root, meta)
         return data unless root
-        ret = {root => data}
+
+        ret = { root => data }
         meta ? ret.merge!(meta: meta) : ret
       end
 
@@ -44,6 +47,7 @@ module Blueprinter
       def object_to_hash(object, view_name:, local_options:)
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
+
           hash[field.name] = field.extract(object, local_options)
         end
         view_collection.transformers(view_name).each do |transformer|
@@ -57,9 +61,9 @@ module Blueprinter
         when String, Symbol
           # no-op
         when NilClass
-          raise BlueprinterError, "meta requires a root to be passed" if meta
+          raise BlueprinterError, 'meta requires a root to be passed' if meta
         else
-          raise BlueprinterError, "root should be one of String, Symbol, NilClass"
+          raise BlueprinterError, 'root should be one of String, Symbol, NilClass'
         end
       end
 
@@ -69,10 +73,10 @@ module Blueprinter
 
       def validate_blueprint!(blueprint, method)
         validate_presence_of_blueprint!(blueprint)
-        unless dynamic_blueprint?(blueprint)
-          validate_blueprint_has_ancestors!(blueprint, method)
-          validate_blueprint_has_blueprinter_base_ancestor!(blueprint, method)
-        end
+        return if dynamic_blueprint?(blueprint)
+
+        validate_blueprint_has_ancestors!(blueprint, method)
+        validate_blueprint_has_blueprinter_base_ancestor!(blueprint, method)
       end
 
       def validate_presence_of_blueprint!(blueprint)
@@ -84,10 +88,10 @@ module Blueprinter
         # it means it, at the very least, does not have Blueprinter::Base as
         # one of its ancestor classes (e.g: Hash) and thus an error should
         # be raised.
-        unless blueprint.respond_to?(:ancestors)
-          raise BlueprinterError, "Blueprint provided for #{association_name} "\
+        return if blueprint.respond_to?(:ancestors)
+
+        raise BlueprinterError, "Blueprint provided for #{association_name} " \
                                 'association is not valid.'
-        end
       end
 
       def validate_blueprint_has_blueprinter_base_ancestor!(blueprint, association_name)
@@ -96,9 +100,9 @@ module Blueprinter
         return if blueprint.ancestors.include? Blueprinter::Base
 
         # Raise error describing what's wrong.
-        raise BlueprinterError, "Class #{blueprint.name} does not inherit from "\
-                              'Blueprinter::Base and is not a valid Blueprinter '\
-                              "for #{association_name} association."
+        raise BlueprinterError, "Class #{blueprint.name} does not inherit from " \
+                                'Blueprinter::Base and is not a valid Blueprinter ' \
+                                "for #{association_name} association."
       end
 
       def jsonify(blob)

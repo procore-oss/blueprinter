@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'activerecord_helper'
 require 'ostruct'
 require_relative 'shared/base_render_examples'
@@ -53,6 +55,30 @@ describe '::Base' do
         let(:obj_id) { obj[:id].to_s }
 
         include_examples 'Base::render'
+      end
+    end
+
+    context 'Given passed object is array-like' do
+      let(:blueprint) { blueprint_with_block }
+      let(:additional_object) { OpenStruct.new(obj_hash.merge(id: 2)) }
+      let(:obj) { Set.new([object_with_attributes, additional_object]) }
+
+      context 'and is an instance of a configured array-like class' do
+        before do
+          reset_blueprinter_config!
+          Blueprinter.configure { |config| config.custom_array_like_classes = [Set] }
+        end
+        after { reset_blueprinter_config! }
+
+        it 'should return the expected array of hashes' do
+          should eq('[{"id":1,"position_and_company":"Manager at Procore"},{"id":2,"position_and_company":"Manager at Procore"}]')
+        end
+      end
+
+      context 'and is not an instance of a configured array-like class' do
+        it 'should raise an error' do
+          expect { blueprint.render(obj) }.to raise_error(NoMethodError)
+        end
       end
     end
 
@@ -381,6 +407,36 @@ describe '::Base' do
           end
         end
       end
+
+      context 'Given passed object is an instance of a configured array-like class' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            fields :make
+          end
+        end
+        let(:vehicle1) { build(:vehicle, id: 1) }
+        let(:vehicle2) { build(:vehicle, id: 2, make: 'Mediocre Car') }
+        let(:vehicle3) { build(:vehicle, id: 3, make: 'Terrible Car') }
+        let(:vehicles) { [vehicle1, vehicle2, vehicle3] }
+        let(:obj) { Set.new(vehicles) }
+        let(:result) do
+          vehicles_json = vehicles.map do |vehicle|
+            "{\"id\":#{vehicle.id},\"make\":\"#{vehicle.make}\"}"
+          end.join(',')
+          "[#{vehicles_json}]"
+        end
+
+        before do
+          reset_blueprinter_config!
+          Blueprinter.configure do |config|
+            config.custom_array_like_classes = [Set]
+          end
+        end
+        after { reset_blueprinter_config! }
+
+        it('returns the expected result') { should eq(result) }
+      end
     end
   end
   describe '::render_as_hash' do
@@ -436,7 +492,7 @@ describe '::Base' do
   end
 
   describe 'has_view?' do
-    subject { blueprint.has_view?(view) }
+    subject { blueprint.view?(view) }
 
     let(:blueprint) do
       Class.new(Blueprinter::Base) do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'active_record/railtie' # see https://github.com/rspec/rspec-rails/issues/1690 for vague hints
 require 'ammeter/init'
 require 'generators/shared'

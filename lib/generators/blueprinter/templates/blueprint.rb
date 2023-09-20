@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class <%= class_name %>Blueprint < Blueprinter::Base
 <% if identifier_symbol -%>
 <%= indent -%>identifier :<%= identifier_symbol %>

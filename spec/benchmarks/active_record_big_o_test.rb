@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'activerecord_helper'
 require 'benchmark_helper'
 require 'blueprinter/base'

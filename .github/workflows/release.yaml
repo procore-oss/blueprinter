@@ -1,0 +1,40 @@
+name: Release
+on:
+  workflow_run:
+    workflows: [Test]
+    types: [completed]
+    branches: [master, main]
+  workflow_dispatch: # allow manual deployment through GitHub Action UI
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # (latest, untagged)
+      - name: Version file changed
+        id: version-file-changed
+        uses: tj-actions/changed-files@76c4d81a6acd339b55bd7407a016981c853eb702 # (latest, untagged)
+        with:
+          files: lib/blueprinter/version.rb
+      - name: Set up Ruby
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        uses: ruby/setup-ruby@250fcd6a742febb1123a77a841497ccaa8b9e939 # (latest, untagged)
+        with:
+          ruby-version: 3.2
+          bundler-cache: true
+      - name: Installing dependencies
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - name: Build gem file
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        run: bundle exec rake build
+      - uses: fac/ruby-gem-setup-credentials-action@5f62d5f2f56a11c7422a92f81fbb29af01e1c00f # (latest, untagged)
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        with:
+          user: ""
+          key: rubygems
+          token: ${{secrets.RUBY_GEMS_API_KEY}}
+      - uses: fac/ruby-gem-push-action@81d77bf568ff6659d7fae0f0c5a036bb0aeacb1a # (latest, untagged)
+        if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
+        with:
+          key: rubygems

@@ -11,3 +11,7 @@ Gemfile.lock
 .vscode
 .DS_Store
 tmp/
+.ruby-version
+.ruby-gemset
+*.gem
+.tool-versions

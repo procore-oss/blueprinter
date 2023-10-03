@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 require 'json'
+
 describe '::View' do
   let(:view) { Blueprinter::View.new('Basic View') }
   let(:field) { MockField.new(:first_name) }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 shared_examples 'Base::render' do
   context 'Given blueprint has ::field' do
     let(:result) { '{"first_name":"Meg","id":' + obj_id + '}' }
@@ -171,6 +173,21 @@ shared_examples 'Base::render' do
     it('uses the correct default values') { should eq(result) }
   end
 
+  context 'Given default_if option is invalid' do
+    before do
+      obj[:first_name] = ""
+    end
+
+    let(:result) { %({"first_name":"","id":#{obj_id}}) }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id
+        field :first_name, default_if: "INVALID_EMPTY_TYPE", default: "Unknown"
+      end
+    end
+    it('does not use the default value') { should eq(result) }
+  end
+
   context "Given blueprint has ::field with nil value" do
     before do
       obj[:first_name] = nil
@@ -240,36 +257,6 @@ shared_examples 'Base::render' do
   end
 
   context 'Given blueprint has ::field with a conditional argument' do
-    context 'Given conditional proc has deprecated two argument signature' do
-      before do
-        @orig_stderr = $stderr
-        $stderr = StringIO.new
-      end
-
-      let(:if_proc) { ->(_obj, _local_opts) { true } }
-      let(:unless_proc) { ->(_obj, _local_opts) { true } }
-
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :id
-          field :first_name, if: ->(_obj, _local_opts) { true }
-          field :last_name, unless: ->(_obj, _local_opts) { true }
-        end
-      end
-
-      it('writes deprecation warning message to $stderr') do
-        blueprint.render(obj, root: :root)
-        $stderr.rewind
-        stderr_output = $stderr.string.chomp
-        expect(stderr_output).to include("[DEPRECATION] Blueprinter :if conditions now expects 3 arguments instead of 2.")
-        expect(stderr_output).to include("[DEPRECATION] Blueprinter :unless conditions now expects 3 arguments instead of 2.")
-      end
-
-      after do
-        $stderr = @orig_stderr
-      end
-    end
-
     context 'Given conditional proc has three argument signature' do
       variants = %i[proc method].product([true, false])
 
@@ -370,32 +357,36 @@ shared_examples 'Base::render' do
       '{"id":' + obj_id + '}'
     end
     let(:no_view) do
-      ['{"id":' + obj_id + '', '"first_name":"Meg"' + '}'].join(',')
+      ['{"id":' + obj_id + '', '"first_name":"Meg"' + '', '"points":0' + '}'].join(',')
     end
     let(:normal) do
       ['{"id":' + obj_id + '', '"employer":"Procore"', '"first_name":"Meg"',
-      '"last_name":"' + obj[:last_name] + '"', '"position":"Manager"}'].join(',')
+      '"last_name":"' + obj[:last_name] + '"', '"points":1', '"position":"Manager"}'].join(',')
     end
     let(:ext) do
       ['{"id":' + obj_id + '', '"description":"A person"', '"employer":"Procore"',
-      '"first_name":"Meg"', '"position":"Manager"}'].join(',')
+      '"first_name":"Meg"', '"points":2', '"position":"Manager"}'].join(',')
     end
     let(:special) do
       ['{"id":' + obj_id + '', '"description":"A person"',
-      '"first_name":"Meg"}'].join(',')
+      '"first_name":"Meg"', '"points":2}'].join(',')
     end
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :first_name
+        field :points do 0 end
+
         view :normal do
           fields :last_name, :position
           field :company, name: :employer
+          field :points do 1 end
         end
         view :extended do
           include_view :normal
           field :description
           exclude :last_name
+          field :points do 2 end
         end
         view :special do
           include_view :extended

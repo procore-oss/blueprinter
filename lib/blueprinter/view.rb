@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Blueprinter
   # @api private
   DefinitionPlaceholder = Struct.new :name, :view?
@@ -14,14 +16,14 @@ module Blueprinter
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
     end
 
-    def track_definition_order(method, is_view = true)
-      if @sort_by_definition
-        @definition_order << DefinitionPlaceholder.new(method, is_view)
-      end
+    def track_definition_order(method, viewable: true)
+      return unless @sort_by_definition
+
+      @definition_order << DefinitionPlaceholder.new(method, viewable)
     end
 
     def inherit(view)
-      view.fields.values.each do |field|
+      view.fields.each_value do |field|
         self << field
       end
 
@@ -65,7 +67,7 @@ module Blueprinter
     end
 
     def <<(field)
-      track_definition_order(field.name,false)
+      track_definition_order(field.name, viewable: false)
       fields[field.name] = field
     end
   end

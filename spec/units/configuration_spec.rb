@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'oj'
 require 'yajl'
 
@@ -53,6 +55,11 @@ describe 'Blueprinter' do
     it 'should set the `field_default` option' do
       Blueprinter.configure { |config| config.field_default = "N/A" }
       expect(Blueprinter.configuration.field_default).to eq("N/A")
+    end
+
+    it 'should set the `deprecations` option' do
+      Blueprinter.configure { |config| config.deprecations = :silence }
+      expect(Blueprinter.configuration.deprecations).to eq(:silence)
     end
 
     it 'should set the `association_default` option' do

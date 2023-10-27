@@ -11,9 +11,9 @@ jobs:
       matrix:
         ruby: ['2.7', '3.0', '3.1', '3.2']
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # (latest, untagged)
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # (latest, untagged)
       - name: Set up Ruby ${{ matrix.ruby }}
-        uses: ruby/setup-ruby@5311f05890856149502132d25c4a24985a00d426
+        uses: ruby/setup-ruby@a05e47355e80e57b9a67566a813648fa67d92011
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true

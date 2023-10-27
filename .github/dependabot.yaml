@@ -7,5 +7,14 @@ updates:
       timezone: "America/Los_Angeles"
     labels:
       - "dependabot"
-      - "docker"
       - "dependencies"
+      - "github-actions"
+  - package-ecosystem: "bundler"
+    directory: /
+    schedule:
+      interval: "weekly"
+      timezone: "America/Los_Angeles"
+    labels:
+      - "dependabot"
+      - "dependencies"
+      - "bundler"

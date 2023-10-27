@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # (latest, untagged)
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # (latest, untagged)
       - name: Version file changed
         id: version-file-changed
-        uses: tj-actions/changed-files@76c4d81a6acd339b55bd7407a016981c853eb702 # (latest, untagged)
+        uses: tj-actions/changed-files@95690f9ece77c1740f4a55b7f1de9023ed6b1f87 # (latest, untagged)
         with:
           files: lib/blueprinter/version.rb
       - name: Set up Ruby
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
-        uses: ruby/setup-ruby@250fcd6a742febb1123a77a841497ccaa8b9e939 # (latest, untagged)
+        uses: ruby/setup-ruby@a05e47355e80e57b9a67566a813648fa67d92011 # (latest, untagged)
         with:
           ruby-version: 3.2
           bundler-cache: true

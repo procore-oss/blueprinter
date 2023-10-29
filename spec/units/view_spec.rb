@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 describe '::View' do
   let(:view) { Blueprinter::View.new('Basic View') }
   let(:field) { MockField.new(:first_name) }
@@ -81,17 +79,33 @@ describe '::View' do
     end
   end
 
-  context 'with transformer' do
-    let(:sample_transformer) do
-      class DynamicFieldsTransformer < Blueprinter::Transformer; end
-      DynamicFieldsTransformer
+  context 'with default transform' do
+    let(:default_transform) do
+      class DefaultTransform < Blueprinter::Transformer; end
+      DefaultTransform
     end
-    let(:view_with_transform) do
-      Blueprinter::View.new('View with transform', transformers: [sample_transformer])
+    let(:override_transform) do
+      class OverrideTransform < Blueprinter::Transformer; end
+      OverrideTransform
     end
+    let(:view_with_default_transform) do
+      Blueprinter::View.new('View with default transform')
+    end
+    let(:view_with_override_transform) do
+      Blueprinter::View.new('View with override transform', transformers: [override_transform])
+    end
+
+    before do
+      Blueprinter.configure { |config| config.default_transformers = [default_transform] }
+    end
+
     describe '#transformers' do
-      it 'should allow for specifying the transformers' do
-        expect(view_with_transform.view_transformers).to eq([sample_transformer])
+      it 'should return the default transformers' do
+        expect(view_with_default_transform.transformers).to eq([default_transform])
+      end
+
+      it 'should allow for overriding the default transformers' do
+        expect(view_with_override_transform.transformers).to eq([override_transform])
       end
     end
   end

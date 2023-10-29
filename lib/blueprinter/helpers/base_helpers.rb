@@ -50,7 +50,7 @@ module Blueprinter
 
           hash[field.name] = field.extract(object, local_options)
         end
-        view_collection.transformers_for(view_name).each do |transformer|
+        view_collection.transformers(view_name).each do |transformer|
           transformer.transform(result_hash, object, local_options)
         end
         result_hash

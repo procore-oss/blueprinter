@@ -1,5 +1,6 @@
 [![Test](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml)
 [![Gem Version](https://badge.fury.io/rb/blueprinter.svg)](https://badge.fury.io/rb/blueprinter)
+[![Discord](https://raw.githubusercontent.com/procore-oss/.github/main/discord_badge_scaled.svg)](https://discord.gg/PbntEMmWws)
 
 <img src="blueprinter_logo.svg" width="25%">
 

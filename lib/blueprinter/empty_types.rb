@@ -16,10 +16,10 @@ module Blueprinter
       return value.nil? unless empty_type
 
       case empty_type
-      when Blueprinter::EMPTY_COLLECTION
-        array_like?(value) && value.empty?
       when Blueprinter::EMPTY_HASH
         value.is_a?(Hash) && value.empty?
+      when Blueprinter::EMPTY_COLLECTION
+        array_like?(value) && value.empty?
       when Blueprinter::EMPTY_STRING
         value.to_s == ''
       end

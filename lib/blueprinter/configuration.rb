@@ -24,8 +24,7 @@ module Blueprinter
 
     def array_like_classes
       @array_like_classes ||= [
-        Array,
-        defined?(ActiveRecord::Relation) && ActiveRecord::Relation,
+        *default_array_like_classes,
         *custom_array_like_classes
       ].compact
     end
@@ -36,6 +35,12 @@ module Blueprinter
 
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
+    end
+
+    private
+
+    def default_array_like_classes
+      [Array, defined?(ActiveRecord::Relation) && ActiveRecord::Relation]
     end
   end
 

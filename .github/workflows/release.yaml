@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # (latest, untagged)
       - name: Version file changed
         id: version-file-changed
-        uses: tj-actions/changed-files@af292f1e845a0377b596972698a8598734eb2796 # (latest, untagged)
+        uses: tj-actions/changed-files@18c8a4ecebe93d32ed8a88e1d0c098f5f68c221b # (latest, untagged)
         with:
           files: lib/blueprinter/version.rb
       - name: Set up Ruby

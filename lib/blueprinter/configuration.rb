@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'extensions'
+
 module Blueprinter
   class Configuration
     attr_accessor :association_default, :datetime_format, :deprecations, :field_default, :generator, :if, :method,
@@ -20,6 +22,14 @@ module Blueprinter
       @extractor_default = AutoExtractor
       @default_transformers = []
       @custom_array_like_classes = []
+    end
+
+    def extensions
+      @extensions ||= Extensions.new
+    end
+
+    def extensions=(list)
+      @extensions = Extensions.new(list)
     end
 
     def array_like_classes

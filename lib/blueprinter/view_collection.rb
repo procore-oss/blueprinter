@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 module Blueprinter
   # @api private
   class ViewCollection
     attr_reader :views, :sort_by_definition
+
     def initialize
       @views = {
         identifier: View.new(:identifier),
@@ -16,8 +19,8 @@ module Blueprinter
       end
     end
 
-    def has_view?(view_name)
-      views.has_key? view_name
+    def view?(view_name)
+      views.key? view_name
     end
 
     def fields_for(view_name)
@@ -26,11 +29,22 @@ module Blueprinter
       fields, excluded_fields = sortable_fields(view_name)
       sorted_fields = sort_by_definition ? sort_by_def(view_name, fields) : fields.values.sort_by(&:name)
 
-      (identifier_fields + sorted_fields).reject { |field| excluded_fields.include?(field.name) }
+      (identifier_fields + sorted_fields).tap do |fields_array|
+        fields_array.reject! { |field| excluded_fields.include?(field.name) }
+      end
     end
 
     def transformers(view_name)
-      views[view_name].transformers
+      transformers = gather_transformers_from_included_views(view_name)
+      transformers.presence&.uniq || views[:default].transformers
+    end
+
+    def gather_transformers_from_included_views(view_name)
+      current_view = views[view_name]
+      current_view.included_view_names.each_with_object([]) do |included_view_name, transformers|
+        next if view_name == included_view_name
+        transformers.concat(gather_transformers_from_included_views(included_view_name))
+      end.concat(current_view.view_transformers)
     end
 
     def [](view_name)
@@ -47,15 +61,15 @@ module Blueprinter
     # @return [Array<(Hash, Hash<String, NilClass>)>] fields, excluded_fields
     def sortable_fields(view_name)
       excluded_fields = {}
-      fields = views[:default].fields
-      fields = merge_fields(fields, views[view_name].fields)
+      fields = views[:default].fields.clone
       views[view_name].included_view_names.each do |included_view_name|
         next if view_name == included_view_name
 
         view_fields, view_excluded_fields = sortable_fields(included_view_name)
-        fields = merge_fields(fields, view_fields)
+        fields.merge!(view_fields)
         excluded_fields.merge!(view_excluded_fields)
       end
+      fields.merge!(views[view_name].fields) unless view_name == :default
 
       views[view_name].excluded_field_names.each { |name| excluded_fields[name] = nil }
 
@@ -65,7 +79,9 @@ module Blueprinter
     # select and order members of fields according to traversal of the definition_orders
     def sort_by_def(view_name, fields)
       ordered_fields = {}
-      views[:default].definition_order.each { |definition| add_to_ordered_fields(ordered_fields, definition, fields, view_name)  }
+      views[:default].definition_order.each do |definition|
+        add_to_ordered_fields(ordered_fields, definition, fields, view_name)
+      end
       ordered_fields.values
     end
 
@@ -74,15 +90,13 @@ module Blueprinter
     def add_to_ordered_fields(ordered_fields, definition, fields, view_name_filter = nil)
       if definition.view?
         if view_name_filter.nil? || view_name_filter == definition.name
-          views[definition.name].definition_order.each { |_definition| add_to_ordered_fields(ordered_fields, _definition, fields) }
+          views[definition.name].definition_order.each do |defined|
+            add_to_ordered_fields(ordered_fields, defined, fields)
+          end
         end
       else
         ordered_fields[definition.name] = fields[definition.name]
       end
-    end
-
-    def merge_fields(source_fields, included_fields)
-      source_fields.merge included_fields
     end
   end
 end

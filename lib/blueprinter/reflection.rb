@@ -49,9 +49,9 @@ module Blueprinter
       #
       def fields
         @fields ||= @view.fields.each_with_object(included(:fields)) do |(_name, field), obj|
-          unless field.options[:association] # rubocop:todo Style/IfUnlessModifier
-            obj[field.method] = Field.new(field.method, field.name, field.options)
-          end
+          next unless field.options[:association]
+
+          obj[field.method] = Field.new(field.method, field.name, field.options)
         end
       end
 

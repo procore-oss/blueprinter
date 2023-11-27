@@ -49,7 +49,7 @@ module Blueprinter
       #
       def fields
         @fields ||= @view.fields.each_with_object(included(:fields)) do |(_name, field), obj|
-          next unless field.options[:association]
+          next if field.options[:association]
 
           obj[field.method] = Field.new(field.method, field.name, field.options)
         end

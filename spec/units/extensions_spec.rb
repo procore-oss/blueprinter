@@ -6,15 +6,15 @@ require 'ostruct'
 describe Blueprinter::Extensions do
   let(:all_extensions) {
     [
-      foo_extension,
-      bar_extension,
-      zar_extension,
+      foo_extension.new,
+      bar_extension.new,
+      zar_extension.new,
     ]
   }
 
   let(:foo_extension) {
-    Module.new do
-      def self.pre_render(object, _blueprint, _view, _options)
+    Class.new(Blueprinter::Extension) do
+      def pre_render(object, _blueprint, _view, _options)
         obj = object.dup
         obj.foo = "Foo"
         obj
@@ -23,8 +23,8 @@ describe Blueprinter::Extensions do
   }
 
   let(:bar_extension) {
-    Module.new do
-      def self.pre_render(object, _blueprint, _view, _options)
+    Class.new(Blueprinter::Extension) do
+      def pre_render(object, _blueprint, _view, _options)
         obj = object.dup
         obj.bar = "Bar"
         obj
@@ -33,7 +33,7 @@ describe Blueprinter::Extensions do
   }
 
   let(:zar_extension) {
-    Module.new do
+    Class.new(Blueprinter::Extension) do
       def self.something_else(object, _blueprint, _view, _options)
         object
       end
@@ -42,20 +42,22 @@ describe Blueprinter::Extensions do
 
   it 'should append extensions' do
     extensions = Blueprinter::Extensions.new
-    extensions << foo_extension
-    extensions << bar_extension
-    extensions << zar_extension
-    expect(extensions.to_a).to eq [
+    extensions << foo_extension.new
+    extensions << bar_extension.new
+    extensions << zar_extension.new
+    expect(extensions.to_a.map(&:class)).to eq [
       foo_extension,
       bar_extension,
+      zar_extension,
     ]
   end
 
   it "should initialize with extensions, removing any that don't have recognized extension methods" do
     extensions = Blueprinter::Extensions.new(all_extensions)
-    expect(extensions.to_a).to eq [
+    expect(extensions.to_a.map(&:class)).to eq [
       foo_extension,
       bar_extension,
+      zar_extension,
     ]
   end
 

@@ -14,23 +14,22 @@ module Blueprinter
   #
   class Extensions
     def initialize(extensions = [])
-      @pre_renderers = []
-      extensions.each { |ext| self << ext }
+      @extensions = extensions
     end
 
     def to_a
-      @pre_renderers.uniq
+      @extensions.dup
     end
 
     # Appends an extension
     def <<(ext)
-      @pre_renderers << ext if ext.respond_to? :pre_render
+      @extensions << ext
       self
     end
 
     # Runs the object through all Render Extensions and returns the final result
     def pre_render(object, blueprint, view, options = {})
-      @pre_renderers.reduce(object) do |acc, ext|
+      @extensions.reduce(object) do |acc, ext|
         ext.pre_render(acc, blueprint, view, options)
       end
     end

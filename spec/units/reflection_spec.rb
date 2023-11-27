@@ -40,7 +40,7 @@ describe Blueprinter::Reflection do
   }
 
   it 'should list views' do
-    expect(widget_blueprint.views.keys).to eq [
+    expect(widget_blueprint.reflections.keys).to eq [
       :identifier,
       :default,
       :extended,
@@ -49,7 +49,7 @@ describe Blueprinter::Reflection do
   end
 
   it 'should list fields' do
-    expect(part_blueprint.views.fetch(:extended).fields.keys).to eq [
+    expect(part_blueprint.reflections.fetch(:extended).fields.keys).to eq [
       :id,
       :name,
       :description,
@@ -57,23 +57,23 @@ describe Blueprinter::Reflection do
   end
 
   it 'should list associations' do
-    associations = widget_blueprint.views.fetch(:default).associations
+    associations = widget_blueprint.reflections.fetch(:default).associations
     expect(associations.keys).to eq [:category]
   end
 
   it 'should list associations from included views' do
-    associations = widget_blueprint.views.fetch(:extended).associations
+    associations = widget_blueprint.reflections.fetch(:extended).associations
     expect(associations.keys).to eq [:category, :parts]
   end
 
   it 'should list associations using custom names' do
-    associations = widget_blueprint.views.fetch(:legacy).associations
+    associations = widget_blueprint.reflections.fetch(:legacy).associations
     expect(associations.keys).to eq [:category, :parts]
     expect(associations[:parts].display_name).to eq :pieces
   end
 
   it 'should get a blueprint and view from an association' do
-    assoc = widget_blueprint.views[:extended].associations[:parts]
+    assoc = widget_blueprint.reflections[:extended].associations[:parts]
     expect(assoc.name).to eq :parts
     expect(assoc.display_name).to eq :parts
     expect(assoc.blueprint).to eq part_blueprint

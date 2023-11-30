@@ -30,6 +30,18 @@ describe Blueprinter::Reflection do
         association :parts, blueprint: part_bp, view: :extended
       end
 
+      view :extended_plus do
+        include_view :extended
+        field :foo
+        association :foos, blueprint: part_bp
+      end
+
+      view :extended_plus_plus do
+        include_view :extended_plus
+        field :bar
+        association :bars, blueprint: part_bp
+      end
+
       view :legacy do
         association :parts, blueprint: part_bp, name: :pieces
       end
@@ -41,6 +53,8 @@ describe Blueprinter::Reflection do
       :identifier,
       :default,
       :extended,
+      :extended_plus,
+      :extended_plus_plus,
       :legacy,
     ]
   end
@@ -53,14 +67,23 @@ describe Blueprinter::Reflection do
     ]
   end
 
+  it 'should list fields from included views' do
+    expect(widget_blueprint.reflections.fetch(:extended_plus_plus).fields.keys).to eq [
+      :id,
+      :name,
+      :foo,
+      :bar,
+    ]
+  end
+
   it 'should list associations' do
     associations = widget_blueprint.reflections.fetch(:default).associations
     expect(associations.keys).to eq [:category]
   end
 
   it 'should list associations from included views' do
-    associations = widget_blueprint.reflections.fetch(:extended).associations
-    expect(associations.keys).to eq [:category, :parts]
+    associations = widget_blueprint.reflections.fetch(:extended_plus_plus).associations
+    expect(associations.keys).to eq [:category, :parts, :foos, :bars]
   end
 
   it 'should list associations using custom names' do

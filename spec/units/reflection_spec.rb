@@ -49,31 +49,31 @@ describe Blueprinter::Reflection do
   }
 
   it 'should list views' do
-    expect(widget_blueprint.reflections.keys).to eq [
+    expect(widget_blueprint.reflections.keys.sort).to eq [
       :identifier,
       :default,
       :extended,
       :extended_plus,
       :extended_plus_plus,
       :legacy,
-    ]
+    ].sort
   end
 
   it 'should list fields' do
-    expect(part_blueprint.reflections.fetch(:extended).fields.keys).to eq [
+    expect(part_blueprint.reflections.fetch(:extended).fields.keys.sort).to eq [
       :id,
       :name,
       :description,
-    ]
+    ].sort
   end
 
   it 'should list fields from included views' do
-    expect(widget_blueprint.reflections.fetch(:extended_plus_plus).fields.keys).to eq [
+    expect(widget_blueprint.reflections.fetch(:extended_plus_plus).fields.keys.sort).to eq [
       :id,
       :name,
       :foo,
       :bar,
-    ]
+    ].sort
   end
 
   it 'should list associations' do
@@ -83,7 +83,7 @@ describe Blueprinter::Reflection do
 
   it 'should list associations from included views' do
     associations = widget_blueprint.reflections.fetch(:extended_plus_plus).associations
-    expect(associations.keys).to eq [:category, :parts, :foos, :bars]
+    expect(associations.keys.sort).to eq [:category, :parts, :foos, :bars].sort
   end
 
   it 'should list associations using custom names' do

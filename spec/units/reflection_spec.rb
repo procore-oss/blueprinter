@@ -14,7 +14,6 @@ describe Blueprinter::Reflection do
       fields :id, :name
 
       view :extended do
-        include_view :default
         field :description
       end
     end
@@ -28,12 +27,10 @@ describe Blueprinter::Reflection do
       association :category, blueprint: cat_bp
 
       view :extended do
-        include_view :default
         association :parts, blueprint: part_bp, view: :extended
       end
 
       view :legacy do
-        include_view :default
         association :parts, blueprint: part_bp, name: :pieces
       end
     end

@@ -74,7 +74,10 @@ module Blueprinter
 
       # Returns all fields or associations from included views
       def included(type)
-        @view.included_view_names.reduce({}) do |acc, view_name|
+        view_names = @view.included_view_names
+        view_names.unshift :default unless name == :default
+
+        view_names.reduce({}) do |acc, view_name|
           view = @blueprint.reflections.fetch(view_name)
           acc.merge view.send(type)
         end

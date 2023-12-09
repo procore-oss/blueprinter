@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'activerecord_helper'
 require 'ostruct'
 require_relative 'shared/base_render_examples'
@@ -53,6 +55,30 @@ describe '::Base' do
         let(:obj_id) { obj[:id].to_s }
 
         include_examples 'Base::render'
+      end
+    end
+
+    context 'Given passed object is array-like' do
+      let(:blueprint) { blueprint_with_block }
+      let(:additional_object) { OpenStruct.new(obj_hash.merge(id: 2)) }
+      let(:obj) { Set.new([object_with_attributes, additional_object]) }
+
+      context 'and is an instance of a configured array-like class' do
+        before do
+          reset_blueprinter_config!
+          Blueprinter.configure { |config| config.custom_array_like_classes = [Set] }
+        end
+        after { reset_blueprinter_config! }
+
+        it 'should return the expected array of hashes' do
+          should eq('[{"id":1,"position_and_company":"Manager at Procore"},{"id":2,"position_and_company":"Manager at Procore"}]')
+        end
+      end
+
+      context 'and is not an instance of a configured array-like class' do
+        it 'should raise an error' do
+          expect { blueprint.render(obj) }.to raise_error(NoMethodError)
+        end
       end
     end
 
@@ -251,6 +277,51 @@ describe '::Base' do
           end
           it('returns json derived from a custom extractor') { should eq(result) }
         end
+
+        context 'Given included view with re-defined association' do
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+
+              view :with_size do
+                field :size do 10 end
+              end
+
+              view :with_height do
+                field :height do 2 end
+              end
+            end
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles, blueprint: vehicle_blueprint
+
+              view :with_size do
+                association :vehicles, blueprint: vehicle_blueprint, view: :with_size
+              end
+
+              view :with_height do
+                include_view :with_size
+                association :vehicles, blueprint: vehicle_blueprint, view: :with_height
+              end
+            end
+          end
+
+          let(:result_default) do
+            '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car"}]}'
+          end
+          let(:result_with_size) do
+            '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car","size":10}]}'
+          end
+          let(:result_with_height) do
+            '{"id":' + obj_id + ',"vehicles":[{"height":2,"make":"Super Car"}]}'
+          end
+
+          it 'returns json with association' do
+            expect(blueprint.render(obj)).to eq(result)
+            expect(blueprint.render(obj, view: :with_size)).to eq(result_with_size)
+            expect(blueprint.render(obj, view: :with_height)).to eq(result_with_height)
+          end
+        end
       end
 
       context "Given association is nil" do
@@ -336,6 +407,36 @@ describe '::Base' do
           end
         end
       end
+
+      context 'Given passed object is an instance of a configured array-like class' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            fields :make
+          end
+        end
+        let(:vehicle1) { build(:vehicle, id: 1) }
+        let(:vehicle2) { build(:vehicle, id: 2, make: 'Mediocre Car') }
+        let(:vehicle3) { build(:vehicle, id: 3, make: 'Terrible Car') }
+        let(:vehicles) { [vehicle1, vehicle2, vehicle3] }
+        let(:obj) { Set.new(vehicles) }
+        let(:result) do
+          vehicles_json = vehicles.map do |vehicle|
+            "{\"id\":#{vehicle.id},\"make\":\"#{vehicle.make}\"}"
+          end.join(',')
+          "[#{vehicles_json}]"
+        end
+
+        before do
+          reset_blueprinter_config!
+          Blueprinter.configure do |config|
+            config.custom_array_like_classes = [Set]
+          end
+        end
+        after { reset_blueprinter_config! }
+
+        it('returns the expected result') { should eq(result) }
+      end
     end
   end
   describe '::render_as_hash' do
@@ -391,7 +492,7 @@ describe '::Base' do
   end
 
   describe 'has_view?' do
-    subject { blueprint.has_view?(view) }
+    subject { blueprint.view?(view) }
 
     let(:blueprint) do
       Class.new(Blueprinter::Base) do

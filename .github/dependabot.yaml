@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: /
+    schedule:
+      interval: "weekly"
+      timezone: "America/Los_Angeles"
+    labels:
+      - "dependabot"
+      - "dependencies"
+      - "github-actions"
+  - package-ecosystem: "bundler"
+    directory: /
+    schedule:
+      interval: "weekly"
+      timezone: "America/Los_Angeles"
+    labels:
+      - "dependabot"
+      - "dependencies"
+      - "bundler"

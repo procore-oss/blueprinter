@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 describe '::View' do
   let(:view) { Blueprinter::View.new('Basic View') }
   let(:field) { MockField.new(:first_name) }

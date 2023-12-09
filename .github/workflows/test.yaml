@@ -1,0 +1,25 @@
+name: Test
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: ['2.7', '3.0', '3.1', '3.2']
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # (latest, untagged)
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@8575951200e472d5f2d95c625da0c7bec8217c42
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Installing dependencies
+        run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - name: Run tests
+        run: bundle exec rake
+      - name: Benchmarks
+        run: bundle exec rake benchmarks

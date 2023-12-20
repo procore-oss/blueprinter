@@ -18,7 +18,7 @@ jobs:
           files: lib/blueprinter/version.rb
       - name: Set up Ruby
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
-        uses: ruby/setup-ruby@8575951200e472d5f2d95c625da0c7bec8217c42 # (latest, untagged)
+        uses: ruby/setup-ruby@af848b40be8bb463a751551a1180d74782ba8a72 # (latest, untagged)
         with:
           ruby-version: 3.2
           bundler-cache: true

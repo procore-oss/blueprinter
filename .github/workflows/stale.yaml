@@ -14,7 +14,7 @@ jobs:
       pull-requests: write  # for actions/stale to close stale PRs
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@b69b346013879cedbf50c69f572cd85439a41936 # (latest, untagged)
+    - uses: actions/stale@v9
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         # Number of days of inactivity before an issue becomes stale

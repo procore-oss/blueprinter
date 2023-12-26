@@ -2,6 +2,10 @@
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'blueprinter'
+require 'pry'
+require 'json'
+
+Dir[File.dirname(__FILE__) + '/support/**/*.rb'].each { |file| require file }
 
 module SpecHelpers
   def reset_blueprinter_config!

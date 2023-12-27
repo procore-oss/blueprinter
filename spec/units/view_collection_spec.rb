@@ -116,5 +116,27 @@ describe 'ViewCollection' do
         expect(transformers.uniq.length == transformers.length).to eq(true)
       end
     end
+
+    context 'configured default transformers' do
+      let(:default_transformer) { Blueprinter::Transformer.new }
+
+      before do
+        Blueprinter.configure { |config| config.default_transformers = [default_transformer] }
+      end
+
+      context 'with no transformers' do
+        let!(:new_view) { view_collection[:new_view] }
+        
+        it 'should return the configured default transformers' do
+          expect(view_collection.transformers(:new_view)).to include(default_transformer)
+        end
+      end
+
+      context 'with transformers' do
+        it 'should not return the configured default transformers' do
+          expect(view_collection.transformers(:view)).to_not include(default_transformer)
+        end
+      end
+    end
   end
 end

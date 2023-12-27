@@ -35,17 +35,8 @@ module Blueprinter
     end
 
     def transformers(view_name)
-      transformers = gather_transformers_from_included_views(view_name)
-      transformers.empty? ? views[:default].transformers : transformers
-    end
-
-    def gather_transformers_from_included_views(view_name)
-      current_view = views[view_name]
-      current_view.included_view_names.flat_map do |included_view_name|
-        next [] if view_name == included_view_name
-
-        gather_transformers_from_included_views(included_view_name)
-      end.concat(current_view.view_transformers).uniq
+      included_transformers = gather_transformers_from_included_views(view_name)
+      included_transformers.concat(views[:default].transformers).uniq
     end
 
     def [](view_name)
@@ -98,6 +89,15 @@ module Blueprinter
       else
         ordered_fields[definition.name] = fields[definition.name]
       end
+    end
+
+    def gather_transformers_from_included_views(view_name)
+      current_view = views[view_name]
+      current_view.included_view_names.flat_map do |included_view_name|
+        next [] if view_name == included_view_name
+
+        gather_transformers_from_included_views(included_view_name)
+      end.concat(current_view.view_transformers)
     end
   end
 end

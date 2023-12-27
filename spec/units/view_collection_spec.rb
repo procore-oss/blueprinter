@@ -117,23 +117,23 @@ describe 'ViewCollection' do
       end
     end
 
-    context 'configured default transformers' do
+    context 'global default transformers' do
       let(:default_transformer) { Blueprinter::Transformer.new }
 
       before do
         Blueprinter.configure { |config| config.default_transformers = [default_transformer] }
       end
 
-      context 'with no transformers' do
+      context 'with no view transformers' do
         let!(:new_view) { view_collection[:new_view] }
-        
-        it 'should return the configured default transformers' do
+
+        it 'should return the global default transformers' do
           expect(view_collection.transformers(:new_view)).to include(default_transformer)
         end
       end
 
-      context 'with transformers' do
-        it 'should not return the configured default transformers' do
+      context 'with view transformers' do
+        it 'should not return the global default transformers' do
           expect(view_collection.transformers(:view)).to_not include(default_transformer)
         end
       end

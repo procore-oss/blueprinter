@@ -800,6 +800,26 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
+#### Transform across views
+
+Transformers can be included across views:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  transform DefaultTransformer
+
+  view :normal do
+    transform ViewTransformer
+  end
+
+  view :extended do
+    include_view :normal
+  end
+end
+```
+
+Both the `normal` and `extended` views have `DefaultTransformer` and `ViewTransformer` applied.
+
 #### Global Transforms
 
 You can also specify global default transformers. Create one or more transformer classes extending from `Blueprinter::Transformer` and set the `default_transformers` configuration

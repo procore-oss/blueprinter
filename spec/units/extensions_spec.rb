@@ -70,6 +70,7 @@ describe Blueprinter::Extensions do
 
     after :each do
       Blueprinter.configure do |config|
+        config.extensions = []
       end
     end
 

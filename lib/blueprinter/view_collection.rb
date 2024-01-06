@@ -36,7 +36,7 @@ module Blueprinter
 
     def transformers(view_name)
       transformers = gather_transformers_from_included_views(view_name)
-      transformers.presence&.uniq || views[:default].transformers
+      transformers && !transformers.empty? ? transformers.uniq : views[:default].transformers
     end
 
     def gather_transformers_from_included_views(view_name)

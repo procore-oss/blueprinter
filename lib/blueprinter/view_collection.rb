@@ -43,6 +43,7 @@ module Blueprinter
       current_view = views[view_name]
       current_view.included_view_names.each_with_object([]) do |included_view_name, transformers|
         next if view_name == included_view_name
+
         transformers.concat(gather_transformers_from_included_views(included_view_name))
       end.concat(current_view.view_transformers)
     end

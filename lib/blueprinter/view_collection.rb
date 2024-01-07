@@ -35,7 +35,8 @@ module Blueprinter
     end
 
     def transformers(view_name)
-      views[view_name].transformers
+      transformers = gather_transformers_from_included_views(view_name)
+      transformers && !transformers.empty? ? transformers.uniq : views[:default].transformers
     end
 
     def [](view_name)
@@ -43,6 +44,15 @@ module Blueprinter
     end
 
     private
+
+    def gather_transformers_from_included_views(view_name)
+      current_view = views[view_name]
+      current_view.included_view_names.each_with_object([]) do |included_view_name, transformers|
+        next if view_name == included_view_name
+
+        transformers.concat(gather_transformers_from_included_views(included_view_name))
+      end.concat(current_view.view_transformers)
+    end
 
     def identifier_fields
       views[:identifier].fields.values

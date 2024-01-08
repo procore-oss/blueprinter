@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe 'ViewCollection' do
-  let(:view_collection) { Blueprinter::ViewCollection.new }
+  subject(:view_collection) { Blueprinter::ViewCollection.new }
 
   let!(:default_view) { view_collection[:default] }
   let!(:view) { view_collection[:view] }

@@ -820,6 +820,8 @@ end
 
 Both the `normal` and `extended` views have `DefaultTransformer` and `ViewTransformer` applied.
 
+Transformers are executed in a top-down order, so `DefaultTransformer` will be executed first, followed by `ViewTransformer`.
+
 #### Global Transforms
 
 You can also specify global default transformers. Create one or more transformer classes extending from `Blueprinter::Transformer` and set the `default_transformers` configuration

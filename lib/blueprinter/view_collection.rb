@@ -35,8 +35,8 @@ module Blueprinter
     end
 
     def transformers(view_name)
-      included_transformers = gather_transformers_from_included_views(view_name)
-      all_transformers = included_transformers.concat(views[:default].view_transformers).uniq
+      included_transformers = gather_transformers_from_included_views(view_name).reverse
+      all_transformers = views[:default].view_transformers.concat(included_transformers).uniq
       all_transformers.empty? ? Blueprinter.configuration.default_transformers : all_transformers
     end
 

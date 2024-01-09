@@ -10,6 +10,8 @@ describe 'ViewCollection' do
   let(:view_field) { MockField.new(:view_field) }
   let(:new_field) { MockField.new(:new_field) }
 
+  let(:default_transformer) { Blueprinter::Transformer.new }
+
   before do
     default_view << default_field
     view << view_field
@@ -78,8 +80,6 @@ describe 'ViewCollection' do
     end
 
     context 'default view transformer' do
-      let(:default_transformer) { Blueprinter::Transformer.new }
-
       before do
         default_view.add_transformer(default_transformer)
       end
@@ -89,7 +89,7 @@ describe 'ViewCollection' do
       end
 
       it 'should return both the view transformer and default transformers for the view' do
-        expect(view_collection.transformers(:view)).to eq([transformer, default_transformer])
+        expect(view_collection.transformers(:view)).to eq([default_transformer, transformer])
       end
     end
 
@@ -99,6 +99,7 @@ describe 'ViewCollection' do
 
       before do
         includes_view.include_view(:view)
+        nested_view.include_view(:includes_view)
       end
 
       it 'should return the transformers for the included view' do
@@ -106,7 +107,6 @@ describe 'ViewCollection' do
       end
 
       it 'should return the transformers for the nested included view' do
-        nested_view.include_view(:includes_view)
         expect(view_collection.transformers(:nested_view)).to include(transformer)
       end
 
@@ -115,11 +115,22 @@ describe 'ViewCollection' do
         transformers = view_collection.transformers(:nested_view)
         expect(transformers.uniq.length == transformers.length).to eq(true)
       end
+
+      it 'should return transformers in the correct order' do
+        includes_view_transformer = Blueprinter::Transformer.new
+        nested_view_transformer = Blueprinter::Transformer.new
+
+        default_view.add_transformer(default_transformer)
+        includes_view.add_transformer(includes_view_transformer)
+        nested_view.add_transformer(nested_view_transformer)
+
+        expect(view_collection.transformers(:nested_view)).to eq([
+          default_transformer, nested_view_transformer, includes_view_transformer, transformer
+        ])
+      end
     end
 
     context 'global default transformers' do
-      let(:default_transformer) { Blueprinter::Transformer.new }
-
       before do
         Blueprinter.configure { |config| config.default_transformers = [default_transformer] }
       end

@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-# test
 
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'blueprinter'

@@ -931,6 +931,35 @@ Output:
 </details>
 
 <details>
+<summary>Reflection</summary>
+
+Blueprint classes may be reflected on to inspect their views, fields, and associations.
+
+```ruby
+# A Hash of views keyed by name
+views = WidgetBlueprint.reflections
+views.keys
+=> [:default, :extended]
+
+# Hashes of fields and associations, keyed by name
+fields = views[:default].fields
+assoc = views[:default].associations
+
+# Get info about a field
+fields[:description].name
+fields[:description].display_name
+fields[:description].options
+
+# Get info about an association
+assoc[:category].name
+assoc[:category].display_name
+assoc[:category].blueprint
+assoc[:category].view
+assoc[:category].options
+```
+</details>
+
+<details>
 <summary>Deprecations</summary>
 
 

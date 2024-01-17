@@ -98,23 +98,5 @@ describe '::View' do
     before do
       Blueprinter.configure { |config| config.default_transformers = [default_transform] }
     end
-
-    describe '#transformers' do
-      it 'should return the default transformers' do
-        expect(view_with_default_transform.transformers).to eq([default_transform])
-      end
-
-      it 'should allow for overriding the default transformers' do
-        expect(view_with_override_transform.transformers).to eq([override_transform])
-      end
-    end
-  end
-end
-
-class MockField
-  attr_reader :name, :method
-  def initialize(method, name = nil)
-    @method = method
-    @name = name || method
   end
 end

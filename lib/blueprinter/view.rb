@@ -16,10 +16,6 @@ module Blueprinter
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
     end
 
-    def transformers
-      view_transformers.empty? ? Blueprinter.configuration.default_transformers : view_transformers
-    end
-
     def track_definition_order(method, viewable: true)
       return unless @sort_by_definition
 

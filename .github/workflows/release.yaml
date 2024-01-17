@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # (latest, untagged)
+      - uses: actions/checkout@v4
       - name: Version file changed
         id: version-file-changed
-        uses: tj-actions/changed-files@94549999469dbfa032becf298d95c87a14c34394 # (latest, untagged)
+        uses: tj-actions/changed-files@v41
         with:
           files: lib/blueprinter/version.rb
       - name: Set up Ruby
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
-        uses: ruby/setup-ruby@8575951200e472d5f2d95c625da0c7bec8217c42 # (latest, untagged)
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.2
           bundler-cache: true
@@ -28,13 +28,13 @@ jobs:
       - name: Build gem file
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
         run: bundle exec rake build
-      - uses: fac/ruby-gem-setup-credentials-action@5f62d5f2f56a11c7422a92f81fbb29af01e1c00f # (latest, untagged)
+      - uses: fac/ruby-gem-setup-credentials-action@v2
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
         with:
           user: ""
           key: rubygems
           token: ${{secrets.RUBY_GEMS_API_KEY}}
-      - uses: fac/ruby-gem-push-action@81d77bf568ff6659d7fae0f0c5a036bb0aeacb1a # (latest, untagged)
+      - uses: fac/ruby-gem-push-action@v2
         if: ${{ github.event_name == 'workflow_dispatch' || steps.version-file-changed.outputs.any_changed == 'true' }}
         with:
           key: rubygems

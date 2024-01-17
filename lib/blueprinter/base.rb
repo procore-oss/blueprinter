@@ -17,10 +17,12 @@ require_relative 'helpers/base_helpers'
 require_relative 'view'
 require_relative 'view_collection'
 require_relative 'transformer'
+require_relative 'reflection'
 
 module Blueprinter
   class Base
     include BaseHelpers
+    extend Reflection
 
     # Specify a field or method name used as an identifier. Usually, this is
     # something like :id

@@ -933,7 +933,7 @@ Output:
 <details>
 <summary>Reflection</summary>
 
-Blueprint classes may be reflected on to inspect their views, fields, and associations.
+Blueprint classes may be reflected on to inspect their views, fields, and associations. Extensions often make use of this ability.
 
 ```ruby
 # A Hash of views keyed by name
@@ -956,6 +956,42 @@ assoc[:category].display_name
 assoc[:category].blueprint
 assoc[:category].view
 assoc[:category].options
+```
+</details>
+
+<details>
+<summary>Extensions</summary>
+
+Blueprinter offers an extension system to hook into and modify certain behavior.
+
+```ruby
+Blueprinter.configure do |config|
+  config.extensions << MyExtension.new
+  config.extensions << OtherExtension.new
+end
+```
+
+The following class implements all extension hooks. If you have an idea for a new one, open an issue or PR.
+
+```ruby
+class ExampleExtension < Blueprinter::Extension
+  #
+  # Called eary during "render", this method receives the object to be rendered and
+  # returns a new or modified object. If there are multiple pre_render extensions,
+  # the return value of one becomes the input object of the next. The final return
+  # value is used to render.
+  #
+  # @param object [Object] The object that was passed to "render"
+  # @param blueprint [Class] The Blueprinter class
+  # @param view [Symbol] The blueprint view
+  # @param options [Hash] Options passed to "render"
+  # @return [Object] The modified, or new, object to render
+  #
+  def pre_render(object, blueprint, view, options)
+    # modify or replace object
+    object
+  end
+end
 ```
 </details>
 

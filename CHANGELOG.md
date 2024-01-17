@@ -1,6 +1,6 @@
-## 0.31.0 - 2024/01/16
+## 1.0.0 - 2024/01/17
 * 🚀 [BREAKING] Allow transformers to be included across views. See [this](https://github.com/procore-oss/blueprinter#transform-across-views) section of the README for details, also PR [#372](https://github.com/procore-oss/blueprinter/pull/372) and issue [#225](https://github.com/procore-oss/blueprinter/issues/225). Note this changes the behavior of transformers which were previously only applied to the view they were defined on. Thanks to [@njbbaer](https://github.com/njbbaer) and [@bhooshiek-narendiran](https://github.com/bhooshiek-narendiran).
-* 💅 [ENHANCEMENT] Add reflection on views, fields, and associations. See PR [#357](https://github.com/procore-oss/blueprinter/pull/357) and issue [#341](https://github.com/procore-oss/blueprinter/issues/341). Thanks to [@jhollinger](https://github.com/jhollinger).
+* 💅 [ENHANCEMENT] Add reflection on views, fields, and associations. See PRs [#357](https://github.com/procore-oss/blueprinter/pull/357), [#358](https://github.com/procore-oss/blueprinter/pull/358), and issue [#341](https://github.com/procore-oss/blueprinter/issues/341). Thanks to [@jhollinger](https://github.com/jhollinger).
 
 ## 0.30.0  - 2023/09/16
 * 🚀 [FEATURE] Allow configuring custom array-like classes to be treated as collections when serializing.  More details can be found [here](https://github.com/procore-oss/blueprinter/pull/327). Thanks to [@toddnestor](https://github.com/toddnestor).

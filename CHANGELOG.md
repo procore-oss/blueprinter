@@ -1,3 +1,6 @@
+## 1.0.1 - 2024/01/19
+* 🐛 [BUGFIX] Fixes an issue where serialization performance would become degraded when using a Blueprint that leverages transformers. See [#381](https://github.com/procore-oss/blueprinter/pull/381). Thanks to [@Pritilender](https://github.com/Pritilender).
+
 ## 1.0.0 - 2024/01/17
 * 🚀 [BREAKING] Allow transformers to be included across views. See [README](https://github.com/procore-oss/blueprinter#transform-across-views), PR [#372](https://github.com/procore-oss/blueprinter/pull/372) and issue [#225](https://github.com/procore-oss/blueprinter/issues/225) for details. Note this changes the behavior of transformers which were previously only applied to the view they were defined on. Thanks to [@njbbaer](https://github.com/njbbaer) and [@bhooshiek-narendiran](https://github.com/bhooshiek-narendiran).
 * 🚀 [FEATURE] Introduce extension API, with initial support for pre_render hook. See [#358](https://github.com/procore-oss/blueprinter/pull/358) for details. Thanks to [@jhollinger](https://github.com/jhollinger).

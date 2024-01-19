@@ -36,7 +36,7 @@ module Blueprinter
 
     def transformers(view_name)
       included_transformers = gather_transformers_from_included_views(view_name).reverse
-      all_transformers = views[:default].view_transformers.concat(included_transformers).uniq
+      all_transformers = [*views[:default].view_transformers, *included_transformers].uniq
       all_transformers.empty? ? Blueprinter.configuration.default_transformers : all_transformers
     end
 
@@ -94,11 +94,12 @@ module Blueprinter
 
     def gather_transformers_from_included_views(view_name)
       current_view = views[view_name]
-      current_view.included_view_names.flat_map do |included_view_name|
+      already_included_transformers = current_view.included_view_names.flat_map do |included_view_name|
         next [] if view_name == included_view_name
 
         gather_transformers_from_included_views(included_view_name)
-      end.concat(current_view.view_transformers)
+      end
+      [*already_included_transformers, *current_view.view_transformers].uniq
     end
   end
 end

@@ -9,8 +9,19 @@ class Blueprinter::IPSTest < Minitest::Test
 
   def setup
     @blueprinter = Class.new(Blueprinter::Base) do
+      transformer = Class.new(Blueprinter::Transformer) do
+        define_method :transform do |result_hash, _obj, _options|
+          {
+            foo: :bar,
+            **result_hash
+          }
+        end
+      end
+
       field :id
       field :name
+
+      transform transformer
     end
     @prepared_objects = 10.times.map {|i| OpenStruct.new(id: i, name: "obj #{i}")}
   end

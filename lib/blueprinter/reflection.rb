@@ -48,7 +48,7 @@ module Blueprinter
         @fields ||= @view_collection.fields_for(name).each_with_object({}) do |field, obj|
           next if field.options[:association]
 
-          obj[field.method] = Field.new(field.method, field.name, field.options)
+          obj[field.method] ||= Field.new(field.method, field.name, field.options)
         end
       end
 
@@ -63,7 +63,7 @@ module Blueprinter
 
           blueprint = field.options.fetch(:blueprint)
           view = field.options[:view] || :default
-          obj[field.method] = Association.new(field.method, field.name, blueprint, view, field.options)
+          obj[field.method] ||= Association.new(field.method, field.name, blueprint, view, field.options)
         end
       end
     end

@@ -45,6 +45,11 @@ describe Blueprinter::Reflection do
       view :legacy do
         association :parts, blueprint: part_bp, name: :pieces
       end
+
+      view :aliased_names do
+        field :name, name: :aliased_name
+        association :category, blueprint: cat_bp, name: :aliased_category
+      end
     end
   }
 
@@ -56,6 +61,7 @@ describe Blueprinter::Reflection do
       :extended_plus,
       :extended_plus_plus,
       :legacy,
+      :aliased_names
     ].sort
   end
 
@@ -76,6 +82,17 @@ describe Blueprinter::Reflection do
     ].sort
   end
 
+  it 'should list overridden fields' do
+    fields = widget_blueprint.reflections.fetch(:aliased_names).fields
+    expect(fields.keys.sort).to eq [
+      :id,
+      :name,
+    ].sort
+    name_field = fields[:name]
+    expect(name_field.name).to eq :name
+    expect(name_field.display_name).to eq :aliased_name
+  end
+
   it 'should list associations' do
     associations = widget_blueprint.reflections.fetch(:default).associations
     expect(associations.keys).to eq [:category]
@@ -90,6 +107,16 @@ describe Blueprinter::Reflection do
     associations = widget_blueprint.reflections.fetch(:legacy).associations
     expect(associations.keys).to eq [:category, :parts]
     expect(associations[:parts].display_name).to eq :pieces
+  end
+
+  it 'should list overridden associations' do
+    associations = widget_blueprint.reflections.fetch(:aliased_names).associations
+    expect(associations.keys.sort).to eq [
+      :category
+    ].sort
+    category_association = associations[:category]
+    expect(category_association.name).to eq :category
+    expect(category_association.display_name).to eq :aliased_category
   end
 
   it 'should get a blueprint and view from an association' do

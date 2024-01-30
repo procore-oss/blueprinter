@@ -5,11 +5,30 @@ on:
   pull_request:
     branches: [master, main]
 jobs:
+  test-old-ruby:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ruby: ['2.7']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby ${{ matrix.ruby }}
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Installing dependencies
+        run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
+      - name: Run tests
+        run: bundle exec rake
+      - name: Benchmarks
+        run: bundle exec rake benchmarks
+
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.7', '3.0', '3.1', '3.2']
+        ruby: ['3.0', '3.1', '3.2']
     steps:
       - uses: actions/checkout@v4
       - name: Set up Ruby ${{ matrix.ruby }}

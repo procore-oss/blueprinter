@@ -258,6 +258,7 @@ module Blueprinter
     def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
       raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view? view_name
 
+      object = Blueprinter.configuration.extensions.pre_render(object, self, view_name, local_options)
       data = prepare_data(object, view_name, local_options)
       prepend_root_and_meta(data, root, meta)
     end

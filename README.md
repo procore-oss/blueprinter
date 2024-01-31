@@ -765,7 +765,7 @@ processing and transforming of resulting view field hashes prior to serializatio
 
 Use `transform` to specify one transformer to be included for serialization.
 A transformer is a class, extending `Blueprinter::Transformer` and implementing the `transform` method.
-Whatever is returned from this `transform` method will end up being the resulting hash passed to serialization.
+The modified `hash` object will be the resulting hash passed to serialization.
 
 #### Example
 

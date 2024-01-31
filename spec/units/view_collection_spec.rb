@@ -91,6 +91,12 @@ describe 'ViewCollection' do
       it 'should return both the view transformer and default transformers for the view' do
         expect(view_collection.transformers(:view)).to eq([default_transformer, transformer])
       end
+
+      it 'should not alter view transformers of the view on subsequent fetches' do
+        view_collection.transformers(:default)
+        expect { view_collection.transformers(:default) }
+          .not_to change(default_view.view_transformers, :count)
+      end
     end
 
     context 'include view transformer' do

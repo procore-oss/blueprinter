@@ -45,6 +45,16 @@ describe Blueprinter::Reflection do
       view :legacy do
         association :parts, blueprint: part_bp, name: :pieces
       end
+
+      view :aliased_names do
+        field :name, name: :aliased_name
+        association :category, blueprint: cat_bp, name: :aliased_category
+      end
+
+      view :overridden_fields do
+        field :override_field, name: :name
+        association :overridden_category, name: :category, blueprint: cat_bp
+      end
     end
   }
 
@@ -56,6 +66,8 @@ describe Blueprinter::Reflection do
       :extended_plus,
       :extended_plus_plus,
       :legacy,
+      :aliased_names,
+      :overridden_fields
     ].sort
   end
 
@@ -76,6 +88,26 @@ describe Blueprinter::Reflection do
     ].sort
   end
 
+  it 'should list aliased fields also included in default view' do
+    fields = widget_blueprint.reflections.fetch(:aliased_names).fields
+    expect(fields.keys.sort).to eq [
+      :id,
+      :name,
+      :aliased_name,
+    ].sort
+  end
+
+  it "should list overridden fields" do
+    fields = widget_blueprint.reflections.fetch(:overridden_fields).fields
+    expect(fields.keys.sort).to eq [
+      :id,
+      :name,
+    ].sort
+    name_field = fields[:name]
+    expect(name_field.name).to eq :override_field
+    expect(name_field.display_name).to eq :name
+  end
+
   it 'should list associations' do
     associations = widget_blueprint.reflections.fetch(:default).associations
     expect(associations.keys).to eq [:category]
@@ -88,8 +120,27 @@ describe Blueprinter::Reflection do
 
   it 'should list associations using custom names' do
     associations = widget_blueprint.reflections.fetch(:legacy).associations
-    expect(associations.keys).to eq [:category, :parts]
-    expect(associations[:parts].display_name).to eq :pieces
+    expect(associations.keys).to eq [:category, :pieces]
+    expect(associations[:pieces].display_name).to eq :pieces
+    expect(associations[:pieces].name).to eq :parts
+  end
+
+  it 'should list aliased associations also included in default view' do
+    associations = widget_blueprint.reflections.fetch(:aliased_names).associations
+    expect(associations.keys.sort).to eq [
+      :category,
+      :aliased_category
+    ].sort
+  end
+
+  it 'should list overridden associations' do
+    associations = widget_blueprint.reflections.fetch(:overridden_fields).associations
+    expect(associations.keys.sort).to eq [
+      :category,
+    ].sort
+    category_association = associations[:category]
+    expect(category_association.name).to eq :overridden_category
+    expect(category_association.display_name).to eq :category
   end
 
   it 'should get a blueprint and view from an association' do

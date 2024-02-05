@@ -32,8 +32,8 @@ module Blueprinter
     #
     # @param method [Symbol] the method or field used as an identifier that you
     #   want to set for serialization.
-    # @param name [Symbol] to rename the identifier key in the JSON
-    #   output. Defaults to method given.
+    # @param source [Symbol] to use a different method to extract the identifier
+    #   from the object being serialized. Defaults to the identifier name.
     # @param extractor [AssociationExtractor,AutoExtractor,BlockExtractor,HashExtractor,PublicSendExtractor]
     # @yield [object, options] The object and the options passed to render are
     #   also yielded to the block.
@@ -56,9 +56,9 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.identifier(method, name: method, extractor: Blueprinter.configuration.extractor_default.new, &block)
+    def self.identifier(name, source: name, extractor: Blueprinter.configuration.extractor_default.new, &block)
       view_collection[:identifier] << Field.new(
-        method,
+        source,
         name,
         extractor,
         self,
@@ -76,9 +76,8 @@ module Blueprinter
     #   Kind of extractor to use.
     #   Either define your own or use Blueprinter's premade extractors. The
     #   Default extractor is AutoExtractor
-    # @option options [Symbol] :name Use this to rename the method. Useful if
-    #   if you want your JSON key named differently in the output than your
-    #   object's field or method name.
+    # @option options [Symbol] :source Useful if you want your JSON key named
+    #   differently in the output than your object's field or method name.
     # @option options [String,Proc] :datetime_format Format Date or DateTime object
     #   If the option provided is a String, the object will be formatted with given strftime
     #   formatting.
@@ -121,10 +120,10 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.field(method, options = {}, &block)
+    def self.field(name, options = {}, &block)
       current_view << Field.new(
-        method,
-        options.fetch(:name) { method },
+        options.fetch(:source) { name },
+        name,
         options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
         self,
         options.merge(block: block)
@@ -134,12 +133,12 @@ module Blueprinter
     # Specify an associated object to be included for serialization.
     # Takes a required method and an option.
     #
-    # @param method [Symbol] the association name
-    # @param options [Hash] options to overide defaults.
+    # @param name [Symbol] the association name
+    # @param options [Hash] options to override defaults.
     # @option options [Symbol] :blueprint Required. Use this to specify the
     #   blueprint to use for the associated object.
-    # @option options [Symbol] :name Use this to rename the association in the
-    #   JSON output.
+    # @option options [Symbol] :source Use this to set a different name for
+    #   extracting the value from the associated object.
     # @option options [Symbol] :view Specify the view to use or fall back to
     #   to the :default view.
     # @yield [object, options] The object and the options passed to render are
@@ -160,11 +159,11 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.association(method, options = {}, &block)
-      validate_blueprint!(options[:blueprint], method)
+    def self.association(name, options = {}, &block)
+      validate_blueprint!(options[:blueprint], name)
 
       field(
-        method,
+        name,
         options.merge(
           association: true,
           extractor: options.fetch(:extractor) { AssociationExtractor.new }

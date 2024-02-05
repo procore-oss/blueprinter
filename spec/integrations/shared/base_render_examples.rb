@@ -43,7 +43,7 @@ shared_examples 'Base::render' do
     let(:result) { '{"first_name":"Meg","identifier":' + obj_id + '}' }
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
-        field :id, name: :identifier
+        field :identifier, source: :id
         field :first_name
       end
     end
@@ -379,7 +379,7 @@ shared_examples 'Base::render' do
 
         view :normal do
           fields :last_name, :position
-          field :company, name: :employer
+          field :employer, source: :company
           field :points do 1 end
         end
         view :extended do

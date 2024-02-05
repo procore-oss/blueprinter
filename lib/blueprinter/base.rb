@@ -56,10 +56,10 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
-    def self.identifier(name, source: name, extractor: Blueprinter.configuration.extractor_default.new, &block)
+    def self.identifier(name, source: name, extractor: Blueprinter.configuration.extractor_default.new, **options, &block)
       view_collection[:identifier] << Field.new(
         source,
-        name,
+        options.fetch(:name) { name }, # @deprecated option
         extractor,
         self,
         block: block
@@ -123,7 +123,7 @@ module Blueprinter
     def self.field(name, options = {}, &block)
       current_view << Field.new(
         options.fetch(:source) { name },
-        name,
+        options.fetch(:name) { name }, # @deprecated option
         options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
         self,
         options.merge(block: block)

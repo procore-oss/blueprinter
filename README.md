@@ -1003,6 +1003,10 @@ class ExampleExtension < Blueprinter::Extension
   end
 end
 ```
+
+Some known extensions are:
+
+* [blueprinter-activerecord](https://github.com/procore-oss/blueprinter-activerecord)
 </details>
 
 <details>

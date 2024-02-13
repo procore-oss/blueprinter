@@ -936,6 +936,16 @@ Output:
 Blueprint classes may be reflected on to inspect their views, fields, and associations. Extensions often make use of this ability.
 
 ```ruby
+class WidgetBlueprint < Blueprinter::Base
+  fields :name, :description
+  association :category, blueprint: CategoryBlueprint
+
+  view :extended do
+    field :price
+    association :parts, blueprint: WidgetPartBlueprint
+  end
+end
+
 # A Hash of views keyed by name
 views = WidgetBlueprint.reflections
 views.keys

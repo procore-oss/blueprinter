@@ -1,0 +1,18 @@
+name: 📚 Documentation or README.md issue report
+description: File a bug/issue for docs or README.md
+title: "[bug] <title>"
+labels: [docs, needs-triage]
+body:
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for the bug you encountered.
+    options:
+    - label: I have searched the existing issues
+      required: true
+- type: textarea
+  attributes:
+    label: Docs/README.md Part to update
+    description: A concise description of what you thing should be updated
+  validations:
+    required: true

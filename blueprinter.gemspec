@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.name        = 'blueprinter'
   s.version     = Blueprinter::VERSION
   s.authors     = ['Procore Technologies, Inc.']
-  s.email       = ['blueprinter@googlegroups.com']
+  s.email       = ['opensource@procore.com']
   s.homepage    = 'https://github.com/procore-oss/blueprinter'
   s.summary     = 'Simple Fast Declarative Serialization Library'
   s.description = 'Blueprinter is a JSON Object Presenter for Ruby that takes business objects ' \

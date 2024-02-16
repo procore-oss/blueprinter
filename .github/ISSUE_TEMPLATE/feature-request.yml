@@ -18,7 +18,7 @@ body:
     required: true
 - type: textarea
   attributes:
-    label: Describe the solution you'd lik
+    label: Describe the feature you'd like to see implemented
     description: A clear and concise description of what you want to happen
   validations:
     required: true

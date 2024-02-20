@@ -981,28 +981,9 @@ Blueprinter.configure do |config|
 end
 ```
 
-The following class implements all extension hooks. If you have an idea for a new one, open an issue or PR.
+Extension hooks:
 
-```ruby
-class ExampleExtension < Blueprinter::Extension
-  #
-  # Called early during "render", this method receives the object to be rendered and
-  # returns a new or modified object. If there are multiple pre_render extensions,
-  # the return value of one becomes the input object of the next. The final return
-  # value is used to render.
-  #
-  # @param object [Object] The object that was passed to "render"
-  # @param blueprint [Class] The Blueprinter class
-  # @param view [Symbol] The blueprint view
-  # @param options [Hash] Options passed to "render"
-  # @return [Object] The modified, or new, object to render
-  #
-  def pre_render(object, blueprint, view, options)
-    # modify or replace object
-    object
-  end
-end
-```
+* [pre_render](https://github.com/procore-oss/blueprinter/blob/abca9ca8ed23edd65a0f4b5ae43e25b8e27a2afc/lib/blueprinter/extension.rb#L18): Intercept the object before rendering begins
 
 Some known extensions are:
 

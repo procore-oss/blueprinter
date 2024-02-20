@@ -986,7 +986,7 @@ The following class implements all extension hooks. If you have an idea for a ne
 ```ruby
 class ExampleExtension < Blueprinter::Extension
   #
-  # Called eary during "render", this method receives the object to be rendered and
+  # Called early during "render", this method receives the object to be rendered and
   # returns a new or modified object. If there are multiple pre_render extensions,
   # the return value of one becomes the input object of the next. The final return
   # value is used to render.

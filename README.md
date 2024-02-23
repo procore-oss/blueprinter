@@ -931,6 +931,66 @@ Output:
 </details>
 
 <details>
+<summary>Reflection</summary>
+
+Blueprint classes may be reflected on to inspect their views, fields, and associations. Extensions often make use of this ability.
+
+```ruby
+class WidgetBlueprint < Blueprinter::Base
+  fields :name, :description
+  association :category, blueprint: CategoryBlueprint
+
+  view :extended do
+    field :price
+    association :parts, blueprint: WidgetPartBlueprint
+  end
+end
+
+# A Hash of views keyed by name
+views = WidgetBlueprint.reflections
+views.keys
+=> [:default, :extended]
+
+# Hashes of fields and associations, keyed by name
+fields = views[:default].fields
+assoc = views[:default].associations
+
+# Get info about a field
+fields[:description].name
+fields[:description].display_name
+fields[:description].options
+
+# Get info about an association
+assoc[:category].name
+assoc[:category].display_name
+assoc[:category].blueprint
+assoc[:category].view
+assoc[:category].options
+```
+</details>
+
+<details>
+<summary>Extensions</summary>
+
+Blueprinter offers an extension system to hook into and modify certain behavior.
+
+```ruby
+Blueprinter.configure do |config|
+  config.extensions << MyExtension.new
+  config.extensions << OtherExtension.new
+end
+```
+
+Extension hooks:
+
+* [pre_render](https://github.com/procore-oss/blueprinter/blob/abca9ca8ed23edd65a0f4b5ae43e25b8e27a2afc/lib/blueprinter/extension.rb#L18): Intercept the object before rendering begins
+
+Some known extensions are:
+
+* [blueprinter-activerecord](https://github.com/procore-oss/blueprinter-activerecord)
+</details>
+
+<details>
 <summary>Deprecations</summary>
 
 

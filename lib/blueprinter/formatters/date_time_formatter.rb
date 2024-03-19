@@ -3,6 +3,7 @@
 module Blueprinter
   class DateTimeFormatter
     InvalidDateTimeFormatterError = Class.new(BlueprinterError)
+    DateTimeFormattingError = Class.new(BlueprinterError)
 
     def format(value, options)
       return value if value.nil?
@@ -28,6 +29,11 @@ module Blueprinter
       else
         raise InvalidDateTimeFormatterError, "Cannot format DateTime object with invalid formatter: #{format.class}"
       end
+    rescue InvalidDateTimeFormatterError => e
+      # Simply re-raise
+      raise e
+    rescue StandardError
+      raise DateTimeFormattingError, 'Error occured when formatting DateTime object. See nested exception for cause.'
     end
   end
 end

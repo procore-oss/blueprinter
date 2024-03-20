@@ -115,15 +115,15 @@ end
 <summary>Renaming</summary>
 
 
-You can rename the resulting JSON keys in both fields and associations by using the `name` option.
+You can rename the resulting JSON keys in both fields and associations by using the `source` option.
 
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
 
-  field :email, name: :login
+  field :login, source: :email
 
-  association :user_projects, name: :projects
+  association :projects, source: :user_projects
 end
 ```
 
@@ -148,7 +148,7 @@ You may define different outputs by utilizing views:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :email, name: :login
+  field :login, source: :email
 
   view :normal do
     fields :first_name, :last_name
@@ -217,7 +217,7 @@ You can also optionally pass in a root key to wrap your resulting json in:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :email, name: :login
+  field :login, source: :email
 
   view :normal do
     fields :first_name, :last_name
@@ -255,7 +255,7 @@ You can additionally add meta-data to the json as well:
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :email, name: :login
+  field :login, source: :email
 
   view :normal do
     fields :first_name, :last_name
@@ -305,7 +305,7 @@ You can specifically choose to exclude certain fields for specific views
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :email, name: :login
+  field :login, source: :email
 
   view :normal do
     fields :first_name, :last_name
@@ -341,7 +341,7 @@ Use `excludes` to exclude multiple fields at once inline.
 ```ruby
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :email, name: :login
+  field :login, source: :email
 
   view :normal do
     fields :age, :first_name, :last_name,
@@ -371,7 +371,7 @@ end
 
 class UserBlueprint < Blueprinter::Base
   identifier :uuid
-  field :email, name: :login
+  field :login, source: :email
 
   view :normal do
     fields :first_name, :last_name

@@ -43,17 +43,17 @@ describe Blueprinter::Reflection do
       end
 
       view :legacy do
-        association :parts, blueprint: part_bp, name: :pieces
+        association :pieces, blueprint: part_bp, source: :parts
       end
 
       view :aliased_names do
-        field :name, name: :aliased_name
-        association :category, blueprint: cat_bp, name: :aliased_category
+        field :aliased_name, source: :name
+        association :aliased_category, blueprint: cat_bp, source: :category
       end
 
       view :overridden_fields do
-        field :override_field, name: :name
-        association :overridden_category, name: :category, blueprint: cat_bp
+        field :name, source: :override_field
+        association :category, source: :overridden_category, blueprint: cat_bp
       end
     end
   }

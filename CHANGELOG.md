@@ -1,5 +1,5 @@
 ## 1.0.2 - 2024/02/02
-* 🐛 [BUGFIX] Fixes an issue with reflection where fields are incorrectly override by their definitions in the default view. See [#391](https://github.com/procore-oss/blueprinter/pull/391). Thanks to [@elliothursh](https://github.com/elliothursh).
+* 🐛 [BUGFIX] [BREAKING] Fixes an issue with reflection where fields are incorrectly override by their definitions in the default view. Note: this may be a breaking change for users of the extensions API, but restores the intended functionality. See [#391](https://github.com/procore-oss/blueprinter/pull/391). Thanks to [@elliothursh](https://github.com/elliothursh).
 
 ## 1.0.1 - 2024/01/19
 * 🐛 [BUGFIX] Fixes an issue where serialization performance would become degraded when using a Blueprint that leverages transformers. See [#381](https://github.com/procore-oss/blueprinter/pull/381). Thanks to [@Pritilender](https://github.com/Pritilender).

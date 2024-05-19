@@ -121,17 +121,7 @@ describe '::Base' do
               association :vehicles, blueprint: vehicle_invalid_blueprint
             end
           end
-          it { expect { subject }.to raise_error(Blueprinter::BlueprinterError) }
-        end
-        context 'Given associated blueprint does not have any ancestors' do
-          let(:blueprint) do
-            vehicle_invalid_blueprint = {}
-            Class.new(Blueprinter::Base) do
-              identifier :id
-              association :vehicles, blueprint: vehicle_invalid_blueprint
-            end
-          end
-          it { expect { subject }.to raise_error(Blueprinter::BlueprinterError) }
+          it { expect { subject }.to raise_error(Blueprinter::Errors::InvalidBlueprint) }
         end
         context "Given association with dynamic blueprint" do
           class UserBlueprint < Blueprinter::Base

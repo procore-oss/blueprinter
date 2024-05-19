@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'blueprint_validator'
 require_relative 'blueprinter_error'
 require_relative 'configuration'
 require_relative 'deprecation'
@@ -160,8 +161,9 @@ module Blueprinter
     #   end
     #
     # @return [Field] A Field object
+    # @raise [Blueprinter::Errors::InvalidBlueprint] if provided blueprint is not valid
     def self.association(method, options = {}, &block)
-      validate_blueprint!(options[:blueprint], method)
+      BlueprintValidator.validate!(options[:blueprint])
 
       field(
         method,

@@ -8,8 +8,7 @@ module Blueprinter
     class << self
       # Determines whether the provided object is a valid Blueprint.
       #
-      #
-      # @param blueprint [Proc, Blueprinter::Base] The object to validate.
+      # @param blueprint [Object] The object to validate.
       # @return [Boolean] true if object is a valid Blueprint
       # @raise [Blueprinter::Errors::InvalidBlueprint] if the object is not a valid Blueprint.
       def validate!(blueprint)

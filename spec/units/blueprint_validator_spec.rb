@@ -18,9 +18,7 @@ describe Blueprinter::BlueprintValidator do
       end
     end
 
-    # This test is not strictly necessary, but due to leveraging "<=" to check inheritance, Hash needs to be handled
-    # separately.
-    context 'when provided object is a Hash' do
+    context 'when provided object is not a class nor a Proc' do
       it 'raises a Blueprinter::Errors::InvalidBlueprint exception' do
         expect { described_class.validate!({}) }.
           to raise_error(Blueprinter::Errors::InvalidBlueprint) do

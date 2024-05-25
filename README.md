@@ -782,10 +782,10 @@ end
 ```ruby
 class User
   def custom_columns
-    self.dynamic_fields #which is an array of some columns
+    # which is an array of some columns
   end
 
-  def custom_fields
+  def dynamic_fields
     custom_columns.each_with_object({}){|col,result|  result[col] = self.send(col)}
   end
 end

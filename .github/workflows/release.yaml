@@ -12,10 +12,10 @@ jobs:
     outputs:
       changed: ${{ steps.check.outputs.any_changed }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
       - name: Check if version has been updated
         id: check
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@d6babd6899969df1a11d14c368283ea4436bca78 # v44
         with:
           files: lib/blueprinter/version.rb
   release:
@@ -23,9 +23,9 @@ jobs:
     needs: version-check
     if: ${{ github.event_name == 'workflow_dispatch' || needs.version-check.outputs.changed == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@d5fb7a202fc07872cb44f00ba8e6197b70cb0c55 # v1
         with:
           ruby-version: 3.2
           bundler-cache: true
@@ -33,11 +33,11 @@ jobs:
         run: bundle check --path=vendor/bundle || bundle install --path=vendor/bundle
       - name: Build gem file
         run: bundle exec rake build
-      - uses: fac/ruby-gem-setup-credentials-action@v2
+      - uses: fac/ruby-gem-setup-credentials-action@5f62d5f2f56a11c7422a92f81fbb29af01e1c00f # v2
         with:
           user: ""
           key: rubygems
           token: ${{secrets.RUBY_GEMS_API_KEY}}
-      - uses: fac/ruby-gem-push-action@v2
+      - uses: fac/ruby-gem-push-action@81d77bf568ff6659d7fae0f0c5a036bb0aeacb1a # v2
         with:
           key: rubygems

@@ -2,37 +2,33 @@
 name: Mark stale issues and pull requests
 on:
   schedule:
-  - cron: "30 1 * * *"
-
+    - cron: "30 1 * * *"
 permissions:
   contents: read
-
 jobs:
   stale:
     permissions:
-      issues: write  # for actions/stale to close stale issues
-      pull-requests: write  # for actions/stale to close stale PRs
+      issues: write # for actions/stale to close stale issues
+      pull-requests: write # for actions/stale to close stale PRs
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v9
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-        # Number of days of inactivity before an issue becomes stale
-        days-before-stale: 60
-        # Number of days of inactivity before a stale issue is closed
-        days-before-close: 7
-        # Issues with these labels will never be considered stale
-        exempt-issue-labels: "on-hold,pinned,security"
-        exempt-pr-labels: "on-hold,pinned,security"
-        # Comment to post when marking an issue as stale.
-        stale-issue-message: >
-          This issue has been automatically marked as stale because it has not had
-          recent activity. It will be closed if no further activity occurs. Thank you
-          for your contributions.
-        stale-pr-message: >
-          This pull request has been automatically marked as stale because it has not had
-          recent activity. It will be closed if no further activity occurs. Thank you
-          for your contributions.
-        # Label to use when marking an issue as stale
-        stale-issue-label: 'no-issue-activity'
-        stale-pr-label: 'no-pr-activity'
+      - uses: actions/stale@28ca1036281a5e5922ead5184a1bbf96e5fc984e # v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          # Number of days of inactivity before an issue becomes stale
+          days-before-stale: 60
+          # Number of days of inactivity before a stale issue is closed
+          days-before-close: 7
+          # Issues with these labels will never be considered stale
+          exempt-issue-labels: "on-hold,pinned,security"
+          exempt-pr-labels: "on-hold,pinned,security"
+          # Comment to post when marking an issue as stale.
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.
+
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. Thank you for your contributions.
+
+          # Label to use when marking an issue as stale
+          stale-issue-label: 'no-issue-activity'
+          stale-pr-label: 'no-pr-activity'

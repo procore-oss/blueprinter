@@ -513,6 +513,88 @@ describe '::Base' do
     end
   end
 
+  describe 'If conditions on views' do
+    let(:obj) { OpenStruct.new(id: 1, first_name: 'Meg', last_name:'Ryan') }
+
+    let(:blueprint) do
+      can_read_name = ->(fn, obj, opts) { opts[:allowed] }
+
+      Class.new(Blueprinter::Base) do
+        identifier :id
+
+        view :with_name, if: can_read_name do
+          field :first_name
+          field :last_name
+        end
+      end
+    end
+
+    subject { blueprint.render_as_hash(obj, view: :with_name, allowed: allowed) }
+
+    context "when allowed" do
+      let(:allowed) { true }
+
+      it { is_expected.to include(first_name: 'Meg', last_name: 'Ryan') }
+    end
+
+    context "when not allowed" do
+      let(:allowed) { false }
+
+      it { is_expected.not_to include(:first_name) }
+      it { is_expected.not_to include(:last_name) }
+      it { is_expected.to include(id: 1) }
+    end
+    
+    context "when inherited, with a new if condition in the child" do
+      subject { child_blueprint.render_as_hash(obj, view: :with_name, **options) }
+
+      let(:options) { {} }
+
+      let(:child_blueprint) do
+        can_read_name = ->(fn, obj, opts) { opts[:really_allowed] }
+
+        Class.new(blueprint) do
+          view :with_name, if: can_read_name
+        end
+      end
+
+      context "when no condition is met" do
+        it "is denied" do
+          expect(subject).not_to include(:first_name)
+          expect(subject).not_to include(:last_name)
+        end
+      end
+
+      context 'when the parent condition is met' do
+        before do
+          options[:allowed] = true
+        end
+
+        it "is denied" do
+          expect(subject).not_to include(:first_name)
+          expect(subject).not_to include(:last_name)
+        end
+
+        specify "the parent blueprint is not affected" do
+          subject
+          parent_result = blueprint.render_as_hash(obj, view: :with_name, **options)
+
+          expect(parent_result).to include(:first_name, :last_name)
+        end
+
+        context 'when the child condition is met' do
+          before do
+            options[:really_allowed] = true
+          end
+
+          it "renders fields from the parent" do
+            expect(subject).to include(first_name: 'Meg', last_name: 'Ryan')
+          end
+        end
+      end
+    end
+  end
+
   describe 'Using the ApplicationBlueprint pattern' do
     let(:obj) { OpenStruct.new(id: 1, first_name: 'Meg',last_name:'Ryan', age: 32) }
     let(:transformer) do

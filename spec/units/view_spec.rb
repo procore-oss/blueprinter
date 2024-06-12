@@ -14,6 +14,31 @@ describe '::View' do
     end
   end
 
+  describe "#finalize" do
+    let(:fields) { {a: double, b: double, c: double} }
+    let(:view) { Blueprinter::View.new('With IF', fields: fields, local_options: { if: if_condition }) }
+
+    context "without an if condition" do
+      let(:if_condition) { nil }
+
+      it "does nothing" do
+        view.finalize
+      end
+    end
+
+    context "when there is an if condition" do
+      let(:if_condition) { :some_condition }
+
+      it "adds the condition to each field" do
+        expect(fields[:a]).to receive(:add_if).with(if_condition)
+        expect(fields[:b]).to receive(:add_if).with(if_condition)
+        expect(fields[:c]).to receive(:add_if).with(if_condition)
+
+        view.finalize
+      end
+    end
+  end
+
   describe '#include_views(:view_name)' do
     it 'should return [:view_name]' do
       expect(view.include_views([:normal, :special])).to eq([:normal, :special])

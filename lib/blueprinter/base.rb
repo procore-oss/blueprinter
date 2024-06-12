@@ -412,6 +412,7 @@ module Blueprinter
     # It accepts a view name and a block. The block should specify the fields.
     #
     # @param view_name [Symbol] the view name
+    # @option if [Proc] A condition that applies to all fields in the view
     # @yieldreturn [#fields,#field,#include_view,#exclude] Use this block to
     #   specify fields, include fields from other views, or exclude fields.
     #
@@ -423,10 +424,13 @@ module Blueprinter
     #   end
     #
     # @return [View] a Blueprinter::View object
-    def self.view(view_name)
-      @current_view = view_collection[view_name]
+    def self.view(view_name, **options)
+      @current_view = view_collection.define(view_name, options)
       view_collection[:default].track_definition_order(view_name)
-      yield
+
+      yield if block_given?
+
+      @current_view.finalize
       @current_view = view_collection[:default]
     end
 

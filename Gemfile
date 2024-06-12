@@ -26,3 +26,7 @@ gem 'rubocop', '~> 1.44'
 gem 'rubocop-rake'
 gem 'sqlite3', '~> 1.5'
 gem 'yard', '>= 0.9.34'
+
+group :development do
+  gem 'debug'
+end

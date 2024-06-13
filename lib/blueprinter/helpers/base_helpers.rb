@@ -48,7 +48,11 @@ module Blueprinter
         result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
           next if field.skip?(field.name, object, local_options)
 
-          hash[field.name] = field.extract(object, local_options)
+          value = field.extract(object, local_options)
+
+          next if value.nil? && field.options[:discard_nil]
+
+          hash[field.name] = value
         end
         view_collection.transformers(view_name).each do |transformer|
           transformer.transform(result_hash, object, local_options)

@@ -50,25 +50,25 @@ shared_examples 'Base::render' do
     it('returns json with a renamed field') { should eq(result) }
   end
 
-  context 'Given blueprint has ::fields with :discard_nil argument' do
-    context 'Given :discard_nil argument is true' do
+  context 'Given blueprint has ::fields with :exclude_if_nil set' do
+    context 'when :exclude_if_nil is true' do
       let(:result) { '{"first_name":"Meg"}' }
       let(:blueprint) do
         Class.new(Blueprinter::Base) do
-          field :first_name, discard_nil: true
-          field :my_field, discard_nil: true do
+          field :first_name, exclude_if_nil: true
+          field :my_field, exclude_if_nil: true do
             nil
           end
         end
       end
       it('returns json without nil value fields') { should eq(result) }
     end
-    context 'Given :discard_nil argument is false' do
+    context 'when :exclude_if_nil is false' do
       let(:result) { '{"first_name":"Meg","my_field":null}' }
       let(:blueprint) do
         Class.new(Blueprinter::Base) do
-          field :first_name, discard_nil: false
-          field :my_field, discard_nil: false do
+          field :first_name, exclude_if_nil: false
+          field :my_field, exclude_if_nil: false do
             nil
           end
         end

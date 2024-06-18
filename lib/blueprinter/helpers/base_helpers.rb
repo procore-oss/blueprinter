@@ -50,7 +50,7 @@ module Blueprinter
 
           value = field.extract(object, local_options)
 
-          next if value.nil? && field.options[:discard_nil]
+          next if value.nil? && field.options[:exclude_if_nil]
 
           hash[field.name] = value
         end

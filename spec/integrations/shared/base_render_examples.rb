@@ -50,33 +50,6 @@ shared_examples 'Base::render' do
     it('returns json with a renamed field') { should eq(result) }
   end
 
-  context 'Given blueprint has ::fields with :exclude_if_nil set' do
-    context 'when :exclude_if_nil is true' do
-      let(:result) { '{"first_name":"Meg"}' }
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :first_name, exclude_if_nil: true
-          field :my_field, exclude_if_nil: true do
-            nil
-          end
-        end
-      end
-      it('returns json without nil value fields') { should eq(result) }
-    end
-    context 'when :exclude_if_nil is false' do
-      let(:result) { '{"first_name":"Meg","my_field":null}' }
-      let(:blueprint) do
-        Class.new(Blueprinter::Base) do
-          field :first_name, exclude_if_nil: false
-          field :my_field, exclude_if_nil: false do
-            nil
-          end
-        end
-      end
-      it('returns json without nil value fields') { should eq(result) }
-    end
-  end
-
   context 'non-default extractor' do
     let(:extractor) do
       Class.new(Blueprinter::Extractor) do

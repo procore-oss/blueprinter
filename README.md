@@ -695,7 +695,7 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 </details>
 
 <details>
-<summary Exclude Fields with nil Values</summary>
+<summary>Exclude Fields with nil Values</summary>
 
 
 By default, fields with `nil` values are included when rendering. You can override this behavior by setting `:exclude_if_nil: true` in the field definition. 

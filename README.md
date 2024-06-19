@@ -774,7 +774,7 @@ Create a Transform class extending from `Blueprinter::Transformer`
 ```ruby
 class DynamicFieldTransformer < Blueprinter::Transformer
   def transform(hash, object, options)
-    hash.merge!(object.dynamic_fields)
+    hash.merge!(object.custom_fields)
   end
 end
 ```

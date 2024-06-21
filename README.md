@@ -773,7 +773,7 @@ Create a Transform class extending from `Blueprinter::Transformer`
 
 ```ruby
 class DynamicFieldTransformer < Blueprinter::Transformer
-  def transform(hash, object, options)
+  def transform(hash, object, _options)
     hash.merge!(object.dynamic_fields)
   end
 end
@@ -781,12 +781,23 @@ end
 
 ```ruby
 class User
-  def custom_columns
-    self.dynamic_fields #which is an array of some columns
-  end
-
-  def custom_fields
-    custom_columns.each_with_object({}){|col,result|  result[col] = self.send(col)}
+  def dynamic_fields
+    case role
+    when :admin
+      {
+        employer: employer,
+        time_in_role: determine_time_in role
+      }
+    when :maintainer
+      {
+        label: label,
+        settings: generate_settings_hash
+      }
+    when :read_only
+      {
+        last_login_at: last_login_at
+      }
+    end
   end
 end
 ```

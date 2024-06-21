@@ -17,5 +17,9 @@ FactoryBot.define do
   factory :vehicle do
     make { 'Super Car' }
     association :user
+
+    trait(:with_model) do
+      model { 'ACME' }
+    end
   end
 end

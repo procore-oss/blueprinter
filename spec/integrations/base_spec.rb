@@ -229,7 +229,10 @@ describe '::Base' do
               association :vehicles
             end
           end
-          it { expect{subject}.to raise_error(Blueprinter::BlueprinterError) }
+          it 'raises an ArgumentError' do
+            expect { subject }.
+              to raise_error(ArgumentError, /:blueprint must be provided when defining an association/)
+          end
         end
 
         context 'Given an association :options option' do
@@ -266,6 +269,29 @@ describe '::Base' do
             end
           end
           it('returns json derived from a custom extractor') { should eq(result) }
+        end
+
+        context 'when a view is specified' do
+          let(:vehicle) { create(:vehicle, :with_model) }
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+
+              view :with_model do
+                field :model
+              end
+            end
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles, blueprint: vehicle_blueprint, view: :with_model
+            end
+          end
+          let(:result) do
+            "{\"id\":#{obj.id},\"vehicles\":[{\"make\":\"Super Car\",\"model\":\"ACME\"}]}"
+          end
+          it 'leverages the specified view when rendering the association' do
+            expect(blueprint.render(obj)).to eq(result)
+          end
         end
 
         context 'Given included view with re-defined association' do

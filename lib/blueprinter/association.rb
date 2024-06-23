@@ -24,7 +24,8 @@ module Blueprinter
         blueprint,
         options.merge(
           blueprint: blueprint,
-          view: view
+          view: view,
+          association: true
         )
       )
     end

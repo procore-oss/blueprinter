@@ -172,7 +172,7 @@ module Blueprinter
         extractor: options.delete(:extractor) || AssociationExtractor.new,
         blueprint: options.delete(:blueprint),
         view: options.delete(:view) || :default,
-        options: options.merge(block: block, association: true)
+        options: options.merge(block: block)
       )
     end
 

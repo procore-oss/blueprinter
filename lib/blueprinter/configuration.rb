@@ -5,7 +5,7 @@ require_relative 'extensions'
 module Blueprinter
   class Configuration
     attr_accessor :association_default, :datetime_format, :deprecations, :field_default, :generator, :if, :method,
-                  :sort_fields_by, :unless, :extractor_default, :default_transformers, :custom_array_like_classes
+                  :sort_fields_by, :unless, :extractor_default, :default_transformers
 
     VALID_CALLABLES = %i[if unless].freeze
 
@@ -21,7 +21,6 @@ module Blueprinter
       @unless = nil
       @extractor_default = AutoExtractor
       @default_transformers = []
-      @custom_array_like_classes = []
     end
 
     def extensions
@@ -30,14 +29,6 @@ module Blueprinter
 
     def extensions=(list)
       @extensions = Extensions.new(list)
-    end
-
-    def array_like_classes
-      @array_like_classes ||= [
-        Array,
-        defined?(ActiveRecord::Relation) && ActiveRecord::Relation,
-        *custom_array_like_classes
-      ].compact
     end
 
     def jsonify(blob)

@@ -4,8 +4,19 @@ require_relative 'extensions'
 
 module Blueprinter
   class Configuration
-    attr_accessor :association_default, :datetime_format, :deprecations, :field_default, :generator, :if, :method,
-                  :sort_fields_by, :unless, :extractor_default, :default_transformers
+    attr_accessor(
+      :association_default,
+      :datetime_format,
+      :default_transformers,
+      :deprecations,
+      :extractor_default,
+      :field_default,
+      :generator,
+      :if,
+      :method,
+      :sort_fields_by,
+      :unless
+    )
 
     VALID_CALLABLES = %i[if unless].freeze
 

@@ -68,7 +68,10 @@ module Blueprinter
       end
 
       def jsonify(blob)
-        Blueprinter.configuration.jsonify(blob)
+        generator = Blueprinter.configuration.generator
+        generator_method = Blueprinter.configuration.method
+
+        generator.send(generator_method, blob)
       end
 
       def current_view

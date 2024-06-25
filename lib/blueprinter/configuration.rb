@@ -40,10 +40,6 @@ module Blueprinter
       ].compact
     end
 
-    def jsonify(blob)
-      generator.public_send(method, blob)
-    end
-
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
     end

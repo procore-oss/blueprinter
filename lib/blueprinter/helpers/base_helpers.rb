@@ -67,44 +67,6 @@ module Blueprinter
         end
       end
 
-      def dynamic_blueprint?(blueprint)
-        blueprint.is_a?(Proc)
-      end
-
-      def validate_blueprint!(blueprint, method)
-        validate_presence_of_blueprint!(blueprint)
-        return if dynamic_blueprint?(blueprint)
-
-        validate_blueprint_has_ancestors!(blueprint, method)
-        validate_blueprint_has_blueprinter_base_ancestor!(blueprint, method)
-      end
-
-      def validate_presence_of_blueprint!(blueprint)
-        raise BlueprinterError, 'Blueprint required' unless blueprint
-      end
-
-      def validate_blueprint_has_ancestors!(blueprint, association_name)
-        # If the class passed as a blueprint does not respond to ancestors
-        # it means it, at the very least, does not have Blueprinter::Base as
-        # one of its ancestor classes (e.g: Hash) and thus an error should
-        # be raised.
-        return if blueprint.respond_to?(:ancestors)
-
-        raise BlueprinterError, "Blueprint provided for #{association_name} " \
-                                'association is not valid.'
-      end
-
-      def validate_blueprint_has_blueprinter_base_ancestor!(blueprint, association_name)
-        # Guard clause in case Blueprinter::Base is present in the ancestor list
-        # for the blueprint class provided.
-        return if blueprint.ancestors.include? Blueprinter::Base
-
-        # Raise error describing what's wrong.
-        raise BlueprinterError, "Class #{blueprint.name} does not inherit from " \
-                                'Blueprinter::Base and is not a valid Blueprinter ' \
-                                "for #{association_name} association."
-      end
-
       def jsonify(blob)
         Blueprinter.configuration.jsonify(blob)
       end

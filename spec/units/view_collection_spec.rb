@@ -23,6 +23,20 @@ describe 'ViewCollection' do
     end
   end
 
+  describe '#define' do
+    it 'creates a view with the given options' do
+      new_view = view_collection.define(:new_view, {if: :some_method_name})
+
+      expect(view_collection[:new_view]).to eq(new_view)
+    end
+
+    it 'errors if this view has already defined a view of the same name' do
+      view_collection.define(:new_view, {})
+
+      expect { view_collection.define(:new_view, {}) }.to raise_error(KeyError)
+    end
+  end
+
   describe '#[]' do
     it 'should return the view if it exists' do
       expect(view_collection.views[:default]).to eq(default_view)
@@ -53,7 +67,7 @@ describe 'ViewCollection' do
 
     it 'should inherit the fields from the parent view collection' do
       view_collection.inherit(parent_view_collection)
-      expect(view.fields).to include(parent_view_collection[:view].fields)
+      expect(view.fields.keys).to include(*parent_view_collection[:view].fields.keys)
     end
   end
 

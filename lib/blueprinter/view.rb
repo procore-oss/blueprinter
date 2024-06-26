@@ -6,7 +6,7 @@ module Blueprinter
   class View
     attr_reader :excluded_field_names, :fields, :included_view_names, :name, :view_transformers, :definition_order
 
-    def initialize(name, fields: {}, included_view_names: [], excluded_view_names: [], transformers: [])
+    def initialize(name, local_options: {}, fields: {}, included_view_names: [], excluded_view_names: [], transformers: [])
       @name = name
       @fields = fields
       @included_view_names = included_view_names
@@ -14,6 +14,15 @@ module Blueprinter
       @view_transformers = transformers
       @definition_order = []
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+      @if_callable = local_options[:if]
+    end
+
+    def finalize
+      return unless @if_callable
+
+      @fields.each_value do |field|
+        field.add_if(@if_callable)
+      end
     end
 
     def track_definition_order(method, viewable: true)
@@ -22,20 +31,20 @@ module Blueprinter
       @definition_order << DefinitionPlaceholder.new(method, viewable)
     end
 
-    def inherit(view)
-      view.fields.each_value do |field|
-        self << field
+    def inherit(parent)
+      parent.fields.each_value do |field|
+        self << field.clone
       end
 
-      view.included_view_names.each do |view_name|
+      parent.included_view_names.each do |view_name|
         include_view(view_name)
       end
 
-      view.excluded_field_names.each do |field_name|
+      parent.excluded_field_names.each do |field_name|
         exclude_field(field_name)
       end
 
-      view.view_transformers.each do |transformer|
+      parent.view_transformers.each do |transformer|
         add_transformer(transformer)
       end
     end

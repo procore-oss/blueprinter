@@ -695,6 +695,36 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 </details>
 
 <details>
+<summary>Exclude Fields with nil Values</summary>
+
+
+By default, fields with `nil` values are included when rendering. You can override this behavior by setting `:exclude_if_nil: true` in the field definition. 
+
+Usage:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  field :name
+  field :birthday, exclude_if_nil: true
+end
+
+user = User.new(name: 'John Doe')
+puts UserBlueprint.render(user)
+```
+
+Output:
+
+```json
+{
+  "name": "John Doe"
+}
+```
+
+</details>
+
+<details>
 <summary>Custom Formatting for Dates and Times</summary>
 
 

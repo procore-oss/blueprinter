@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'association'
+require_relative 'blueprint_validator'
 require_relative 'blueprinter_error'
 require_relative 'configuration'
 require_relative 'deprecation'
@@ -10,14 +12,14 @@ require_relative 'extractors/auto_extractor'
 require_relative 'extractors/block_extractor'
 require_relative 'extractors/hash_extractor'
 require_relative 'extractors/public_send_extractor'
-require_relative 'formatters/date_time_formatter'
 require_relative 'field'
-require_relative 'helpers/type_helpers'
+require_relative 'formatters/date_time_formatter'
 require_relative 'helpers/base_helpers'
-require_relative 'view'
-require_relative 'view_collection'
-require_relative 'transformer'
+require_relative 'helpers/type_helpers'
 require_relative 'reflection'
+require_relative 'transformer'
+require_relative 'view_collection'
+require_relative 'view'
 
 module Blueprinter
   class Base
@@ -159,17 +161,18 @@ module Blueprinter
     #     end
     #   end
     #
-    # @return [Field] A Field object
+    # @return [Association] An object
+    # @raise [Blueprinter::Errors::InvalidBlueprint] if provided blueprint is not valid
     def self.association(method, options = {}, &block)
-      validate_blueprint!(options[:blueprint], method)
+      raise ArgumentError, ':blueprint must be provided when defining an association' unless options[:blueprint]
 
-      field(
-        method,
-        options.merge(
-          association: true,
-          extractor: options.fetch(:extractor) { AssociationExtractor.new }
-        ),
-        &block
+      current_view << Association.new(
+        method: method,
+        name: options.delete(:name) || method,
+        extractor: options.delete(:extractor) || AssociationExtractor.new,
+        blueprint: options.delete(:blueprint),
+        view: options.delete(:view) || :default,
+        options: options.merge(block: block)
       )
     end
 

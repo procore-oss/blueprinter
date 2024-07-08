@@ -5,9 +5,7 @@ module Blueprinter
     private
 
     def array_like?(object)
-      Blueprinter.configuration.array_like_classes.any? do |klass|
-        object.is_a?(klass)
-      end
+      object.is_a?(Enumerable) && !object.is_a?(Hash)
     end
   end
 end

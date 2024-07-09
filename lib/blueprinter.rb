@@ -8,6 +8,7 @@ module Blueprinter
   autoload :Errors, 'blueprinter/errors'
   autoload :Extension, 'blueprinter/extension'
   autoload :Transformer, 'blueprinter/transformer'
+  autoload :V2, 'blueprinter/v2'
 
   class << self
     # @return [Configuration]

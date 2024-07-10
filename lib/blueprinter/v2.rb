@@ -13,7 +13,7 @@ module Blueprinter
 
     # Initialize subclass
     def self.inherited(subclass)
-      subclass.views = {}
+      subclass.views = { default: subclass }
       subclass.fields = fields.dup
       subclass.extensions = extensions.dup
       subclass.blueprint_name = subclass.name ? [subclass.name] : blueprint_name.dup
@@ -26,18 +26,24 @@ module Blueprinter
 
     # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint:extended"
     def self.to_s
-      blueprint_name.join ':'
+      blueprint_name.join '.'
     end
 
     # Access a child view
+    #   MyBlueprint[:extended]
+    #   MyBlueprint[:extended][:plus]
+    #   MyBlueprint["extended.plus"]
     def self.[](view)
-      views.fetch(view)
-    rescue KeyError
-      raise Blueprinter::Errors::UnknownView, "View '#{view}' could not be found in Blueprint '#{self}'"
+      view.to_s.split('.').reduce(self) do |blueprint, child|
+        blueprint.views[child.to_sym] ||
+          raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{blueprint}'")
+      end
     end
 
     # Define a new child view, which is a subclass of self
     def self.view(name, &definition)
+      raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
+
       views[name] = Class.new(self)
       views[name].blueprint_name << name
       views[name].class_eval(&definition) if definition

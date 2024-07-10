@@ -99,7 +99,7 @@ describe '::Base' do
       context 'and exclude_if_nil is false' do
         let(:blueprint) do
           Class.new(Blueprinter::Base) do
-            field :category, exclude_if_nil: false,
+            field :category, exclude_if_nil: false
             field :label, exclude_if_nil: true
           end
         end

@@ -12,8 +12,8 @@ describe "Blueprinter::V2 Names" do
     end
 
     it 'should find a view by name' do
-      expect(NamedBlueprint[:extended].to_s).to eq "NamedBlueprint:extended"
-      expect(NamedBlueprint[:extended].inspect).to eq "NamedBlueprint:extended"
+      expect(NamedBlueprint[:extended].to_s).to eq "NamedBlueprint.extended"
+      expect(NamedBlueprint[:extended].inspect).to eq "NamedBlueprint.extended"
     end
 
     it 'should raise for an invalid view name' do
@@ -38,8 +38,8 @@ describe "Blueprinter::V2 Names" do
     end
 
     it 'should find a view by name' do
-      expect(blueprint[:extended].to_s).to eq "MyBlueprint:extended"
-      expect(blueprint[:extended].inspect).to eq "MyBlueprint:extended"
+      expect(blueprint[:extended].to_s).to eq "MyBlueprint.extended"
+      expect(blueprint[:extended].inspect).to eq "MyBlueprint.extended"
     end
   end
 
@@ -78,14 +78,28 @@ describe "Blueprinter::V2 Names" do
       expect(blueprint.to_s).to eq "MyBlueprint"
       expect(blueprint.inspect).to eq "MyBlueprint"
 
-      expect(blueprint[:foo].to_s).to eq "MyBlueprint:foo"
-      expect(blueprint[:foo].inspect).to eq "MyBlueprint:foo"
+      expect(blueprint[:foo].to_s).to eq "MyBlueprint.foo"
+      expect(blueprint[:foo].inspect).to eq "MyBlueprint.foo"
 
-      expect(blueprint[:foo][:bar].to_s).to eq "MyBlueprint:foo:bar"
-      expect(blueprint[:foo][:bar].inspect).to eq "MyBlueprint:foo:bar"
+      expect(blueprint[:foo][:bar].to_s).to eq "MyBlueprint.foo.bar"
+      expect(blueprint[:foo][:bar].inspect).to eq "MyBlueprint.foo.bar"
 
-      expect(blueprint[:foo][:bar][:zorp].to_s).to eq "MyBlueprint:foo:bar:zorp"
-      expect(blueprint[:foo][:bar][:zorp].inspect).to eq "MyBlueprint:foo:bar:zorp"
+      expect(blueprint[:foo][:bar][:zorp].to_s).to eq "MyBlueprint.foo.bar.zorp"
+      expect(blueprint[:foo][:bar][:zorp].inspect).to eq "MyBlueprint.foo.bar.zorp"
     end
+
+    it 'should find deeply nested names using dot syntax' do
+      expect(blueprint["foo"].to_s).to eq "MyBlueprint.foo"
+      expect(blueprint["foo.bar"].to_s).to eq "MyBlueprint.foo.bar"
+      expect(blueprint["foo.bar.zorp"].to_s).to eq "MyBlueprint.foo.bar.zorp"
+    end
+  end
+
+  it "should not contain periods" do
+    blueprint = Class.new(Blueprinter::V2)
+    expect { blueprint.view :"foo.bar" }.to raise_error(
+      Blueprinter::Errors::InvalidBlueprint,
+      /name may not contain/
+    )
   end
 end

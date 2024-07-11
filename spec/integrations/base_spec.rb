@@ -82,6 +82,32 @@ describe '::Base' do
       end
     end
 
+    context 'Given exclude_if_nil is passed' do
+      let(:obj) { OpenStruct.new(obj_hash.merge(category: nil, label: 'not nil')) }
+
+      context 'and exclude_if_nil is true' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :category, exclude_if_nil: true
+            field :label, exclude_if_nil: true
+          end
+        end
+        let(:result) { '{"label":"not nil"}' }
+        it { expect(blueprint.render(obj)).to eq(result) }
+      end
+
+      context 'and exclude_if_nil is false' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            field :category, exclude_if_nil: false
+            field :label, exclude_if_nil: true
+          end
+        end
+        let(:result) { '{"category":null,"label":"not nil"}' }
+        it { expect(blueprint.render(obj)).to eq(result) }
+      end
+    end
+
     context 'Inside Rails project' do
       include FactoryBot::Syntax::Methods
       let(:obj) { create(:user) }

@@ -2,13 +2,16 @@
 
 module Blueprinter
   class V2
+    autoload :Options, 'blueprinter/v2/options'
+
     class << self
-      attr_accessor :views, :fields, :extensions, :blueprint_name
+      attr_accessor :views, :fields, :extensions, :options, :blueprint_name
     end
 
     self.views = {}
     self.fields = {}
     self.extensions = []
+    self.options = Options.new(DEFAULT_OPTIONS)
     self.blueprint_name = []
 
     # Initialize subclass
@@ -16,6 +19,7 @@ module Blueprinter
       subclass.views = { default: subclass }
       subclass.fields = fields.dup
       subclass.extensions = extensions.dup
+      subclass.options = options.dup
       subclass.blueprint_name = subclass.name ? [subclass.name] : blueprint_name.dup
     end
 

@@ -44,6 +44,7 @@ module Blueprinter
     def self.view(name, &definition)
       raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
+      name = name.to_sym
       views[name] = Class.new(self)
       views[name].blueprint_name << name
       views[name].class_eval(&definition) if definition
@@ -53,12 +54,26 @@ module Blueprinter
     # Define a field
     # rubocop:todo Lint/UnusedMethodArgument
     def self.field(name, options = {})
-      fields[name] = 'TODO'
+      fields[name.to_sym] = 'TODO'
     end
 
     # Define an association
     def self.association(name, blueprint, options = {})
-      fields[name] = 'TODO'
+      fields[name.to_sym] = 'TODO'
+    end
+
+    # Exclude fields/associations
+    def self.exclude(*names)
+      unknown = []
+      names.each do |name|
+        name_sym = name.to_sym
+        if fields.key? name_sym
+          fields.delete name_sym
+        else
+          unknown << name.to_s
+        end
+      end
+      raise Errors::InvalidBlueprint, "Unknown excluded fields in '#{self}': #{unknown.join(', ')}" if unknown.any?
     end
 
     def self.render(obj, options = {})

@@ -5,12 +5,15 @@ module Blueprinter
   class ViewCollection
     attr_reader :views, :sort_by_definition
 
+    AlreadyDefined = Class.new(KeyError)
+
     def initialize
       @views = {
         identifier: View.new(:identifier),
         default: View.new(:default)
       }
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+      @local_view_definitions = [].to_set
     end
 
     def inherit(view_collection)
@@ -38,6 +41,17 @@ module Blueprinter
       included_transformers = gather_transformers_from_included_views(view_name).reverse
       all_transformers = [*views[:default].view_transformers, *included_transformers].uniq
       all_transformers.empty? ? Blueprinter.configuration.default_transformers : all_transformers
+    end
+
+    def define(view_name, options)
+      raise AlreadyDefined, view_name if @local_view_definitions.include?(view_name)
+
+      @local_view_definitions << view_name
+      old_definition = @views[view_name]
+      new_definition = View.new(view_name, local_options: options)
+      new_definition.inherit(old_definition) if old_definition
+
+      @views[view_name] = new_definition
     end
 
     def [](view_name)

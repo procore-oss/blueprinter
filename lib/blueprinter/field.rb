@@ -18,9 +18,34 @@ module Blueprinter
     end
 
     def skip?(field_name, object, local_options)
+      return true if unless_callable && unless_callable.call(field_name, object, local_options)
       return true if if_callable && !if_callable.call(field_name, object, local_options)
 
-      unless_callable && unless_callable.call(field_name, object, local_options)
+      false
+    end
+
+    def clone
+      opts = options.dup
+      opts[:if] = if_callable if if_callable
+      opts[:unless] = unless_callable if unless_callable
+
+      Field.new(@method, @name, @extractor, @blueprint, opts)
+    end
+
+    # Adds an outer scoped if to any potential if conditions
+    def add_if(condition)
+      return unless condition
+
+      @if_callable = nil
+      inner = callable_from(:if)
+      outer = coerce_callable(condition)
+
+      @if_callable = lambda do |name, obj, opts|
+        next false if inner && !inner.call(name, obj, opts)
+        next false unless outer.call(name, obj, opts)
+
+        true
+      end
     end
 
     private
@@ -49,6 +74,10 @@ module Blueprinter
 
       return false unless tmp
 
+      coerce_callable(tmp)
+    end
+
+    def coerce_callable(tmp)
       case tmp
       when Proc then tmp
       when Symbol then blueprint.method(tmp)

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 describe Blueprinter::Reflection do
   let(:category_blueprint) {
     Class.new(Blueprinter::Base) do

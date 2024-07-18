@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
 require 'ostruct'
 
 describe Blueprinter::Extensions do

@@ -2,6 +2,6 @@
 
 module Blueprinter
   module Errors
-    class InvalidBlueprint < Blueprinter::BlueprinterError; end
+    autoload :InvalidBlueprint, 'blueprinter/errors/invalid_blueprint'
   end
 end

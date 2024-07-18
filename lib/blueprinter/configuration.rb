@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'json'
-require_relative 'extensions'
 
 module Blueprinter
   class Configuration
@@ -48,13 +47,15 @@ module Blueprinter
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
     end
-  end
 
-  def self.configuration
-    @configuration ||= Configuration.new
-  end
+    module Configurable
+      def configuration
+        @configuration ||= Configuration.new
+      end
 
-  def self.configure
-    yield configuration if block_given?
+      def configure
+        yield configuration if block_given?
+      end
+    end
   end
 end

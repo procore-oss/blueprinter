@@ -1,26 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'association'
-require_relative 'blueprint_validator'
-require_relative 'blueprinter_error'
-require_relative 'configuration'
-require_relative 'deprecation'
-require_relative 'empty_types'
-require_relative 'extractor'
-require_relative 'extractors/association_extractor'
-require_relative 'extractors/auto_extractor'
-require_relative 'extractors/block_extractor'
-require_relative 'extractors/hash_extractor'
-require_relative 'extractors/public_send_extractor'
-require_relative 'field'
-require_relative 'formatters/date_time_formatter'
-require_relative 'helpers/base_helpers'
-require_relative 'helpers/type_helpers'
-require_relative 'reflection'
-require_relative 'transformer'
-require_relative 'view_collection'
-require_relative 'view'
-
 module Blueprinter
   class Base
     include BaseHelpers

@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'field'
-require_relative 'blueprint_validator'
-
 module Blueprinter
   # @api private
   class Association < Field

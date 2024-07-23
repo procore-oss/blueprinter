@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+require 'blueprinter/extractor'
+require 'blueprinter/empty_types'
+require 'blueprinter/extractors/block_extractor'
+require 'blueprinter/extractors/hash_extractor'
+require 'blueprinter/extractors/public_send_extractor'
+require 'blueprinter/formatters/date_time_formatter'
+
 module Blueprinter
   # @api private
   class AutoExtractor < Extractor

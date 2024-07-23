@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/helpers/type_helpers'
+
 module Blueprinter
   EMPTY_COLLECTION = 'empty_collection'
   EMPTY_HASH = 'empty_hash'

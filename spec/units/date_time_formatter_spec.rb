@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'date'
+require 'blueprinter/formatters/date_time_formatter'
+
 describe '::DateTimeFormatter' do
   let(:formatter) { Blueprinter::DateTimeFormatter.new }
   let(:valid_date) { Date.new(1994, 3, 4) }

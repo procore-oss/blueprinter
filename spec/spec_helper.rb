@@ -7,7 +7,7 @@ Dir[File.dirname(__FILE__) + '/support/**/*.rb'].each { |file| require file }
 
 module SpecHelpers
   def reset_blueprinter_config!
-    Blueprinter.instance_variable_set(:@configuration, nil)
+    Blueprinter.reset_configuration!
   end
 end
 

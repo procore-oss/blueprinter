@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/deprecation'
+
 describe 'Blueprinter::Deprecation' do
   describe '#report' do
     TEST_MESSAGE = "Test Message"

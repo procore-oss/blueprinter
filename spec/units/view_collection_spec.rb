@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/view_collection'
+
 describe 'ViewCollection' do
   subject(:view_collection) { Blueprinter::ViewCollection.new }
 

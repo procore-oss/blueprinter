@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/blueprint_validator'
+
 describe Blueprinter::BlueprintValidator do
   describe 'validate!' do
     context 'when provided object subclasses Blueprinter::Base' do

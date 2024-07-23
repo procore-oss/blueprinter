@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'blueprinter/extensions'
+require 'blueprinter/extractors/auto_extractor'
 
 module Blueprinter
   class Configuration
@@ -46,16 +48,6 @@ module Blueprinter
 
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
-    end
-
-    module Configurable
-      def configuration
-        @configuration ||= Configuration.new
-      end
-
-      def configure
-        yield configuration if block_given?
-      end
     end
   end
 end

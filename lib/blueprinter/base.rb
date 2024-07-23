@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+require 'blueprinter/association'
+require 'blueprinter/extractors/association_extractor'
+require 'blueprinter/field'
+require 'blueprinter/helpers/base_helpers'
+require 'blueprinter/reflection'
+
 module Blueprinter
   class Base
     include BaseHelpers

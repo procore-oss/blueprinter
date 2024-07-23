@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'blueprinter/field'
+require 'blueprinter/blueprint_validator'
+require 'blueprinter/extractors/association_extractor'
+
 module Blueprinter
   # @api private
   class Association < Field

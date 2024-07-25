@@ -2,7 +2,7 @@
 
 require 'activerecord_helper'
 require 'benchmark_helper'
-require 'blueprinter/base'
+require 'blueprinter'
 
 class Blueprinter::ActiveRecordIPSTest < Minitest::Test
   include FactoryBot::Syntax::Methods

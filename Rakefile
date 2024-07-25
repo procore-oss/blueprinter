@@ -34,7 +34,7 @@ YARD::Rake::YardocTask.new do |t|
 end
 
 Rake::TestTask.new(:benchmarks) do |t|
-  t.libs << 'spec'
+  t.libs.append('lib', 'spec')
   t.pattern = 'spec/benchmarks/**/*_test.rb'
   t.verbose = false
 end

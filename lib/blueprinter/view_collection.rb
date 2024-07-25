@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/view'
+
 module Blueprinter
   # @api private
   class ViewCollection

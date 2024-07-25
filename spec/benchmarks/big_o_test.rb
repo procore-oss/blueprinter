@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'benchmark_helper'
-require 'blueprinter/base'
+require 'blueprinter'
 require 'ostruct'
 
 class Blueprinter::BigOTest < Minitest::Benchmark

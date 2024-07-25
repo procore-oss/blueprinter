@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'blueprinter/extractor'
+require 'blueprinter/empty_types'
+
 module Blueprinter
   # @api private
   class AssociationExtractor < Extractor

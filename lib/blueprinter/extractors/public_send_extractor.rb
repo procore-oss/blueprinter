@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/extractor'
+
 module Blueprinter
   # @api private
   class PublicSendExtractor < Extractor

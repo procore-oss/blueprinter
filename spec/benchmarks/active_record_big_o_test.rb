@@ -2,7 +2,7 @@
 
 require 'activerecord_helper'
 require 'benchmark_helper'
-require 'blueprinter/base'
+require 'blueprinter'
 
 class Blueprinter::ActiveRecordBigOTest < Minitest::Benchmark
   include FactoryBot::Syntax::Methods

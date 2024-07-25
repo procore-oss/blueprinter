@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'blueprinter/helpers/type_helpers'
+require 'blueprinter/view_collection'
+
 module Blueprinter
   module BaseHelpers
     def self.included(base)

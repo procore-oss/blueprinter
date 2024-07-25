@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative 'errors/invalid_blueprint'
-
 module Blueprinter
   # @api private
   class BlueprintValidator

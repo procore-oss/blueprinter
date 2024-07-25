@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require_relative 'field'
-require_relative 'blueprint_validator'
+require 'blueprinter/field'
+require 'blueprinter/blueprint_validator'
+require 'blueprinter/extractors/association_extractor'
 
 module Blueprinter
   # @api private

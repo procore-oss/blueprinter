@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/association'
+
 describe Blueprinter::Association do
   describe '#initialize' do
     let(:blueprint) { Class.new(Blueprinter::Base) }

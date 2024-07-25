@@ -78,6 +78,7 @@ describe 'Blueprinter' do
     end
 
     it 'should default the `extractor_default` option' do
+      Blueprinter.reset_configuration!
       expect(Blueprinter.configuration.extractor_default).to eq(Blueprinter::AutoExtractor)
     end
 

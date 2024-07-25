@@ -1,7 +1,26 @@
 # frozen_string_literal: true
 
-require_relative 'blueprinter/base'
-require_relative 'blueprinter/extension'
-
 module Blueprinter
+  autoload :Base, 'blueprinter/base'
+  autoload :BlueprinterError, 'blueprinter/blueprinter_error'
+  autoload :Configuration, 'blueprinter/configuration'
+  autoload :Errors, 'blueprinter/errors'
+  autoload :Extension, 'blueprinter/extension'
+  autoload :Transformer, 'blueprinter/transformer'
+
+  class << self
+    # @return [Configuration]
+    def configuration
+      @configuration ||= Configuration.new
+    end
+
+    def configure
+      yield(configuration) if block_given?
+    end
+
+    # Resets global configuration.
+    def reset_configuration!
+      @configuration = nil
+    end
+  end
 end

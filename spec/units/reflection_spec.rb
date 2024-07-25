@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/reflection'
+
 describe Blueprinter::Reflection do
   let(:category_blueprint) {
     Class.new(Blueprinter::Base) do

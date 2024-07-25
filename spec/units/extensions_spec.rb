@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'ostruct'
+require 'blueprinter/extensions'
 
 describe Blueprinter::Extensions do
   let(:all_extensions) {

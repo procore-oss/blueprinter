@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'helpers/type_helpers'
+require 'blueprinter/helpers/type_helpers'
 
 module Blueprinter
   EMPTY_COLLECTION = 'empty_collection'

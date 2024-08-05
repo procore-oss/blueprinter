@@ -1,36 +1,53 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/dsl'
+require 'blueprinter/v2/options'
+require 'blueprinter/v2/reflection'
+
 module Blueprinter
   class V2
-    autoload :Options, 'blueprinter/v2/options'
+    extend DSL
+    extend Reflection
 
     class << self
-      attr_accessor :views, :fields, :extensions, :options, :blueprint_name
+      attr_accessor :views, :fields, :extensions, :options
+      # The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
+      attr_accessor :blueprint_name
+      # Name of the view, e.g. :default, :foo, :"foo.bar"
+      attr_accessor :view_name
     end
 
     self.views = {}
     self.fields = {}
     self.extensions = []
     self.options = Options.new(DEFAULT_OPTIONS)
-    self.blueprint_name = []
+    self.blueprint_name = name
+    self.view_name = :default
 
     # Initialize subclass
     def self.inherited(subclass)
       subclass.views = { default: subclass }
-      subclass.fields = fields.dup
+      subclass.fields = fields.transform_values(&:dup)
       subclass.extensions = extensions.dup
       subclass.options = options.dup
-      subclass.blueprint_name = subclass.name ? [subclass.name] : blueprint_name.dup
+      subclass.blueprint_name = subclass.name || blueprint_name
+      subclass.view_name = subclass.name ? :default : view_name
     end
 
-    # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint:extended"
+    # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
     def self.inspect
-      to_s
+      blueprint_name
     end
 
-    # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint:extended"
+    # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
     def self.to_s
-      blueprint_name.join '.'
+      blueprint_name
+    end
+
+    # Append the sub-view name to blueprint_name and view_name
+    def self.append_name(name)
+      self.blueprint_name = "#{blueprint_name}.#{name}"
+      self.view_name = view_name == :default ? name : :"#{view_name}.#{name}"
     end
 
     # Access a child view
@@ -42,42 +59,6 @@ module Blueprinter
         blueprint.views[child.to_sym] ||
           raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{blueprint}'")
       end
-    end
-
-    # Define a new child view, which is a subclass of self
-    def self.view(name, &definition)
-      raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
-
-      name = name.to_sym
-      views[name] = Class.new(self)
-      views[name].blueprint_name << name
-      views[name].class_eval(&definition) if definition
-      views[name]
-    end
-
-    # Define a field
-    # rubocop:todo Lint/UnusedMethodArgument
-    def self.field(name, options = {})
-      fields[name.to_sym] = 'TODO'
-    end
-
-    # Define an association
-    def self.association(name, blueprint, options = {})
-      fields[name.to_sym] = 'TODO'
-    end
-
-    # Exclude fields/associations
-    def self.exclude(*names)
-      unknown = []
-      names.each do |name|
-        name_sym = name.to_sym
-        if fields.key? name_sym
-          fields.delete name_sym
-        else
-          unknown << name.to_s
-        end
-      end
-      raise Errors::InvalidBlueprint, "Unknown excluded fields in '#{self}': #{unknown.join(', ')}" if unknown.any?
     end
 
     def self.render(obj, options = {})
@@ -95,7 +76,5 @@ module Blueprinter
       # a field/association block calling "render" again), and others to be called on every
       # nested Blueprint. This would fix some persistent issues with blueprinter-activerecord.
     end
-
-    # rubocop:enable Lint/UnusedMethodArgument
   end
 end

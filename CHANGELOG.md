@@ -1,3 +1,11 @@
+## 1.1.0 - 2024/08/02
+* [BREAKING] Drops support for Ruby 2.7. See [#402](https://github.com/procore-oss/blueprinter/pull/402). Thanks to [@jmeridth](https://github.com/jmeridth)
+* 🚜 [REFACTOR] Cleans up Blueprint validation logic and implements an `Association` class with a clearer interface. See [#414](https://github.com/procore-oss/blueprinter/pull/414). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+* 💅 [ENHANCEMENT] Updates **Transform Classes** documentation to provide a more understandable example. See [#415](https://github.com/procore-oss/blueprinter/pull/415). Thanks to [@SaxtonDrey](https://github.com/SaxtonDrey).
+* 💅 [ENHANCEMENT] Implements field-level configuration option for excluding an attribute from the result of a render if its value is `nil`. See [#425](https://github.com/procore-oss/blueprinter/pull/425). Thanks to [jamesst20](https://github.com/jamesst20).
+* 🚜 [REFACTOR] Adds explicit dependency on `json` within `Blueprinter::Configuration`. See [#444](https://github.com/procore-oss/blueprinter/pull/444). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+* 🚜 [REFACTOR] Alters file loading to leverage `autoload` instead of `require` for (future) optional, top-level constants. See [#445](https://github.com/procore-oss/blueprinter/pull/445). Thanks to [@jhollinger](https://github.com/jhollinger).
+
 ## 1.0.2 - 2024/02/02
 * 🐛 [BUGFIX] [BREAKING] Fixes an issue with reflection where fields are incorrectly override by their definitions in the default view. Note: this may be a breaking change for users of the extensions API, but restores the intended functionality. See [#391](https://github.com/procore-oss/blueprinter/pull/391). Thanks to [@elliothursh](https://github.com/elliothursh).
 

@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/association'
 require 'blueprinter/v2/dsl'
+require 'blueprinter/v2/field'
 require 'blueprinter/v2/options'
 require 'blueprinter/v2/reflection'
 
 module Blueprinter
+  # Base class for V2 Blueprints
   class V2
     extend DSL
     extend Reflection

@@ -2,6 +2,7 @@
 
 module Blueprinter
   class V2
+    # API for reflecting on Blueprints
     module Reflection
       def self.extended(klass)
         klass.class_eval do
@@ -33,15 +34,15 @@ module Blueprinter
       class View
         # @return [Symbol] Name of the view
         attr_reader :name
-        # @return [Hash<Symbol, TODO>] Fields defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Field>] Fields defined on the view
         attr_reader :fields
-        # @return [Hash<Symbol, TODO>] Associations defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations defined on the view
         attr_reader :associations
 
         def initialize(blueprint)
           @name = blueprint.view_name
-          @fields = {} # TODO: get non-association fields from blueprint.fields
-          @associations = {} # TODO: get association fields from blueprint.fields
+          @fields = blueprint.fields.select { |_, f| f.is_a? Field }
+          @associations = blueprint.fields.select { |_, f| f.is_a? Association }
         end
       end
     end

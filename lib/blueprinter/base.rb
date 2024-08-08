@@ -153,10 +153,10 @@ module Blueprinter
 
       current_view << Association.new(
         method: method,
-        name: options.delete(:name) || method,
-        extractor: options.delete(:extractor) || AssociationExtractor.new,
-        blueprint: options.delete(:blueprint),
-        view: options.delete(:view) || :default,
+        name: options.fetch(:name) { method },
+        extractor: options.fetch(:extractor) { AssociationExtractor.new },
+        blueprint: options.fetch(:blueprint),
+        view: options.fetch(:view, :default),
         options: options.merge(block: block)
       )
     end

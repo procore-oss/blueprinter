@@ -15,9 +15,9 @@ module Blueprinter
       private
 
       def prepare_for_render(object, options)
-        view_name = options.delete(:view) || :default
-        root = options.delete(:root)
-        meta = options.delete(:meta)
+        view_name = options.fetch(:view, :default)
+        root = options[:root]
+        meta = options[:meta]
         validate_root_and_meta!(root, meta)
         prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
       end

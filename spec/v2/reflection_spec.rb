@@ -54,10 +54,10 @@ describe "Blueprinter::V2 Reflection" do
       end
     end
 
-    expect blueprint.reflections[:default].fields.keys to eq %i(name)
-    expect blueprint.reflections[:default].associations.keys to eq %i(name)
+    expect(blueprint.reflections[:default].fields.keys).to eq %i(name)
+    expect(blueprint.reflections[:default].associations.keys).to eq %i(category)
 
-    expect blueprint.reflections[:extended].fields.keys to eq %i(name description)
-    expect blueprint.reflections[:extended].associations.keys to eq %i(name widgets)
+    expect(blueprint.reflections[:extended].fields.keys).to eq %i(name description)
+    expect(blueprint.reflections[:extended].associations.keys).to eq %i(category widgets)
   end
 end

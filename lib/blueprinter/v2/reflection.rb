@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/association'
+require 'blueprinter/v2/field'
+
 module Blueprinter
   class V2
     # API for reflecting on Blueprints

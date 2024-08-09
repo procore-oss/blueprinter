@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require 'blueprinter/v2/association'
 require 'blueprinter/v2/dsl'
-require 'blueprinter/v2/field'
 require 'blueprinter/v2/options'
 require 'blueprinter/v2/reflection'
 
@@ -53,10 +51,15 @@ module Blueprinter
       self.view_name = view_name == :default ? name : :"#{view_name}.#{name}"
     end
 
-    # Access a child view
+    #
+    # Access a child view.
+    #
     #   MyBlueprint[:extended]
-    #   MyBlueprint[:extended][:plus]
-    #   MyBlueprint["extended.plus"]
+    #   MyBlueprint["extended.plus"] or MyBlueprint[:extended][:plus]
+    #
+    # @param view [Symbol|String] Name of the view, e.g. :extended, "extended.plus"
+    # @return [Class] A descendent of Blueprinter::V2
+    #
     def self.[](view)
       view.to_s.split('.').reduce(self) do |blueprint, child|
         blueprint.views[child.to_sym] ||
@@ -64,20 +67,14 @@ module Blueprinter
       end
     end
 
+    # Render the object
     def self.render(obj, options = {})
       new.render(obj, options)
     end
 
+    # Render the object
     def render(obj, options = {})
-      # TODO: call an external Render module/class, passing in self, obj, and options.
-      #
-      # I propose this new renderer (possibly shared with 1.x) would have an "outer" and
-      # "inner" API. The "inner" API would be used when rendering nested Blueprints. The
-      # "outer" API would only be called here.
-      #
-      # This design would allow for some render hooks to only be called ONCE per render (baring
-      # a field/association block calling "render" again), and others to be called on every
-      # nested Blueprint. This would fix some persistent issues with blueprinter-activerecord.
+      # TODO: call an external Render module/class, passing in self, obj, and options
     end
   end
 end

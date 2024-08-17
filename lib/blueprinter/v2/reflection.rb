@@ -9,7 +9,7 @@ module Blueprinter
     module Reflection
       def self.extended(klass)
         klass.class_eval do
-          private_class_method :flattened_views
+          private_class_method :flatten_children
         end
       end
 
@@ -19,16 +19,21 @@ module Blueprinter
       # @return [Hash<Symbol, Blueprinter::V2::Reflection::View>]
       #
       def reflections
-        @reflections ||= flattened_views(views)
+        @reflections ||= flatten_children(self, :default)
       end
 
       # Builds a flat Hash of nested views
-      def flattened_views(views, acc = {})
-        views.each_with_object(acc) do |(_, blueprint), obj|
-          obj[blueprint.view_name] = View.new(blueprint)
-          children = blueprint.views.except(:default)
-          flattened_views(children, obj)
-        end
+      def flatten_children(parent, child_name, path = [])
+        ref_key = path.empty? ? child_name : path.join('.').to_sym
+        child_view = parent.views.fetch(child_name)
+        child_ref = View.new(child_view, ref_key)
+
+        child_view.views.
+          except(:default).
+          reduce({ ref_key => child_ref }) do |acc, (name, _)|
+            children = flatten_children(child_view, name, path + [name])
+            acc.merge(children)
+          end
       end
 
       #
@@ -42,8 +47,8 @@ module Blueprinter
         # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations defined on the view
         attr_reader :associations
 
-        def initialize(blueprint)
-          @name = blueprint.view_name
+        def initialize(blueprint, name)
+          @name = name
           @fields = blueprint.fields.select { |_, f| f.is_a? Field }
           @associations = blueprint.fields.select { |_, f| f.is_a? Association }
         end

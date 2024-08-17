@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 describe "Blueprinter::V2 Reflection" do
-  it "should find all view keys" do
-    blueprint = Class.new(Blueprinter::V2) do
+  let(:blueprint) do
+    Class.new(Blueprinter::V2) do
       view :foo
       view :bar do
         view :foo do
@@ -10,7 +10,9 @@ describe "Blueprinter::V2 Reflection" do
         end
       end
     end
+  end
 
+  it "should find all view keys" do
     view_names = blueprint.reflections.keys
     expect(view_names.sort).to eq %i(
       default
@@ -22,22 +24,43 @@ describe "Blueprinter::V2 Reflection" do
   end
 
   it "should find all view names" do
-    blueprint = Class.new(Blueprinter::V2) do
-      view :foo
-      view :bar do
-        view :foo do
-          view :borp
-        end
-      end
-    end
-
-    views = blueprint.reflections.values
-    expect(views.map(&:name).sort).to eq %i(
+    view_names = blueprint.reflections.values.map(&:name)
+    expect(view_names.sort).to eq %i(
       default
       foo
       bar
       bar.foo
       bar.foo.borp
+    ).sort
+  end
+
+  it "should find nested view keys" do
+    bar_view_names = blueprint[:bar].reflections.keys
+    expect(bar_view_names.sort).to eq %i(
+      default
+      foo
+      foo.borp
+    ).sort
+
+    bar_foo_view_names = blueprint[:"bar.foo"].reflections.keys
+    expect(bar_foo_view_names.sort).to eq %i(
+      default
+      borp
+    ).sort
+  end
+
+  it "should find nested view names" do
+    bar_view_names = blueprint[:bar].reflections.values.map(&:name)
+    expect(bar_view_names.sort).to eq %i(
+      default
+      foo
+      foo.borp
+    ).sort
+
+    bar_foo_view_names = blueprint[:"bar.foo"].reflections.values.map(&:name)
+    expect(bar_foo_view_names.sort).to eq %i(
+      default
+      borp
     ).sort
   end
 

@@ -14,8 +14,6 @@ module Blueprinter
       attr_accessor :views, :fields, :extensions, :options
       # The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
       attr_accessor :blueprint_name
-      # Name of the view, e.g. :default, :foo, :"foo.bar"
-      attr_accessor :view_name
     end
 
     self.views = {}
@@ -23,7 +21,6 @@ module Blueprinter
     self.extensions = []
     self.options = Options.new(DEFAULT_OPTIONS)
     self.blueprint_name = name
-    self.view_name = :default
 
     # Initialize subclass
     def self.inherited(subclass)
@@ -32,7 +29,6 @@ module Blueprinter
       subclass.extensions = extensions.dup
       subclass.options = options.dup
       subclass.blueprint_name = subclass.name || blueprint_name
-      subclass.view_name = subclass.name ? :default : view_name
     end
 
     # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
@@ -45,10 +41,9 @@ module Blueprinter
       blueprint_name
     end
 
-    # Append the sub-view name to blueprint_name and view_name
+    # Append the sub-view name to blueprint_name
     def self.append_name(name)
       self.blueprint_name = "#{blueprint_name}.#{name}"
-      self.view_name = view_name == :default ? name : :"#{view_name}.#{name}"
     end
 
     #

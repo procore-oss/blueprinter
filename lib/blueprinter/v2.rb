@@ -11,13 +11,14 @@ module Blueprinter
     extend Reflection
 
     class << self
-      attr_accessor :views, :fields, :extensions, :options
+      attr_accessor :views, :fields, :partials, :extensions, :options
       # The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
       attr_accessor :blueprint_name
     end
 
     self.views = {}
     self.fields = {}
+    self.partials = {}
     self.extensions = []
     self.options = Options.new(DEFAULT_OPTIONS)
     self.blueprint_name = name
@@ -26,6 +27,7 @@ module Blueprinter
     def self.inherited(subclass)
       subclass.views = { default: subclass }
       subclass.fields = fields.transform_values(&:dup)
+      subclass.partials = partials.dup
       subclass.extensions = extensions.dup
       subclass.options = options.dup
       subclass.blueprint_name = subclass.name || blueprint_name

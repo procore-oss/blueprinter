@@ -24,6 +24,30 @@ module Blueprinter
       end
 
       #
+      # Define a new partial.
+      #
+      # @param name [Symbol] Name of the partial to create or import
+      # @yield Define a new partial in the block
+      #
+      def partial(name, &definition)
+        partials[name.to_sym] = definition
+      end
+
+      #
+      # Import a partial into this view.
+      #
+      # @param name [Array<Symbol>] One or more partial names
+      #
+      def use(*names)
+        names.each do |name|
+          if !(p = partials[name])
+            raise Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'. NOTE: partials must be defined before your views!"
+          end
+          class_eval(&p)
+        end
+      end
+
+      #
       # Define a field.
       #
       # @param name [Symbol] Name of the field
@@ -67,7 +91,11 @@ module Blueprinter
         )
       end
 
-      # Exclude parent fields/associations from inheritance
+      #
+      # Exclude parent fields and associations from this view.
+      #
+      # @param name [Array<Symbol>] One or more fields or associations to exclude
+      #
       def exclude(*names)
         unknown = []
         names.each do |name|

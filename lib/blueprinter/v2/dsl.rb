@@ -12,15 +12,11 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the view
       # @yield Define the view in the block
-      # @return [Class] An annonymous subclass of Blueprinter::V2
       #
       def view(name, &definition)
         raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
-        view = Class.new(self)
-        view.append_name(name)
-        view.class_eval(&definition) if definition
-        views[name.to_sym] = view
+        views[name.to_sym] = definition
       end
 
       #
@@ -36,15 +32,10 @@ module Blueprinter
       #
       # Import a partial into this view.
       #
-      # @param name [Array<Symbol>] One or more partial names
+      # @param names [Array<Symbol>] One or more partial names
       #
       def use(*names)
-        names.each do |name|
-          if !(p = partials[name])
-            raise Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'. NOTE: partials must be defined before your views!"
-          end
-          class_eval(&p)
-        end
+        names.each { |name| used_partials << name.to_sym }
       end
 
       #
@@ -97,16 +88,7 @@ module Blueprinter
       # @param name [Array<Symbol>] One or more fields or associations to exclude
       #
       def exclude(*names)
-        unknown = []
-        names.each do |name|
-          name_sym = name.to_sym
-          if fields.key? name_sym
-            fields.delete name_sym
-          else
-            unknown << name.to_s
-          end
-        end
-        raise Errors::InvalidBlueprint, "Unknown excluded fields in '#{self}': #{unknown.join(', ')}" if unknown.any?
+        self.excludes += names.map(&:to_sym)
       end
     end
   end

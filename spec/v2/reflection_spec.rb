@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe "Blueprinter::V2 Reflection" do
+describe "Blueprinter::V2::Reflection" do
   let(:blueprint) do
     Class.new(Blueprinter::V2) do
       view :foo

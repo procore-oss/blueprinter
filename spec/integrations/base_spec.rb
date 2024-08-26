@@ -478,6 +478,27 @@ describe '::Base' do
         after { reset_blueprinter_config! }
 
         it('returns the expected result') { should eq(result) }
+
+        context 'Given options containing `view` and rendered multiple times (as in batching)' do
+          let(:blueprint) do
+            Class.new(Blueprinter::Base) do
+              field :id
+              view :with_make do
+                field :make
+              end
+            end
+          end
+
+          let(:options) { { view: :with_make } }
+
+          subject do
+            obj.map do |vehicle|
+              blueprint.render_as_hash(vehicle, options)
+            end.to_json
+          end
+
+          it('returns the expected result') { should eq(result) }
+        end
       end
     end
   end

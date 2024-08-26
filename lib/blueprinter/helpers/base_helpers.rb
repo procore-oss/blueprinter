@@ -19,7 +19,17 @@ module Blueprinter
         root = options[:root]
         meta = options[:meta]
         validate_root_and_meta!(root, meta)
-        prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
+        prepare(
+          object,
+          view_name: view_name,
+          local_options: options.except(
+            :view,
+            :root,
+            :meta
+          ),
+          root: root,
+          meta: meta
+        )
       end
 
       def prepare_data(object, view_name, local_options)

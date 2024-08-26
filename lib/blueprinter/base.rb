@@ -157,7 +157,12 @@ module Blueprinter
         extractor: options.fetch(:extractor) { AssociationExtractor.new },
         blueprint: options.fetch(:blueprint),
         view: options.fetch(:view, :default),
-        options: options.merge(block: block)
+        options: options.except(
+          :name,
+          :extractor,
+          :blueprint,
+          :view
+        ).merge(block: block)
       )
     end
 

@@ -156,6 +156,7 @@ module Blueprinter
         name: options.fetch(:name) { method },
         extractor: options.fetch(:extractor) { AssociationExtractor.new },
         blueprint: options.fetch(:blueprint),
+        parent_blueprint: self,
         view: options.fetch(:view, :default),
         options: options.except(
           :name,

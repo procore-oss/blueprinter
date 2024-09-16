@@ -420,6 +420,36 @@ shared_examples 'Base::render' do
     end
   end
 
+  context 'Given blueprint has fields with if conditional' do
+    let(:result) { '{"id":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :first_name, if: ->(_field_name, _object, _local_opts) { false }
+      end
+    end
+    it 'does not render the field if condition is false' do
+      expect(blueprint.render(obj)).to eq(result)
+    end
+
+    context 'when if value is a symbol' do
+      let(:result) { '{"id":' + obj_id + '}' }
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          field :first_name, if: :if_method
+
+          def self.if_method(_field_name, _object, _local_opts)
+            false
+          end
+        end
+      end
+      it 'does not render the field if the result of sending symbol to Blueprint is false' do
+        should eq(result)
+      end
+    end
+  end
+
   context 'Given blueprint has :meta without :root' do
     let(:blueprint) { blueprint_with_block }
     it('raises a BlueprinterError') {

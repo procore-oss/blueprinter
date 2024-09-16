@@ -199,7 +199,6 @@ describe '::Base' do
             end
           end
         end
-
         context "Given default_if option is Blueprinter::EMPTY_COLLECTION" do
           before { vehicle.update(user: nil) }
           after { vehicle.update(user: obj) }
@@ -260,7 +259,6 @@ describe '::Base' do
               to raise_error(ArgumentError, /:blueprint must be provided when defining an association/)
           end
         end
-
         context 'Given an association :options option' do
           let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car Enhanced"}]}' }
           let(:blueprint) do
@@ -277,7 +275,6 @@ describe '::Base' do
           end
           it('returns json using the association options') { should eq(result) }
         end
-
         context 'Given an association :extractor option' do
           let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
           let(:blueprint) do
@@ -296,7 +293,6 @@ describe '::Base' do
           end
           it('returns json derived from a custom extractor') { should eq(result) }
         end
-
         context 'when a view is specified' do
           let(:vehicle) { create(:vehicle, :with_model) }
           let(:blueprint) do
@@ -319,7 +315,6 @@ describe '::Base' do
             expect(blueprint.render(obj)).to eq(result)
           end
         end
-
         context 'Given included view with re-defined association' do
           let(:blueprint) do
             vehicle_blueprint = Class.new(Blueprinter::Base) do
@@ -362,6 +357,53 @@ describe '::Base' do
             expect(blueprint.render(obj)).to eq(result)
             expect(blueprint.render(obj, view: :with_size)).to eq(result_with_size)
             expect(blueprint.render(obj, view: :with_height)).to eq(result_with_height)
+          end
+        end
+        context 'when if option is provided' do
+          let(:vehicle) { create(:vehicle, make: 'Super Car') }
+          let(:user_without_cars) { create(:user, vehicles: []) }
+          let(:user_with_cars) { create(:user, vehicles: [vehicle]) }
+
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              fields :make
+            end
+            Class.new(Blueprinter::Base) do
+              identifier :id
+              association :vehicles, blueprint: vehicle_blueprint, if: ->(_field_name, object, _local_opts) { object.vehicles.present? }
+            end
+          end
+          it 'does not render the association if the if condition is not met' do
+            expect(blueprint.render(user_without_cars)).to eq("{\"id\":#{user_without_cars.id}}")
+          end
+          it 'renders the association if the if condition is met' do
+            expect(blueprint.render(user_with_cars)).to eq("{\"id\":#{user_with_cars.id},\"vehicles\":[{\"make\":\"Super Car\"}]}")
+          end
+
+          context 'and if option is a symbol' do
+            let(:blueprint) do
+              vehicle_blueprint = Class.new(Blueprinter::Base) do
+                fields :make
+              end
+              Class.new(Blueprinter::Base) do
+                identifier :id
+                association :vehicles, blueprint: vehicle_blueprint, if: :has_vehicles?
+                association :vehicles, name: :cars, blueprint: vehicle_blueprint, if: :has_cars?
+
+                def self.has_vehicles?(_field_name, object, local_options)
+                  false
+                end
+
+                def self.has_cars?(_field_name, object, local_options)
+                  true
+                end
+              end
+            end
+
+            it 'renders the association based on evaluating the symbol as a method on the blueprint' do
+              expect(blueprint.render(user_with_cars)).
+                to eq("{\"id\":#{user_with_cars.id},\"cars\":[{\"make\":\"Super Car\"}]}")
+            end
           end
         end
       end

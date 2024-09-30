@@ -12,7 +12,7 @@ jobs:
     outputs:
       changed: ${{ steps.check.outputs.any_changed }}
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
       - name: Check if version has been updated
         id: check
         uses: tj-actions/changed-files@48d8f15b2aaa3d255ca5af3eba4870f807ce6b3c # v44
@@ -23,9 +23,9 @@ jobs:
     needs: version-check
     if: ${{ github.event_name == 'workflow_dispatch' || needs.version-check.outputs.changed == 'true' }}
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
       - name: Set up Ruby
-        uses: ruby/setup-ruby@f321cf5a4d1533575411f8752cf25b86478b0442 # v1
+        uses: ruby/setup-ruby@c04af2bb7258bb6a03df1d3c1865998ac9390972 # v1
         with:
           ruby-version: 3.2
           bundler-cache: true

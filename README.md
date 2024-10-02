@@ -881,7 +881,7 @@ Blueprinter.configure do |config|
 end
 ```
 
-**Note: Any transforms specified on a per-blueprint or per-view level will override the `default_transformers` in the configuration.**
+**Note Any transforms specified on a per-blueprint or per-view level will override the `default_transformers` in the configuration.**
 
 </details>
 

@@ -1,6 +1,6 @@
 ## 1.1.2 - 2024/10/3
 - 🐛 [BUGFIX] Fixes an issue where a `Blueprinter::BlueprinterError` would be raised on render when providing `view: nil`, instead of falling back on the `:default` view. See
-[#472](https://github.com/procore-oss/blueprinter/pull/472). Tahnks to [@lessthanjacob](https://github.com/lessthanjacob).
+[#472](https://github.com/procore-oss/blueprinter/pull/472). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.1.1 - 2024/10/2
 * 🐛 [BUGFIX] Fixes an issue when when calling `.render` multiple times on a Blueprint using the same `options` hash, which would result in the `options` changing unexpectedly between calls. See [#453](https://github.com/procore-oss/blueprinter/pull/453). Thanks to [@ryanmccarthypdx](https://github.com/ryanmccarthypdx).

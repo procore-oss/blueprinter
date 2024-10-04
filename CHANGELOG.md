@@ -1,3 +1,11 @@
+## 1.1.2 - 2024/10/3
+- 🐛 [BUGFIX] Fixes an issue where a `Blueprinter::BlueprinterError` would be raised on render when providing `view: nil`, instead of falling back on the `:default` view. See
+[#472](https://github.com/procore-oss/blueprinter/pull/472). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+
+## 1.1.1 - 2024/10/2
+* 🐛 [BUGFIX] Fixes an issue when when calling `.render` multiple times on a Blueprint using the same `options` hash, which would result in the `options` changing unexpectedly between calls. See [#453](https://github.com/procore-oss/blueprinter/pull/453). Thanks to [@ryanmccarthypdx](https://github.com/ryanmccarthypdx).
+* 🐛 [BUGFIX] Fixes an issue when passing in a `Symbol` (representing a method) to the `if:` condition on an association. The provided `Symbol` would be erroneously sent to the association's Blueprint, instead of the Blueprint in which the association was defined within. See [#464](https://github.com/procore-oss/blueprinter/pull/464). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+
 ## 1.1.0 - 2024/08/02
 * [BREAKING] Drops support for Ruby 2.7. See [#402](https://github.com/procore-oss/blueprinter/pull/402). Thanks to [@jmeridth](https://github.com/jmeridth)
 * 🚜 [REFACTOR] Cleans up Blueprint validation logic and implements an `Association` class with a clearer interface. See [#414](https://github.com/procore-oss/blueprinter/pull/414). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).

@@ -32,6 +32,29 @@ describe '::Base' do
   describe '::render' do
     subject { blueprint.render(obj) }
 
+    context 'when providing a view' do
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          field :first_name
+
+          view :extended do
+            field :last_name
+          end
+        end
+      end
+      it 'renders the data based on the view definition' do
+        expect(blueprint.render(object_with_attributes, view: :extended)).
+          to eq('{"id":1,"first_name":"Meg","last_name":"Ryan"}')
+      end
+      context 'and the value is nil' do
+        it 'falls back to the :default view' do
+          expect(blueprint.render(object_with_attributes, view: nil)).
+            to eq(blueprint.render(object_with_attributes))
+        end
+      end
+    end
+
     context 'Outside Rails project' do
       context 'Given passed object has dot notation accessible attributes' do
         let(:obj) { object_with_attributes }
@@ -544,6 +567,7 @@ describe '::Base' do
       end
     end
   end
+
   describe '::render_as_hash' do
     subject { blueprint_with_block.render_as_hash(object_with_attributes) }
     context 'Outside Rails project' do

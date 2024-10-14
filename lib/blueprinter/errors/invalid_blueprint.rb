@@ -2,6 +2,6 @@
 
 module Blueprinter
   module Errors
-    class InvalidBlueprint < Blueprinter::BlueprinterError; end
+    class InvalidBlueprint < BlueprinterError; end
   end
 end

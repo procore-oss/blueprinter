@@ -2,7 +2,7 @@
 
 describe "Blueprinter::V2 Partials" do
   it "should allow a partial to be used in any view" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
       partial :description do
@@ -25,7 +25,7 @@ describe "Blueprinter::V2 Partials" do
   end
 
   it "should allow use statements to be nested" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       use :foo
 
@@ -49,7 +49,7 @@ describe "Blueprinter::V2 Partials" do
   end
 
   it "should allow a view to be defined in a partial" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
       view :foo do
@@ -77,7 +77,7 @@ describe "Blueprinter::V2 Partials" do
   end
 
   it "should throw an error for an invalid partial name" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       view :foo do
         use :description
       end

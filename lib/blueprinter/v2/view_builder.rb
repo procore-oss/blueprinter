@@ -6,7 +6,7 @@ module Blueprinter
     # A Hash-like class that holds a Blueprint's views, but defers evaluation of their
     # definitions until they're first accessed.
     #
-    # This allows things like a parent's fields and partials to be defined AFTER views.
+    # This allows views to trivially inherit parent fields, etc even when they're defined AFTER the view.
     #
     class ViewBuilder
       include Enumerable

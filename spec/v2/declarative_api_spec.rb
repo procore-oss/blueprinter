@@ -2,7 +2,7 @@
 
 describe "Blueprinter::V2 Declarative API" do
   it "should inherit fields defined after the view" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       view :desc do
         field :description
       end
@@ -16,7 +16,7 @@ describe "Blueprinter::V2 Declarative API" do
   end
 
   it "should include partials defined after the view" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
       view :foo do
@@ -33,7 +33,7 @@ describe "Blueprinter::V2 Declarative API" do
   end
 
   it "should include partials defined after the use statement" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       use :desc
 
@@ -47,7 +47,7 @@ describe "Blueprinter::V2 Declarative API" do
   end
 
   it "should inherit when accessing views" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       use :desc
       field :name
 
@@ -69,7 +69,7 @@ describe "Blueprinter::V2 Declarative API" do
   end
 
   it "should exclude fields added after the exclude statement" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :name
 

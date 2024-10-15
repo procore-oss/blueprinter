@@ -6,7 +6,7 @@ describe "Blueprinter::V2::ViewBuilder" do
   end
 
   let(:blueprint) do
-    Class.new(Blueprinter::V2) do
+    Class.new(Blueprinter::V2::Base) do
       field :id
       field :name
     end

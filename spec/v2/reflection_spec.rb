@@ -2,7 +2,7 @@
 
 describe "Blueprinter::V2::Reflection" do
   let(:blueprint) do
-    Class.new(Blueprinter::V2) do
+    Class.new(Blueprinter::V2::Base) do
       view :foo
       view :bar do
         view :foo do
@@ -65,9 +65,9 @@ describe "Blueprinter::V2::Reflection" do
   end
 
   it "should find fields and associations" do
-    category_blueprint = Class.new(Blueprinter::V2)
-    widget_blueprint = Class.new(Blueprinter::V2)
-    blueprint = Class.new(Blueprinter::V2) do
+    category_blueprint = Class.new(Blueprinter::V2::Base)
+    widget_blueprint = Class.new(Blueprinter::V2::Base)
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       association :category, category_blueprint
 

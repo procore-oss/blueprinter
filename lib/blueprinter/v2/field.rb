@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Blueprinter
-  class V2
+  module V2
     Field = Struct.new(
       :name,
       :from,

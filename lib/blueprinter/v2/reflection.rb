@@ -4,7 +4,7 @@ require 'blueprinter/v2/association'
 require 'blueprinter/v2/field'
 
 module Blueprinter
-  class V2
+  module V2
     # API for reflecting on Blueprints
     module Reflection
       #
@@ -42,7 +42,7 @@ module Blueprinter
         attr_reader :associations
 
 
-        # @param blueprint [Class] A subclass of Blueprinter::V2
+        # @param blueprint [Class] A subclass of Blueprinter::V2::Base
         # @param name [Symbol] Name of the view
         # @api private
         def initialize(blueprint, name)

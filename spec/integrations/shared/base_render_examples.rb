@@ -452,15 +452,15 @@ shared_examples 'Base::render' do
 
   context 'Given blueprint has :meta without :root' do
     let(:blueprint) { blueprint_with_block }
-    it('raises a BlueprinterError') {
-      expect{blueprint.render(obj, meta: 'meta_value')}.to raise_error(Blueprinter::BlueprinterError)
+    it('raises a MetaRequiresRoot error') {
+      expect{blueprint.render(obj, meta: 'meta_value')}.to raise_error(Blueprinter::Errors::MetaRequiresRoot)
     }
   end
 
   context 'Given blueprint has root as a non-supported object' do
     let(:blueprint) { blueprint_with_block }
-    it('raises a BlueprinterError') {
-      expect{blueprint.render(obj, root: {some_key: "invalid root"})}.to raise_error(Blueprinter::BlueprinterError)
+    it('raises a InvalidRoot error') {
+      expect{blueprint.render(obj, root: {some_key: "invalid root"})}.to raise_error(Blueprinter::Errors::InvalidRoot)
     }
   end
 

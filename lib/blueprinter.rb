@@ -11,7 +11,7 @@ module Blueprinter
   class << self
     # @return [Configuration]
     def configuration
-      @configuration ||= Configuration.new
+      @_configuration ||= Configuration.new
     end
 
     def configure
@@ -20,7 +20,7 @@ module Blueprinter
 
     # Resets global configuration.
     def reset_configuration!
-      @configuration = nil
+      @_configuration = nil
     end
   end
 end

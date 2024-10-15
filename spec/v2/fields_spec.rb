@@ -3,7 +3,7 @@
 describe "Blueprinter::V2 Fields" do
   context "fields" do
     it "should add fields with options" do
-      blueprint = Class.new(Blueprinter::V2) do
+      blueprint = Class.new(Blueprinter::V2::Base) do
         field :name
         field :description, from: :desc, if: -> { true }
         field(:foo) { "foo" }
@@ -23,9 +23,9 @@ describe "Blueprinter::V2 Fields" do
 
   context "associations" do
     it "should add associations with options" do
-      category_blueprint = Class.new(Blueprinter::V2)
-      widget_blueprint = Class.new(Blueprinter::V2)
-      blueprint = Class.new(Blueprinter::V2) do
+      category_blueprint = Class.new(Blueprinter::V2::Base)
+      widget_blueprint = Class.new(Blueprinter::V2::Base)
+      blueprint = Class.new(Blueprinter::V2::Base) do
         association :category, category_blueprint
         association :widgets, widget_blueprint, from: :foo, if: -> { true }
         association(:foo, widget_blueprint) { {foo: "bar"} }
@@ -47,7 +47,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "it should inherit from parent classes" do
-    application_blueprint = Class.new(Blueprinter::V2) do
+    application_blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
     end
     blueprint = Class.new(application_blueprint) do
@@ -59,7 +59,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "it should inherit from parent views" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
       view :extended do
@@ -78,7 +78,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from the parent class" do
-    application_blueprint = Class.new(Blueprinter::V2) do
+    application_blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :foo
     end
@@ -92,9 +92,9 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from the parent view" do
-    category_blueprint = Class.new(Blueprinter::V2)
-    widget_blueprint = Class.new(Blueprinter::V2)
-    blueprint = Class.new(Blueprinter::V2) do
+    category_blueprint = Class.new(Blueprinter::V2::Base)
+    widget_blueprint = Class.new(Blueprinter::V2::Base)
+    blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :name
       association :category, category_blueprint
@@ -114,7 +114,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from partials" do
-    blueprint = Class.new(Blueprinter::V2) do
+    blueprint = Class.new(Blueprinter::V2::Base) do
       partial :desc do
         field :short_desc
         field :long_desc

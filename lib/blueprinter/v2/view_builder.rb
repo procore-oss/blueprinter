@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Blueprinter
-  class V2
+  module V2
     #
     # A Hash-like class that holds a Blueprint's views, but defers evaluation of their
     # definitions until they're first accessed.
@@ -11,7 +11,7 @@ module Blueprinter
     class ViewBuilder
       include Enumerable
 
-      # @param parent [Class] A subclass of Blueprinter::V2
+      # @param parent [Class] A subclass of Blueprinter::V2::Base
       def initialize(parent)
         @parent = parent
         @views = { default: parent }

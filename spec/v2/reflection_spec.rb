@@ -69,11 +69,11 @@ describe "Blueprinter::V2::Reflection" do
     widget_blueprint = Class.new(Blueprinter::V2::Base)
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
-      association :category, category_blueprint
+      object :category, category_blueprint
 
       view :extended do
         field :description
-        association :widgets, widget_blueprint
+        collection :widgets, widget_blueprint
       end
     end
 

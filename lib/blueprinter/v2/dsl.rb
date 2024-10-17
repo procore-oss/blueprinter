@@ -58,7 +58,7 @@ module Blueprinter
       end
 
       #
-      # Define an association.
+      # Define an association to a single object.
       #
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
@@ -68,12 +68,39 @@ module Blueprinter
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
-      def association(name, blueprint, from: name, view: nil, **options, &definition)
+      def object(name, blueprint, from: name, view: nil, **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
         fields[name.to_sym] = Association.new(
           name: name,
           blueprint: blueprint,
+          collection: false,
+          legacy_view: view,
+          from: from,
+          if_cond: options.delete(:if),
+          value_proc: definition,
+          custom_options: options
+        )
+      end
+
+      #
+      # Define an association to a collection of objects.
+      #
+      # @param name [Symbol] Name of the association
+      # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
+      # @param view [Symbol] Only for use with legacy (not V2) blueprints
+      # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param if [Proc] Only include this association if the Proc evaluates to truthy
+      # @yield [TODO] Generate the value from the block
+      # @return [Blueprinter::V2::Association]
+      #
+      def collection(name, blueprint, from: name, view: nil, **options, &definition)
+        raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
+
+        fields[name.to_sym] = Association.new(
+          name: name,
+          blueprint: blueprint,
+          collection: true,
           legacy_view: view,
           from: from,
           if_cond: options.delete(:if),

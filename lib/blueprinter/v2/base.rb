@@ -68,15 +68,14 @@ module Blueprinter
       #   MyBlueprint[:extended]
       #   MyBlueprint["extended.plus"] or MyBlueprint[:extended][:plus]
       #
-      # @param view [Symbol|String] Name of the view, e.g. :extended, "extended.plus"
+      # @param name [Symbol|String] Name of the view, e.g. :extended, "extended.plus"
       # @return [Class] A descendent of Blueprinter::V2::Base
       #
-      def self.[](view)
+      def self.[](name)
         eval! unless @evaled
-        view.to_s.split('.').reduce(self) do |blueprint, child|
-          blueprint.views[child.to_sym] ||
-            raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{blueprint}'")
-        end
+        child, children = name.to_s.split('.', 2)
+        view = views[child.to_sym] || raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{self}'")
+        children ? view[children] : view
       end
 
       # Apply partials and field exclusions

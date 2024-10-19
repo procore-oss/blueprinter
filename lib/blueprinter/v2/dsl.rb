@@ -65,10 +65,11 @@ module Blueprinter
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param if [Proc] Only include this association if the Proc evaluates to truthy
+      # @param extractor [Class]
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
-      def object(name, blueprint, from: name, view: nil, **options, &definition)
+      def object(name, blueprint, from: name, view: nil, extractor: nil, **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
         fields[name.to_sym] = Association.new(
@@ -79,6 +80,7 @@ module Blueprinter
           from: from,
           if_cond: options.delete(:if),
           value_proc: definition,
+          extractor: extractor,
           custom_options: options
         )
       end
@@ -91,10 +93,11 @@ module Blueprinter
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param if [Proc] Only include this association if the Proc evaluates to truthy
+      # @param extractor [Class]
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
-      def collection(name, blueprint, from: name, view: nil, **options, &definition)
+      def collection(name, blueprint, from: name, view: nil, extractor: nil, **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
         fields[name.to_sym] = Association.new(
@@ -105,6 +108,7 @@ module Blueprinter
           from: from,
           if_cond: options.delete(:if),
           value_proc: definition,
+          extractor: extractor,
           custom_options: options
         )
       end

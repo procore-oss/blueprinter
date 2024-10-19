@@ -3,6 +3,8 @@
 require 'blueprinter/v2/dsl'
 require 'blueprinter/v2/options'
 require 'blueprinter/v2/reflection'
+require 'blueprinter/v2/renderer'
+require 'blueprinter/v2/serializer'
 require 'blueprinter/v2/view_builder'
 
 module Blueprinter
@@ -20,7 +22,7 @@ module Blueprinter
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :fields, :excludes, :partials, :used_partials, :eval_mutex
+        attr_accessor :views, :fields, :excludes, :partials, :used_partials, :eval_mutex, :renderer
       end
 
       self.views = ViewBuilder.new(self)
@@ -78,6 +80,25 @@ module Blueprinter
         children ? view[children] : view
       end
 
+      # MyBlueprint.render(obj).to_json
+      def self.render(obj, options = {})
+        if array_like? obj
+          render_collection(obj, options)
+        else
+          render_object(obj, options)
+        end
+      end
+
+      # MyBlueprint.render_object(obj).to_json
+      def self.render_object(obj, options = {})
+        Renderer.new(serializer, obj, options, false)
+      end
+
+      # MyBlueprint.render_collection(objs).to_json
+      def self.render_collection(objs, options = {})
+        Renderer.new(serializer, obj, options, true)
+      end
+
       # Apply partials and field exclusions
       # @api private
       def self.eval!(lock = true)
@@ -100,17 +121,8 @@ module Blueprinter
         end
 
         excludes.each { |f| fields.delete f }
+        self.serializer = Serializer.new(self)
         @evaled = true
-      end
-
-      # Render the object
-      def self.render(obj, options = {})
-        new.render(obj, options)
-      end
-
-      # Render the object
-      def render(obj, options = {})
-        # TODO: call an external Render module/class, passing in self, obj, and options
       end
     end
   end

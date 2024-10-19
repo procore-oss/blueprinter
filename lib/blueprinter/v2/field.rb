@@ -7,6 +7,7 @@ module Blueprinter
       :from,
       :if_cond,
       :value_proc,
+      :extractor,
       :custom_options,
       keyword_init: true
     )

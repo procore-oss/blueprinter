@@ -11,8 +11,23 @@ module Blueprinter
         ext.formatters = {}
       end
 
-      def self.format(klass, helper = nil, &action)
-        formatters[klass] = helper || action
+      #
+      # Add a formatter for instances of the given class.
+      #
+      # Example:
+      #   format(Time) { |time| time.iso8601 }
+      #   format Date, :date_str
+      #
+      #   def date_str(date)
+      #     date.iso8601
+      #   end
+      #
+      # @param klass [Class] The class of objects to format
+      # @param formatter_method [Symbol] Name of a public instance method to call for formatting
+      # @yield Do formatting in the block instead
+      #
+      def self.format(klass, formatter_method = nil, &formatter_block)
+        formatters[klass] = formatter_method || formatter_block
       end
     end
   end

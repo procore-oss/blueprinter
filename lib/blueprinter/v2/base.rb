@@ -3,7 +3,7 @@
 require 'blueprinter/v2/dsl'
 require 'blueprinter/v2/options'
 require 'blueprinter/v2/reflection'
-require 'blueprinter/v2/renderer'
+require 'blueprinter/v2/render'
 require 'blueprinter/v2/serializer'
 require 'blueprinter/v2/view_builder'
 
@@ -22,7 +22,7 @@ module Blueprinter
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :fields, :excludes, :partials, :used_partials, :eval_mutex, :renderer
+        attr_accessor :views, :fields, :excludes, :partials, :used_partials, :eval_mutex, :serializer
       end
 
       self.views = ViewBuilder.new(self)
@@ -91,12 +91,12 @@ module Blueprinter
 
       # MyBlueprint.render_object(obj).to_json
       def self.render_object(obj, options = {})
-        Renderer.new(serializer, obj, options, false)
+        Render.new(serializer, obj, options, false)
       end
 
       # MyBlueprint.render_collection(objs).to_json
       def self.render_collection(objs, options = {})
-        Renderer.new(serializer, obj, options, true)
+        Render.new(serializer, obj, options, true)
       end
 
       # Apply partials and field exclusions

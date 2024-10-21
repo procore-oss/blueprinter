@@ -19,6 +19,8 @@ module Blueprinter
         attr_accessor :options
         # Extensions set on this Blueprint
         attr_accessor :extensions
+        # Extractor class to use by default
+        attr_accessor :extractor
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
@@ -31,6 +33,7 @@ module Blueprinter
       self.partials = {}
       self.used_partials = []
       self.extensions = []
+      self.extractor = Extractor
       self.options = Options.new(DEFAULT_OPTIONS)
       self.blueprint_name = name
       self.eval_mutex = Mutex.new
@@ -43,6 +46,7 @@ module Blueprinter
         subclass.partials = partials.dup
         subclass.used_partials = []
         subclass.extensions = extensions.dup
+        subclass.extractor = extractor
         subclass.options = options.dup
         subclass.blueprint_name = subclass.name || blueprint_name
         subclass.eval_mutex = Mutex.new
@@ -91,12 +95,12 @@ module Blueprinter
 
       # MyBlueprint.render_object(obj).to_json
       def self.render_object(obj, options = {})
-        Render.new(serializer, obj, options, false)
+        Render.new(obj, options, serializer: serializer, collection: false)
       end
 
       # MyBlueprint.render_collection(objs).to_json
       def self.render_collection(objs, options = {})
-        Render.new(serializer, obj, options, true)
+        Render.new(obj, options, serializer: serializer, collection: true)
       end
 
       # Apply partials and field exclusions

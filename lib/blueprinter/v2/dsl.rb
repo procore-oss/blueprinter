@@ -44,15 +44,18 @@ module Blueprinter
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param if [Proc] Only include this field if the Proc evaluates to truthy
+      # @param extractor [Class] Extractor class to use for this field
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
-      def field(name, from: name, **options, &definition)
+      def field(name, from: name, extractor: nil, **options, &definition)
+        options = options.dup
         fields[name.to_sym] = Field.new(
           name: name,
           from: from,
           if_cond: options.delete(:if),
           value_proc: definition,
+          extractor: extractor,
           custom_options: options
         )
       end
@@ -65,13 +68,14 @@ module Blueprinter
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param if [Proc] Only include this association if the Proc evaluates to truthy
-      # @param extractor [Class]
+      # @param extractor [Class] Extractor class to use for this association
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
       def object(name, blueprint, from: name, view: nil, extractor: nil, **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
+        options = options.dup
         fields[name.to_sym] = Association.new(
           name: name,
           blueprint: blueprint,
@@ -93,7 +97,7 @@ module Blueprinter
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param if [Proc] Only include this association if the Proc evaluates to truthy
-      # @param extractor [Class]
+      # @param extractor [Class] Extractor class to use for this association
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #

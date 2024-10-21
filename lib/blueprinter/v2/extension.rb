@@ -15,10 +15,10 @@ module Blueprinter
       # Add a formatter for instances of the given class.
       #
       # Example:
-      #   format(Time) { |time| time.iso8601 }
+      #   format(Time) { |time, options| time.iso8601 }
       #   format Date, :date_str
       #
-      #   def date_str(date)
+      #   def date_str(date, options)
       #     date.iso8601
       #   end
       #

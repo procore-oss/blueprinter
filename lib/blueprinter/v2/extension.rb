@@ -15,11 +15,13 @@ module Blueprinter
       # Add a formatter for instances of the given class.
       #
       # Example:
-      #   format(Time) { |time, options| time.iso8601 }
-      #   format Date, :date_str
+      #   class MyExtension < Blueprinter::V2::Extension
+      #     format(Time) { |time, options| time.iso8601 }
+      #     format Date, :date_str
       #
-      #   def date_str(date, options)
-      #     date.iso8601
+      #     def date_str(date, options)
+      #       date.iso8601
+      #     end
       #   end
       #
       # @param klass [Class] The class of objects to format

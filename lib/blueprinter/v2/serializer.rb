@@ -29,7 +29,7 @@ module Blueprinter
       private
 
       def format(val, options)
-        fmt = formatter[val.class]
+        fmt = formatters[val.class]
         fmt ? fmt.call(val, options) : val
       end
 

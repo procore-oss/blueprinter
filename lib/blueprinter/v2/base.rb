@@ -77,6 +77,22 @@ module Blueprinter
         children ? view[children] : view
       end
 
+      def self.render(obj, options = {})
+        if array_like? obj
+          render_collection(obj, options)
+        else
+          render_object(obj, options)
+        end
+      end
+
+      def self.render_object(obj, options = {})
+        # TODO call external renderer
+      end
+
+      def self.render_collection(objs, options = {})
+        # TODO call external renderer
+      end
+
       # Apply partials and field exclusions
       # @api private
       def self.eval!(lock = true)
@@ -102,9 +118,9 @@ module Blueprinter
         @evaled = true
       end
 
-      # Render the object
-      def self.render(obj, options = {})
-        # TODO: call an external Render module/class, passing in self, obj, and options
+      # @api private
+      def self.array_like?(obj)
+        # TODO
       end
     end
   end

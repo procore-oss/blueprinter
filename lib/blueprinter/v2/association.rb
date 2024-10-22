@@ -7,9 +7,8 @@ module Blueprinter
       :blueprint,
       :legacy_view,
       :from,
-      :if_cond,
       :value_proc,
-      :custom_options,
+      :options,
       keyword_init: true
     )
   end

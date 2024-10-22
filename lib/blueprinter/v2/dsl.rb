@@ -43,7 +43,6 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param if [Proc] Only include this field if the Proc evaluates to truthy
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
@@ -51,9 +50,8 @@ module Blueprinter
         fields[name.to_sym] = Field.new(
           name: name,
           from: from,
-          if_cond: options.delete(:if),
           value_proc: definition,
-          custom_options: options
+          options: options.dup
         )
       end
 
@@ -64,7 +62,6 @@ module Blueprinter
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param if [Proc] Only include this association if the Proc evaluates to truthy
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
@@ -76,9 +73,8 @@ module Blueprinter
           blueprint: blueprint,
           legacy_view: view,
           from: from,
-          if_cond: options.delete(:if),
           value_proc: definition,
-          custom_options: options
+          options: options.dup
         )
       end
 

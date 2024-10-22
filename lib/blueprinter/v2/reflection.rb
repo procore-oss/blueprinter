@@ -38,8 +38,10 @@ module Blueprinter
         attr_reader :name
         # @return [Hash<Symbol, Blueprinter::V2::Field>] Fields defined on the view
         attr_reader :fields
-        # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations defined on the view
-        attr_reader :associations
+        # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations to single objects defined on the view
+        attr_reader :objects
+        # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations to collections defined on the view
+        attr_reader :collections
 
 
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base
@@ -48,7 +50,8 @@ module Blueprinter
         def initialize(blueprint, name)
           @name = name
           @fields = blueprint.fields.select { |_, f| f.is_a? Field }
-          @associations = blueprint.fields.select { |_, f| f.is_a? Association }
+          @objects = blueprint.fields.select { |_, f| f.is_a?(Association) && !f.collection }
+          @collections = blueprint.fields.select { |_, f| f.is_a?(Association) && f.collection }
         end
       end
     end

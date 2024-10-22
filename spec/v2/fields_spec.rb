@@ -26,23 +26,23 @@ describe "Blueprinter::V2 Fields" do
       category_blueprint = Class.new(Blueprinter::V2::Base)
       widget_blueprint = Class.new(Blueprinter::V2::Base)
       blueprint = Class.new(Blueprinter::V2::Base) do
-        association :category, category_blueprint
-        association :widgets, widget_blueprint, from: :foo, if: -> { true }
-        association(:foo, widget_blueprint) { {foo: "bar"} }
+        object :category, category_blueprint
+        collection :widgets, widget_blueprint, from: :foo, if: -> { true }
+        object(:foo, widget_blueprint) { {foo: "bar"} }
       end
 
       ref = blueprint.reflections[:default]
-      expect(ref.associations[:category].class.name).to eq "Blueprinter::V2::Association"
-      expect(ref.associations[:category].name).to eq :category
-      expect(ref.associations[:category].from).to eq :category
-      expect(ref.associations[:category].blueprint).to eq category_blueprint
-      expect(ref.associations[:widgets].name).to eq :widgets
-      expect(ref.associations[:widgets].from).to eq :foo
-      expect(ref.associations[:widgets].blueprint).to eq widget_blueprint
-      expect(ref.associations[:widgets].options[:if].class.name).to eq "Proc"
-      expect(ref.associations[:foo].name).to eq :foo
-      expect(ref.associations[:foo].blueprint).to eq widget_blueprint
-      expect(ref.associations[:foo].value_proc.class.name).to eq "Proc"
+      expect(ref.objects[:category].class.name).to eq "Blueprinter::V2::Association"
+      expect(ref.objects[:category].name).to eq :category
+      expect(ref.objects[:category].from).to eq :category
+      expect(ref.objects[:category].blueprint).to eq category_blueprint
+      expect(ref.collections[:widgets].name).to eq :widgets
+      expect(ref.collections[:widgets].from).to eq :foo
+      expect(ref.collections[:widgets].blueprint).to eq widget_blueprint
+      expect(ref.collections[:widgets].options[:if].class.name).to eq "Proc"
+      expect(ref.objects[:foo].name).to eq :foo
+      expect(ref.objects[:foo].blueprint).to eq widget_blueprint
+      expect(ref.objects[:foo].value_proc.class.name).to eq "Proc"
     end
   end
 
@@ -97,8 +97,8 @@ describe "Blueprinter::V2 Fields" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :name
-      association :category, category_blueprint
-      association :widgets, widget_blueprint
+      object :category, category_blueprint
+      collection :widgets, widget_blueprint
 
       view :foo do
         exclude :name, :category
@@ -108,9 +108,11 @@ describe "Blueprinter::V2 Fields" do
 
     refs = blueprint.reflections
     expect(refs[:default].fields.keys.sort).to eq %i(id name).sort
-    expect(refs[:default].associations.keys.sort).to eq %i(category widgets).sort
+    expect(refs[:default].objects.keys.sort).to eq %i(category).sort
+    expect(refs[:default].collections.keys.sort).to eq %i(widgets).sort
     expect(refs[:foo].fields.keys.sort).to eq %i(id description).sort
-    expect(refs[:foo].associations.keys.sort).to eq %i(widgets).sort
+    expect(refs[:foo].objects.keys.sort).to eq %i().sort
+    expect(refs[:foo].collections.keys.sort).to eq %i(widgets).sort
   end
 
   it "should exclude specified fields and associations from partials" do

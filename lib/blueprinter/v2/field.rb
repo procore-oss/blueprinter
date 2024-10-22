@@ -5,9 +5,8 @@ module Blueprinter
     Field = Struct.new(
       :name,
       :from,
-      :if_cond,
       :value_proc,
-      :custom_options,
+      :options,
       keyword_init: true
     )
   end

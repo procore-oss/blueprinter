@@ -2,6 +2,8 @@
 
 require 'blueprinter/v2/dsl'
 require 'blueprinter/v2/reflection'
+require 'blueprinter/v2/render'
+require 'blueprinter/v2/serializer'
 require 'blueprinter/v2/view_builder'
 
 module Blueprinter
@@ -12,7 +14,7 @@ module Blueprinter
       extend Reflection
 
       class << self
-        # Options set on this Blueprint
+        # Custom options set on this Blueprint
         attr_accessor :options
         # Extensions set on this Blueprint
         attr_accessor :extensions
@@ -77,6 +79,7 @@ module Blueprinter
         children ? view[children] : view
       end
 
+      # MyBlueprint.render(obj).to_json
       def self.render(obj, options = {})
         if array_like? obj
           render_collection(obj, options)
@@ -85,12 +88,20 @@ module Blueprinter
         end
       end
 
+      # MyBlueprint.render_object(obj).to_json
       def self.render_object(obj, options = {})
-        # TODO call external renderer
+        Render.new(obj, options, serializer: serializer, collection: false)
       end
 
+      # MyBlueprint.render_collection(objs).to_json
       def self.render_collection(objs, options = {})
-        # TODO call external renderer
+        Render.new(obj, options, serializer: serializer, collection: true)
+      end
+
+      # @api private
+      def self.serializer
+        eval! unless @evaled
+        @serializer
       end
 
       # Apply partials and field exclusions
@@ -115,6 +126,7 @@ module Blueprinter
         end
 
         excludes.each { |f| fields.delete f }
+        @serializer = Serializer.new(self)
         @evaled = true
       end
 

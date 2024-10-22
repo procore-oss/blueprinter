@@ -43,6 +43,13 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param extractor [Class] Extractor class to use for this association
+      # @param if [Proc] TODO
+      # @param unless [Proc] TODO
+      # @param default [Object | Proc] TODO
+      # @param default_if [Proc] TODO
+      # @param exclude_if_nil [Boolean] TODO
+      # @param exclude_if_empty [Boolean] TODO
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
@@ -62,6 +69,13 @@ module Blueprinter
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param extractor [Class] Extractor class to use for this association
+      # @param if [Proc] TODO
+      # @param unless [Proc] TODO
+      # @param default [Object | Proc] TODO
+      # @param default_if [Proc] TODO
+      # @param exclude_if_nil [Boolean] TODO
+      # @param exclude_if_empty [Boolean] TODO
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
@@ -86,10 +100,17 @@ module Blueprinter
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param extractor [Class] Extractor class to use for this association
+      # @param if [Proc] TODO
+      # @param unless [Proc] TODO
+      # @param default [Object | Proc] TODO
+      # @param default_if [Proc] TODO
+      # @param exclude_if_nil [Boolean] TODO
+      # @param exclude_if_empty [Boolean] TODO
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Association]
       #
-      def collection(name, blueprint, from: name, view: nil, **options, &definition)
+      def collection(name, blueprint, from: name, view: nil,  **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
         fields[name.to_sym] = Association.new(

@@ -15,7 +15,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.fields[:name].from).to eq :name
       expect(ref.fields[:description].name).to eq :description
       expect(ref.fields[:description].from).to eq :desc
-      expect(ref.fields[:description].if_cond.class.name).to eq "Proc"
+      expect(ref.fields[:description].options[:if].class.name).to eq "Proc"
       expect(ref.fields[:foo].name).to eq :foo
       expect(ref.fields[:foo].value_proc.class.name).to eq "Proc"
     end
@@ -39,7 +39,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.associations[:widgets].name).to eq :widgets
       expect(ref.associations[:widgets].from).to eq :foo
       expect(ref.associations[:widgets].blueprint).to eq widget_blueprint
-      expect(ref.associations[:widgets].if_cond.class.name).to eq "Proc"
+      expect(ref.associations[:widgets].options[:if].class.name).to eq "Proc"
       expect(ref.associations[:foo].name).to eq :foo
       expect(ref.associations[:foo].blueprint).to eq widget_blueprint
       expect(ref.associations[:foo].value_proc.class.name).to eq "Proc"

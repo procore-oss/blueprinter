@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'blueprinter/v2/dsl'
-require 'blueprinter/v2/options'
 require 'blueprinter/v2/reflection'
 require 'blueprinter/v2/view_builder'
 
@@ -29,7 +28,7 @@ module Blueprinter
       self.partials = {}
       self.used_partials = []
       self.extensions = []
-      self.options = Options.new(DEFAULT_OPTIONS)
+      self.options = {}
       self.blueprint_name = name
       self.eval_mutex = Mutex.new
 

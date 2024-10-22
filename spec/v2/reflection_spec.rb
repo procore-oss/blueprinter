@@ -69,18 +69,20 @@ describe "Blueprinter::V2::Reflection" do
     widget_blueprint = Class.new(Blueprinter::V2::Base)
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
-      association :category, category_blueprint
+      object :category, category_blueprint
 
       view :extended do
         field :description
-        association :widgets, widget_blueprint
+        collection :widgets, widget_blueprint
       end
     end
 
     expect(blueprint.reflections[:default].fields.keys).to eq %i(name)
-    expect(blueprint.reflections[:default].associations.keys).to eq %i(category)
+    expect(blueprint.reflections[:default].objects.keys).to eq %i(category)
+    expect(blueprint.reflections[:default].collections.keys).to eq %i()
 
     expect(blueprint.reflections[:extended].fields.keys).to eq %i(name description)
-    expect(blueprint.reflections[:extended].associations.keys).to eq %i(category widgets)
+    expect(blueprint.reflections[:extended].objects.keys).to eq %i(category)
+    expect(blueprint.reflections[:extended].collections.keys).to eq %i(widgets)
   end
 end

@@ -105,11 +105,6 @@ module Blueprinter
 
       # Render the object
       def self.render(obj, options = {})
-        new.render(obj, options)
-      end
-
-      # Render the object
-      def render(obj, options = {})
         # TODO: call an external Render module/class, passing in self, obj, and options
       end
     end

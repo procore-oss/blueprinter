@@ -5,6 +5,7 @@ module Blueprinter
     Association = Struct.new(
       :name,
       :blueprint,
+      :collection,
       :legacy_view,
       :from,
       :value_proc,

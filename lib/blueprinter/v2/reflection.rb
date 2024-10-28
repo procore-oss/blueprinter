@@ -49,9 +49,9 @@ module Blueprinter
         # @api private
         def initialize(blueprint, name)
           @name = name
-          @fields = blueprint.fields.select { |_, f| f.is_a? Field }
-          @objects = blueprint.fields.select { |_, f| f.is_a?(Association) && !f.collection }
-          @collections = blueprint.fields.select { |_, f| f.is_a?(Association) && f.collection }
+          @fields = blueprint.schema.select { |_, f| f.is_a? Field }
+          @objects = blueprint.schema.select { |_, f| f.is_a?(Association) && !f.collection }
+          @collections = blueprint.schema.select { |_, f| f.is_a?(Association) && f.collection }
         end
       end
     end

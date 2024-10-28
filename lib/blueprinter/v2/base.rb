@@ -19,11 +19,11 @@ module Blueprinter
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :fields, :excludes, :partials, :used_partials, :eval_mutex
+        attr_accessor :views, :schema, :excludes, :partials, :used_partials, :eval_mutex
       end
 
       self.views = ViewBuilder.new(self)
-      self.fields = {}
+      self.schema = {}
       self.excludes = []
       self.partials = {}
       self.used_partials = []
@@ -35,7 +35,7 @@ module Blueprinter
       # Initialize subclass
       def self.inherited(subclass)
         subclass.views = ViewBuilder.new(subclass)
-        subclass.fields = fields.transform_values(&:dup)
+        subclass.schema = schema.transform_values(&:dup)
         subclass.excludes = []
         subclass.partials = partials.dup
         subclass.used_partials = []
@@ -114,7 +114,7 @@ module Blueprinter
           class_eval(&p)
         end
 
-        excludes.each { |f| fields.delete f }
+        excludes.each { |f| schema.delete f }
         @evaled = true
       end
 

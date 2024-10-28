@@ -47,12 +47,21 @@ module Blueprinter
       # @return [Blueprinter::V2::Field]
       #
       def field(name, from: name, **options, &definition)
-        fields[name.to_sym] = Field.new(
+        schema[name.to_sym] = Field.new(
           name: name,
           from: from,
           value_proc: definition,
           options: options.dup
         )
+      end
+
+      #
+      # Add multiple fields at once.
+      #
+      def fields(*names)
+        names.each do |name|
+          schema[name.to_sym] = Field.new(name: name, options: {})
+        end
       end
 
       #
@@ -68,7 +77,7 @@ module Blueprinter
       def object(name, blueprint, from: name, view: nil, **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
-        fields[name.to_sym] = Association.new(
+        schema[name.to_sym] = Association.new(
           name: name,
           blueprint: blueprint,
           collection: false,
@@ -92,7 +101,7 @@ module Blueprinter
       def collection(name, blueprint, from: name, view: nil, **options, &definition)
         raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
 
-        fields[name.to_sym] = Association.new(
+        schema[name.to_sym] = Association.new(
           name: name,
           blueprint: blueprint,
           collection: true,

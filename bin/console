@@ -5,4 +5,5 @@ require 'bundler/setup'
 require 'blueprinter'
 
 require 'irb'
+
 IRB.start(__FILE__)

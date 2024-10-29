@@ -26,15 +26,11 @@ module Blueprinter
     private
 
     def if_callable
-      return @if_callable if defined?(@if_callable)
-
-      @if_callable = callable_from(:if)
+      @_if_callable ||= callable_from(:if)
     end
 
     def unless_callable
-      return @unless_callable if defined?(@unless_callable)
-
-      @unless_callable = callable_from(:unless)
+      @_unless_callable ||= callable_from(:unless)
     end
 
     def callable_from(condition)

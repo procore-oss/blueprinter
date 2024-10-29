@@ -103,14 +103,18 @@ module Blueprinter
     def prepare_data(object, view_name, local_options)
       if array_like?(object)
         object.map do |obj|
-          object_to_hash(obj,
-                         view_name: view_name,
-                         local_options: local_options)
+          object_to_hash(
+            obj,
+            view_name: view_name,
+            local_options: local_options
+          )
         end
       else
-        object_to_hash(object,
-                       view_name: view_name,
-                       local_options: local_options)
+        object_to_hash(
+          object,
+          view_name: view_name,
+          local_options: local_options
+        )
       end
     end
 
@@ -141,7 +145,7 @@ module Blueprinter
     end
 
     def add_metadata(object:, metadata:, root:)
-      return object if metadata.nil?
+      return object unless metadata
       return object.merge(meta: metadata) if root
 
       raise(Errors::MetaRequiresRoot)

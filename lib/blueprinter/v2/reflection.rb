@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'blueprinter/v2/association'
-require 'blueprinter/v2/field'
-
 module Blueprinter
   module V2
     # API for reflecting on Blueprints
@@ -38,9 +35,9 @@ module Blueprinter
         attr_reader :name
         # @return [Hash<Symbol, Blueprinter::V2::Field>] Fields defined on the view
         attr_reader :fields
-        # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations to single objects defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::ObjectField>] Associations to single objects defined on the view
         attr_reader :objects
-        # @return [Hash<Symbol, Blueprinter::V2::Association>] Associations to collections defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Collection>] Associations to collections defined on the view
         attr_reader :collections
 
 
@@ -50,8 +47,8 @@ module Blueprinter
         def initialize(blueprint, name)
           @name = name
           @fields = blueprint.schema.select { |_, f| f.is_a? Field }
-          @objects = blueprint.schema.select { |_, f| f.is_a?(Association) && !f.collection }
-          @collections = blueprint.schema.select { |_, f| f.is_a?(Association) && f.collection }
+          @objects = blueprint.schema.select { |_, f| f.is_a? ObjectField }
+          @collections = blueprint.schema.select { |_, f| f.is_a? Collection }
         end
       end
     end

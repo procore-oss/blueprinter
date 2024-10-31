@@ -51,7 +51,7 @@ describe "Blueprinter::V2 Fields" do
       end
 
       ref = blueprint.reflections[:default]
-      expect(ref.objects[:category].class.name).to eq "Blueprinter::V2::Association"
+      expect(ref.objects[:category].class.name).to eq "Blueprinter::V2::ObjectField"
       expect(ref.objects[:category].name).to eq :category
       expect(ref.objects[:category].from).to eq :category
       expect(ref.objects[:category].blueprint).to eq category_blueprint

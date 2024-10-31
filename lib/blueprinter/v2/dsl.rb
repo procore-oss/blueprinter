@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require 'blueprinter/v2/association'
-require 'blueprinter/v2/field'
-
 module Blueprinter
   module V2
     # Methods for defining Blueprint fields and views
@@ -69,19 +66,14 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
-      # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @yield [TODO] Generate the value from the block
-      # @return [Blueprinter::V2::Association]
+      # @return [Blueprinter::V2::ObjectField]
       #
-      def object(name, blueprint, from: name, view: nil, **options, &definition)
-        raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
-
-        schema[name.to_sym] = Association.new(
+      def object(name, blueprint, from: name, **options, &definition)
+        schema[name.to_sym] = ObjectField.new(
           name: name,
           blueprint: blueprint,
-          collection: false,
-          legacy_view: view,
           from: from,
           value_proc: definition,
           options: options.dup
@@ -93,19 +85,14 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
-      # @param view [Symbol] Only for use with legacy (not V2) blueprints
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @yield [TODO] Generate the value from the block
-      # @return [Blueprinter::V2::Association]
+      # @return [Blueprinter::V2::Collection]
       #
-      def collection(name, blueprint, from: name, view: nil, **options, &definition)
-        raise ArgumentError, 'The :view argument may not be used with V2 Blueprints' if view && blueprint.is_a?(V2)
-
-        schema[name.to_sym] = Association.new(
+      def collection(name, blueprint, from: name, **options, &definition)
+        schema[name.to_sym] = Collection.new(
           name: name,
           blueprint: blueprint,
-          collection: true,
-          legacy_view: view,
           from: from,
           value_proc: definition,
           options: options.dup

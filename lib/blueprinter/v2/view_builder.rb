@@ -41,8 +41,9 @@ module Blueprinter
           @mut.synchronize do
             next if @views.key?(name)
 
-            view = Class.new(@parent, &@pending[name])
+            view = Class.new(@parent)
             view.append_name(name)
+            view.class_eval(&@pending[name]) if @pending[name]
             view.eval!(false)
             @views[name] = view
           end

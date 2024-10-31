@@ -1,9 +1,5 @@
 # frozen_string_literal: true
 
-require 'blueprinter/v2/dsl'
-require 'blueprinter/v2/reflection'
-require 'blueprinter/v2/view_builder'
-
 module Blueprinter
   module V2
     # Base class for V2 Blueprints

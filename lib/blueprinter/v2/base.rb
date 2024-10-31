@@ -12,6 +12,8 @@ module Blueprinter
         attr_accessor :options
         # Extensions set on this Blueprint
         attr_accessor :extensions
+        # The name of this view, e.g. :default, :"foo.bar"
+        attr_accessor :view_name
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
@@ -26,6 +28,7 @@ module Blueprinter
       self.extensions = []
       self.options = {}
       self.blueprint_name = name
+      self.view_name = :default
       self.eval_mutex = Mutex.new
 
       # Initialize subclass
@@ -38,6 +41,7 @@ module Blueprinter
         subclass.extensions = extensions.dup
         subclass.options = options.dup
         subclass.blueprint_name = subclass.name || blueprint_name
+        subclass.view_name = :default
         subclass.eval_mutex = Mutex.new
       end
 
@@ -51,10 +55,11 @@ module Blueprinter
         blueprint_name
       end
 
-      # Append the sub-view name to blueprint_name
+      # Set the view name
       # @api private
       def self.append_name(name)
         self.blueprint_name = "#{blueprint_name}.#{name}"
+        self.view_name = blueprint_name.sub(/^[^.]+\./, '').to_sym
       end
 
       #

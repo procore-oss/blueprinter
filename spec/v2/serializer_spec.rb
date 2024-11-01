@@ -56,6 +56,19 @@ describe Blueprinter::V2::Serializer do
     })
   end
 
+  it 'should enable the default values extension' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      field :desc, default: 'Description!'
+    end
+
+    result = described_class.new(widget_blueprint).call({ name: 'Foo' }, {}, instance_cache)
+    expect(result).to eq({
+      name: 'Foo',
+      desc: 'Description!'
+    })
+  end
+
   it 'should format fields' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       format(Date) { |date| date.strftime('%a %b %e, %Y') }

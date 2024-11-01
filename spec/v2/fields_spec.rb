@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'date'
+
 describe "Blueprinter::V2 Fields" do
   context "fields" do
     it "adds fields with options" do
@@ -151,5 +153,32 @@ describe "Blueprinter::V2 Fields" do
 
     refs = blueprint.reflections
     expect(refs[:foo].fields.keys).to eq %i(name long_desc)
+  end
+
+  context 'formatters' do
+    let(:blueprint) do
+      Class.new(Blueprinter::V2::Base) do
+        def fmt_date(d)
+          d.iso8601
+        end
+      end
+    end
+
+    it 'adds a block formatter' do
+      iso8601 = ->(x, _opts) { x.iso8601 }
+      blueprint.format(Date, &iso8601)
+      expect(blueprint.formatters[Date]).to eq iso8601
+    end
+
+    it 'adds a method formatter' do
+      blueprint.format(Date, :fmt_date)
+      expect(blueprint.formatters[Date]).to eq :fmt_date
+    end
+
+    it 'are inherited' do
+      blueprint.format(Date, :fmt_date)
+      child = Class.new(blueprint)
+      expect(child.formatters[Date]).to eq :fmt_date
+    end
   end
 end

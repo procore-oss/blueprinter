@@ -51,4 +51,10 @@ namespace :perf do
   end
 end
 
+Rake::TestTask.new(:speedtest) do |t|
+  t.libs.append('lib', 'spec')
+  t.pattern = 'spec/benchmarks/speedtest.rb'
+  t.verbose = false
+end
+
 task default: %i[spec rubocop]

@@ -91,6 +91,36 @@ describe Blueprinter::V2::Serializer do
     }.to_json)
   end
 
+  it 'enables the if conditionals extension' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      field :desc, if: ->(ctx) { ctx.options[:n] > 42 }
+    end
+
+    result = described_class.new(widget_blueprint).object(
+      { name: 'Foo', desc: 'Bar' },
+      { n: 42 },
+      instance_cache,
+      {}
+    )
+    expect(result).to eq({ name: 'Foo' })
+  end
+
+  it 'enables the unless conditionals extension' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      field :desc, unless: ->(ctx) { ctx.options[:n] > 42 }
+    end
+
+    result = described_class.new(widget_blueprint).object(
+      { name: 'Foo', desc: 'Bar' },
+      { n: 43 },
+      instance_cache,
+      {}
+    )
+    expect(result).to eq({ name: 'Foo' })
+  end
+
   it 'enables the default values extension' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
@@ -102,6 +132,26 @@ describe Blueprinter::V2::Serializer do
       name: 'Foo',
       desc: 'Description!'
     })
+  end
+
+  it 'enables the exclude if empty extension' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name, exclude_if_empty: true
+      field :desc, exclude_if_empty: true
+    end
+
+    result = described_class.new(widget_blueprint).object({ name: 'Foo', desc: "" }, {}, instance_cache, {})
+    expect(result).to eq({ name: 'Foo' })
+  end
+
+  it 'enables the exclude if nil extension' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name, exclude_if_nil: true
+      field :desc, exclude_if_nil: true
+    end
+
+    result = described_class.new(widget_blueprint).object({ name: 'Foo', desc: nil }, {}, instance_cache, {})
+    expect(result).to eq({ name: 'Foo' })
   end
 
   it 'formats fields' do
@@ -171,6 +221,35 @@ describe Blueprinter::V2::Serializer do
 
     result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
     expect(result).to eq({ name: 'Foo', category: nil })
+  end
+
+  it 'evaluates value hooks before exclusion hooks' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      field :desc, default: 'Bar', if: ->(ctx) { !ctx.value.nil? }
+    end
+    widget = { name: 'Foo', desc: nil }
+
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    expect(result).to eq({ name: 'Foo', desc: 'Bar' })
+  end
+
+  it 'evaluates both ifs and unlesses' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name, if: ->(ctx) { ctx.options[:n] > 42 }
+      field :desc, unless: ->(ctx) { ctx.options[:n] < 43 }
+      field :zorp,
+        if: ->(ctx) { ctx.options[:n] > 40 },
+        unless: ->(ctx) { ctx.options[:m] == 42 }
+    end
+
+    result = described_class.new(widget_blueprint).object(
+      { name: 'Foo', desc: 'Bar', zorp: 'Zorp' },
+      { n: 42, m: 42 },
+      instance_cache,
+      {}
+    )
+    expect(result).to eq({})
   end
 
   it 'runs blueprint_input hooks before anything else' do

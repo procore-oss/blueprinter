@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/render'
+require 'blueprinter/v2/serializer'
+
 module Blueprinter
   module V2
     # Base class for V2 Blueprints
@@ -81,7 +84,7 @@ module Blueprinter
       end
 
       def self.render(obj, options = {})
-        if array_like? obj
+        if serializer.hooks.any?(:collection?, obj)
           render_collection(obj, options)
         else
           render_object(obj, options)
@@ -89,11 +92,17 @@ module Blueprinter
       end
 
       def self.render_object(obj, options = {})
-        # TODO call external renderer
+        Render.new(obj, options, serializer: serializer, collection: false)
       end
 
       def self.render_collection(objs, options = {})
-        # TODO call external renderer
+        Render.new(objs, options, serializer: serializer, collection: true)
+      end
+
+      # @api private
+      def self.serializer
+        eval! unless @evaled
+        @serializer
       end
 
       # Apply partials and field exclusions
@@ -127,12 +136,8 @@ module Blueprinter
           f.freeze
         end
 
+        @serializer = Serializer.new(self)
         @evaled = true
-      end
-
-      # @api private
-      def self.array_like?(obj)
-        # TODO
       end
     end
   end

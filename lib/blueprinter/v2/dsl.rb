@@ -44,9 +44,10 @@ module Blueprinter
       # @return [Blueprinter::V2::Field]
       #
       def field(name, from: name, **options, &definition)
-        schema[name.to_sym] = Field.new(
+        name = name.to_sym
+        schema[name] = Field.new(
           name: name,
-          from: from,
+          from: from.to_sym,
           value_proc: definition,
           options: options.dup
         )
@@ -57,7 +58,8 @@ module Blueprinter
       #
       def fields(*names)
         names.each do |name|
-          schema[name.to_sym] = Field.new(name: name, options: {})
+          name = name.to_sym
+          schema[name] = Field.new(name: name, options: {})
         end
       end
 
@@ -71,10 +73,11 @@ module Blueprinter
       # @return [Blueprinter::V2::ObjectField]
       #
       def object(name, blueprint, from: name, **options, &definition)
-        schema[name.to_sym] = ObjectField.new(
+        name = name.to_sym
+        schema[name] = ObjectField.new(
           name: name,
           blueprint: blueprint,
-          from: from,
+          from: from.to_sym,
           value_proc: definition,
           options: options.dup
         )
@@ -90,10 +93,11 @@ module Blueprinter
       # @return [Blueprinter::V2::Collection]
       #
       def collection(name, blueprint, from: name, **options, &definition)
-        schema[name.to_sym] = Collection.new(
+        name = name.to_sym
+        schema[name] = Collection.new(
           name: name,
           blueprint: blueprint,
-          from: from,
+          from: from.to_sym,
           value_proc: definition,
           options: options.dup
         )

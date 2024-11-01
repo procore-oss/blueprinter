@@ -17,6 +17,7 @@ module Blueprinter
         @hooks = Hooks.new([
           Extensions::Core::Prelude.new,
           Extensions::Core::Values.new,
+          Extensions::Core::Conditionals.new,
           *blueprint.extensions
         ])
         @formatter = Formatter.new(blueprint)

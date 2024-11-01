@@ -3,7 +3,7 @@
 require 'date'
 
 describe Blueprinter::V2::Formatter do
-  let(:field) { Blueprinter::V2::Field.new(name: :foo, from: :foo) }
+  let(:field) { Blueprinter::V2::Field.new(name: :foo, from: :foo, from_str: 'foo') }
   let(:object) { { foo: 'Foo' } }
   let(:context) { Blueprinter::V2::Context::Field }
   let(:instances) { Blueprinter::V2::InstanceCache.new }

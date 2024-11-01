@@ -74,6 +74,7 @@ module Blueprinter
         schema[name] = Field.new(
           name: name,
           from: from.to_sym,
+          from_str: from.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -85,7 +86,7 @@ module Blueprinter
       def fields(*names)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Field.new(name: name, options: {})
+          schema[name] = Field.new(name: name, from: name, from_str: name.to_s, options: {})
         end
       end
 
@@ -104,6 +105,7 @@ module Blueprinter
           name: name,
           blueprint: blueprint,
           from: from.to_sym,
+          from_str: from.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -124,6 +126,7 @@ module Blueprinter
           name: name,
           blueprint: blueprint,
           from: from.to_sym,
+          from_str: from.to_s,
           value_proc: definition,
           options: options.dup
         )

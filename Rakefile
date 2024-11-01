@@ -39,4 +39,10 @@ Rake::TestTask.new(:benchmarks) do |t|
   t.verbose = false
 end
 
+Rake::TestTask.new(:speedtest) do |t|
+  t.libs.append('lib', 'spec')
+  t.pattern = 'spec/benchmarks/speedtest.rb'
+  t.verbose = false
+end
+
 task default: %i[spec rubocop]

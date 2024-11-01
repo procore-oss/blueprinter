@@ -13,7 +13,9 @@ module Blueprinter
       ].freeze
 
       # Core extensions that must run at the end of serialization
-      CORE_FINISH = [].freeze
+      CORE_FINISH = [
+        Extensions::Output
+      ].freeze
 
       attr_reader :blueprint, :formatter, :hooks
 

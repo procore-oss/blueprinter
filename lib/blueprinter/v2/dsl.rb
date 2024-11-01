@@ -54,6 +54,10 @@ module Blueprinter
       # @param extractor [Class] Extractor class to use for this field
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
@@ -86,6 +90,10 @@ module Blueprinter
       # @param extractor [Class] Extractor class to use for this field
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::ObjectField]
       #
@@ -109,6 +117,10 @@ module Blueprinter
       # @param extractor [Class] Extractor class to use for this field
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Collection]
       #

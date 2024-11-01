@@ -109,4 +109,32 @@ describe Blueprinter::V2::Render do
       category: nil
     }])
   end
+
+  it 'should call output hooks for objects' do
+    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
+    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+    render = described_class.new(widget, { root: :data }, serializer: serializer, collection: false)
+
+    expect(render.to_hash).to eq({
+      data: {
+        name: 'Foo',
+        desc: 'About',
+        category: { name: 'Bar' }
+      }
+    })
+  end
+
+  it 'should call output hooks for collections' do
+    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
+    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+    render = described_class.new([widget], { root: :data }, serializer: serializer, collection: true)
+
+    expect(render.to_hash).to eq({
+      data: [{
+        name: 'Foo',
+        desc: 'About',
+        category: { name: 'Bar' }
+      }]
+    })
+  end
 end

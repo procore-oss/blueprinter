@@ -43,4 +43,26 @@ describe "Blueprinter::V2 Rendering" do
       }
     ])
   end
+
+  it 'should render an object with options' do
+    result = widget_blueprint.render_object(widget, { root: :data }).to_hash
+    expect(result).to eq({
+      data: {
+        name: 'Foo',
+        cat: { name: 'Bar' },
+        parts: [{ num: 42 }, { num: 43 }]
+      }
+    })
+  end
+
+  it 'should render a collection with options' do
+    result = widget_blueprint.render_collection([widget], { root: :data }).to_hash
+    expect(result).to eq({
+      data: [{
+        name: 'Foo',
+        cat: { name: 'Bar' },
+        parts: [{ num: 42 }, { num: 43 }]
+      }]
+    })
+  end
 end

@@ -50,6 +50,17 @@ module Blueprinter
       end
 
       #
+      # Add a formatter for field values of the given class.
+      #
+      # @param klass [Class] The class of objects to format
+      # @param formatter_method [Symbol] Name of a public instance method to call for formatting
+      # @yield Do formatting in the block instead
+      #
+      def format(klass, formatter_method = nil, &formatter_block)
+        formatters[klass] = formatter_method || formatter_block
+      end
+
+      #
       # Define a field.
       #
       # @param name [Symbol] Name of the field

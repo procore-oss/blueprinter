@@ -51,6 +51,7 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param extractor [Class] Extractor class to use for this field
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
@@ -80,6 +81,7 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param extractor [Class] Extractor class to use for this field
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::ObjectField]
       #
@@ -100,6 +102,7 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param extractor [Class] Extractor class to use for this field
       # @yield [TODO] Generate the value from the block
       # @return [Blueprinter::V2::Collection]
       #

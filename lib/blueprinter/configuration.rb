@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'blueprinter/extensions'
+require 'blueprinter/hooks'
 require 'blueprinter/extractors/auto_extractor'
 
 module Blueprinter
@@ -27,11 +27,15 @@ module Blueprinter
     end
 
     def extensions
-      @extensions ||= Extensions.new
+      @extensions ||= []
     end
 
     def extensions=(list)
-      @extensions = Extensions.new(list)
+      @extensions = list
+    end
+
+    def hooks
+      @hooks ||= Blueprinter::Hooks.new(extensions)
     end
 
     def array_like_classes

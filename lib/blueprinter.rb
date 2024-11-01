@@ -6,6 +6,7 @@ module Blueprinter
   autoload :Configuration, 'blueprinter/configuration'
   autoload :Errors, 'blueprinter/errors'
   autoload :Extension, 'blueprinter/extension'
+  autoload :Hooks, 'blueprinter/hooks'
   autoload :Transformer, 'blueprinter/transformer'
   autoload :V2, 'blueprinter/v2'
 

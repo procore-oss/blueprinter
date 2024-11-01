@@ -7,6 +7,7 @@ module Blueprinter
   autoload :Deprecation, 'blueprinter/deprecation'
   autoload :Errors, 'blueprinter/errors'
   autoload :Extension, 'blueprinter/extension'
+  autoload :Extractor, 'blueprinter/extractor'
   autoload :Hooks, 'blueprinter/hooks'
   autoload :Transformer, 'blueprinter/transformer'
   autoload :V2, 'blueprinter/v2'

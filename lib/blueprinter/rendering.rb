@@ -92,7 +92,7 @@ module Blueprinter
     def hashify(object, view_name:, local_options:)
       raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
 
-      object = Blueprinter.configuration.extensions.pre_render(object, self, view_name, local_options)
+      object = Blueprinter.configuration.hooks.reduce(:pre_render, object) { |val| [val, self, view_name, local_options] }
       prepare_data(object, view_name, local_options)
     end
 

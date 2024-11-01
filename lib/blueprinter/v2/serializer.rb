@@ -8,7 +8,8 @@ module Blueprinter
     class Serializer
       # Core extensions that must run at the start of serialization
       CORE_START = [
-        Extensions::Values
+        Extensions::Values,
+        Extensions::Exclusions
       ].freeze
 
       # Core extensions that must run at the end of serialization

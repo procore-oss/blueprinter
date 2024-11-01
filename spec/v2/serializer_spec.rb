@@ -82,6 +82,19 @@ describe Blueprinter::V2::Serializer do
     }.to_json)
   end
 
+  it 'should enable the default values extension' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      field :desc, default: 'Description!'
+    end
+
+    result = described_class.new(widget_blueprint).object({ name: 'Foo' }, {}, instance_cache, {})
+    expect(result).to eq({
+      name: 'Foo',
+      desc: 'Description!'
+    })
+  end
+
   it 'should format fields' do
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
     result = described_class.new(widget_blueprint[:extended]).object(widget, {}, instance_cache, {})

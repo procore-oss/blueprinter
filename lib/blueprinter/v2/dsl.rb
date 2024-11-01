@@ -66,6 +66,8 @@ module Blueprinter
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param extractor [Class] Extractor class to use for this field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
@@ -97,6 +99,8 @@ module Blueprinter
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param extractor [Class] Extractor class to use for this field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::ObjectField]
       #
@@ -119,6 +123,8 @@ module Blueprinter
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param extractor [Class] Extractor class to use for this field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::Collection]
       #

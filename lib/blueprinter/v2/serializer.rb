@@ -11,7 +11,7 @@ module Blueprinter
     # NOTE: Each Blueprint gets a *single* Serializer instance that will live for the duration of the application.
     #
     class Serializer
-      attr_reader :blueprint, :formatter, :hooks, :values
+      attr_reader :blueprint, :formatter, :hooks, :values, :exclusions
 
       def initialize(blueprint)
         @hooks = Hooks.new([Extensions::Core::Prelude.new, *blueprint.extensions, Extensions::Core::Postlude.new])
@@ -19,6 +19,7 @@ module Blueprinter
         @blueprint = blueprint
         # "Unroll" these hooks for a significant speed boost
         @values = Extensions::Core::Values.new
+        @exclusions = Extensions::Core::Exclusions.new
         find_used_hooks!
       end
 
@@ -77,20 +78,20 @@ module Blueprinter
             ctx.value = values.field_value ctx
             hooks.reduce_into(:field_value, ctx, :value) if @run_field_value
             ctx.value = formatter.call(ctx)
-            next if @run_exclude_field && hooks.any?(:exclude_field?, ctx)
+            next if exclusions.exclude_field?(ctx) || (@run_exclude_field && hooks.any?(:exclude_field?, ctx))
 
             acc[field.name] = ctx.value
           when ObjectField
             ctx.value = values.object_value ctx
             hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
-            next if @run_exclude_object && hooks.any?(:exclude_object?, ctx)
+            next if exclusions.exclude_object?(ctx) || (@run_exclude_object && hooks.any?(:exclude_object?, ctx))
 
             ctx.value = field.blueprint.serializer.object(ctx.value, options, instances, store) if ctx.value
             acc[field.name] = ctx.value
           when Collection
             ctx.value = values.collection_value ctx
             hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
-            next if @run_exclude_collection && hooks.any?(:exclude_collection?, ctx)
+            next if exclusions.exclude_collection?(ctx) || (@run_exclude_collection && hooks.any?(:exclude_collection?, ctx))
 
             ctx.value = field.blueprint.serializer.collection(ctx.value, options, instances, store) if ctx.value
             acc[field.name] = ctx.value
@@ -107,6 +108,7 @@ module Blueprinter
       # Allow extensions to do time-saving prep work on the current context
       def prepare!(ctx)
         values.prepare ctx
+        exclusions.prepare ctx
         hooks.run(:prepare, ctx) if @run_prepare
         { fields: hooks.last(:blueprint_fields, ctx).freeze }.freeze
       end

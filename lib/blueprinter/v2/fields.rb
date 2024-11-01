@@ -5,6 +5,7 @@ module Blueprinter
     Field = Struct.new(
       :name,
       :from,
+      :from_str,
       :value_proc,
       :options,
       keyword_init: true
@@ -14,6 +15,7 @@ module Blueprinter
       :name,
       :blueprint,
       :from,
+      :from_str,
       :value_proc,
       :options,
       keyword_init: true
@@ -23,6 +25,7 @@ module Blueprinter
       :name,
       :blueprint,
       :from,
+      :from_str,
       :value_proc,
       :options,
       keyword_init: true

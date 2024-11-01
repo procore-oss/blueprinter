@@ -30,14 +30,17 @@ describe "Blueprinter::V2 Fields" do
       ref = blueprint.reflections[:default]
       expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:name].name).to eq :name
+      expect(ref.fields[:name].from).to eq :name
       expect(ref.fields[:name].options).to eq({})
 
       expect(ref.fields[:description].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:description].name).to eq :description
+      expect(ref.fields[:description].from).to eq :description
       expect(ref.fields[:description].options).to eq({})
 
       expect(ref.fields[:status].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:status].name).to eq :status
+      expect(ref.fields[:status].from).to eq :status
       expect(ref.fields[:status].options).to eq({})
     end
   end

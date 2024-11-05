@@ -13,38 +13,62 @@ module Blueprinter
 
         # @param ctx [Blueprinter::V2::Context]
         def field_value(ctx)
-          extractor = get_extractor ctx
-          value = extractor.field(ctx.blueprint, ctx.field, ctx.object, ctx.options)
+          data = ctx.store[ctx.field.object_id]
+          ctx.value = data[:extractor].field(ctx.blueprint, ctx.field, ctx.object, ctx.options)
 
-          default_if = ctx.options[:field_default_if] || ctx.field.options[:default_if] || ctx.blueprint.class.options[:field_default_if]
-          return value unless value.nil? || (default_if && use_default?(default_if, ctx))
+          default_if = data[:default_if]
+          return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
 
-          default = ctx.options[:field_default] || ctx.field.options[:default] || ctx.blueprint.class.options[:field_default]
-          get_default(default, ctx)
+          get_default(data[:default], ctx)
         end
 
         # @param ctx [Blueprinter::V2::Context]
         def object_value(ctx)
-          extractor = get_extractor ctx
-          value = extractor.object(ctx.blueprint, ctx.field, ctx.object, ctx.options)
+          data = ctx.store[ctx.field.object_id]
+          ctx.value = data[:extractor].object(ctx.blueprint, ctx.field, ctx.object, ctx.options)
 
-          default_if = ctx.options[:object_default_if] || ctx.field.options[:default_if] || ctx.blueprint.class.options[:object_default_if]
-          return value unless value.nil? || (default_if && use_default?(default_if, ctx))
+          default_if = data[:default_if]
+          return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
 
-          default = ctx.options[:object_default] || ctx.field.options[:default] || ctx.blueprint.class.options[:object_default]
-          get_default(default, ctx)
+          get_default(data[:default], ctx)
         end
 
         # @param ctx [Blueprinter::V2::Context]
         def collection_value(ctx)
-          extractor = get_extractor ctx
-          value = extractor.collection(ctx.blueprint, ctx.field, ctx.object, ctx.options)
+          data = ctx.store[ctx.field.object_id]
+          ctx.value = data[:extractor].collection(ctx.blueprint, ctx.field, ctx.object, ctx.options)
 
-          default_if = ctx.options[:collection_default_if] || ctx.field.options[:default_if] || ctx.blueprint.class.options[:collection_default_if]
-          return value unless value.nil? || (default_if && use_default?(default_if, ctx))
+          default_if = data[:default_if]
+          return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
 
-          default = ctx.options[:collection_default] || ctx.field.options[:default] || ctx.blueprint.class.options[:collection_default]
-          get_default(default, ctx)
+          get_default(data[:default], ctx)
+        end
+
+        # @param ctx [Blueprinter::V2::Context]
+        def prepare(ctx)
+          bp_class = ctx.blueprint.class
+          ref = bp_class.reflections[:default]
+
+          ref.fields.each_value do |field|
+            ctx.store[field.object_id] ||= {}
+            ctx.store[field.object_id][:extractor] = ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
+            ctx.store[field.object_id][:default_if] = ctx.options[:field_default_if] || field.options[:default_if] || bp_class.options[:field_default_if]
+            ctx.store[field.object_id][:default] = ctx.options[:field_default] || field.options[:default] || bp_class.options[:field_default]
+          end
+
+          ref.objects.each_value do |field|
+            ctx.store[field.object_id] ||= {}
+            ctx.store[field.object_id][:extractor] = ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
+            ctx.store[field.object_id][:default_if] = ctx.options[:object_default_if] || field.options[:default_if] || bp_class.options[:object_default_if]
+            ctx.store[field.object_id][:default] = ctx.options[:object_default] || field.options[:default] || bp_class.options[:object_default]
+          end
+
+          ref.collections.each_value do |field|
+            ctx.store[field.object_id] ||= {}
+            ctx.store[field.object_id][:extractor] = ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
+            ctx.store[field.object_id][:default_if] = ctx.options[:collection_default_if] || field.options[:default_if] || bp_class.options[:collection_default_if]
+            ctx.store[field.object_id][:default] = ctx.options[:collection_default] || field.options[:default] || bp_class.options[:collection_default]
+          end
         end
 
         private
@@ -62,11 +86,6 @@ module Blueprinter
           when Proc then ctx.blueprint.instance_exec(ctx, &cond)
           else ctx.blueprint.public_send(cond, ctx)
           end
-        end
-
-        def get_extractor(ctx)
-          klass = ctx.field.options[:extractor] || ctx.blueprint.class.options[:extractor] || Extractor
-          ctx.instances[klass]
         end
       end
     end

@@ -27,6 +27,10 @@ module Blueprinter
 
       def call(object, options, instances, store)
         context = Context.new(instances[blueprint], nil, nil, object, options, instances, store)
+        if !context.store[blueprint.object_id]
+          hooks.each(:prepare, context)
+          context.store[blueprint.object_id] = true
+        end
         hooks.reduce_into(:blueprint_input, context, :object)
 
         result = blueprint.reflections[:default].sorted.each_with_object({}) do |field, acc|

@@ -25,8 +25,8 @@ module Blueprinter
         @blueprint = blueprint
       end
 
-      def call(object, options, instances)
-        context = Context.new(instances[blueprint], nil, nil, object, options, instances)
+      def call(object, options, instances, store)
+        context = Context.new(instances[blueprint], nil, nil, object, options, instances, store)
         hooks.reduce_into(:blueprint_input, context, :object)
 
         result = blueprint.reflections[:default].sorted.each_with_object({}) do |field, acc|
@@ -43,14 +43,14 @@ module Blueprinter
             next if hooks.any?(:exclude_object?, context)
 
             v2 = instances[field.blueprint].is_a? V2::Base
-            value = v2 ? field.blueprint.serializer.call(value, options, instances) : field.blueprint.render(value, options) if value
+            value = v2 ? field.blueprint.serializer.call(value, options, instances, store) : field.blueprint.render(value, options) if value
             acc[field.name] = value
           when Collection
             value = hooks.reduce_into(:collection_value, context, :value)
             next if hooks.any?(:exclude_collection?, context)
 
             v2 = instances[field.blueprint].is_a? V2::Base
-            value = v2 ? value.map { |val| field.blueprint.serializer.call(val, options, instances) } : field.blueprint.render(value, options) if value
+            value = v2 ? value.map { |val| field.blueprint.serializer.call(val, options, instances, store) } : field.blueprint.render(value, options) if value
             acc[field.name] = value
           end
         end

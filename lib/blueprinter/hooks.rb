@@ -11,6 +11,10 @@ module Blueprinter
         end
     end
 
+    def each(hook, arg)
+      @hooks.fetch(hook).each { |ext| ext.public_send(hook, arg) }
+    end
+
     #
     # Return true if any of "hook" returns truthy.
     #

@@ -6,12 +6,18 @@ module Blueprinter
       class Exclusions < Extension
         # @param ctx [Blueprinter::V2::Context]
         def exclude_field?(ctx)
-          return true if exclude_if_nil_or_empty? ctx
-          if (cond = ctx.options[:field_if] || ctx.field.options[:if] || ctx.blueprint.class.options[:field_if])
+          data = ctx.store[ctx.field.object_id]
+          if ctx.value.nil? && data[:exclude_if_nil]
+            return true
+          elsif data[:exclude_if_empty]
+            return true if ctx.value.nil? || (ctx.value.respond_to?(:empty?) && ctx.value.empty?)
+          end
+
+          if (cond = data[:if])
             result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
             return true if !result
           end
-          if (cond = ctx.options[:field_unless] || ctx.field.options[:unless] || ctx.blueprint.class.options[:field_unless])
+          if (cond = data[:unless])
             result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
             return true if result
           end
@@ -20,41 +26,42 @@ module Blueprinter
 
         # @param ctx [Blueprinter::V2::Context]
         def exclude_object?(ctx)
-          return true if exclude_if_nil_or_empty? ctx
-          if (cond = ctx.options[:object_if] || ctx.field.options[:if] || ctx.blueprint.class.options[:object_if])
-            result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-            return true if !result
-          end
-          if (cond = ctx.options[:object_unless] || ctx.field.options[:unless] || ctx.blueprint.class.options[:object_unless])
-            result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-            return true if result
-          end
-          false
+          exclude_field? ctx
         end
 
         # @param ctx [Blueprinter::V2::Context]
         def exclude_collection?(ctx)
-          return true if exclude_if_nil_or_empty? ctx
-          if (cond = ctx.options[:collection_if] || ctx.field.options[:if] || ctx.blueprint.class.options[:collection_if])
-            result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-            return true if !result
-          end
-          if (cond = ctx.options[:collection_unless] || ctx.field.options[:unless] || ctx.blueprint.class.options[:collection_unless])
-            result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-            return true if result
-          end
-          false
+          exclude_field? ctx
         end
 
-        private
+        # @param ctx [Blueprinter::V2::Context]
+        def prepare(ctx)
+          bp_class = ctx.blueprint.class
+          ref = bp_class.reflections[:default]
 
-        def exclude_if_nil_or_empty?(ctx)
-          if ctx.value.nil? && (ctx.options[:exclude_if_nil] || ctx.field.options[:exclude_if_nil] || ctx.blueprint.class.options[:exclude_if_nil])
-            return true
-          elsif ctx.options[:exclude_if_empty] || ctx.field.options[:exclude_if_empty] || ctx.blueprint.class.options[:exclude_if_empty]
-            return true if ctx.value.nil? || (ctx.value.respond_to?(:empty?) && ctx.value.empty?)
+          ref.fields.each_value do |field|
+            ctx.store[field.object_id] ||= {}
+            ctx.store[field.object_id][:if] = ctx.options[:field_if] || field.options[:if] || bp_class.options[:field_if]
+            ctx.store[field.object_id][:unless] = ctx.options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
+            ctx.store[field.object_id][:exclude_if_nil] = ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
+            ctx.store[field.object_id][:exclude_if_empty] = ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
           end
-          false
+
+          ref.objects.each_value do |field|
+            ctx.store[field.object_id] ||= {}
+            ctx.store[field.object_id][:if] = ctx.options[:object_if] || field.options[:if] || bp_class.options[:object_if]
+            ctx.store[field.object_id][:unless] = ctx.options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
+            ctx.store[field.object_id][:exclude_if_nil] = ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
+            ctx.store[field.object_id][:exclude_if_empty] = ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
+          end
+
+          ref.collections.each_value do |field|
+            ctx.store[field.object_id] ||= {}
+            ctx.store[field.object_id][:if] = ctx.options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
+            ctx.store[field.object_id][:unless] = ctx.options[:collection_unless] || field.options[:unless] || bp_class.options[:collection_unless]
+            ctx.store[field.object_id][:exclude_if_nil] = ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
+            ctx.store[field.object_id][:exclude_if_empty] = ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
+          end
         end
       end
     end

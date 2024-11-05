@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 describe Blueprinter::V2::Extensions::Values do
-  subject { described_class.new }
-  let(:instance_cache) { Blueprinter::V2::InstanceCache.new }
-  let(:context) { Blueprinter::V2::Context }
-  let(:blueprint) { Class.new(Blueprinter::V2::Base) }
-  let(:object) { { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }] } }
+  include ExtensionHelpers
+
+  let(:object) { { foo: 'Foo', foo_obj: { name: 'Bar' }, foos: [{ num: 42 }] } }
   let(:my_extractor) do
     Class.new(Blueprinter::V2::Extractor) do
       def field(_blueprint, field, obj, _options)
@@ -37,64 +35,64 @@ describe Blueprinter::V2::Extensions::Values do
   end
 
   context 'fields' do
-    let(:field) { Blueprinter::V2::Field.new(name: :name, from: :name, options: {}) }
+    let(:field) { blueprint.reflections[:default].fields[:foo] }
 
     it 'should extract a field with the default extractor' do
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.field_value ctx).to eq 'Foo'
     end
 
     it 'should extract a field with the field options extractor' do
-      field.options[:extractor] = my_extractor
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      blueprint.field :foo, extractor: my_extractor
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.field_value ctx).to eq 'FOO'
     end
 
     it 'should extract a field with the blueprint options extractor' do
       blueprint.options[:extractor] = my_extractor
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.field_value ctx).to eq 'FOO'
     end
   end
 
   context 'objects' do
-    let(:field) { Blueprinter::V2::ObjectField.new(name: :category, from: :category, options: {}) }
+    let(:field) { blueprint.reflections[:default].objects[:foo_obj] }
 
     it 'should extract an object the default extractor' do
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.object_value ctx).to eq({ name: 'Bar' })
     end
 
     it 'should extract an object the field options extractor' do
-      field.options[:extractor] = my_extractor
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      blueprint.object :foo_obj, sub_blueprint, extractor: my_extractor
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.object_value ctx).to eq({ name: 'BAR' })
     end
 
     it 'should extract an object the blueprint options extractor' do
       blueprint.options[:extractor] = my_extractor
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.object_value ctx).to eq({ name: 'BAR' })
     end
   end
 
   context 'collections' do
-    let(:field) { Blueprinter::V2::Collection.new(name: :parts, from: :parts, options: {}) }
+    let(:field) { blueprint.reflections[:default].collections[:foos] }
 
     it 'should extract an object the default extractor' do
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.collection_value ctx).to eq [{ num: 42 }]
     end
 
     it 'should extract an object the field options extractor' do
-      field.options[:extractor] = my_extractor
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      blueprint.collection :foos, sub_blueprint, extractor: my_extractor
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.collection_value ctx).to eq [{ num: 84 }]
     end
 
     it 'should extract an object the blueprint options extractor' do
       blueprint.options[:extractor] = my_extractor
-      ctx = context.new(blueprint.new, field, nil, object, {}, instance_cache)
+      ctx = prepare(blueprint, field, nil, object, {})
       expect(subject.collection_value ctx).to eq [{ num: 84 }]
     end
   end

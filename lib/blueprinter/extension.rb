@@ -8,6 +8,7 @@ module Blueprinter
   #  - sort_fields
   #  - collection? (skipped if calling render_object/render_collection)
   #  - input_object | input_collection
+  #  - prepare
   #  - blueprint_input
   #  - field_value
   #  - exclude_field?
@@ -41,6 +42,14 @@ module Blueprinter
     def collection?(_object)
       false
     end
+
+    #
+    # Called once per blueprint per render. A common use is to pre-calculate certain options
+    # and cache them in context.data, so we don't have to recalculate them for every field.
+    #
+    # @param context [Blueprinter::V2::Context]
+    #
+    def prepare(context); end
 
     #
     # Modify or replace the object passed to render/render_object.

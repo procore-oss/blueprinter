@@ -65,4 +65,59 @@ describe "Blueprinter::V2 Rendering" do
       }]
     })
   end
+
+  it 'should use the same Context.store Hash throughout' do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize(log)
+        @log = log
+      end
+
+      def input_collection(ctx)
+        @log.clear
+        ctx.store[:log] = @log
+        ctx.object
+      end
+    end
+    category_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name, if: ->(ctx) { ctx.store[:log] << ctx.value }
+    end
+    part_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :num, if: ->(ctx) { ctx.store[:log] << ctx.value }
+    end
+    log = []
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      extensions << ext.new(log)
+      field :name, if: ->(ctx) { ctx.store[:log] << ctx.value }
+      object :category, category_blueprint, if: ->(ctx) { ctx.store[:log] << ctx.value }
+      collection :parts, part_blueprint, if: ->(ctx) { ctx.store[:log] << ctx.value }
+    end
+
+    widget_blueprint.render_collection([
+      {
+        name: 'Widget A',
+        category: { name: 'Category 1' },
+        parts: [{ num: 42 }, { num: 43 }]
+      },
+      {
+        name: 'Widget B',
+        category: { name: 'Category 2' },
+        parts: [{ num: 43 }, { num: 44 }]
+      },
+    ]).to_hash
+
+    expect(log).to eq [
+      'Widget A',
+      { name: 'Category 1' },
+      'Category 1',
+      [{ num: 42 }, { num: 43 }],
+      42,
+      43,
+      'Widget B',
+      { name: 'Category 2' },
+      'Category 2',
+      [{ num: 43 }, { num: 44 }],
+      43,
+      44
+    ]
+  end
 end

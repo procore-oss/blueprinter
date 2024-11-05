@@ -25,8 +25,8 @@ module Blueprinter
     #
     # Returns fields in the order they should appear. Default is the order in which they were defined.
     #
-    # @param fields [Array<Blueprinter::V2::Field|>Blueprinter::V2::Object|Blueprinter::V2::Collection]
-    # @return [Array<Blueprinter::V2::Field|>Blueprinter::V2::Object|Blueprinter::V2::Collection]
+    # @param fields [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
+    # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
     #
     def sort_fields(fields)
       fields

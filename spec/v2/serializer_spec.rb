@@ -31,7 +31,7 @@ describe Blueprinter::V2::Serializer do
     test = self
     widget = { name: nil, category: nil }
 
-    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache, {})
     expect(result).to eq({
       name: nil,
       category: nil,
@@ -48,7 +48,7 @@ describe Blueprinter::V2::Serializer do
       parts: [{ num: 42, extra: 'bar' }, { num: 43 }]
     }
 
-    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache, {})
     expect(result).to eq({
       name: 'Foo',
       category: { name: 'Bar' },
@@ -65,7 +65,8 @@ describe Blueprinter::V2::Serializer do
     result = described_class.new(widget_blueprint).call(
       { name: 'Foo', desc: 'Bar' },
       { n: 42 },
-      instance_cache
+      instance_cache,
+      {}
     )
     expect(result).to eq({ name: 'Foo' })
   end
@@ -79,7 +80,8 @@ describe Blueprinter::V2::Serializer do
     result = described_class.new(widget_blueprint).call(
       { name: 'Foo', desc: 'Bar' },
       { n: 43 },
-      instance_cache
+      instance_cache,
+      {}
     )
     expect(result).to eq({ name: 'Foo' })
   end
@@ -90,7 +92,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, default: 'Description!'
     end
 
-    result = described_class.new(widget_blueprint).call({ name: 'Foo' }, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call({ name: 'Foo' }, {}, instance_cache, {})
     expect(result).to eq({
       name: 'Foo',
       desc: 'Description!'
@@ -103,7 +105,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, exclude_if_empty: true
     end
 
-    result = described_class.new(widget_blueprint).call({ name: 'Foo', desc: "" }, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call({ name: 'Foo', desc: "" }, {}, instance_cache, {})
     expect(result).to eq({ name: 'Foo' })
   end
 
@@ -113,7 +115,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, exclude_if_nil: true
     end
 
-    result = described_class.new(widget_blueprint).call({ name: 'Foo', desc: nil }, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call({ name: 'Foo', desc: nil }, {}, instance_cache, {})
     expect(result).to eq({ name: 'Foo' })
   end
 
@@ -125,7 +127,7 @@ describe Blueprinter::V2::Serializer do
     end
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
 
-    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache, {})
     expect(result).to eq({
       name: 'Foo',
       created_on: 'Thu Oct 31, 2024'
@@ -139,7 +141,7 @@ describe Blueprinter::V2::Serializer do
     end
     widget = { name: 'Foo', desc: nil }
 
-    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache)
+    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache, {})
     expect(result).to eq({ name: 'Foo', desc: 'Bar' })
   end
 
@@ -155,7 +157,8 @@ describe Blueprinter::V2::Serializer do
     result = described_class.new(widget_blueprint).call(
       { name: 'Foo', desc: 'Bar', zorp: 'Zorp' },
       { n: 42, m: 42 },
-      instance_cache
+      instance_cache,
+      {}
     )
     expect(result).to eq({})
   end
@@ -171,7 +174,8 @@ describe Blueprinter::V2::Serializer do
     result = described_class.new(widget_blueprint).call(
       { category: { name: 'Cat' }, parts: [{ num: 42 }] },
       {},
-      instance_cache
+      instance_cache,
+      {}
     )
     expect(result).to eq({ name: 'Foo', category: nil, parts: nil })
   end
@@ -187,7 +191,8 @@ describe Blueprinter::V2::Serializer do
     result = described_class.new(widget_blueprint).call(
       { category: { name: 'Cat' }, parts: [{ num: 42 }] },
       {},
-      instance_cache
+      instance_cache,
+      {}
     )
     expect(result).to eq({ name: 'Foo' })
   end
@@ -200,7 +205,8 @@ describe Blueprinter::V2::Serializer do
     result = described_class.new(blueprint).call(
       { description: 'A widget', category: { name: 'Cat' }, parts: [{ num: 42 }], name: 'Foo' },
       {},
-      instance_cache
+      instance_cache,
+      {}
     )
     expect(result.to_json).to eq({
       name: 'Foo',

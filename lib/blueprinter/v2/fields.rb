@@ -28,6 +28,6 @@ module Blueprinter
       keyword_init: true
     )
 
-    Context = Struct.new(:blueprint, :field, :value, :object, :options, :instances)
+    Context = Struct.new(:blueprint, :field, :value, :object, :options, :instances, :store)
   end
 end

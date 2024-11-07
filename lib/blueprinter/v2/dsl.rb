@@ -79,7 +79,7 @@ module Blueprinter
       def fields(*names)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Field.new(name: name, options: {})
+          schema[name] = Field.new(name: name, from: name, options: {})
         end
       end
 

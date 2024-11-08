@@ -9,7 +9,7 @@ module Blueprinter
 
       def [](obj)
         if obj.is_a? Class
-          @cache[obj] ||= obj.new
+          @cache[obj.object_id] ||= obj.new
         else
           obj
         end

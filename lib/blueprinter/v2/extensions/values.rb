@@ -4,13 +4,6 @@ module Blueprinter
   module V2
     module Extensions
       class Values < Extension
-        def collection?(object)
-          case object
-          when Array, Set then true
-          else false
-          end
-        end
-
         # @param ctx [Blueprinter::V2::Context]
         def field_value(ctx)
           data = ctx.store[ctx.field.object_id]

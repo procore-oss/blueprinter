@@ -3,7 +3,9 @@
 require 'benchmark'
 require 'blueprinter'
 
-NAME_FIELDS = 10
+NUM_FIELDS = 10
+NUM_OBJECTS = 5
+NUM_COLLECTIONS = 2
 
 class CategoryBlueprintV1 < Blueprinter::Base
   field :name
@@ -14,53 +16,56 @@ class PartBlueprintV1 < Blueprinter::Base
 end
 
 class WidgetBlueprintV1 < Blueprinter::Base
-  NAME_FIELDS.times { |i| field :"name#{i}" }
-  association :category, blueprint: CategoryBlueprintV1
-  association :parts, blueprint: PartBlueprintV1
+  NUM_FIELDS.times { |i| field :"name_#{i}" }
+  NUM_OBJECTS.times { |i| association :"category_#{i}", blueprint: CategoryBlueprintV1 }
+  NUM_COLLECTIONS.times { |i| association  :"parts_#{i}", blueprint: PartBlueprintV1 }
 end
 
-class CategoryBlueprintV2 < Blueprinter::V2::Base
+class ApplicationBlueprintV2 < Blueprinter::V2::Base
+end
+
+class CategoryBlueprintV2 < ApplicationBlueprintV2
   field :name
 end
 
-class PartBlueprintV2 < Blueprinter::V2::Base
+class PartBlueprintV2 < ApplicationBlueprintV2
   field :num
 end
 
-class WidgetBlueprintV2 < Blueprinter::V2::Base
-  NAME_FIELDS.times { |i| field :"name#{i}" }
-  object :category, CategoryBlueprintV2
-  collection :parts, PartBlueprintV2
+class WidgetBlueprintV2 < ApplicationBlueprintV2
+  NUM_FIELDS.times { |i| field :"name_#{i}" }
+  NUM_OBJECTS.times { |i| object :"category_#{i}", CategoryBlueprintV2 }
+  NUM_COLLECTIONS.times { |i| collection :"parts_#{i}", PartBlueprintV2 }
 end
+
+puts "#{NUM_FIELDS} fields, #{NUM_OBJECTS} objects, #{NUM_COLLECTIONS} collections"
 
 results = Benchmark.bmbm do |x|
   widgets = 100_000.times.map do |n|
-    NAME_FIELDS.times.
-      each_with_object({}) { |i, obj| obj[:"name#{i}"] = "Widget #{n}" }.
-      merge({
-        category: { name: "Category #{n % 50}" },
-        parts: (1..rand(1..10)).map { |n| { num: n } }
-      })
+    {}.merge(
+      NUM_FIELDS.times.each_with_object({}) { |i, obj| obj[:"name_#{i}"] = "Widget #{n}" },
+      NUM_OBJECTS.times.each_with_object({}) { |i, obj| obj[:"category_#{i}"] = { name: "Category #{n % 50}" } },
+      NUM_COLLECTIONS.times.each_with_object({}) { |i, obj| obj[:"parts_#{i}"] = (1..rand(1..10)).map { |n| { num: n } } },
+    )
   end
 
   [
-    [100_000, 1],
     [10_000, 10],
     [1000, 100],
     [500, 100],
     [250, 100],
-    [100, 100],
-    [25, 100],
-    [5, 100],
-    [1, 100],
+    [100, 250],
+    [25, 500],
+    [5, 1000],
+    [1, 1000],
   ].each do |(n, m)|
     fmt_n = n.to_s.chars.reverse.each_slice(3).map(&:join).join(',').reverse
     list = widgets[0,n]
-    x.report "#{fmt_n} widgets: V1" do
-      m.times { WidgetBlueprintV1.render(list) }
+    x.report "#{fmt_n} widgets #{m}x: V1" do
+      m.times { WidgetBlueprintV1.render_as_hash(list) }
     end
 
-    x.report "#{fmt_n} widgets: V2" do
+    x.report "#{fmt_n} widgets #{m}x: V2" do
       m.times { WidgetBlueprintV2.render(list).to_hash }
     end
   end

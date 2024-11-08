@@ -11,6 +11,22 @@ module Blueprinter
         end
     end
 
+    #
+    # Checks if any hooks of the given name are registered.
+    #
+    # @param hook [Symbol] Name of hook to call
+    # @return [Boolean]
+    #
+    def has?(hook)
+      @hooks.fetch(hook).any?
+    end
+
+    #
+    # Runs each hook.
+    #
+    # @param hook [Symbol] Name of hook to call
+    # @param arg [Object] Argument to hook
+    #
     def each(hook, arg)
       @hooks.fetch(hook).each { |ext| ext.public_send(hook, arg) }
     end

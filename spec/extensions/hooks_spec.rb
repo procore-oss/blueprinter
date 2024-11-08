@@ -25,6 +25,13 @@ describe Blueprinter::Hooks do
     end
   end
 
+  it 'should know whether it contains certain hooks' do
+    hooks = described_class.new [ext1.new, ext2.new]
+    expect(hooks.has? :output_object).to be true
+    expect(hooks.has? :exclude_field?).to be true
+    expect(hooks.has? :exclude_collection?).to be false
+  end
+
   context 'any?' do
     it 'should return true if any hook returns true' do
       hooks = described_class.new [ext1.new, ext2.new]

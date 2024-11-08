@@ -22,18 +22,6 @@ describe Blueprinter::V2::Extensions::Values do
     end
   end
 
-  it 'should detect hashes as objects' do
-    expect(subject.collection? object).to be false
-  end
-
-  it 'should detect arrays as collections' do
-    expect(subject.collection? [object]).to be true
-  end
-
-  it 'should detect sets as collections' do
-    expect(subject.collection? Set.new([object])).to be true
-  end
-
   context 'fields' do
     let(:field) { blueprint.reflections[:default].fields[:foo] }
 

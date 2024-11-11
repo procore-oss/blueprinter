@@ -7,7 +7,7 @@ module Blueprinter
         # @param ctx [Blueprinter::V2::Context]
         def field_value(ctx)
           data = ctx.store[ctx.field.object_id]
-          ctx.value = data[:extractor].field(ctx.blueprint, ctx.field, ctx.object, ctx.options)
+          ctx.value = data[:extractor].field(ctx)
 
           default_if = data[:default_if]
           return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
@@ -18,7 +18,7 @@ module Blueprinter
         # @param ctx [Blueprinter::V2::Context]
         def object_value(ctx)
           data = ctx.store[ctx.field.object_id]
-          ctx.value = data[:extractor].object(ctx.blueprint, ctx.field, ctx.object, ctx.options)
+          ctx.value = data[:extractor].object(ctx)
 
           default_if = data[:default_if]
           return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
@@ -29,7 +29,7 @@ module Blueprinter
         # @param ctx [Blueprinter::V2::Context]
         def collection_value(ctx)
           data = ctx.store[ctx.field.object_id]
-          ctx.value = data[:extractor].collection(ctx.blueprint, ctx.field, ctx.object, ctx.options)
+          ctx.value = data[:extractor].collection(ctx)
 
           default_if = data[:default_if]
           return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))

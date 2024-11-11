@@ -4,22 +4,25 @@ module Blueprinter
   module V2
     # The default extractor and base class for custom extractors
     class Extractor
-      def field(blueprint, field, object, options)
-        if field.value_proc
-          blueprint.instance_exec(object, options, &field.value_proc)
-        elsif object.is_a? Hash
-          object[field.from]
+      # @param ctx [Blueprinter::V2::Context]
+      def field(ctx)
+        if ctx.field.value_proc
+          ctx.blueprint.instance_exec(ctx.object, ctx.options, &ctx.field.value_proc)
+        elsif ctx.object.is_a? Hash
+          ctx.object[ctx.field.from]
         else
-          object.public_send(field.from)
+          ctx.object.public_send(ctx.field.from)
         end
       end
 
-      def object(blueprint, field, object, options)
-        field(blueprint, field, object, options)
+      # @param ctx [Blueprinter::V2::Context]
+      def object(ctx)
+        field ctx
       end
 
-      def collection(blueprint, field, object, options)
-        field(blueprint, field, object, options)
+      # @param ctx [Blueprinter::V2::Context]
+      def collection(ctx)
+        field ctx
       end
     end
   end

@@ -6,17 +6,17 @@ describe Blueprinter::V2::Extensions::Values do
   let(:object) { { foo: 'Foo', foo_obj: { name: 'Bar' }, foos: [{ num: 42 }] } }
   let(:my_extractor) do
     Class.new(Blueprinter::V2::Extractor) do
-      def field(_blueprint, field, obj, _options)
-        obj[field.from].upcase
+      def field(ctx)
+        ctx.object[ctx.field.from].upcase
       end
 
-      def object(_blueprint, field, obj, _options)
-        val = obj[field.from]
+      def object(ctx)
+        val = ctx.object[ctx.field.from]
         val.transform_values { |v| v.upcase }
       end
 
-      def collection(_blueprint, field, obj, _options)
-        vals = obj[field.from]
+      def collection(ctx)
+        vals = ctx.object[ctx.field.from]
         vals.map { |val| val.transform_values { |v| v * 2 } }
       end
     end

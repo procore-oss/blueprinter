@@ -39,8 +39,8 @@ module Blueprinter
         attr_reader :objects
         # @return [Hash<Symbol, Blueprinter::V2::Collection>] Associations to collections defined on the view
         attr_reader :collections
-        # @return [Array] All fields, objects, and collections ordered by the field_order extension hook (default is the order in which they were defined)
-        attr_reader :sorted
+        # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>] All fields, objects, and collections in the order they were defined
+        attr_reader :ordered
 
 
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base
@@ -48,7 +48,7 @@ module Blueprinter
         # @api private
         def initialize(blueprint, name)
           @name = name
-          @sorted = blueprint.serializer.hooks.last(:sort_fields, blueprint.schema.values) || blueprint.schema.values
+          @ordered = blueprint.schema.values
           @fields = blueprint.schema.select { |_, f| f.is_a? Field }
           @objects = blueprint.schema.select { |_, f| f.is_a? ObjectField }
           @collections = blueprint.schema.select { |_, f| f.is_a? Collection }

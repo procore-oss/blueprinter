@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 describe Blueprinter::V2::Extensions::FieldOrder do
+  let(:context) { Blueprinter::V2::Context.new(blueprint.new, nil, nil, nil, {}, {}, {}) }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       field :foo
@@ -11,7 +12,7 @@ describe Blueprinter::V2::Extensions::FieldOrder do
 
   it 'should sort fields alphabetically' do
     ext = described_class.new { |a, b| a.name <=> b.name }
-    result = ext.sort_fields(blueprint.schema.values)
+    result = ext.blueprint_fields(context)
     expect(result.map(&:name)).to eq %i(bar foo id)
   end
 
@@ -25,7 +26,7 @@ describe Blueprinter::V2::Extensions::FieldOrder do
         a.name <=> b.name
       end
     end
-    result = ext.sort_fields(blueprint.schema.values)
+    result = ext.blueprint_fields(context)
     expect(result.map(&:name)).to eq %i(id bar foo)
   end
 end

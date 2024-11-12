@@ -19,11 +19,13 @@ module Blueprinter
       end
 
       def call(object, options, instances, store)
-        ctx = Context.new(instances[blueprint], nil, nil, object, options, instances, store)
-        ctx.store[blueprint.object_id] ||= prepare! ctx
+        ctx = Context.new(instances[blueprint], nil, nil, nil, options, instances, store)
+        store[blueprint.object_id] ||= prepare! ctx
+
+        ctx.object = object
         hooks.reduce_into(:blueprint_input, ctx, :object) if @run_blueprint_input
 
-        result = blueprint.reflections[:default].sorted.each_with_object({}) do |field, acc|
+        result = ctx.store[blueprint.object_id][:fields].each_with_object({}) do |field, acc|
           ctx.field = field
           ctx.value = nil
 
@@ -65,7 +67,7 @@ module Blueprinter
         values.prepare ctx
         exclusions.prepare ctx
         hooks.each(:prepare, ctx) if @run_prepare
-        true
+        { fields: hooks.last(:blueprint_fields, ctx).freeze }.freeze
       end
 
       def block_unused_hooks!

@@ -12,6 +12,10 @@ module Blueprinter
           else false
           end
         end
+
+        def blueprint_fields(ctx)
+          ctx.blueprint.class.reflections[:default].ordered
+        end
       end
     end
   end

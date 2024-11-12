@@ -56,6 +56,27 @@ describe Blueprinter::V2::Serializer do
     })
   end
 
+  it 'should respect the blueprint_fields hook' do
+    ext = Class.new(Blueprinter::Extension) do
+      def blueprint_fields(ctx)
+        ctx.blueprint.class.reflections[:default].ordered.sort_by(&:name)
+      end
+    end
+    widget_blueprint.extensions << ext.new
+    widget = {
+      name: 'Foo',
+      category: { name: 'Bar' },
+      parts: [{ num: 42 }, { num: 43 }]
+    }
+
+    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache, {})
+    expect(result.to_json).to eq({
+      category: { name: 'Bar' },
+      name: 'Foo',
+      parts: [{ num: 42 }, { num: 43 }]
+    }.to_json)
+  end
+
   it 'should enable the if conditionals extension' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name

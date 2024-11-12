@@ -8,8 +8,8 @@ module Blueprinter
           @sorter = sorter
         end
 
-        def sort_fields(fields)
-          fields.sort(&@sorter)
+        def blueprint_fields(ctx)
+          ctx.blueprint.class.reflections[:default].ordered.sort(&@sorter)
         end
       end
     end

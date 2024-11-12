@@ -90,33 +90,12 @@ describe "Blueprinter::V2::Reflection" do
       expect(blueprint.reflections[:extended].collections.keys).to eq %i(widgets)
     end
 
-    it 'should be in the default order' do
-      names = blueprint.reflections[:default].sorted.map(&:name)
+    it 'should be in the definition order' do
+      names = blueprint.reflections[:default].ordered.map(&:name)
       expect(names).to eq %i(name category)
 
-      names = blueprint.reflections[:extended].sorted.map(&:name)
+      names = blueprint.reflections[:extended].ordered.map(&:name)
       expect(names).to eq %i(name category widgets description)
-    end
-
-    it 'should be in a custom order' do
-      ext = Class.new(Blueprinter::Extension) do
-        def initialize(&sorter)
-          @sorter = sorter
-        end
-
-        def sort_fields(fields)
-          fields.sort(&@sorter)
-        end
-      end
-
-      blueprint.extensions << ext.new { |a, b| b.name <=> a.name }
-      blueprint.extensions << ext.new { |a, b| a.name <=> b.name }
-
-      names = blueprint.reflections[:default].sorted.map(&:name)
-      expect(names).to eq %i(category name)
-
-      names = blueprint.reflections[:extended].sorted.map(&:name)
-      expect(names).to eq %i(category description name widgets)
     end
   end
 end

@@ -5,10 +5,10 @@ module Blueprinter
   # Base class for all extensions.
   #
   # V2 hook call order:
-  #  - sort_fields
   #  - collection? (skipped if calling render_object/render_collection)
   #  - input_object | input_collection
   #  - prepare
+  #  - blueprint_fields
   #  - blueprint_input
   #  - field_value
   #  - exclude_field?
@@ -23,16 +23,6 @@ module Blueprinter
   #  - pre_render
   #
   class Extension
-    #
-    # Returns fields in the order they should appear. Default is the order in which they were defined.
-    #
-    # @param fields [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
-    # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
-    #
-    def sort_fields(fields)
-      fields
-    end
-
     #
     # Returns true if the given object should be treated as a collection (i.e. supports `map { |obj| ... }`).
     #
@@ -50,6 +40,18 @@ module Blueprinter
     # @param context [Blueprinter::V2::Context]
     #
     def prepare(context); end
+
+    #
+    # Returns the fields that should be included in the correct order. Default is all fields in the order in which they were defined.
+    #
+    # NOTE Only runs once per Blueprint per render.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
+    #
+    def blueprint_fields(ctx)
+      []
+    end
 
     #
     # Modify or replace the object passed to render/render_object.

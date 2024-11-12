@@ -41,4 +41,15 @@ describe Blueprinter::V2::Extensions::Collections do
     x = OpenStruct.new
     expect(subject.collection? x).to be false
   end
+
+  it 'should return all fields in the order they were defined' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      object :category, self
+      collection :parts, self
+    end
+    ctx = Blueprinter::V2::Context.new(blueprint.new, nil, nil, nil, {}, {}, {})
+
+    expect(subject.blueprint_fields(ctx).map(&:name)).to eq %i(name category parts)
+  end
 end

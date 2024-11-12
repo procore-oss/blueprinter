@@ -9,9 +9,9 @@ describe Blueprinter::Extension do
     let(:object) { { foo: 'Foo' } }
     let(:context) { Blueprinter::V2::Context }
 
-    it 'should default sort fields to the given order' do
-      fields = [Blueprinter::V2::Field.new(name: :foo), Blueprinter::V2::Field.new(name: :bar)]
-      expect(subject.new.sort_fields(fields)).to eq fields
+    it 'should default to no fields' do
+      ctx = context.new(blueprint.new, nil, nil, object, {})
+      expect(subject.new.blueprint_fields(ctx)).to eq []
     end
 
     it 'should default collections? to false' do

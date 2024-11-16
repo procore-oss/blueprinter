@@ -113,4 +113,71 @@ describe Blueprinter::Hooks do
       expect(result).to eq({ name: 'Foo' })
     end
   end
+
+  context 'around' do
+    let(:ext_a) do
+      Class.new(Blueprinter::Extension) do
+        def initialize(log)
+          @log = log
+        end
+
+        def around_blueprint(ctx)
+          @log << "A: #{ctx.store[:value]}"
+          yield
+          @log << "A END"
+        end
+      end
+    end
+
+    let(:ext_b) do
+      Class.new(ext_a) do
+        def around_blueprint(ctx)
+          @log << "B: #{ctx.store[:value]}"
+          yield
+          @log << "B END"
+        end
+      end
+    end
+
+    let(:ext_c) do
+      Class.new(ext_a) do
+        def around_blueprint(ctx)
+          @log << "C: #{ctx.store[:value]}"
+          yield
+          @log << "C END"
+        end
+      end
+    end
+
+    it 'should nest calls' do
+      log = []
+      ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
+      hooks = described_class.new [ext_a.new(log), ext_b.new(log), ext_c.new(log)]
+      hooks.around(:around_blueprint, ctx) { log << 'INNER' }
+      expect(log).to eq ['A: 42', 'B: 42', 'C: 42', 'INNER', 'C END', 'B END', 'A END',]
+    end
+
+    it 'should return the inner value' do
+      ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
+      hooks = described_class.new [ext_a.new([]), ext_b.new([]), ext_c.new([])]
+      result = hooks.around(:around_blueprint, ctx) { 42 }
+      expect(result).to eq 42
+    end
+
+    it 'should return the inner with no hooks' do
+      ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
+      hooks = described_class.new []
+      result = hooks.around(:around_blueprint, ctx) { 42 }
+      expect(result).to eq 42
+    end
+
+    it "should raise if a hook doesn't yield" do
+      ext = Class.new(Blueprinter::Extension) do
+        def around_blueprint(_ctx); end
+      end
+      ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
+      hooks = described_class.new [ext.new]
+      expect { hooks.around(:around_blueprint, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+    end
+  end
 end

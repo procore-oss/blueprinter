@@ -2,7 +2,7 @@
 
 require 'ostruct'
 
-describe Blueprinter::V2::Extensions::Collections do
+describe Blueprinter::V2::Extensions::Prelude do
   include ExtensionHelpers
 
   subject { described_class.new }

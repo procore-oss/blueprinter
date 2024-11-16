@@ -3,7 +3,8 @@
 module Blueprinter
   module V2
     module Extensions
-      class Output < Extension
+      # Hooks that should run after everything else
+      class Postlude < Extension
         def output_object(ctx)
           root_name = ctx.options[:root] || ctx.blueprint.class.options[:root]
           return ctx.value if root_name.nil?

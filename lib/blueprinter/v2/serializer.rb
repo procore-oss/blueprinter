@@ -9,7 +9,7 @@ module Blueprinter
       attr_reader :blueprint, :formatter, :hooks, :values, :exclusions
 
       def initialize(blueprint)
-        @hooks = Hooks.new([Extensions::Collections.new] + blueprint.extensions + [Extensions::Output.new])
+        @hooks = Hooks.new([Extensions::Prelude.new] + blueprint.extensions + [Extensions::Postlude.new])
         @formatter = Formatter.new(blueprint)
         @blueprint = blueprint
         # "Unroll" these hooks for a significant speed boost
@@ -19,9 +19,19 @@ module Blueprinter
       end
 
       def call(object, options, instances, store)
+        if @run_around_blueprint
+          ctx = Context.new(instances[blueprint], nil, nil, object, options, instances, store)
+          hooks.around(:around_blueprint, ctx) { call_blueprint(object, options, instances, store) }
+        else
+          call_blueprint(object, options, instances, store)
+        end
+      end
+
+      private
+
+      def call_blueprint(object, options, instances, store)
         ctx = Context.new(instances[blueprint], nil, nil, nil, options, instances, store)
         store[blueprint.object_id] ||= prepare! ctx
-
         ctx.object = object
         hooks.reduce_into(:blueprint_input, ctx, :object) if @run_blueprint_input
 
@@ -71,6 +81,7 @@ module Blueprinter
       end
 
       def block_unused_hooks!
+        @run_around_blueprint = hooks.has? :around_blueprint
         @run_prepare = hooks.has? :prepare
         @run_blueprint_input = hooks.has? :blueprint_input
         @run_blueprint_output = hooks.has? :blueprint_output

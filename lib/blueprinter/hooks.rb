@@ -84,5 +84,25 @@ module Blueprinter
       end
       target_obj[target_attr]
     end
+
+    #
+    # Runs nested hooks that yield. A block MUST be passed, and it will be run at the "apex" of
+    # the nested hooks.
+    #
+    # @param hook [Symbol] Name of hook to call
+    # @param arg [Object] Argument to hook
+    # @return [Object] The return value from the block passed to this method
+    #
+    def around(hook, arg)
+      result = nil
+      @hooks.fetch(hook).reverse.reduce(-> { result = yield }) do |f, ext|
+        proc do
+          yielded = false
+          ext.public_send(hook, arg) { yielded = true; f.call }
+          raise BlueprinterError, "Extension hook '#{ext.class.name}##{hook}' did not yield" unless yielded
+        end
+      end.call
+      result
+    end
   end
 end

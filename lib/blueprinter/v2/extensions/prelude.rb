@@ -5,7 +5,8 @@ require 'set'
 module Blueprinter
   module V2
     module Extensions
-      class Collections < Extension
+      # Hooks that should run before anything else
+      class Prelude < Extension
         def collection?(object)
           case object
           when Array, Set, Enumerator then true

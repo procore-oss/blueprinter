@@ -6,18 +6,20 @@ module Blueprinter
   #
   # V2 hook call order:
   #  - collection? (skipped if calling render_object/render_collection)
-  #  - input_object | input_collection
-  #  - prepare
-  #  - blueprint_fields
-  #  - blueprint_input
-  #  - field_value
-  #  - exclude_field?
-  #  - object_value
-  #  - exclude_object?
-  #  - collection_value
-  #  - exclude_collection?
-  #  - blueprint_output
-  #  - output_object | output_collection
+  #  - around
+  #    - input_object | input_collection
+  #    - around_blueprint
+  #      - prepare (only first time during a given render)
+  #      - blueprint_fields (only first time during a given render)
+  #      - blueprint_input
+  #      - field_value
+  #      - exclude_field?
+  #      - object_value
+  #      - exclude_object?
+  #      - collection_value
+  #      - exclude_collection?
+  #      - blueprint_output
+  #    - output_object | output_collection
   #
   # V1 hook call order:
   #  - pre_render
@@ -26,7 +28,7 @@ module Blueprinter
     #
     # Returns true if the given object should be treated as a collection (i.e. supports `map { |obj| ... }`).
     #
-    # @param [Object]
+    # @param _object [Object]
     # @return [Boolean]
     #
     def collection?(_object)
@@ -34,22 +36,40 @@ module Blueprinter
     end
 
     #
+    # Runs around the entire rendering process. MUST yield!
+    #
+    # @param _context [Blueprinter::V2::Context]
+    #
+    def around(_context)
+      yield
+    end
+
+    #
+    # Runs around any Blueprint serialization. Surrounds the `prepare` through `blueprint_output` hooks. MUST yield!
+    #
+    # @param _context [Blueprinter::V2::Context]
+    #
+    def around_blueprint(_context)
+      yield
+    end
+
+    #
     # Called once per blueprint per render. A common use is to pre-calculate certain options
     # and cache them in context.data, so we don't have to recalculate them for every field.
     #
-    # @param context [Blueprinter::V2::Context]
+    # @param _context [Blueprinter::V2::Context]
     #
-    def prepare(context); end
+    def prepare(_context); end
 
     #
     # Returns the fields that should be included in the correct order. Default is all fields in the order in which they were defined.
     #
     # NOTE Only runs once per Blueprint per render.
     #
-    # @param context [Blueprinter::V2::Context]
+    # @param _context [Blueprinter::V2::Context]
     # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
     #
-    def blueprint_fields(ctx)
+    def blueprint_fields(_context)
       []
     end
 

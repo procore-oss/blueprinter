@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Blueprinter::V2::Extensions::Output do
+describe Blueprinter::V2::Extensions::Postlude do
   subject { described_class.new }
   let(:context) { Blueprinter::V2::Context }
   let(:blueprint) do

@@ -218,6 +218,47 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo' })
   end
 
+  it 'should run around_blueprint around all other serializer hooks' do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize(log)
+        @log = log
+      end
+
+      def around_blueprint(ctx)
+        @log << "around_blueprint (#{ctx.object[:name]}): a"
+        yield
+        @log << "around_blueprint (#{ctx.object[:name]}): b"
+      end
+
+      def prepare(ctx)
+        @log << "prepare (#{ctx.object || "sans object"})"
+      end
+
+      def blueprint_input(ctx)
+        @log << 'blueprint_input'
+        ctx.object
+      end
+
+      def blueprint_output(ctx)
+        @log << 'blueprint_output'
+        ctx.value
+      end
+    end
+    log = []
+    widget_blueprint.extensions << ext.new(log)
+    widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] }
+
+    result = described_class.new(widget_blueprint).call(widget, {}, instance_cache, {})
+    expect(result).to eq(widget)
+    expect(log).to eq [
+      'around_blueprint (Foo): a',
+      'prepare (sans object)',
+      'blueprint_input',
+      'blueprint_output',
+      'around_blueprint (Foo): b',
+    ]
+  end
+
   it 'should put fields in the order they were defined' do
     blueprint = Class.new(widget_blueprint) do
       field :description

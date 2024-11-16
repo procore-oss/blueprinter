@@ -20,16 +20,16 @@ module Blueprinter
         post_hook = @collection ? :output_collection : :output_object
 
         ctx = Context.new(blueprint, nil, nil, @object, @options, instance_cache, {})
-        object = @serializer.hooks.reduce_into(pre_hook, ctx, :object)
-
-        ctx.value =
-          if @collection
-            object.map { |obj| @serializer.call(obj, @options, instance_cache, ctx.store) }
-          else
-            @serializer.call(object, @options, instance_cache, ctx.store)
-          end
-
-        @serializer.hooks.reduce_into(post_hook, ctx, :value)
+        @serializer.hooks.around(:around, ctx) do
+          object = @serializer.hooks.reduce_into(pre_hook, ctx, :object)
+          ctx.value =
+            if @collection
+              object.map { |obj| @serializer.call(obj, @options, instance_cache, ctx.store) }
+            else
+              @serializer.call(object, @options, instance_cache, ctx.store)
+            end
+          @serializer.hooks.reduce_into(post_hook, ctx, :value)
+        end
       end
 
       def to_json

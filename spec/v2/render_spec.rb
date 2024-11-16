@@ -137,4 +137,49 @@ describe Blueprinter::V2::Render do
       }]
     })
   end
+
+  it 'should run the around hook around all other render hooks' do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize(log)
+        @log = log
+      end
+
+      def around(ctx)
+        @log << 'around: a'
+        yield
+        @log << 'around: b'
+      end
+
+      def input_object(ctx)
+        @log << 'input_object'
+        ctx.object
+      end
+
+      def input_collection(ctx)
+        @log << 'input_collection'
+        ctx.object
+      end
+
+      def output_object(ctx)
+        @log << 'output_object'
+        ctx.value
+      end
+
+      def output_collection(ctx)
+        @log << 'output_collection'
+        ctx.value
+      end
+    end
+    log = []
+    category_blueprint.extensions << ext.new(log)
+    serializer = Blueprinter::V2::Serializer.new(category_blueprint)
+    result = described_class.new({ n: 'Foo' }, {}, serializer: serializer, collection: false).to_hash
+    expect(result).to eq({ name: 'Foo' })
+    expect(log).to eq ['around: a', 'input_object', 'output_object', 'around: b']
+
+    log.clear
+    result = described_class.new([{ n: 'Foo' }], {}, serializer: serializer, collection: true).to_hash
+    expect(result).to eq([{ name: 'Foo' }])
+    expect(log).to eq ['around: a', 'input_collection', 'output_collection', 'around: b']
+  end
 end

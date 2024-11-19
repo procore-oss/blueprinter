@@ -13,7 +13,9 @@ module Blueprinter
       def view(name, &definition)
         raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
-        views[name.to_sym] = definition
+        name = name.to_sym
+        partials[name] = definition
+        views[name] = definition
       end
 
       #

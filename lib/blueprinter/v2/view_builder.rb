@@ -11,6 +11,8 @@ module Blueprinter
     class ViewBuilder
       include Enumerable
 
+      Definition = Struct.new(:definition, :parent_override)
+
       # @param parent [Class] A subclass of Blueprinter::V2::Base
       def initialize(parent)
         @parent = parent
@@ -23,7 +25,7 @@ module Blueprinter
       # Add a view definition.
       #
       # @param name [Symbol]
-      # @param definition [Proc]
+      # @param definition [Blueprinter::V2::ViewBuilder::Definition]
       #
       def []=(name, definition)
         @pending[name.to_sym] = definition
@@ -37,13 +39,15 @@ module Blueprinter
       #
       def [](name)
         name = name.to_sym
-        if !@views.key?(name) and @pending.key?(name)
+        if !@views.key?(name) and (pending = @pending[name])
+          parent = pending.parent_override ? root_blueprint[pending.parent_override] : @parent
+
           @mut.synchronize do
             next if @views.key?(name)
 
-            view = Class.new(@parent)
+            view = Class.new(parent)
             view.append_name(name)
-            view.class_eval(&@pending[name]) if @pending[name]
+            view.class_eval(&pending.definition) if pending.definition
             view.eval!(false)
             @views[name] = view
           end
@@ -62,6 +66,18 @@ module Blueprinter
           @pending.each_key { |name| y.yield(name, self[name]) }
         end
         block ? enum.each(&block) : enum
+      end
+
+      private
+
+      # Finds and returns the "root" blueprint view class (i.e. one named :default).
+      # The view "inherit" option needs this so it can inherit using a fully-qualified view name.
+      def root_blueprint
+        return @root_blueprint if @root_blueprint
+
+        blueprint = @parent
+        blueprint = blueprint.superclass until blueprint.view_name == :default
+        @root_blueprint = blueprint
       end
     end
   end

@@ -8,12 +8,13 @@ module Blueprinter
       # Define a new child view, which is a subclass of self.
       #
       # @param name [Symbol] Name of the view
+      # @param inherit [Symbol] Name of view to inherit from (default is the immediate inherit)
       # @yield Define the view in the block
       #
-      def view(name, &definition)
+      def view(name, inherit: nil, &definition)
         raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
-        views[name.to_sym] = definition
+        views[name.to_sym] = ViewBuilder::Definition.new(definition, inherit)
       end
 
       #

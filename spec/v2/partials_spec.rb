@@ -84,4 +84,20 @@ describe "Blueprinter::V2 Partials" do
     end
     expect { blueprint[:foo] }.to raise_error(Blueprinter::Errors::UnknownPartial)
   end
+
+  it 'should create an implicit partial for every view' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      view :foo do
+        field :name
+      end
+
+      view :bar do
+        use :foo
+        field :description
+      end
+    end
+
+    refs = blueprint.reflections
+    expect(refs[:bar].fields.keys).to eq %i(name description).sort
+  end
 end

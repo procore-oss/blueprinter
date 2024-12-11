@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/render'
+require 'blueprinter/v2/serializer'
+
 module Blueprinter
   module V2
     # Base class for V2 Blueprints
@@ -17,12 +20,13 @@ module Blueprinter
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :schema, :excludes, :partials, :used_partials, :eval_mutex
+        attr_accessor :views, :schema, :excludes, :formatters, :partials, :used_partials, :eval_mutex
       end
 
       self.views = ViewBuilder.new(self)
       self.schema = {}
       self.excludes = []
+      self.formatters = {}
       self.partials = {}
       self.used_partials = []
       self.extensions = []
@@ -36,6 +40,7 @@ module Blueprinter
         subclass.views = ViewBuilder.new(subclass)
         subclass.schema = schema.transform_values(&:dup)
         subclass.excludes = []
+        subclass.formatters = formatters.dup
         subclass.partials = partials.dup
         subclass.used_partials = []
         subclass.extensions = extensions.dup
@@ -79,7 +84,7 @@ module Blueprinter
       end
 
       def self.render(obj, options = {})
-        if array_like? obj
+        if serializer.hooks.any?(:collection?, obj)
           render_collection(obj, options)
         else
           render_object(obj, options)
@@ -87,11 +92,17 @@ module Blueprinter
       end
 
       def self.render_object(obj, options = {})
-        # TODO call external renderer
+        Render.new(obj, options, serializer: serializer, collection: false)
       end
 
       def self.render_collection(objs, options = {})
-        # TODO call external renderer
+        Render.new(objs, options, serializer: serializer, collection: true)
+      end
+
+      # @api private
+      def self.serializer
+        eval! unless @evaled
+        @serializer
       end
 
       # Apply partials and field exclusions
@@ -116,12 +127,17 @@ module Blueprinter
         end
 
         excludes.each { |f| schema.delete f }
-        @evaled = true
-      end
+        extensions.freeze
+        options.freeze
+        formatters.freeze
+        schema.freeze
+        schema.each do |_, f|
+          f.options&.freeze
+          f.freeze
+        end
 
-      # @api private
-      def self.array_like?(obj)
-        # TODO
+        @serializer = Serializer.new(self)
+        @evaled = true
       end
     end
   end

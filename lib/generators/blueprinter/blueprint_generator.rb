@@ -36,7 +36,7 @@ module Blueprinter
       end
 
       def create_blueprint
-        template 'blueprint.rb', File.join(path, "#{file_path}_blueprint.rb")
+        template 'blueprint.erb', File.join(path, "#{file_path}_blueprint.rb")
       end
 
       private

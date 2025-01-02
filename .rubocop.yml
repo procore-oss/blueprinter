@@ -27,3 +27,6 @@ Metrics/AbcSize:
 
 Metrics/ParameterLists:
   Max: 10
+
+Naming/MemoizedInstanceVariableName:
+  EnforcedStyleForLeadingUnderscores: required

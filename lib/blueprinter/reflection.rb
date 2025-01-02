@@ -23,7 +23,7 @@ module Blueprinter
     # @return [Hash<Symbol, Blueprinter::Reflection::View>]
     #
     def reflections
-      @reflections ||= view_collection.views.transform_values do |view|
+      @_reflections ||= view_collection.views.transform_values do |view|
         View.new(view.name, view_collection)
       end
     end
@@ -45,7 +45,7 @@ module Blueprinter
       # @return [Hash<Symbol, Blueprinter::Reflection::Field>]
       #
       def fields
-        @fields ||= @view_collection.fields_for(name).each_with_object({}) do |field, obj|
+        @_fields ||= @view_collection.fields_for(name).each_with_object({}) do |field, obj|
           next if field.options[:association]
 
           obj[field.name] = Field.new(field.method, field.name, field.options)
@@ -58,7 +58,7 @@ module Blueprinter
       # @return [Hash<Symbol, Blueprinter::Reflection::Association>]
       #
       def associations
-        @associations ||= @view_collection.fields_for(name).each_with_object({}) do |field, obj|
+        @_associations ||= @view_collection.fields_for(name).each_with_object({}) do |field, obj|
           next unless field.options[:association]
 
           blueprint = field.options.fetch(:blueprint)

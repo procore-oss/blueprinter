@@ -22,6 +22,6 @@ Gem::Specification.new do |s|
 
   s.files = Dir['{app,config,db,lib}/**/*', 'CHANGELOG.md', 'LICENSE.md', 'Rakefile', 'README.md']
 
-  s.required_ruby_version = '>= 3.0'
+  s.required_ruby_version = '>= 3.1'
   s.metadata['rubygems_mfa_required'] = 'true'
 end

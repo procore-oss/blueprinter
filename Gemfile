@@ -7,7 +7,7 @@ source 'https://rubygems.org'
 # development dependencies will be added by default to the :development group.
 gemspec
 
-# officially supported gems for serialisation
+# Officially supported gems for serialization
 gem 'oj', '~> 3.13'
 gem 'yajl-ruby', '~> 1.4'
 
@@ -24,5 +24,5 @@ gem 'rspec', '~> 3.12'
 gem 'rspec-rails', '~> 7.0'
 gem 'rubocop', '~> 1.44'
 gem 'rubocop-rake'
-gem 'sqlite3', '~> 1.5'
+gem 'sqlite3', '~> 2.1'
 gem 'yard', '>= 0.9.34'

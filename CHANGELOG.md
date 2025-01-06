@@ -1,3 +1,6 @@
+## Unreleased
+- [BREAKING] Drops support for Ruby 3.0. See [#496](https://github.com/procore-oss/blueprinter/pull/496)
+
 ## 1.1.2 - 2024/10/3
 - 🐛 [BUGFIX] Fixes an issue where a `Blueprinter::BlueprinterError` would be raised on render when providing `view: nil`, instead of falling back on the `:default` view. See
 [#472](https://github.com/procore-oss/blueprinter/pull/472). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).

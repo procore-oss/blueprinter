@@ -7,6 +7,7 @@ spec/dummy/log/*.log
 spec/dummy/tmp/
 /benchmarks/results/
 doc/
+docs-dist/
 .yardoc/
 Gemfile.lock
 .vscode

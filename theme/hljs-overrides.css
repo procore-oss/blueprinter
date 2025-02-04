@@ -1,0 +1,60 @@
+/* Override the default syntax highlighting to sorta match GitHub's */
+
+code.language-ruby.hljs .hljs-params {
+    color: inherit;
+}
+
+/* Assume dark theme by default */
+
+code.language-ruby.hljs .hljs-keyword {
+    color: #f46767;
+}
+
+code.language-ruby.hljs .hljs-symbol,
+code.language-ruby.hljs .hljs-string {
+    color: #96d0ff;
+}
+
+code.language-ruby.hljs .hljs-title.function_ {
+    color: #dcbdfb;
+}
+
+code.language-ruby.hljs .hljs-title.class_ {
+    color: #f69d50;
+}
+
+code.language-ruby.hljs .hljs-variable,
+code.language-ruby.hljs .hljs-literal {
+    color: #6cb6ff;
+}
+
+/* Variants for light themes */
+
+html.light code.language-ruby.hljs .hljs-keyword,
+html.rust code.language-ruby.hljs .hljs-keyword {
+    color: #cf222e;
+}
+
+html.light code.language-ruby.hljs .hljs-title.function_,
+html.rust code.language-ruby.hljs .hljs-title.function_ {
+    color: #6639ba;
+}
+
+html.light code.language-ruby.hljs .hljs-title.class_,
+html.rust code.language-ruby.hljs .hljs-title.class_ {
+    color: #953800;
+}
+
+html.light code.language-ruby.hljs .hljs-variable,
+html.light code.language-ruby.hljs .hljs-literal,
+html.rust code.language-ruby.hljs .hljs-variable,
+html.rust code.language-ruby.hljs .hljs-literal {
+    color: #0550ae;
+}
+
+html.light code.language-ruby.hljs .hljs-symbol,
+html.light code.language-ruby.hljs .hljs-string,
+html.rust code.language-ruby.hljs .hljs-symbol,
+html.rust code.language-ruby.hljs .hljs-string {
+    color: #1554b3;
+}

@@ -89,6 +89,10 @@ describe "Blueprinter::V2 Partials" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       view :foo do
         field :name
+
+        view :zorp do
+          field :zorp
+        end
       end
 
       view :bar do
@@ -97,7 +101,7 @@ describe "Blueprinter::V2 Partials" do
       end
     end
 
-    refs = blueprint.reflections
-    expect(refs[:bar].fields.keys).to eq %i(name description).sort
+    expect(blueprint.reflections[:bar].fields.keys.sort).to eq %i(name description).sort
+    expect(blueprint.reflections[:"bar.zorp"].fields.keys.sort).to eq %i(name zorp description).sort
   end
 end

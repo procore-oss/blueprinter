@@ -178,19 +178,30 @@
   partial :bar do
     options[:exclude_if_empty] = false
   end
+
+  # Some options accept Procs/labmdas. These can call instance methods defined on
+  # your Blueprint.
+  field :foo, if: -&gt;(ctx) { long_complex_check? ctx }
+
+  def long_complex_check?(ctx)
+    # ...
+  end
 end
 </code></pre>
-<p>Options are grouped into the following categories for easier reference:</p>
+<p>For easier reference, options are grouped into the following categories:</p>
 <ul>
 <li><a href="#default-values">Default values</a></li>
 <li><a href="#conditional-fields">Conditional fields</a></li>
 <li><a href="#other">Other</a></li>
 </ul>
+<h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
+<p>Options that accept Procs, lambdas, or method names are usually passed a single "context object" argument. It object contains the object being rendered, as well as other useful information. See the <a href="../api/context-objects.html">Context Objects</a> documentation for more information.</p>
 <h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
 <p>These options allow you to set default values for fields and associations, and customize when they're used.</p>
 <h4 id="default"><a class="header" href="#default">default</a></h4>
 <p>A default value used when the field or assocation is nil.</p>
 <p><em>Scope:</em> Field, object, collection</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">field :foo, default: "Foo"
 field :foo, default: -&gt;(ctx) { "Foo" }
 field :foo, default: :foo
@@ -202,6 +213,7 @@ end
 <h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
 <p>Default value for any nil non-association field in its scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:field_default] = "Foo"
 options[:field_default] = -&gt;(ctx) { "Foo" }
 options[:field_default] = :foo
@@ -209,10 +221,13 @@ options[:field_default] = :foo
 def foo(ctx)
   "Foo"
 end
+
+WidgetBluerpint.render(widget, field_default: "Foo").to_json
 </code></pre>
 <h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
 <p>Default value for any nil object field in its scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
 options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
 options[:object_default] = :foo
@@ -220,10 +235,13 @@ options[:object_default] = :foo
 def foo(ctx)
   { name: "Foo" }
 end
+
+WidgetBluerpint.render(widget, object_default: { name: "Foo" }).to_json
 </code></pre>
 <h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
 <p>Default value for any nil collection field.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
 options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
 options[:collection_default] = :foo
@@ -231,10 +249,13 @@ options[:collection_default] = :foo
 def foo(ctx)
   [{ name: "Foo" }]
 end
+
+WidgetBluerpint.render(widget, collection_default: [{ name: "Foo" }]).to_json
 </code></pre>
 <h4 id="default_if"><a class="header" href="#default_if">default_if</a></h4>
 <p>Use the default value if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Field, object, collection</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">field :foo, default: "Foo", default_if: -&gt;(ctx) { ctx.object.disabled? }
 field :foo, default: "Foo", default_if: :disabled?
 
@@ -245,37 +266,47 @@ end
 <h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
 <p>Same as <a href="#default_if">default_if</a>, but applies to any non-association field in scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:field_default_if] = :disabled?
 
 def disabled?(ctx)
   ctx.object.disabled?
 end
+
+WidgetBluerpint.render(widget, field_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
 <p>Same as <a href="#default_if">default_if</a>, but applies to any object field in scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:object_default_if] = :disabled?
 
 def disabled?(ctx)
   ctx.object.disabled?
 end
+
+WidgetBluerpint.render(widget, object_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
 <p>Same as <a href="#default_if">default_if</a>, but applies to any collection field in scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:collection_default_if] = :disabled?
 
 def disabled?(ctx)
   ctx.object.disabled?
 end
+
+WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
 </code></pre>
 <h2 id="conditional-fields"><a class="header" href="#conditional-fields">Conditional Fields</a></h2>
 <h4 id="if"><a class="header" href="#if">if</a></h4>
 <p>Only include the field if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Field, object, collection</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">field :foo, if: -&gt;(ctx) { ctx.object.enabled? }
 field :foo, if: :enabled?
 
@@ -286,51 +317,58 @@ end
 <h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
 <p>Only include non-association fields if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:field_if] = :enabled?
 
 def enabled?(ctx)
   ctx.object.enabled?
 end
+
+WidgetBluerpint.render(widget, field_if: :enabled?).to_json
 </code></pre>
 <h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
 <p>Only include object fields if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:object_if] = :enabled?
 
 def enabled?(ctx)
   ctx.object.enabled?
 end
+
+WidgetBluerpint.render(widget, object_if: :enabled?).to_json
 </code></pre>
 <h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
 <p>Only include collection fields if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:collection_if] = :enabled?
 
 def enabled?(ctx)
   ctx.object.enabled?
 end
+
+WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 </code></pre>
 <h4 id="unless"><a class="header" href="#unless">unless</a></h4>
 <p>Inverse of <a href="#if">if</a>.</p>
-<p><em>Scope:</em> Field, object, collection</p>
 <h4 id="field_unless"><a class="header" href="#field_unless">field_unless</a></h4>
 <p>Inverse of <a href="#field_if">field_if</a>.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="object_unless"><a class="header" href="#object_unless">object_unless</a></h4>
 <p>Inverse of <a href="#object_if">object_if</a>.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="collection_unless"><a class="header" href="#collection_unless">collection_unless</a></h4>
 <p>Inverse of <a href="#collection_if">collection_if</a>.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
 <p>Exclude fields if they're nil.</p>
 <p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
 <pre><code class="language-ruby">options[:exclude_if_nil] = true
 
 field :description, exclude_if_nil: true
+
+WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
 </code></pre>
 <h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
 <p>Exclude fields if they're nil, or if they respond to <code>empty?</code> and it returns true.</p>
@@ -338,6 +376,8 @@ field :description, exclude_if_nil: true
 <pre><code class="language-ruby">options[:exclude_if_empty] = true
 
 field :description, exclude_if_empty: true
+
+WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
 </code></pre>
 <h2 id="other"><a class="header" href="#other">Other</a></h2>
 <h4 id="from"><a class="header" href="#from">from</a></h4>
@@ -346,14 +386,33 @@ field :description, exclude_if_empty: true
 <pre><code class="language-ruby">field :desc, from: :description
 </code></pre>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
-<p>TODO</p>
+<p>Pass a <a href="../api/extractors.html">custom extractor</a> class.</p>
 <p><em>Scope:</em> Blueprint, view, partial, field, object, collection</p>
+<pre><code class="language-ruby">options[:extractor] = MyCustomExtractor
+
+object :category, CategoryBlueprint, extractor: MyCategoryExtractor
+</code></pre>
 <h4 id="root"><a class="header" href="#root">root</a></h4>
-<p>TODO</p>
+<p>Pass a root key to wrap the output.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<pre><code class="language-ruby">options[:root] = :data
+
+WidgetBlueprint.render(widget, root: :data).to_json
+</code></pre>
 <h4 id="meta"><a class="header" href="#meta">meta</a></h4>
-<p>TODO</p>
+<p>Add a <code>meta</code> key and data to the wrapped output (requires the <code>root</code> option).</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<pre><code class="language-ruby">options[:root] = :data
+options[:meta] = { page: 1 }
+
+# If you pass a Proc/lambda, it can call instance methods defined on the Blueprint
+options[:meta] = -&gt;(ctx) { { page: page_num(ctx) } }
+
+WidgetBlueprint
+  .render(widget, root: :data, meta: { page: params[:page] })
+  .to_json
+</code></pre>
 
                     </main>
 

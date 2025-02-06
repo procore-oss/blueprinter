@@ -176,17 +176,23 @@ collection :parts, PartBlueprint, exclude_if_empty: true
 <h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
 <ul>
 <li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
-<li>For other objects, Blueprinter will look for a method matching the field name.</li>
+<li>For other objects, Blueprinter will look for a public method matching the field name.</li>
 <li>The <a href="./options.html#from">from</a> option can be used to specify a different method or Hash key name.</li>
 </ul>
 <h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
 <p>Pass a block to a field, object, or collection to extract the value yourself. Blocks accept a context argument which contains the object being rendered, <a href="../api/context-objects.html">among other things</a>.</p>
+<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">field :description do |ctx|
   ctx.object.description.upcase
 end
 
+# Blocks can call instance methods defined on your Blueprint
 collection :parts, PartBlueprint do |ctx|
-  ctx.object.parts.select(&amp;:active?)
+  active_parts ctx.object
+end
+
+def active_parts(object)
+  object.parts.select(&amp;:active?)
 end
 </code></pre>
 <h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>

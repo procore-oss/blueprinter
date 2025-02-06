@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Blueprinter DSL - Blueprinter</title>
+        <title>Fields - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -155,39 +155,57 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
-<h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common fields, <a href="./views.html">views</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="./options.html">options</a>.</p>
-<h4 id="library-version-2x"><a class="header" href="#library-version-2x">Library version 2.x</a></h4>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Base
-  field :id
+                        <h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
+<p>By default, Blueprinter tries to find methods or Hash keys matching the field names on the object being rendered. You can change how this works with <a href="../api/extractors.html">custom extractors</a>.</p>
+<pre><code class="language-ruby"># Use field for scalar values or arrays of scalar values
+field :name
+field :tags
+
+# Use object for an association to another object
+object :category, CategoryBlueprint
+
+# Use collection for an assocation to an array of objects
+collection :parts, PartBlueprint
+</code></pre>
+<h2 id="options"><a class="header" href="#options">Options</a></h2>
+<p>Fields accept a wide array of built-in options, and <a href="./extensions.html">extensions</a> can define even more. <a href="./options.html">Find all built-in options here.</a></p>
+<pre><code class="language-ruby">field :description, default: "No description"
+collection :parts, PartBlueprint, exclude_if_empty: true
+</code></pre>
+<h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
+<p>Blueprinter has sane defaults for extracting field values from objects, but there are several ways to customize the behavior.</p>
+<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
+<ul>
+<li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
+<li>For other objects, Blueprinter will look for a method matching the field name.</li>
+<li>The <a href="./options.html#from">from</a> option can be used to specify a different method or Hash key name.</li>
+</ul>
+<h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
+<p>Pass a block to a field, object, or collection to extract the value yourself. Blocks accept a context argument which contains the object being rendered, <a href="../api/context-objects.html">among other things</a>.</p>
+<pre><code class="language-ruby">field :description do |ctx|
+  ctx.object.description.upcase
+end
+
+collection :parts, PartBlueprint do |ctx|
+  ctx.object.parts.select(&amp;:active?)
 end
 </code></pre>
-<h4 id="library-version-12x"><a class="header" href="#library-version-12x">Library version 1.2.x</a></h4>
-<p>Version 1.2.x contains both the V1 and V2 APIs, so you must specify V2 in the base class.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  field :id
-end
+<h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>
+<p>You can completely replace the above behaviors by creating a <a href="../api/extractors.html">custom extractor</a>. You can use your extractor for an entire Blueprint, view, or on specific fields.</p>
+<pre><code class="language-ruby">options[:extractor] = MyCustomExtractor
+
+object :bar, extractor: MyOtherExtractor
 </code></pre>
-<h2 id="define-blueprints-for-your-models"><a class="header" href="#define-blueprints-for-your-models">Define blueprints for your models</a></h2>
-<p>This blueprint inherits everything from <code>ApplicationBlueprint</code>, then adds a <code>name</code> field and two associations that will render using other blueprints.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  field :name
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
-end
-</code></pre>
-<p>There's a lot more you can do with the Blueprinter DSL. <a href="./fields.html">Fields</a> are up next!</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../dsl/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../dsl/fields.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../dsl/views.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -197,11 +215,11 @@ end
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../dsl/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../dsl/fields.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../dsl/views.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -340,6 +340,11 @@ field :description, exclude_if_nil: true
 field :description, exclude_if_empty: true
 </code></pre>
 <h2 id="other"><a class="header" href="#other">Other</a></h2>
+<h4 id="from"><a class="header" href="#from">from</a></h4>
+<p>Populate the field using a method/Hash key other than the field name.</p>
+<p><em>Scope</em>: Field, object, collection</p>
+<pre><code class="language-ruby">field :desc, from: :description
+</code></pre>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
 <p>TODO</p>
 <p><em>Scope:</em> Blueprint, view, partial, field, object, collection</p>

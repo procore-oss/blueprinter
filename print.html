@@ -205,11 +205,48 @@ end
   collection :parts, PartBlueprint
 end
 </code></pre>
-<h3 id="define-fields-with-blocks"><a class="header" href="#define-fields-with-blocks">Define fields with blocks</a></h3>
-<p>TODO</p>
-<h4 id="context-argument"><a class="header" href="#context-argument">Context argument</a></h4>
-<p>TODO</p>
-<p>There's a lot more you can do with Blueprinter; <a href="dsl/./views.html">views</a> are a good place to start!</p>
+<p>There's a lot more you can do with the Blueprinter DSL. <a href="dsl/./fields.html">Fields</a> are up next!</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
+<p>By default, Blueprinter tries to find methods or Hash keys matching the field names on the object being rendered. You can change how this works with <a href="dsl/../api/extractors.html">custom extractors</a>.</p>
+<pre><code class="language-ruby"># Use field for scalar values or arrays of scalar values
+field :name
+field :tags
+
+# Use object for an association to another object
+object :category, CategoryBlueprint
+
+# Use collection for an assocation to an array of objects
+collection :parts, PartBlueprint
+</code></pre>
+<h2 id="options"><a class="header" href="#options">Options</a></h2>
+<p>Fields accept a wide array of built-in options, and <a href="dsl/./extensions.html">extensions</a> can define even more. <a href="dsl/./options.html">Find all built-in options here.</a></p>
+<pre><code class="language-ruby">field :description, default: "No description"
+collection :parts, PartBlueprint, exclude_if_empty: true
+</code></pre>
+<h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
+<p>Blueprinter has sane defaults for extracting field values from objects, but there are several ways to customize the behavior.</p>
+<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
+<ul>
+<li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
+<li>For other objects, Blueprinter will look for a method matching the field name.</li>
+<li>The <a href="dsl/./options.html#from">from</a> option can be used to specify a different method or Hash key name.</li>
+</ul>
+<h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
+<p>Pass a block to a field, object, or collection to extract the value yourself. Blocks accept a context argument which contains the object being rendered, <a href="dsl/../api/context-objects.html">among other things</a>.</p>
+<pre><code class="language-ruby">field :description do |ctx|
+  ctx.object.description.upcase
+end
+
+collection :parts, PartBlueprint do |ctx|
+  ctx.object.parts.select(&amp;:active?)
+end
+</code></pre>
+<h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>
+<p>You can completely replace the above behaviors by creating a <a href="dsl/../api/extractors.html">custom extractor</a>. You can use your extractor for an entire Blueprint, view, or on specific fields.</p>
+<pre><code class="language-ruby">options[:extractor] = MyCustomExtractor
+
+object :bar, extractor: MyOtherExtractor
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
 <p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, and <a href="dsl/./extensions.html">extensions</a>.</p>
 <p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
@@ -304,7 +341,7 @@ end
   end
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="options"><a class="header" href="#options">Options</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="options-1"><a class="header" href="#options-1">Options</a></h1>
 <p>Numerous options can be defined on Blueprints, views, partials, or individual fields. Some can also be passed to <code>render</code>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   # Blueprint options apply to all fields, associations, views, and partials in
@@ -489,6 +526,11 @@ field :description, exclude_if_nil: true
 field :description, exclude_if_empty: true
 </code></pre>
 <h2 id="other"><a class="header" href="#other">Other</a></h2>
+<h4 id="from"><a class="header" href="#from">from</a></h4>
+<p>Populate the field using a method/Hash key other than the field name.</p>
+<p><em>Scope</em>: Field, object, collection</p>
+<pre><code class="language-ruby">field :desc, from: :description
+</code></pre>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
 <p>TODO</p>
 <p><em>Scope:</em> Blueprint, view, partial, field, object, collection</p>
@@ -513,6 +555,7 @@ data = WidgetBlueprint["extended.price"].render(widget).to_json
 </code></pre>
 <p>TODO <code>render_object</code>, <code>render_collection</code></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="reflections"><a class="header" href="#reflections">Reflections</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors"><a class="header" href="#extractors">Extractors</a></h1>

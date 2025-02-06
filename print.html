@@ -184,8 +184,7 @@ data = WidgetBlueprint[:extended].render(widget)
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common fields, views, partials, formatters, extensions, and options.</p>
-<p>test1</p>
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common fields, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
   field :id
 end
@@ -283,7 +282,7 @@ end
   end
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="formatting"><a class="header" href="#formatting">Formatting</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
 <p>Automatically format field values by class.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint
   # Strip whitespace from all strings
@@ -482,6 +481,7 @@ field :description, exclude_if_empty: true
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="meta"><a class="header" href="#meta">meta</a></h4>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
 <pre><code class="language-ruby"># Render the default view
 data = WidgetBlueprint.render(widget)
@@ -494,8 +494,9 @@ data = WidgetBlueprint[:extended].render(widget)
 # Render a nested view
 data = WidgetBlueprint["extended.price"].render(widget)
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="reflection"><a class="header" href="#reflection">Reflection</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reflections"><a class="header" href="#reflections">Reflections</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors"><a class="header" href="#extractors">Extractors</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="updating-to-v2"><a class="header" href="#updating-to-v2">Updating to V2</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>

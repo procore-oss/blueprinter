@@ -171,8 +171,8 @@
 
   view :extended do
     field :description
-    association :manufacturer, CompanyBlueprint
-    association :vendors, [CompanyBlueprint]
+    object :manufacturer, CompanyBlueprint
+    collection :vendors, CompanyBlueprint
   end
 end
 

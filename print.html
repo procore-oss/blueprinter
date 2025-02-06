@@ -182,35 +182,42 @@ data = WidgetBlueprint.render(widget)
 # Render the extended view
 data = WidgetBlueprint[:extended].render(widget)
 </code></pre>
+<p>Interested? <a href="./dsl/index.html">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
 <p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common fields, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
+<h4 id="library-version-2x"><a class="header" href="#library-version-2x">Library version 2.x</a></h4>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Base
+  field :id
+end
+</code></pre>
+<h4 id="library-version-12x"><a class="header" href="#library-version-12x">Library version 1.2.x</a></h4>
+<p>Version 1.2.x contains both the V1 and V2 APIs, so you must specify V2 in the base class.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
   field :id
 end
 </code></pre>
 <h2 id="define-blueprints-for-your-models"><a class="header" href="#define-blueprints-for-your-models">Define blueprints for your models</a></h2>
-<p>The following blueprint:</p>
-<ul>
-<li>Inherits <code>id</code> from <code>ApplicationBlueprint</code></li>
-<li>Defines a <code>name</code> field</li>
-<li>Defines a <code>category</code> association that will render using another blueprint</li>
-<li>Defines a <code>parts</code> <strong>array</strong> association that will render using another blueprint</li>
-</ul>
+<p>This blueprint inherits everything from <code>ApplicationBlueprint</code>, then adds a <code>name</code> field and two associations that will render using other blueprints.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
   collection :parts, PartBlueprint
 end
 </code></pre>
+<h3 id="define-fields-with-blocks"><a class="header" href="#define-fields-with-blocks">Define fields with blocks</a></h3>
+<p>TODO</p>
+<h4 id="context-argument"><a class="header" href="#context-argument">Context argument</a></h4>
+<p>TODO</p>
+<p>There's a lot more you can do with Blueprinter; <a href="dsl/./views.html">views</a> are a good place to start!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent, but may choose to override some pieces.</p>
-<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other view is specified.</p>
+<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, and <a href="dsl/./extensions.html">extensions</a>.</p>
+<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
 
-  # The "with_parts" view adds a collection of parts
+  # The "with_parts" view inherits from "default" and adds a collection of parts
   view :with_parts do
     collection :parts, PartBlueprint
   end
@@ -227,7 +234,7 @@ end
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   fields :name, :description, :price
 
-  view :simple do
+  view :minimal do
     exclude :description, :price
   end
 end
@@ -237,10 +244,10 @@ end
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
 
   view :extended do
     field :description
+    collection :parts, PartBlueprint
 
     # The "extended.with_price" view adds a price field
     view :with_price do
@@ -250,18 +257,18 @@ end
 
 </code></pre>
 <h3 id="referencing-views"><a class="header" href="#referencing-views">Referencing views</a></h3>
-<p>When defining an object or collection, you can choose a view from the blueprint:</p>
-<pre><code class="language-ruby">object :category, CategoryBlueprint[:extended]
-collection :parts, PartBlueprint["extended.plus"]
+<p>When defining an association, you can choose a view from its blueprint:</p>
+<pre><code class="language-ruby">object :widget, WidgetBlueprint[:extended]
+collection :widgets, WidgetBlueprint["extended.with_price"]
 </code></pre>
 <h3 id="inheriting-from-views"><a class="header" href="#inheriting-from-views">Inheriting from views</a></h3>
 <p>You can inherit from another blueprint's view:</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint[:financial]
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint[:with_timestamps]
   # ...
 end
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="partials"><a class="header" href="#partials">Partials</a></h1>
-<p>Partials allow you to compose views from reusable components.</p>
+<p>Partials allow you to compose views from reusable components. Just like views, partials can define <a href="dsl/./options.html">options</a>, <a href="dsl/./views.html">views</a>, other <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, and <a href="dsl/./extensions.html">extensions</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   field :description
@@ -300,31 +307,38 @@ end
 <div style="break-before: page; page-break-before: always;"></div><h1 id="options"><a class="header" href="#options">Options</a></h1>
 <p>Numerous options can be defined on Blueprints, views, partials, or individual fields. Some can also be passed to <code>render</code>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  # Blueprint options apply to all fields, objects, and collections in the Blueprint.
-  # Options are inherited from the parent class and can be overridden.
+  # Blueprint options apply to all fields, associations, views, and partials in
+  # the Blueprint. They are inherited from the parent class but can be overridden.
   options[:exclude_if_empty] = true
 
-  # Field options apply to individual fields, objects, and collections. They can
-  # override Blueprint options.
+  # Field options apply to individual fields or associations. They can override
+  # Blueprint options.
   field :name, exclude_if_empty: false
 
-  # Options in views apply to all fields, objects, and collections in the view. They
-  # inherit options from the Blueprint, or from parent views, and can override them.
+  # Options in views apply to all fields, associations, partials and nested views
+  # in the view. They inherit options from the Blueprint, or from parent views,
+  # and can override them.
   view :foo do
     options[:exclude_if_empty] = false
   end
 
-  # Options in partials apply to all fields, objects, and collections in the partial
-  # AND in views that use the partial. They inherit options from the Blueprint, or
-  # from parent views, and can override them.
+  # Options in partials apply to all fields, associations, views, and partials in
+  # the partial. All of these are applied to the views that use the partial.
   partial :bar do
     options[:exclude_if_empty] = false
   end
 end
 </code></pre>
+<p>Options are grouped into the following categories for easier reference:</p>
+<ul>
+<li><a href="dsl/options.html#default-values">Default values</a></li>
+<li><a href="dsl/options.html#conditional-fields">Conditional fields</a></li>
+<li><a href="dsl/options.html#other">Other</a></li>
+</ul>
 <h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
+<p>These options allow you to set default values for fields and associations, and customize when they're used.</p>
 <h4 id="default"><a class="header" href="#default">default</a></h4>
-<p>A default value in case this field's value is nil.</p>
+<p>A default value used when the field or assocation is nil.</p>
 <p><em>Scope:</em> Field, object, collection</p>
 <pre><code class="language-ruby">field :foo, default: "Foo"
 field :foo, default: -&gt;(ctx) { "Foo" }
@@ -335,7 +349,7 @@ def foo(ctx)
 end
 </code></pre>
 <h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
-<p>Default value for any <em>regular</em> field that's nil.</p>
+<p>Default value for any nil non-association field in its scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:field_default] = "Foo"
 options[:field_default] = -&gt;(ctx) { "Foo" }
@@ -346,7 +360,7 @@ def foo(ctx)
 end
 </code></pre>
 <h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
-<p>Default value for any <em>object</em> field that's nil.</p>
+<p>Default value for any nil object field in its scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
 options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
@@ -357,7 +371,7 @@ def foo(ctx)
 end
 </code></pre>
 <h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
-<p>Default value for any <em>collection</em> field that's nil.</p>
+<p>Default value for any nil collection field.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
 options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
@@ -378,7 +392,7 @@ def disabled?(ctx)
 end
 </code></pre>
 <h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
-<p>Same as <code>default_if</code>, but applies to any <em>regular</em> field in scope.</p>
+<p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any non-association field in scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:field_default_if] = :disabled?
@@ -388,7 +402,7 @@ def disabled?(ctx)
 end
 </code></pre>
 <h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
-<p>Same as <code>default_if</code>, but applies to any <em>object</em> field in scope.</p>
+<p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any object field in scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:object_default_if] = :disabled?
@@ -398,7 +412,7 @@ def disabled?(ctx)
 end
 </code></pre>
 <h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
-<p>Same as <code>default_if</code>, but applies to any <em>collection</em> field in scope.</p>
+<p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any collection field in scope.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:collection_default_if] = :disabled?
@@ -419,7 +433,7 @@ def enabled?(ctx)
 end
 </code></pre>
 <h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
-<p>Only include <em>regular</em> fields if the given Proc or method name returns truthy.</p>
+<p>Only include non-association fields if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:field_if] = :enabled?
@@ -429,7 +443,7 @@ def enabled?(ctx)
 end
 </code></pre>
 <h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
-<p>Only include <em>object</em> fields if the given Proc or method name returns truthy.</p>
+<p>Only include object fields if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:object_if] = :enabled?
@@ -439,7 +453,7 @@ def enabled?(ctx)
 end
 </code></pre>
 <h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
-<p>Only include <em>collection</em> fields if the given Proc or method name returns truthy.</p>
+<p>Only include collection fields if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:collection_if] = :enabled?
@@ -449,16 +463,16 @@ def enabled?(ctx)
 end
 </code></pre>
 <h4 id="unless"><a class="header" href="#unless">unless</a></h4>
-<p>Inverse of <code>if</code>.</p>
+<p>Inverse of <a href="dsl/options.html#if">if</a>.</p>
 <p><em>Scope:</em> Field, object, collection</p>
 <h4 id="field_unless"><a class="header" href="#field_unless">field_unless</a></h4>
-<p>Inverse of <code>field_if</code>.</p>
+<p>Inverse of <a href="dsl/options.html#field_if">field_if</a>.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="object_unless"><a class="header" href="#object_unless">object_unless</a></h4>
-<p>Inverse of <code>object_if</code>.</p>
+<p>Inverse of <a href="dsl/options.html#object_if">object_if</a>.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="collection_unless"><a class="header" href="#collection_unless">collection_unless</a></h4>
-<p>Inverse of <code>collection_if</code>.</p>
+<p>Inverse of <a href="dsl/options.html#collection_if">collection_if</a>.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
 <p>Exclude fields if they're nil.</p>
@@ -476,24 +490,28 @@ field :description, exclude_if_empty: true
 </code></pre>
 <h2 id="other"><a class="header" href="#other">Other</a></h2>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
+<p>TODO</p>
 <p><em>Scope:</em> Blueprint, view, partial, field, object, collection</p>
 <h4 id="root"><a class="header" href="#root">root</a></h4>
+<p>TODO</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <h4 id="meta"><a class="header" href="#meta">meta</a></h4>
+<p>TODO</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
-<pre><code class="language-ruby"># Render the default view
-data = WidgetBlueprint.render(widget)
+<pre><code class="language-ruby"># Render the default view to JSON
+data = WidgetBlueprint.render(widget).to_json
 # or
-data = WidgetBlueprint[:default].render(widget)
+data = WidgetBlueprint[:default].render(widget).to_json
 
-# Render a view
-data = WidgetBlueprint[:extended].render(widget)
+# Render a view to a Hash
+data = WidgetBlueprint[:extended].render(widget).to_hash
 
-# Render a nested view
-data = WidgetBlueprint["extended.price"].render(widget)
+# Render a nested view to JSON
+data = WidgetBlueprint["extended.price"].render(widget).to_json
 </code></pre>
+<p>TODO <code>render_object</code>, <code>render_collection</code></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="reflections"><a class="header" href="#reflections">Reflections</a></h1>

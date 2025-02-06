@@ -156,17 +156,18 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
-<pre><code class="language-ruby"># Render the default view
-data = WidgetBlueprint.render(widget)
+<pre><code class="language-ruby"># Render the default view to JSON
+data = WidgetBlueprint.render(widget).to_json
 # or
-data = WidgetBlueprint[:default].render(widget)
+data = WidgetBlueprint[:default].render(widget).to_json
 
-# Render a view
-data = WidgetBlueprint[:extended].render(widget)
+# Render a view to a Hash
+data = WidgetBlueprint[:extended].render(widget).to_hash
 
-# Render a nested view
-data = WidgetBlueprint["extended.price"].render(widget)
+# Render a nested view to JSON
+data = WidgetBlueprint["extended.price"].render(widget).to_json
 </code></pre>
+<p>TODO <code>render_object</code>, <code>render_collection</code></p>
 
                     </main>
 

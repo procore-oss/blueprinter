@@ -158,24 +158,30 @@
                         <h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
 <p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common fields, <a href="./views.html">views</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="./options.html">options</a>.</p>
+<h4 id="library-version-2x"><a class="header" href="#library-version-2x">Library version 2.x</a></h4>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Base
+  field :id
+end
+</code></pre>
+<h4 id="library-version-12x"><a class="header" href="#library-version-12x">Library version 1.2.x</a></h4>
+<p>Version 1.2.x contains both the V1 and V2 APIs, so you must specify V2 in the base class.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
   field :id
 end
 </code></pre>
 <h2 id="define-blueprints-for-your-models"><a class="header" href="#define-blueprints-for-your-models">Define blueprints for your models</a></h2>
-<p>The following blueprint:</p>
-<ul>
-<li>Inherits <code>id</code> from <code>ApplicationBlueprint</code></li>
-<li>Defines a <code>name</code> field</li>
-<li>Defines a <code>category</code> association that will render using another blueprint</li>
-<li>Defines a <code>parts</code> <strong>array</strong> association that will render using another blueprint</li>
-</ul>
+<p>This blueprint inherits everything from <code>ApplicationBlueprint</code>, then adds a <code>name</code> field and two associations that will render using other blueprints.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
   collection :parts, PartBlueprint
 end
 </code></pre>
+<h3 id="define-fields-with-blocks"><a class="header" href="#define-fields-with-blocks">Define fields with blocks</a></h3>
+<p>TODO</p>
+<h4 id="context-argument"><a class="header" href="#context-argument">Context argument</a></h4>
+<p>TODO</p>
+<p>There's a lot more you can do with Blueprinter; <a href="./views.html">views</a> are a good place to start!</p>
 
                     </main>
 

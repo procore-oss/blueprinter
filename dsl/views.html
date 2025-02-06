@@ -156,13 +156,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent, but may choose to override some pieces.</p>
-<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other view is specified.</p>
+<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to fields, views can define <a href="./options.html">options</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, and <a href="./extensions.html">extensions</a>.</p>
+<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
 
-  # The "with_parts" view adds a collection of parts
+  # The "with_parts" view inherits from "default" and adds a collection of parts
   view :with_parts do
     collection :parts, PartBlueprint
   end
@@ -179,7 +179,7 @@ end
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   fields :name, :description, :price
 
-  view :simple do
+  view :minimal do
     exclude :description, :price
   end
 end
@@ -189,10 +189,10 @@ end
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
 
   view :extended do
     field :description
+    collection :parts, PartBlueprint
 
     # The "extended.with_price" view adds a price field
     view :with_price do
@@ -202,13 +202,13 @@ end
 
 </code></pre>
 <h3 id="referencing-views"><a class="header" href="#referencing-views">Referencing views</a></h3>
-<p>When defining an object or collection, you can choose a view from the blueprint:</p>
-<pre><code class="language-ruby">object :category, CategoryBlueprint[:extended]
-collection :parts, PartBlueprint["extended.plus"]
+<p>When defining an association, you can choose a view from its blueprint:</p>
+<pre><code class="language-ruby">object :widget, WidgetBlueprint[:extended]
+collection :widgets, WidgetBlueprint["extended.with_price"]
 </code></pre>
 <h3 id="inheriting-from-views"><a class="header" href="#inheriting-from-views">Inheriting from views</a></h3>
 <p>You can inherit from another blueprint's view:</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint[:financial]
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint[:with_timestamps]
   # ...
 end
 </code></pre>

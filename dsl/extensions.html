@@ -156,6 +156,32 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
+<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Some are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="../api/extensions.html">Extension API</a>.</p>
+<h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
+<p>Extensions can be added in your blueprints, views, and partials. They're inherited from parent classes and views, but can be overridden.</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  extensions &lt;&lt; FooExtension.new
+  extensions &lt;&lt; BarExtension.new
+
+  view :minimal do
+    # extensions is a simple Array, so you can add or remove elements as needed
+    extensions.reject! { |ext| ext.is_a? BarExtension }
+  end
+end
+</code></pre>
+<h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
+<p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
+<h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
+<p>Control the order of fields in your output. See the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the block parameters.</p>
+<pre><code class="language-ruby"># Library version 2.x
+extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
+
+# Library version 1.2.x
+extensions &lt;&lt; Blueprinter::V2::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
+</code></pre>
+<h2 id="external-gems"><a class="header" href="#external-gems">External gems</a></h2>
+<p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a></p>
+<p>An official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
 
                     </main>
 

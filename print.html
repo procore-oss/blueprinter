@@ -388,7 +388,7 @@ end
 <li><a href="dsl/options.html#other">Other</a></li>
 </ul>
 <h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
-<p>Options that accept Procs, lambdas, or method names are usually passed a single "context object" argument. It object contains the object being rendered, as well as other useful information. See the <a href="dsl/../api/context-objects.html">Context Objects</a> documentation for more information.</p>
+<p>Options that accept Procs, lambdas, or method names are usually passed a single "context object" argument. It contains the object being rendered, as well as other useful information. See the <a href="dsl/../api/context-objects.html">Context Objects</a> documentation for more information.</p>
 <h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
 <p>These options allow you to set default values for fields and associations, and customize when they're used.</p>
 <h4 id="default"><a class="header" href="#default">default</a></h4>
@@ -607,6 +607,32 @@ WidgetBlueprint
   .to_json
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
+<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Some are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="dsl/../api/extensions.html">Extension API</a>.</p>
+<h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
+<p>Extensions can be added in your blueprints, views, and partials. They're inherited from parent classes and views, but can be overridden.</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  extensions &lt;&lt; FooExtension.new
+  extensions &lt;&lt; BarExtension.new
+
+  view :minimal do
+    # extensions is a simple Array, so you can add or remove elements as needed
+    extensions.reject! { |ext| ext.is_a? BarExtension }
+  end
+end
+</code></pre>
+<h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
+<p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
+<h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
+<p>Control the order of fields in your output. See the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the block parameters.</p>
+<pre><code class="language-ruby"># Library version 2.x
+extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
+
+# Library version 1.2.x
+extensions &lt;&lt; Blueprinter::V2::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
+</code></pre>
+<h2 id="external-gems"><a class="header" href="#external-gems">External gems</a></h2>
+<p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a></p>
+<p>An official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
 <pre><code class="language-ruby"># Render the default view to JSON
 data = WidgetBlueprint.render(widget).to_json

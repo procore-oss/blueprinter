@@ -185,7 +185,7 @@ data = WidgetBlueprint[:extended].render(widget)
 <p>Interested? <a href="./dsl/index.html">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common fields, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
 <h4 id="library-version-2x"><a class="header" href="#library-version-2x">Library version 2.x</a></h4>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Base
   field :id
@@ -242,10 +242,12 @@ collection :parts, PartBlueprint do |ctx|
 end
 </code></pre>
 <h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>
-<p>You can completely replace the above behaviors by creating a <a href="dsl/../api/extractors.html">custom extractor</a>. You can use your extractor for an entire Blueprint, view, or on specific fields.</p>
-<pre><code class="language-ruby">options[:extractor] = MyCustomExtractor
+<p>You can completely replace the above behaviors by creating a <a href="dsl/../api/extractors.html">custom extractor</a>.</p>
+<pre><code class="language-ruby"># For an entire Blueprint or view
+options[:extractor] = MyCustomExtractor
 
-object :bar, extractor: MyOtherExtractor
+# For a single field
+object :bar, extractor: MyCustomExtractor
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
 <p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, and <a href="dsl/./extensions.html">extensions</a>.</p>

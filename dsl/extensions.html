@@ -164,8 +164,10 @@
   extensions &lt;&lt; BarExtension.new
 
   view :minimal do
-    # extensions is a simple Array, so you can add or remove elements as needed
+    # extensions is a simple Array, so you can add or remove elements
     extensions.reject! { |ext| ext.is_a? BarExtension }
+    # or simply replace the whole Array
+    self.extensions = [FooExtension.new]
   end
 end
 </code></pre>

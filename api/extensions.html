@@ -282,7 +282,7 @@ end
 <blockquote>
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Object</strong> The value to be rendered<br />
-<strong>@cost</strong> High - run for every field</p>
+<strong>@cost</strong> High - run for every field (not object or collection fields)</p>
 </blockquote>
 <p>Run after a field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent field_value hooks, then run through any formatters and rendered.</strong></p>
 <pre><code class="language-ruby">def field_value(ctx)
@@ -321,7 +321,7 @@ end
 <blockquote>
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
-<strong>@cost</strong> High - run for every field</p>
+<strong>@cost</strong> High - run for every field (not object or collection fields)</p>
 </blockquote>
 <p>If any extension with this hook returns truthy, the field will be excluded from the output. The formatted field value is available in <code>context.value</code>.</p>
 <pre><code class="language-ruby">def exclude_field?(ctx)

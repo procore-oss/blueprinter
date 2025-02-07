@@ -258,10 +258,12 @@ end
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
-<strong>@return Array&lt;Field | ObjectField | Collection&gt;</strong> Fields in the order they should be rendered<br />
+<strong>@return Array&lt;Field | ObjectField | Collection&gt;</strong> The fields you want to render in the order you want to render them<br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Customize the order fields are rendered in. (The default is the order in which they were defined). You wouldn't think it matters, but some bad JSON parsers care. (The built-in, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.)</p>
+<p>Customize the order fields are rendered in - or strip out certain fields entirely. The included, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
+<p>The default behavior is to render all fields in the order they were defined.</p>
+<p>This example uses the <a href="./reflection.html">Reflection API</a> to get the fields from the current view, then sort them by name:</p>
 <pre><code class="language-ruby">def blueprint_fields(ctx)
   ref = ctx.blueprint.class.reflections[:default]
   ref.ordered.sort_by(&amp;:name)

@@ -156,6 +156,99 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="reflection"><a class="header" href="#reflection">Reflection</a></h1>
+<p>Blueprints may be reflected on to inspect their views, fields, and associations. This is useful for building <a href="./extensions.html">extensions</a>, and possibly even for some applications.</p>
+<p>We will use the following blueprint in the examples below:</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  field :name
+  field :description, exclude_if_empty: true
+  object :category, CategoryBlueprint
+  collection :parts, PartBlueprint
+
+  view :extended do
+    object :manufacturer, CompanyBlueprint[:full]
+
+    view :with_price do
+      field :price
+    end
+  end
+end
+</code></pre>
+<h2 id="blueprint-names"><a class="header" href="#blueprint-names">Blueprint names</a></h2>
+<pre><code class="language-ruby">WidgetBlueprint.to_s
+=&gt; "WidgetBlueprint"
+
+WidgetBlueprint[:extended].to_s
+=&gt; "WidgetBlueprint.extended"
+
+WidgetBlueprint["extended.with_price"].to_s
+=&gt; "WidgetBlueprint.extended.with_price"
+</code></pre>
+<h2 id="views"><a class="header" href="#views">Views</a></h2>
+<p>Here, <code>:default</code> refers to the top level of the blueprint.</p>
+<pre><code class="language-ruby">WidgetBlueprint.reflections.keys
+=&gt; [:default, :extended, :"extended.with_price"]
+</code></pre>
+<p>You can also reflect directly on a view. <strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
+<pre><code class="language-ruby">WidgetBlueprint[:extended].reflections.keys
+=&gt; [:default, :with_price]
+</code></pre>
+<h2 id="fields"><a class="header" href="#fields">Fields</a></h2>
+<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
+
+# Regular fields
+view.fields.keys
+=&gt; [:name, :description]
+
+# Object fields
+view.objects.keys
+=&gt; [:category]
+
+# Collection fields
+view.collections.keys
+=&gt; [:parts]
+
+# All fields in the order they were defined
+view.ordered
+# returns an array of field objects
+</code></pre>
+<h2 id="field-metadata"><a class="header" href="#field-metadata">Field metadata</a></h2>
+<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
+field = view.fields[:description]
+
+field.name
+=&gt; :description
+
+field.from
+=&gt; :description # the :from option in the DSL
+
+field.value_proc
+=&gt; nil # the block you passed to the field, if any
+
+field.options # all other options passed to the field
+=&gt; { exclude_if_empty: true }
+</code></pre>
+<p>Object and collection fields have the same metadata as regular fields, plus a <code>blueprint</code> attribute:</p>
+<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
+field = view.collection[:parts]
+
+# it returns the Blueprint class, so you can continue reflecting
+field.blueprint
+=&gt; PartBlueprint
+
+field.blueprint.reflections[:default].fields
+=&gt; # array of fields on the default view of PartBlueprint
+</code></pre>
+<p>If you used a view in an object or collection field, you can reflect on that view just like a blueprint:</p>
+<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:extended]
+field = view.objects[:manufacturer]
+
+field.blueprint.to_s
+=&gt; "CompanyBlueprint.full"
+
+# Remember, we're reflecting ON the :full view, so the name is relative!
+field.blueprint.reflections[:default].fields
+=&gt; # array of fields on the :full view of CompanyBlueprint
+</code></pre>
 
                     </main>
 

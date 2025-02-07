@@ -175,11 +175,11 @@
   end
 end
 
-# Render the default view
-data = WidgetBlueprint.render(widget)
+# Render the default view to JSON
+WidgetBlueprint.render(widget).to_json
 
-# Render the extended view
-data = WidgetBlueprint[:extended].render(widget)
+# Render the extended view to a Hash
+WidgetBlueprint[:extended].render(widget).to_hash
 </code></pre>
 <p>Interested? <a href="./dsl/index.html">Learn the DSL!</a></p>
 

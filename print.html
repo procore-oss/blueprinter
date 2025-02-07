@@ -176,11 +176,11 @@
   end
 end
 
-# Render the default view
-data = WidgetBlueprint.render(widget)
+# Render the default view to JSON
+WidgetBlueprint.render(widget).to_json
 
-# Render the extended view
-data = WidgetBlueprint[:extended].render(widget)
+# Render the extended view to a Hash
+WidgetBlueprint[:extended].render(widget).to_hash
 </code></pre>
 <p>Interested? <a href="./dsl/index.html">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
@@ -652,9 +652,141 @@ data = WidgetBlueprint["extended.price"].render(widget).to_json
 </code></pre>
 <p>TODO <code>render_object</code>, <code>render_collection</code></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
+<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="api/../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
+<pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
+  # Use the exclude_field? hook to exclude certain fields on Tuesdays
+  def exclude_field?(ctx)
+    ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
+  end
+end
+</code></pre>
+<h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
+<p>Hooks are called in the following order. Most are passed a <a href="api/./context-objects.html">context object</a> as an argument.</p>
+<ul>
+<li><a href="api/extensions.html#collection">collection?</a></li>
+<li><a href="api/extensions.html#around">around</a>
+<ul>
+<li><a href="api/extensions.html#input_object">input_object</a> | <a href="api/extensions.html#input_collection">input_collection</a></li>
+<li><a href="api/extensions.html#around_blueprint">around_blueprint</a>
+<ul>
+<li><a href="api/extensions.html#prepare">prepare</a></li>
+<li><a href="api/extensions.html#blueprint_fields">blueprint_fields</a></li>
+<li><a href="api/extensions.html#blueprint_input">blueprint_input</a></li>
+<li><a href="api/extensions.html#field_value">field_value</a> | <a href="api/extensions.html#object_value">object_value</a> | <a href="api/extensions.html#collection_value">collection_value</a></li>
+<li><a href="api/extensions.html#exclude_field">exclude_field?</a> | <a href="api/extensions.html#exclude_object">exclude_object?</a> | <a href="api/extensions.html#exclude_collection">exclude_collection?</a></li>
+<li><a href="api/extensions.html#blueprint_output">blueprint_output</a></li>
+</ul>
+</li>
+<li><a href="api/extensions.html#output_object">output_object</a> | <a href="api/extensions.html#output_collection">output_collection</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="collection"><a class="header" href="#collection">collection?</a></h2>
+<blockquote>
+<p><strong>@param Object</strong> The object passed to <code>render</code><br />
+<strong>@return Boolean</strong> Whether the object is a collection or a single item<br />
+<strong>@cost</strong> Low - run exactly once per render (not called for <code>render_object</code> or <code>render_collection</code>)</p>
+</blockquote>
+<p>If any extension with this hook returns <code>true</code>, the object will be considered a collection and rendered as such. For example, the <a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> extension uses this hook to indicate that an <code>ActiveRecord::Relation</code> should be considered a collection.</p>
+<pre><code class="language-ruby">def collection?(object)
+  object.is_a? ArrayLikeThing
+end
+</code></pre>
+<h2 id="around"><a class="header" href="#around">around</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@cost</strong> Low - run exactly once per render</p>
+</blockquote>
+<p>Wraps the entire rendering process. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around(ctx)
+  # do something before render
+  yield # render
+  # do something after render
+end
+</code></pre>
+<h2 id="input_object"><a class="header" href="#input_object">input_object</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
+<strong>@cost</strong> Low - run exactly once per render</p>
+</blockquote>
+<p>Run when <code>render</code> is called with a non-collection object, or when <code>render_object</code> is called. This hook allows you to modify the object before rendering, or even return a new one. <strong>Whatever object is returned will be rendered.</strong></p>
+<pre><code class="language-ruby">def input_object(ctx)
+  ctx.object
+end
+</code></pre>
+<h2 id="input_collection"><a class="header" href="#input_collection">input_collection</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
+<strong>@cost</strong> Low - run exactly once per render</p>
+</blockquote>
+<p>Run when <code>render</code> is called with a collection object, or when <code>render_collection</code> is called. This hook allows you to modify the array-like object before rendering, or even return a new one. <strong>Whatever collection is returned will be rendered.</strong></p>
+<pre><code class="language-ruby">def input_object(ctx)
+  ctx.object
+end
+</code></pre>
+<h2 id="around_blueprint"><a class="header" href="#around_blueprint">around_blueprint</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
+</blockquote>
+<p>Wraps the rendering of a every blueprint. This could be the top-level blueprint or one from an association N levels deep. For collections, it will be called once for each item in the collection.</p>
+<p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around_blueprint(ctx)
+  # do something before render
+  yield # render
+  # do something after render
+end
+</code></pre>
+<h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
+</blockquote>
+<p>Allows an extension to perform any expensive setup operations for a given blueprint class. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions.</p>
+<pre><code class="language-ruby">def prepare(ctx)
+  ctx.store[:my_ext] ||= {}
+  ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
+end
+</code></pre>
+<h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@return Array&lt;Field | ObjectField | Collection&gt;</strong> Fields in the order they should be rendered<br />
+<strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
+</blockquote>
+<p>Customize the order fields are rendered in. (The default is the order in which they were defined). You wouldn't think it matters, but some bad JSON parsers care. (The built-in, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.)</p>
+<pre><code class="language-ruby">def blueprint_fields(ctx)
+  ref = ctx.blueprint.class.reflections[:default]
+  ref.ordered.sort_by(&amp;:name)
+end
+</code></pre>
+<h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> With fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
+<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
+</blockquote>
+<p>Run before any blueprint is rendered, allowing you to modify (or return a new) object used for the render. <strong>Whatever object is returned will be rendered.</strong></p>
+<pre><code class="language-ruby">def blueprint_input(ctx)
+  ctx.object
+end
+</code></pre>
+<h2 id="field_value"><a class="header" href="#field_value">field_value</a></h2>
+<h2 id="object_value"><a class="header" href="#object_value">object_value</a></h2>
+<h2 id="collection_value"><a class="header" href="#collection_value">collection_value</a></h2>
+<h2 id="exclude_field"><a class="header" href="#exclude_field">exclude_field?</a></h2>
+<h2 id="exclude_object"><a class="header" href="#exclude_object">exclude_object?</a></h2>
+<h2 id="exclude_collection"><a class="header" href="#exclude_collection">exclude_collection?</a></h2>
+<h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
+<h2 id="output_object"><a class="header" href="#output_object">output_object</a></h2>
+<h2 id="output_collection"><a class="header" href="#output_collection">output_collection</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reflections"><a class="header" href="#reflections">Reflections</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extractors"><a class="header" href="#extractors">Extractors</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h1>
-<p>Context objects present a consistent interface during the serialization lifecycle. They are passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a>, <a href="api/./extensions.html">extension hooks</a>, and <a href="api/./extractors.html">extractors</a>.</p>
-<p>Depending on the API, the context object will contain some or all of the following fields. (Each API's documentation will specify which fields are present, but the broad strokes are laid out here.)</p>
+<p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a>, <a href="api/./extensions.html">extension hooks</a>, and <a href="api/./extractors.html">extractors</a>. They contain the current blueprint, the object being rendered, and more (depending on the specific API).</p>
 <h3 id="blueprint"><a class="header" href="#blueprint">blueprint</a></h3>
 <p>The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
 <p><em>Present</em>: Always</p>
@@ -674,11 +806,8 @@ data = WidgetBlueprint["extended.price"].render(widget).to_json
 <p>A Hash for extensions to cache data in. Note that Blueprinter uses this store internally, so be careful not to overwrite Blueprinter's keys (they're all object ids).</p>
 <p><em>Present</em>: Always</p>
 <h3 id="instances"><a class="header" href="#instances">instances</a></h3>
-<p>A Hash-like interface for creating/fetching class instances. This is how Blueprinter uses the same blueprint and extractor instances during a render. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
+<p>A Hash-like interface for creating/fetching class instances. This allows Blueprinter to reuse the same blueprint and extractor instances during a render. You're free to use it, too. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
 <p><em>Present</em>: Always</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="reflections"><a class="header" href="#reflections">Reflections</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extractors"><a class="header" href="#extractors">Extractors</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="updating-to-v2"><a class="header" href="#updating-to-v2">Updating to V2</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>

@@ -378,7 +378,7 @@ end
 <strong>@cost</strong> Low - run once per <code>render</code> (for collections) or <code>render_collection</code></p>
 </blockquote>
 <p>Run after the top-level collection is fully serialized to an array of Hashes, allowing you to modify the output. The array of Hashes is available in <code>context.value</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
-<pre><code class="language-ruby"># Wrap the output in an object
+<pre><code class="language-ruby"># Wrap the output array in a Hash
 def output_collection(ctx)
   {
     data: ctx.value,

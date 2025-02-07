@@ -662,7 +662,8 @@ data = WidgetBlueprint["extended.price"].render(widget).to_json
 <h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
 <p>Context objects are the arguments you'll receive in most of the above APIs. <a href="api/./context-objects.html">Read more</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-2"><a class="header" href="#extensions-2">Extensions</a></h1>
-<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="api/../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
+<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter's features are implemented as built-in extensions!</p>
+<p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="api/../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
 <pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
   # Use the exclude_field? hook to exclude certain fields on Tuesdays
   def exclude_field?(ctx)

@@ -156,7 +156,8 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
-<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
+<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter's features are implemented as built-in extensions!</p>
+<p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
 <pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
   # Use the exclude_field? hook to exclude certain fields on Tuesdays
   def exclude_field?(ctx)

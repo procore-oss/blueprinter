@@ -996,6 +996,43 @@ field.blueprint.reflections[:default].fields
 =&gt; # array of fields on the :full view of CompanyBlueprint
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
+<p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed.</p>
+<h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
+<p>The default extractor first checks for field blocks passed in the DSL. Then it checks if the object is a Hash and tries symbol and string keys. Finally, it calls <code>public_send</code> on the object.</p>
+<pre><code class="language-ruby">class Blueprinter::Extractor
+  # For regular fields
+  def field(ctx)
+    if ctx.field.value_proc
+      ctx.blueprint.instance_exec(ctx, &amp;ctx.field.value_proc)
+    elsif ctx.object.is_a? Hash
+      ctx.object[ctx.field.from] || ctx.object[ctx.field.from.to_s]
+    else
+      ctx.object.public_send(ctx.field.from)
+    end
+  end
+
+  # For object fields
+  def object(ctx)
+    field ctx
+  end
+
+  # For collection fields
+  def collection(ctx)
+    field ctx
+  end
+end
+</code></pre>
+<h2 id="custom-extractors-1"><a class="header" href="#custom-extractors-1">Custom Extractors</a></h2>
+<p>If you're using library version 2.x, subclass from <code>Blueprinter::Extractor</code>. If you're using 1.2.x, subclass from <code>Blueprinter::V2::Extractor</code>.</p>
+<p>Override the <code>field</code>, <code>object</code>, or <code>collection</code> methods as needed. They'll be passed a <a href="api/./context-objects.html">context object</a> with the following fields populated: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code>.</p>
+<p>Note that a new version of your extractor will be initialized for each render, so it's safe to store state inside.</p>
+<pre><code class="language-ruby">class WeirdObjectExtractor &lt; Blueprinter::Extractor
+  def object(ctx)
+    weird_extraction_logic ctx
+  end
+end
+</code></pre>
+<p>To use your extractor, pass it to the <a href="api/../dsl/options.html#extractor">extractor option</a> in your blueprint, view, or field.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="context-objects-1"><a class="header" href="#context-objects-1">Context Objects</a></h1>
 <p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a>, <a href="api/./extensions.html">extension hooks</a>, and <a href="api/./extractors.html">extractors</a>. They contain the current blueprint, the object being rendered, and more (depending on the specific API).</p>
 <h3 id="blueprint"><a class="header" href="#blueprint">blueprint</a></h3>

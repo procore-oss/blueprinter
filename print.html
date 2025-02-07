@@ -213,10 +213,10 @@ end
 field :name
 field :tags
 
-# Use object for an association to another object
+# Use object to render an object or Hash using another blueprint
 object :category, CategoryBlueprint
 
-# Use collection for an assocation to an array of objects
+# Use collection to render an array-like collection of objects
 collection :parts, PartBlueprint
 </code></pre>
 <h2 id="options"><a class="header" href="#options">Options</a></h2>
@@ -375,8 +375,9 @@ end
   end
 
   # Some options accept Procs/labmdas. These can call instance methods defined on
-  # your Blueprint.
+  # your Blueprint. Or you can pass a method name as a symbol.
   field :foo, if: -&gt;(ctx) { long_complex_check? ctx }
+  field :bar, if: :long_complex_check?
 
   def long_complex_check?(ctx)
     # ...
@@ -385,9 +386,10 @@ end
 </code></pre>
 <p>For easier reference, options are grouped into the following categories:</p>
 <ul>
-<li><a href="dsl/options.html#default-values">Default values</a></li>
-<li><a href="dsl/options.html#conditional-fields">Conditional fields</a></li>
-<li><a href="dsl/options.html#other">Other</a></li>
+<li><a href="dsl/options.html#default-values">Default values</a>: Provide defaults for empty fields</li>
+<li><a href="dsl/options.html#conditional-fields">Conditional fields</a>: Exclude fields based on conditions</li>
+<li><a href="dsl/options.html#field-mapping">Field mapping</a>: Change how field values are extracted from objects</li>
+<li><a href="dsl/options.html#other">Metadata</a>: Wrap or add metadata to the output</li>
 </ul>
 <h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
 <p>Options that accept Procs, lambdas, or method names are usually passed a single "context object" argument. It contains the object being rendered, as well as other useful information. See the <a href="dsl/../api/context-objects.html">Context Objects</a> documentation for more information.</p>
@@ -498,6 +500,25 @@ end
 WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
 </code></pre>
 <h2 id="conditional-fields"><a class="header" href="#conditional-fields">Conditional Fields</a></h2>
+<p>These options allow you to exclude fields from the output.</p>
+<h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
+<p>Exclude fields if they're nil.</p>
+<p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
+<pre><code class="language-ruby">options[:exclude_if_nil] = true
+
+field :description, exclude_if_nil: true
+
+WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
+</code></pre>
+<h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
+<p>Exclude fields if they're nil, or if they respond to <code>empty?</code> and it returns true.</p>
+<p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
+<pre><code class="language-ruby">options[:exclude_if_empty] = true
+
+field :description, exclude_if_empty: true
+
+WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
+</code></pre>
 <h4 id="if"><a class="header" href="#if">if</a></h4>
 <p>Only include the field if the given Proc or method name returns truthy.</p>
 <p><em>Scope:</em> Field, object, collection</p>
@@ -556,25 +577,8 @@ WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 <p>Inverse of <a href="dsl/options.html#object_if">object_if</a>.</p>
 <h4 id="collection_unless"><a class="header" href="#collection_unless">collection_unless</a></h4>
 <p>Inverse of <a href="dsl/options.html#collection_if">collection_if</a>.</p>
-<h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
-<p>Exclude fields if they're nil.</p>
-<p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
-<pre><code class="language-ruby">options[:exclude_if_nil] = true
-
-field :description, exclude_if_nil: true
-
-WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
-</code></pre>
-<h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
-<p>Exclude fields if they're nil, or if they respond to <code>empty?</code> and it returns true.</p>
-<p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
-<pre><code class="language-ruby">options[:exclude_if_empty] = true
-
-field :description, exclude_if_empty: true
-
-WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
-</code></pre>
-<h2 id="other"><a class="header" href="#other">Other</a></h2>
+<h2 id="field-mapping"><a class="header" href="#field-mapping">Field mapping</a></h2>
+<p>These options let you change how fields values are extracted from your objects.</p>
 <h4 id="from"><a class="header" href="#from">from</a></h4>
 <p>Populate the field using a method/Hash key other than the field name.</p>
 <p><em>Scope</em>: Field, object, collection</p>
@@ -587,6 +591,8 @@ WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
 
 object :category, CategoryBlueprint, extractor: MyCategoryExtractor
 </code></pre>
+<h2 id="metadata"><a class="header" href="#metadata">Metadata</a></h2>
+<p>These options allow you to add metadata to the rendered output.</p>
 <h4 id="root"><a class="header" href="#root">root</a></h4>
 <p>Pass a root key to wrap the output.</p>
 <p><em>Scope:</em> Blueprint, view, partial, render</p>

@@ -338,9 +338,23 @@ end
   end
 end
 </code></pre>
-<h2 id="appending-vs-inlining"><a class="header" href="#appending-vs-inlining">Appending vs inlining</a></h2>
+<h2 id="appending-vs-inlining"><a class="header" href="#appending-vs-inlining">Appending vs. Inlining</a></h2>
 <p>By default, partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc.</p>
 <p>If instead you would prefer your view to override the partial, call <code>use!</code>. The partial will be evaluated <em>on that line</em>, allowing subsequent lines to override it.</p>
+<p>Precendence rules for each are as follows (highest to lowest):</p>
+<h4 id="precedence-of-use"><a class="header" href="#precedence-of-use">Precedence of <code>use</code></a></h4>
+<ol>
+<li>Definitions in the partial</li>
+<li>Definitions in the view</li>
+<li>Definitions inherited from the blueprint/parent views</li>
+</ol>
+<h4 id="precedence-of-use-1"><a class="header" href="#precedence-of-use-1">Precedence of <code>use!</code></a></h4>
+<ol>
+<li>Definitions in the view <em>after</em> <code>use!</code></li>
+<li>Definitions in the partial</li>
+<li>Definitions in the view <em>before</em> <code>use!</code></li>
+<li>Definitions inherited from the blueprint/parent views</li>
+</ol>
 <pre><code class="language-ruby">partial :no_empties do
   options[:field_if] = -&gt;(ctx) { field_logic ctx }
   options[:object_if] = -&gt;(ctx) { object_logic ctx }

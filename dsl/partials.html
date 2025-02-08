@@ -159,22 +159,46 @@
 <p>Partials allow you to compose views from reusable components. Just like views, partials can define <a href="./fields.html">fields</a>, <a href="./options.html">options</a>, <a href="./views.html">views</a>, other <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, and <a href="./extensions.html">extensions</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
-  field :description
 
   view :foo do
-    field :foo
     use :associations
+    field :foo
   end
 
   view :bar do
+    use :associations, :description
     field :bar
-    use :associations
   end
 
   partial :associations do
     object :category, CategoryBlueprint
     collection :parts, PartBlueprint
   end
+
+  partial :description do
+    field :description
+  end
+end
+</code></pre>
+<h2 id="appending-vs-inlining"><a class="header" href="#appending-vs-inlining">Appending vs inlining</a></h2>
+<p>By default, partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc.</p>
+<p>If instead you would prefer your view to override the partial, call <code>use!</code>. The partial will be evaluated <em>on that line</em>, allowing subsequent lines to override it.</p>
+<pre><code class="language-ruby">partial :no_empties do
+  options[:field_if] = -&gt;(ctx) { field_logic ctx }
+  options[:object_if] = -&gt;(ctx) { object_logic ctx }
+  options[:collection_if] -&gt;(ctx) { collection_logic ctx }
+end
+
+# View :foo appends the partial, so the PARTIAL's field_if logic wins
+view :foo do
+  use :no_empties
+  options[:field_if] = -&gt;(ctx) { some_other_logic ctx }
+end
+
+# View :bar inlines the partial, so the VIEWS's field_if logic wins
+view :bar do
+  use! :no_empties
+  options[:field_if] = -&gt;(ctx) { some_other_logic ctx }
 end
 </code></pre>
 

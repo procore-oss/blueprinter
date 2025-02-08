@@ -183,14 +183,14 @@ end
 <h2 id="appending-vs-inlining"><a class="header" href="#appending-vs-inlining">Appending vs. Inlining</a></h2>
 <p>Blueprinter has two ways of including partials in your views: <code>use</code> and <code>use!</code>.</p>
 <h3 id="append-with-use"><a class="header" href="#append-with-use">Append with 'use'</a></h3>
-<p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc. Precedence (higest to lowest) is:</p>
+<p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc. Precedence (highest to lowest) is:</p>
 <ol>
 <li>Definitions in the partial</li>
 <li>Definitions in the view</li>
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
 <h3 id="inline-with-use"><a class="header" href="#inline-with-use">Inline with 'use!'</a></h3>
-<p>Partials are embedded <em>on that line</em>, allowing subsequent lines to override things. Precedence (higest to lowest) is:</p>
+<p>Partials are embedded <em>on that line</em>, allowing subsequent lines to override things. Precedence (highest to lowest) is:</p>
 <ol>
 <li>Definitions in the view <em>after</em> <code>use!</code></li>
 <li>Definitions in the partial</li>

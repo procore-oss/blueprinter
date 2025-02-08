@@ -226,14 +226,14 @@ collection :parts, PartBlueprint, exclude_if_empty: true
 </code></pre>
 <h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
 <p>Blueprinter has sane defaults for extracting field values from objects, but there are several ways to customize the behavior.</p>
-<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
+<h3 id="default-extraction"><a class="header" href="#default-extraction">Default extraction</a></h3>
 <ul>
 <li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
 <li>For other objects, Blueprinter will look for a public method matching the field name.</li>
 <li>The <a href="dsl/./options.html#from">from</a> option can be used to specify a different method or Hash key name.</li>
 </ul>
 <h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
-<p>Pass a block to a field, object, or collection to extract the value yourself. Blocks accept a context argument which contains the object being rendered, <a href="dsl/../api/context-objects.html">among other things</a>.</p>
+<p>Return whatever you want from a block. It will be passed a context argument which contains the object being rendered, <a href="dsl/../api/context-objects.html">among other things</a>.</p>
 <p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
 <pre><code class="language-ruby">field :description do |ctx|
   ctx.object.description.upcase
@@ -249,7 +249,7 @@ def active_parts(object)
 end
 </code></pre>
 <h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>
-<p>You can completely replace the above behaviors by creating a <a href="dsl/../api/extractors.html">custom extractor</a>.</p>
+<p>Define your own extraction behavior by creating a <a href="dsl/../api/extractors.html">custom extractor</a>.</p>
 <pre><code class="language-ruby"># For an entire Blueprint or view
 options[:extractor] = MyCustomExtractor
 
@@ -1005,13 +1005,11 @@ field.blueprint.reflections[:default].fields
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
 <p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed.</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
-<p>The default extractor first checks for field blocks passed in the DSL. Then it checks if the object is a Hash and tries symbol and string keys. Finally, it calls <code>public_send</code> on the object.</p>
+<p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extractor
   # For regular fields
   def field(ctx)
-    if ctx.field.value_proc
-      ctx.blueprint.instance_exec(ctx, &amp;ctx.field.value_proc)
-    elsif ctx.object.is_a? Hash
+    if ctx.object.is_a? Hash
       ctx.object[ctx.field.from] || ctx.object[ctx.field.from.to_s]
     else
       ctx.object.public_send(ctx.field.from)

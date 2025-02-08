@@ -158,13 +158,11 @@
                         <h1 id="extractors"><a class="header" href="#extractors">Extractors</a></h1>
 <p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed.</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
-<p>The default extractor first checks for field blocks passed in the DSL. Then it checks if the object is a Hash and tries symbol and string keys. Finally, it calls <code>public_send</code> on the object.</p>
+<p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extractor
   # For regular fields
   def field(ctx)
-    if ctx.field.value_proc
-      ctx.blueprint.instance_exec(ctx, &amp;ctx.field.value_proc)
-    elsif ctx.object.is_a? Hash
+    if ctx.object.is_a? Hash
       ctx.object[ctx.field.from] || ctx.object[ctx.field.from.to_s]
     else
       ctx.object.public_send(ctx.field.from)

@@ -24,6 +24,22 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:bar].fields.keys.sort).to eq %i(name description).sort
   end
 
+  it "accepts multiple partials" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+
+      view :extended do
+        use :description, :tags
+      end
+
+      partial(:description) { field :description }
+      partial(:tags) { field :tags }
+    end
+
+    refs = blueprint.reflections
+    expect(refs[:extended].fields.keys.sort).to eq %i(name description tags).sort
+  end
+
   it "allows use statements to be nested" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
@@ -99,5 +115,56 @@ describe "Blueprinter::V2 Partials" do
 
     refs = blueprint.reflections
     expect(refs[:bar].fields.keys).to eq %i(name description).sort
+  end
+
+  context 'precedence' do
+    it 'partials override what the view inherits' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        field :name
+
+        view :foo do
+          use :non_empty_name
+        end
+
+        partial :non_empty_name do
+          field :name, exclude_if_empty: true
+        end
+      end
+
+      view = blueprint.reflections[:foo]
+      expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
+    end
+
+    it '`use` overrides the view' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        view :foo do
+          use :non_empty_name
+          field :name
+        end
+
+        partial :non_empty_name do
+          field :name, exclude_if_empty: true
+        end
+      end
+
+      view = blueprint.reflections[:foo]
+      expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
+    end
+
+    it '`use!` allows the view to override' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        view :foo do
+          use! :non_empty_name
+          field :name
+        end
+
+        partial :non_empty_name do
+          field :name, exclude_if_empty: true
+        end
+      end
+
+      view = blueprint.reflections[:foo]
+      expect(view.fields[:name].options).to eq({})
+    end
   end
 end

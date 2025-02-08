@@ -17,14 +17,14 @@ module Blueprinter
         # @api private The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :schema, :excludes, :partials, :used_partials, :eval_mutex
+        attr_accessor :views, :schema, :excludes, :partials, :appended_partials, :eval_mutex
       end
 
       self.views = ViewBuilder.new(self)
       self.schema = {}
       self.excludes = []
       self.partials = {}
-      self.used_partials = []
+      self.appended_partials = []
       self.extensions = []
       self.options = {}
       self.blueprint_name = name
@@ -37,7 +37,7 @@ module Blueprinter
         subclass.schema = schema.transform_values(&:dup)
         subclass.excludes = []
         subclass.partials = partials.dup
-        subclass.used_partials = []
+        subclass.appended_partials = []
         subclass.extensions = extensions.dup
         subclass.options = options.dup
         subclass.blueprint_name = subclass.name || blueprint_name
@@ -108,13 +108,7 @@ module Blueprinter
 
       # @api private
       def self.run_eval!
-        used_partials.each do |name|
-          if !(p = partials[name])
-            raise Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'"
-          end
-          class_eval(&p)
-        end
-
+        appended_partials.each(&method(:apply_partial!))
         excludes.each { |f| schema.delete f }
         extensions.freeze
         options.freeze
@@ -130,6 +124,11 @@ module Blueprinter
       # @api private
       def self.array_like?(obj)
         # TODO
+      end
+
+      def self.apply_partial!(name)
+        p = partials[name] || raise(Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'")
+        class_eval(&p)
       end
     end
   end

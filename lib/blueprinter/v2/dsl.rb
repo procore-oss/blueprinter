@@ -31,12 +31,21 @@ module Blueprinter
       end
 
       #
-      # Import a partial into this view.
+      # Append one or more partials to this view.
       #
       # @param names [Array<Symbol>] One or more partial names
       #
       def use(*names)
-        names.each { |name| used_partials << name.to_sym }
+        names.each { |name| appended_partials << name.to_sym }
+      end
+
+      #
+      # Insert one or more partials in this view.
+      #
+      # @param names [Array<Symbol>] One or more partial names
+      #
+      def use!(*names)
+        names.each(&method(:apply_partial!))
       end
 
       #

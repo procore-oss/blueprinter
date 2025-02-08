@@ -199,21 +199,21 @@ end
 </ol>
 <h3 id="examples-of-use-and-use"><a class="header" href="#examples-of-use-and-use">Examples of 'use' and 'use!'</a></h3>
 <pre><code class="language-ruby">partial :no_empties do
-  options[:field_if] = -&gt;(ctx) { og_field_logic ctx }
-  options[:object_if] = -&gt;(ctx) { og_object_logic ctx }
-  options[:collection_if] -&gt;(ctx) { og_collection_logic ctx }
+  options[:field_if] = :og_field_logic
+  options[:object_if] = :og_object_logic
+  options[:collection_if] :og_collection_logic
 end
 
 # :foo appends the partial, so og_field_logic is used
 view :foo do
   use :no_empties
-  options[:field_if] = -&gt;(ctx) { other_field_logic ctx }
+  options[:field_if] = :other_field_logic
 end
 
 # :bar inlines the partial, so other_field_logic takes precedence
 view :bar do
   use! :no_empties
-  options[:field_if] = -&gt;(ctx) { other_field_logic ctx }
+  options[:field_if] = :other_field_logic
 end
 </code></pre>
 

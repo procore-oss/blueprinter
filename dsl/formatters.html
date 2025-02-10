@@ -156,7 +156,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
-<p>Automatically format field values by class.</p>
+<p>Automatically format field values by class. You can define formatters anywhere in your blueprints: the top level, views, and partials.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint
   # Strip whitespace from all strings
   format(String) { |val| val.strip }

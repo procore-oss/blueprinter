@@ -180,7 +180,7 @@
   end
 end
 </code></pre>
-<p>There are two ways of including partials: <a href="#append-with-use">appending with 'use'</a> and <a href="#inline-with-use">inlining with 'use!'</a> (see <a href="#examples-of-use-and-use">examples</a>).</p>
+<p>There are two ways of including partials: <a href="#append-with-use">appending with 'use'</a> and <a href="#inserting-with-use">inserting with 'use!'</a> (see <a href="#examples-of-use-and-use">examples</a>).</p>
 <h3 id="append-with-use"><a class="header" href="#append-with-use">Append with 'use'</a></h3>
 <p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc. Precedence (highest to lowest) is:</p>
 <ol>
@@ -188,7 +188,7 @@ end
 <li>Definitions in the view</li>
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
-<h3 id="inline-with-use"><a class="header" href="#inline-with-use">Inline with 'use!'</a></h3>
+<h3 id="insert-with-use"><a class="header" href="#insert-with-use">Insert with 'use!'</a></h3>
 <p>Partials are embedded immediately, <em>on that line</em>, allowing subsequent lines to make overrides. Precedence (highest to lowest) is:</p>
 <ol>
 <li>Definitions in the view <em>after</em> <code>use!</code></li>
@@ -197,20 +197,20 @@ end
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
 <h3 id="examples-of-use-and-use"><a class="header" href="#examples-of-use-and-use">Examples of 'use' and 'use!'</a></h3>
-<pre><code class="language-ruby">partial :no_empties do
+<pre><code class="language-ruby">partial :no_empty_fields do
   options[:field_if] = :og_field_logic
   # other stuff
 end
 
 # :foo appends the partial, so it overrides the view's field_if
 view :foo do
-  use :no_empties
+  use :no_empty_fields
   options[:field_if] = :other_field_logic
 end
 
-# :bar inlines the partial, and the next line overrides the partial's field_if
+# :bar inserts the partial, but the next line overrides the partial's field_if
 view :bar do
-  use! :no_empties
+  use! :no_empty_fields
   options[:field_if] = :other_field_logic
 end
 </code></pre>

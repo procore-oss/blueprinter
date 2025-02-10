@@ -236,7 +236,7 @@ end
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Wraps the rendering of a every blueprint. This could be the top-level blueprint or one from an association N levels deep. For collections, it will be called once for each item in the collection.</p>
+<p>Wraps the rendering of each blueprint. This could be the top-level blueprint or one from an association N levels deep. For collections, it will be called once for each item in the collection.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
 <pre><code class="language-ruby">def around_blueprint(ctx)
   # do something before render
@@ -249,7 +249,7 @@ end
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Allows an extension to perform any expensive setup operations for a given blueprint class. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions.</p>
+<p>Allows an extension to perform any setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
 <pre><code class="language-ruby">def prepare(ctx)
   ctx.store[:my_ext] ||= {}
   ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
@@ -288,8 +288,8 @@ end
 </blockquote>
 <p>Run after a field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent field_value hooks, then run through any formatters and rendered.</strong></p>
 <pre><code class="language-ruby">def field_value(ctx)
-  case ctx
-  when String then ctx.strip
+  case ctx.value
+  when String then ctx.value.strip
   else ctx.value
   end
 end
@@ -302,10 +302,7 @@ end
 </blockquote>
 <p>Run after an object field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent object_value hooks, then rendered.</strong></p>
 <pre><code class="language-ruby">def field_value(ctx)
-  case ctx
-  when String then ctx.strip
-  else ctx.value
-  end
+  ctx.value
 end
 </code></pre>
 <h2 id="collection_value"><a class="header" href="#collection_value">collection_value</a></h2>

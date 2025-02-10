@@ -225,12 +225,12 @@ collection :parts, PartBlueprint
 collection :parts, PartBlueprint, exclude_if_empty: true
 </code></pre>
 <h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
-<p>Blueprinter has sane defaults for extracting field values from objects, but there are several ways to customize the behavior.</p>
+<p>Blueprinter is pretty smart about extracting field values from objects, but there are ways to customize the behavior if needed.</p>
 <h3 id="default-extraction"><a class="header" href="#default-extraction">Default extraction</a></h3>
 <ul>
 <li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
-<li>For other objects, Blueprinter will look for a public method matching the field name.</li>
-<li>The <a href="dsl/./options.html#from">from</a> option can be used to specify a different method or Hash key name.</li>
+<li>For anything else, Blueprinter will look for a public method matching the field name.</li>
+<li>The <a href="dsl/./options.html#from">from</a> field option can be used to specify a different method or Hash key name.</li>
 </ul>
 <h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
 <p>Return whatever you want from a block. It will be passed a context argument which contains the object being rendered, <a href="dsl/../api/context-objects.html">among other things</a>.</p>
@@ -249,7 +249,7 @@ def active_parts(object)
 end
 </code></pre>
 <h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>
-<p>Define your own extraction behavior by creating a <a href="dsl/../api/extractors.html">custom extractor</a>.</p>
+<p>Define your own extraction behavior with a <a href="dsl/../api/extractors.html">custom extractor</a>.</p>
 <pre><code class="language-ruby"># For an entire Blueprint or view
 options[:extractor] = MyCustomExtractor
 
@@ -257,7 +257,7 @@ options[:extractor] = MyCustomExtractor
 object :bar, extractor: MyCustomExtractor
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, and <a href="dsl/./extensions.html">extensions</a>.</p>
+<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent context but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and nested views.</p>
 <p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
@@ -338,7 +338,7 @@ end
   end
 end
 </code></pre>
-<p>There are two ways of including partials: <a href="dsl/partials.html#append-with-use">appending with 'use'</a> and <a href="dsl/partials.html#inline-with-use">inlining with 'use!'</a> (see <a href="dsl/partials.html#examples-of-use-and-use">examples</a>).</p>
+<p>There are two ways of including partials: <a href="dsl/partials.html#append-with-use">appending with 'use'</a> and <a href="dsl/partials.html#inserting-with-use">inserting with 'use!'</a> (see <a href="dsl/partials.html#examples-of-use-and-use">examples</a>).</p>
 <h3 id="append-with-use"><a class="header" href="#append-with-use">Append with 'use'</a></h3>
 <p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc. Precedence (highest to lowest) is:</p>
 <ol>
@@ -346,7 +346,7 @@ end
 <li>Definitions in the view</li>
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
-<h3 id="inline-with-use"><a class="header" href="#inline-with-use">Inline with 'use!'</a></h3>
+<h3 id="insert-with-use"><a class="header" href="#insert-with-use">Insert with 'use!'</a></h3>
 <p>Partials are embedded immediately, <em>on that line</em>, allowing subsequent lines to make overrides. Precedence (highest to lowest) is:</p>
 <ol>
 <li>Definitions in the view <em>after</em> <code>use!</code></li>
@@ -355,25 +355,25 @@ end
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
 <h3 id="examples-of-use-and-use"><a class="header" href="#examples-of-use-and-use">Examples of 'use' and 'use!'</a></h3>
-<pre><code class="language-ruby">partial :no_empties do
+<pre><code class="language-ruby">partial :no_empty_fields do
   options[:field_if] = :og_field_logic
   # other stuff
 end
 
 # :foo appends the partial, so it overrides the view's field_if
 view :foo do
-  use :no_empties
+  use :no_empty_fields
   options[:field_if] = :other_field_logic
 end
 
-# :bar inlines the partial, and the next line overrides the partial's field_if
+# :bar inserts the partial, but the next line overrides the partial's field_if
 view :bar do
-  use! :no_empties
+  use! :no_empty_fields
   options[:field_if] = :other_field_logic
 end
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
-<p>Automatically format field values by class.</p>
+<p>Automatically format field values by class. You can define formatters anywhere in your blueprints: the top level, views, and partials.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint
   # Strip whitespace from all strings
   format(String) { |val| val.strip }
@@ -678,11 +678,10 @@ extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;
 # Library version 1.2.x
 extensions &lt;&lt; Blueprinter::V2::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
 </code></pre>
-<h2 id="external-gems"><a class="header" href="#external-gems">External gems</a></h2>
-<p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a></p>
-<p>An official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
-<hr />
+<h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
 <p><em>Have an extension you'd like to share? Let us know and we may add it to the list!</em></p>
+<h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
+<p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> is an official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
 <pre><code class="language-ruby"># Render the default view to JSON
 data = WidgetBlueprint.render(widget).to_json
@@ -701,7 +700,7 @@ data = WidgetBlueprint["extended.price"].render(widget).to_json
 <h2 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h2>
 <p>The extensions API offers deep hooks into the serialization process. <a href="api/./extensions.html">Read more</a>.</p>
 <h2 id="reflection"><a class="header" href="#reflection">Reflection</a></h2>
-<p>The reflection API allows your application, or Blueprinter extensions, to introspect on your blueprints options, fields, and views. <a href="api/./reflection.html">Read more</a>.</p>
+<p>The reflection API allows your application, or Blueprinter extensions, to introspect on your blueprints' options, fields, and views. <a href="api/./reflection.html">Read more</a>.</p>
 <h2 id="extractors"><a class="header" href="#extractors">Extractors</a></h2>
 <p>By creating and using custom extractors, you can change the way field values are extracted from objects. <a href="api/./extractors.html">Read more</a>.</p>
 <h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
@@ -787,7 +786,7 @@ end
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Wraps the rendering of a every blueprint. This could be the top-level blueprint or one from an association N levels deep. For collections, it will be called once for each item in the collection.</p>
+<p>Wraps the rendering of each blueprint. This could be the top-level blueprint or one from an association N levels deep. For collections, it will be called once for each item in the collection.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
 <pre><code class="language-ruby">def around_blueprint(ctx)
   # do something before render
@@ -800,7 +799,7 @@ end
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Allows an extension to perform any expensive setup operations for a given blueprint class. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions.</p>
+<p>Allows an extension to perform any setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
 <pre><code class="language-ruby">def prepare(ctx)
   ctx.store[:my_ext] ||= {}
   ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
@@ -839,8 +838,8 @@ end
 </blockquote>
 <p>Run after a field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent field_value hooks, then run through any formatters and rendered.</strong></p>
 <pre><code class="language-ruby">def field_value(ctx)
-  case ctx
-  when String then ctx.strip
+  case ctx.value
+  when String then ctx.value.strip
   else ctx.value
   end
 end
@@ -853,10 +852,7 @@ end
 </blockquote>
 <p>Run after an object field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent object_value hooks, then rendered.</strong></p>
 <pre><code class="language-ruby">def field_value(ctx)
-  case ctx
-  when String then ctx.strip
-  else ctx.value
-  end
+  ctx.value
 end
 </code></pre>
 <h2 id="collection_value"><a class="header" href="#collection_value">collection_value</a></h2>
@@ -978,10 +974,11 @@ WidgetBlueprint["extended.with_price"].to_s
 <pre><code class="language-ruby">WidgetBlueprint.reflections.keys
 =&gt; [:default, :extended, :"extended.with_price"]
 </code></pre>
-<p>You can also reflect directly on a view. <strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
+<p>You can also reflect directly on a view.</p>
 <pre><code class="language-ruby">WidgetBlueprint[:extended].reflections.keys
 =&gt; [:default, :with_price]
 </code></pre>
+<p><strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
 <h2 id="fields-1"><a class="header" href="#fields-1">Fields</a></h2>
 <pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
 

@@ -188,10 +188,11 @@ WidgetBlueprint["extended.with_price"].to_s
 <pre><code class="language-ruby">WidgetBlueprint.reflections.keys
 =&gt; [:default, :extended, :"extended.with_price"]
 </code></pre>
-<p>You can also reflect directly on a view. <strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
+<p>You can also reflect directly on a view.</p>
 <pre><code class="language-ruby">WidgetBlueprint[:extended].reflections.keys
 =&gt; [:default, :with_price]
 </code></pre>
+<p><strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
 <h2 id="fields"><a class="header" href="#fields">Fields</a></h2>
 <pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
 

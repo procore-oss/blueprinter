@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe "Blueprinter::V2::ViewBuilder" do
+describe Blueprinter::V2::ViewBuilder do
   let(:builder) do
     Blueprinter::V2::ViewBuilder.new(blueprint)
   end
@@ -59,5 +59,18 @@ describe "Blueprinter::V2::ViewBuilder" do
 
     keys = builder.each.map { |name, _| name }
     expect(keys.sort).to eq %i(default foo bar).sort
+  end
+
+  it "doesn't throw an error if you try to redefine an existing view" do
+    builder[:foo] = proc { field :description }
+    expect do
+      builder[:foo] = proc { field :description }
+    end.to_not raise_error
+  end
+
+  it "throws an error if you try to define the default view" do
+    expect {
+      builder[:default] = proc { field :description }
+    }.to raise_error Blueprinter::Errors::InvalidBlueprint
   end
 end

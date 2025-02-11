@@ -26,7 +26,10 @@ module Blueprinter
       # @param definition [Proc]
       #
       def []=(name, definition)
-        @pending[name.to_sym] = definition
+        name = name.to_sym
+        raise Errors::InvalidBlueprint, "You may not redefine the default view" if name == :default
+
+        @pending[name] = definition
       end
 
       #

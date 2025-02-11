@@ -158,13 +158,12 @@
                     <main>
                         <h1 id="blueprinter"><a class="header" href="#blueprinter">Blueprinter</a></h1>
 <h3 id="note-this-is-a-wip-for-api-v2"><a class="header" href="#note-this-is-a-wip-for-api-v2">NOTE This is a WIP for API V2!</a></h3>
-<p>Blueprinter is a JSON Object Presenter for Ruby that takes business objects and breaks them down into simple hashes and serializes them to JSON. It can be used in Rails in place of other serializers (like JBuilder or ActiveModelSerializers). It is designed to be simple, direct, and performant.</p>
+<p>Blueprinter is a JSON serializer for your business objects. It is designed to be simple, flexible, and performant.</p>
+<p>Upgrading from 1.x? <a href="./updating-to-v2.html">Read the upgrade guide!</a></p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
 <pre><code class="language-bash">bundle add blueprinter
 </code></pre>
-<h3 id="api-docs"><a class="header" href="#api-docs">API Docs</a></h3>
-<p>Generated code documentation can be found at <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a>.</p>
-<p>Upgrading to API V2? <a href="./updating-to-v2.html">Read the upgrade guide</a>!</p>
+<p>See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for generated API documentation.</p>
 <h3 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h3>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
@@ -187,15 +186,11 @@ WidgetBlueprint[:extended].render(widget).to_hash
 <p>Look interesting? <a href="./dsl/index.html">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
-<h4 id="library-version-2x"><a class="header" href="#library-version-2x">Library version 2.x</a></h4>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Base
-  field :id
-end
-</code></pre>
-<h4 id="library-version-12x"><a class="header" href="#library-version-12x">Library version 1.2.x</a></h4>
-<p>Version 1.2.x contains both the V1 and V2 APIs, so you must specify V2 in the base class.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
+<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
+class ApplicationBlueprint &lt; Blueprinter::Base
+  extensions &lt;&lt; MyExtension.new
+  options[:exclude_if_nil] = true
   field :id
 end
 </code></pre>
@@ -207,7 +202,7 @@ end
   collection :parts, PartBlueprint
 end
 </code></pre>
-<p>There's a lot more you can do with the Blueprinter DSL. <a href="dsl/./fields.html">Fields</a> are a god place to start!</p>
+<p>There's a lot more you can do with the Blueprinter DSL. <a href="dsl/./fields.html">Fields</a> are a good place to start!</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
 <pre><code class="language-ruby"># Use field for scalar values, arrays of scalar values, or even a Hash
 field :name
@@ -226,7 +221,7 @@ collection :parts, PartBlueprint, exclude_if_empty: true
 </code></pre>
 <h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
 <p>Blueprinter is pretty smart about extracting field values from objects, but there are ways to customize the behavior if needed.</p>
-<h3 id="default-extraction"><a class="header" href="#default-extraction">Default extraction</a></h3>
+<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
 <ul>
 <li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
 <li>For anything else, Blueprinter will look for a public method matching the field name.</li>
@@ -257,7 +252,7 @@ options[:extractor] = MyCustomExtractor
 object :bar, extractor: MyCustomExtractor
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent context but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and nested views.</p>
+<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent context but is free to override as needed. In addition to fields, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/views.html#nested-views">nested views</a>.</p>
 <p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
@@ -276,7 +271,7 @@ object :bar, extractor: MyCustomExtractor
 end
 </code></pre>
 <h3 id="excluding-fields"><a class="header" href="#excluding-fields">Excluding fields</a></h3>
-<p>Views can exclude fields from a parent:</p>
+<p>Views can exclude fields from parents, views they've included, or from <a href="dsl/./partials.html">partials</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   fields :name, :description, :price
 
@@ -308,7 +303,7 @@ end
 collection :widgets, WidgetBlueprint["extended.with_price"]
 </code></pre>
 <h3 id="inheriting-from-views"><a class="header" href="#inheriting-from-views">Inheriting from views</a></h3>
-<p>You can inherit from another blueprint's view:</p>
+<p>You can inherit from another blueprint, or from one of its views:</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint[:with_timestamps]
   # ...
 end
@@ -373,8 +368,8 @@ view :bar do
 end
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
-<p>Automatically format field values by class. You can define formatters anywhere in your blueprints: the top level, views, and partials.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint
+<p>Declaratively format field values by class. You can define formatters anywhere in your blueprints: top level, <a href="dsl/./views.html">views</a>, and <a href="dsl/./partials.html">partials</a>.</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   # Strip whitespace from all strings
   format(String) { |val| val.strip }
 

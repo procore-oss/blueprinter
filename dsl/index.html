@@ -157,15 +157,11 @@
                     <main>
                         <h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Define common <a href="./fields.html">fields</a>, <a href="./views.html">views</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="./options.html">options</a>.</p>
-<h4 id="library-version-2x"><a class="header" href="#library-version-2x">Library version 2.x</a></h4>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Base
-  field :id
-end
-</code></pre>
-<h4 id="library-version-12x"><a class="header" href="#library-version-12x">Library version 1.2.x</a></h4>
-<p>Version 1.2.x contains both the V1 and V2 APIs, so you must specify V2 in the base class.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="./fields.html">fields</a>, <a href="./views.html">views</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="./options.html">options</a>.</p>
+<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
+class ApplicationBlueprint &lt; Blueprinter::Base
+  extensions &lt;&lt; MyExtension.new
+  options[:exclude_if_nil] = true
   field :id
 end
 </code></pre>
@@ -177,7 +173,7 @@ end
   collection :parts, PartBlueprint
 end
 </code></pre>
-<p>There's a lot more you can do with the Blueprinter DSL. <a href="./fields.html">Fields</a> are a god place to start!</p>
+<p>There's a lot more you can do with the Blueprinter DSL. <a href="./fields.html">Fields</a> are a good place to start!</p>
 
                     </main>
 

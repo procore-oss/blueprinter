@@ -173,7 +173,7 @@ collection :parts, PartBlueprint, exclude_if_empty: true
 </code></pre>
 <h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
 <p>Blueprinter is pretty smart about extracting field values from objects, but there are ways to customize the behavior if needed.</p>
-<h3 id="default-extraction"><a class="header" href="#default-extraction">Default extraction</a></h3>
+<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
 <ul>
 <li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
 <li>For anything else, Blueprinter will look for a public method matching the field name.</li>

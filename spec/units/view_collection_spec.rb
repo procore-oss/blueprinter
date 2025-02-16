@@ -143,6 +143,10 @@ describe 'ViewCollection' do
         Blueprinter.configure { |config| config.default_transformers = [default_transformer] }
       end
 
+      after do
+        Blueprinter.configure { |config| config.default_transformers = [] }
+      end
+
       context 'with no view transformers' do
         let!(:new_view) { view_collection[:new_view] }
 

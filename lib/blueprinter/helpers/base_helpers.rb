@@ -18,6 +18,8 @@ module Blueprinter
         view_name = options.delete(:view) || :default
         root = options.delete(:root)
         meta = options.delete(:meta)
+        options[:v2_instances] ||= V2::InstanceCache.new
+        options[:v2_store] ||= {}
         validate_root_and_meta!(root, meta)
         prepare(object, view_name: view_name, local_options: options, root: root, meta: meta)
       end

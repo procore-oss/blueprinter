@@ -27,7 +27,7 @@ module Blueprinter
         return true if blueprint.is_a?(Proc)
         return false unless blueprint.is_a?(Class)
 
-        blueprint <= Blueprinter::Base
+        blueprint <= Blueprinter::Base || blueprint <= Blueprinter::V2::Base
       end
     end
   end

@@ -21,7 +21,18 @@ module Blueprinter
 
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
-      blueprint.prepare(value, view_name: view, local_options: local_options)
+      if blueprint <= V2::Base
+        view = options[:view] || :default
+        store = local_options.fetch(:v2_store)
+        instances = local_options.fetch(:v2_instances)
+        if value.is_a?(Enumerable) && !value.is_a?(Hash)
+          blueprint[view].serializer.collection(value, local_options, instances, store)
+        else
+          blueprint[view].serializer.object(value, local_options, instances, store)
+        end
+      else
+        blueprint.prepare(value, view_name: view, local_options: local_options)
+      end
     end
 
     private

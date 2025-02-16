@@ -31,6 +31,7 @@ module Blueprinter
     end
 
     def extensions=(list)
+      @hooks = nil
       @extensions = list
     end
 

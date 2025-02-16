@@ -533,7 +533,9 @@ _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `
 <summary>Defining A Field Directly In The Blueprint</summary>
 
 
-You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
+You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render` with, additionally,
+`view` which can be useful to access the view who triggered the field rendering (imagine view `a` include view `b`, during rendering of a generic field you can see view `a` on `options[:view]`).
+For example:
 
 ```ruby
 class UserBlueprint < Blueprinter::Base

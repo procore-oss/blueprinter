@@ -5,6 +5,7 @@ require 'blueprinter/extractors/association_extractor'
 require 'blueprinter/field'
 require 'blueprinter/helpers/base_helpers'
 require 'blueprinter/reflection'
+require 'blueprinter/view_wrapper'
 
 module Blueprinter
   class Base
@@ -437,6 +438,15 @@ module Blueprinter
     # supported by this Blueprint.
     def self.view?(view_name)
       view_collection.view? view_name
+    end
+
+    # For compatibility with V2
+    #
+    # @return [Blueprinter::ViewWrapper]
+    def self.[](view_name)
+      raise Errors::UnknownView, "View '#{view_name}' could not be found in Blueprint '#{self.name}'" unless view? view_name
+
+      ViewWrapper.new(self, view_name)
     end
   end
 end

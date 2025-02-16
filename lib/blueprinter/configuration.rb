@@ -12,7 +12,6 @@ module Blueprinter
       :datetime_format,
       :default_transformers,
       :deprecations,
-      :extensions,
       :field_default,
       :generator,
       :if,
@@ -20,7 +19,7 @@ module Blueprinter
       :sort_fields_by,
       :unless
     )
-    attr_reader :extractor_default
+    attr_reader :extensions, :extractor_default
 
     VALID_CALLABLES = %i[if unless].freeze
 
@@ -38,6 +37,11 @@ module Blueprinter
       @default_transformers = []
       @custom_array_like_classes = []
       @extensions = []
+    end
+
+    def extensions=(list)
+      @_hooks = nil
+      @extensions = list
     end
 
     def hooks

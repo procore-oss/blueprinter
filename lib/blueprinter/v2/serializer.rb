@@ -78,6 +78,7 @@ module Blueprinter
         end
         ctx = Context::Field.new(instances[blueprint], options, instances, store, object, nil, nil)
 
+        # rubocop:disable Metrics/BlockLength
         result = ctx.store.fetch(blueprint.object_id).each_with_object({}) do |field, acc|
           ctx.field = field
           ctx.value = nil
@@ -93,15 +94,30 @@ module Blueprinter
             hooks.reduce_into(:object_value, ctx, :value)
             next if hooks.any?(:exclude_object?, ctx)
 
-            ctx.value = field.blueprint.serializer.object(ctx.value, options, instances, store) if ctx.value
+            if ctx.value
+              ctx.value =
+                if instances[field.blueprint].is_a? V2::Base
+                  field.blueprint.serializer.object(ctx.value, options, instances, store)
+                else
+                  field.blueprint.render_as_hash(ctx.value, options.dup.merge({ v2_instances: instances, v2_store: store }))
+                end
+            end
             acc[field.name] = ctx.value
           when Collection
             hooks.reduce_into(:collection_value, ctx, :value)
             next if hooks.any?(:exclude_collection?, ctx)
 
-            ctx.value = field.blueprint.serializer.collection(ctx.value, options, instances, store) if ctx.value
+            if ctx.value
+              ctx.value =
+                if instances[field.blueprint].is_a? V2::Base
+                  field.blueprint.serializer.collection(ctx.value, options, instances, store)
+                else
+                  field.blueprint.render_as_hash(ctx.value, options.dup.merge({ v2_instances: instances, v2_store: store }))
+                end
+            end
             acc[field.name] = ctx.value
           end
+          # rubocop:enable Metrics/BlockLength
         end
 
         if @run_blueprint_output

@@ -98,5 +98,9 @@ describe '::View' do
     before do
       Blueprinter.configure { |config| config.default_transformers = [default_transform] }
     end
+
+    after do
+      Blueprinter.configure { |config| config.default_transformers = [] }
+    end
   end
 end

@@ -26,9 +26,9 @@ module Blueprinter
         store = local_options.fetch(:v2_store)
         instances = local_options.fetch(:v2_instances)
         if value && blueprint.serializer.hooks.any?(:collection?, value)
-          value.map { |val| blueprint[view].serializer.call(val, local_options, instances, store) }
+          blueprint[view].serializer.collection(value, local_options, instances, store)
         else
-          blueprint[view].serializer.call(value, local_options, instances, store)
+          blueprint[view].serializer.object(value, local_options, instances, store)
         end
       else
         blueprint.prepare(value, view_name: view, local_options: local_options)

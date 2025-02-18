@@ -90,6 +90,26 @@ describe "Blueprinter::V2 Rendering" do
     })
   end
 
+  it 'renders an object with the deprecated view option' do
+    result = widget_blueprint.render_object(widget, { view: :extended }).to_hash
+    expect(result).to eq({
+      name: 'Foo',
+      description: 'About Foo',
+      cat: { name: 'Bar' },
+      parts: [{ num: 42 }, { num: 43 }]
+    })
+  end
+
+  it 'renders a collection with the deprecated view option' do
+    result = widget_blueprint.render_collection([widget], { view: :extended }).to_hash
+    expect(result).to eq([{
+      name: 'Foo',
+      description: 'About Foo',
+      cat: { name: 'Bar' },
+      parts: [{ num: 42 }, { num: 43 }]
+    }])
+  end
+
   it 'uses the same Context.store Hash throughout' do
     log_ext = Class.new(Blueprinter::Extension) do
       def initialize(log)

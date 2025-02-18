@@ -1,6 +1,27 @@
 # frozen_string_literal: true
 
 shared_examples 'Base::render' do
+  context 'Given blueprint has ::identifier' do
+    let(:result) { '{"id":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+      end
+    end
+    it('returns json with an identifier') { should eq(result) }
+
+    context 'with a provided block' do
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id do |object, _options|
+            "THE ID IS #{object.respond_to?(:id) ? object.id : object[:id]}"
+          end
+        end
+      end
+      it('returns json with an identifier') { should eq('{"id":"THE ID IS ' + obj_id + '"}') }
+    end
+  end
+
   context 'Given blueprint has ::field' do
     let(:result) { '{"first_name":"Meg","id":' + obj_id + '}' }
     let(:blueprint) do

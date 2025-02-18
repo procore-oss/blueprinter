@@ -185,6 +185,7 @@ end
 <li><a href="#output_object">output_object</a> | <a href="#output_collection">output_collection</a></li>
 </ul>
 </li>
+<li><a href="#json_output">json_output</a></li>
 </ul>
 <h2 id="collection"><a class="header" href="#collection">collection?</a></h2>
 <blockquote>
@@ -389,6 +390,17 @@ end
 # Or modify each element
 def output_collection(ctx)
   ctx.value.map { |item| item.merge({ extra: "data" }) }
+end
+</code></pre>
+<h2 id="json_output"><a class="header" href="#json_output">json_output</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@return String</strong> The JSON output<br />
+<strong>@cost</strong> Low - run once per JSON render</p>
+</blockquote>
+<p>Serializes the final output to JSON.</p>
+<pre><code class="language-ruby">def json_output(ctx)
+  MultiJson.dump ctx.value
 end
 </code></pre>
 

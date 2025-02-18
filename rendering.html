@@ -156,18 +156,39 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
-<pre><code class="language-ruby"># Render the default view to JSON
-data = WidgetBlueprint.render(widget).to_json
-# or
-data = WidgetBlueprint[:default].render(widget).to_json
-
-# Render a view to a Hash
-data = WidgetBlueprint[:extended].render(widget).to_hash
-
-# Render a nested view to JSON
-data = WidgetBlueprint["extended.price"].render(widget).to_json
+<h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
 </code></pre>
-<p>TODO <code>render_object</code>, <code>render_collection</code></p>
+<p>If you're using <code>render json:</code> in a Rails controller, you can leave off <code>.to_json</code>:</p>
+<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
+</code></pre>
+<p>JSON serialization uses the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. You can override this with the <a href="./api/extensions.html#json_output">json_output extension hook</a>.</p>
+<h3 id="rendering-to-a-hash"><a class="header" href="#rendering-to-a-hash">Rendering to a Hash</a></h3>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
+</code></pre>
+<h3 id="rendering-a-view"><a class="header" href="#rendering-a-view">Rendering a view</a></h3>
+<pre><code class="language-ruby"># Render a view
+WidgetBlueprint[:extended].render(widget).to_json
+
+# Render a nested view
+WidgetBlueprint["extended.price"].render(widget).to_json
+
+# These two both render the default view
+WidgetBlueprint.render(widget).to_json
+WidgetBlueprint[:default].render(widget).to_json
+</code></pre>
+<h3 id="handling-of-arrays-and-array-like-objects"><a class="header" href="#handling-of-arrays-and-array-like-objects">Handling of arrays and array-like objects</a></h3>
+<p>By default, <code>.render</code> treats the following classes (or their subclasses) as arrays:</p>
+<ul>
+<li><code>Array</code></li>
+<li><code>Set</code></li>
+<li><code>Enumerator</code></li>
+</ul>
+<p>You can use the <a href="./api/extensions.html#collection">collection? extension hook</a> to add support for other array-like classes. For example, <a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> uses it for <code>ActiveRecord::Relation</code>. Alternatively, you can be explicit with <code>render_object</code> and <code>render_collection</code>:</p>
+<pre><code class="language-ruby">WidgetBlueprint.render_object(widget).to_json
+
+WidgetBlueprint.render_collection(Widget.all).to_json
+</code></pre>
 
                     </main>
 

@@ -678,18 +678,39 @@ extensions &lt;&lt; Blueprinter::V2::Extensions::FieldOrder.new { |a, b| a.name 
 <h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
 <p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> is an official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
-<pre><code class="language-ruby"># Render the default view to JSON
-data = WidgetBlueprint.render(widget).to_json
-# or
-data = WidgetBlueprint[:default].render(widget).to_json
-
-# Render a view to a Hash
-data = WidgetBlueprint[:extended].render(widget).to_hash
-
-# Render a nested view to JSON
-data = WidgetBlueprint["extended.price"].render(widget).to_json
+<h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
 </code></pre>
-<p>TODO <code>render_object</code>, <code>render_collection</code></p>
+<p>If you're using <code>render json:</code> in a Rails controller, you can leave off <code>.to_json</code>:</p>
+<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
+</code></pre>
+<p>JSON serialization uses the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. You can override this with the <a href="./api/extensions.html#json_output">json_output extension hook</a>.</p>
+<h3 id="rendering-to-a-hash"><a class="header" href="#rendering-to-a-hash">Rendering to a Hash</a></h3>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
+</code></pre>
+<h3 id="rendering-a-view"><a class="header" href="#rendering-a-view">Rendering a view</a></h3>
+<pre><code class="language-ruby"># Render a view
+WidgetBlueprint[:extended].render(widget).to_json
+
+# Render a nested view
+WidgetBlueprint["extended.price"].render(widget).to_json
+
+# These two both render the default view
+WidgetBlueprint.render(widget).to_json
+WidgetBlueprint[:default].render(widget).to_json
+</code></pre>
+<h3 id="handling-of-arrays-and-array-like-objects"><a class="header" href="#handling-of-arrays-and-array-like-objects">Handling of arrays and array-like objects</a></h3>
+<p>By default, <code>.render</code> treats the following classes (or their subclasses) as arrays:</p>
+<ul>
+<li><code>Array</code></li>
+<li><code>Set</code></li>
+<li><code>Enumerator</code></li>
+</ul>
+<p>You can use the <a href="./api/extensions.html#collection">collection? extension hook</a> to add support for other array-like classes. For example, <a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> uses it for <code>ActiveRecord::Relation</code>. Alternatively, you can be explicit with <code>render_object</code> and <code>render_collection</code>:</p>
+<pre><code class="language-ruby">WidgetBlueprint.render_object(widget).to_json
+
+WidgetBlueprint.render_collection(Widget.all).to_json
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
 <p>Blueprinter has a rich API for extending the serialization process and reflecting on your blueprints.</p>
 <h2 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h2>
@@ -730,6 +751,7 @@ end
 <li><a href="api/extensions.html#output_object">output_object</a> | <a href="api/extensions.html#output_collection">output_collection</a></li>
 </ul>
 </li>
+<li><a href="api/extensions.html#json_output">json_output</a></li>
 </ul>
 <h2 id="collection"><a class="header" href="#collection">collection?</a></h2>
 <blockquote>
@@ -936,6 +958,17 @@ def output_collection(ctx)
   ctx.value.map { |item| item.merge({ extra: "data" }) }
 end
 </code></pre>
+<h2 id="json_output"><a class="header" href="#json_output">json_output</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@return String</strong> The JSON output<br />
+<strong>@cost</strong> Low - run once per JSON render</p>
+</blockquote>
+<p>Serializes the final output to JSON.</p>
+<pre><code class="language-ruby">def json_output(ctx)
+  MultiJson.dump ctx.value
+end
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="reflection-1"><a class="header" href="#reflection-1">Reflection</a></h1>
 <p>Blueprints may be reflected on to inspect their views, fields, and associations. This is useful for building <a href="api/./extensions.html">extensions</a>, and possibly even for some applications.</p>
 <p>We will use the following blueprint in the examples below:</p>
@@ -1090,7 +1123,74 @@ end
 <h3 id="instances"><a class="header" href="#instances">instances</a></h3>
 <p>A Hash-like interface for creating/fetching class instances. This allows Blueprinter to reuse the same blueprint and extractor instances during a render. You're free to use it, too. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
 <p><em>Present</em>: Always</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="updating-to-api-v2"><a class="header" href="#updating-to-api-v2">Updating to API V2</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
+<p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#gradual-update">gradual update</a>.</p>
+<h2 id="full-update"><a class="header" href="#full-update">Full update</a></h2>
+<p>Update <code>blueprinter</code> to 2.x. All of your blueprints will need updated to use the <a href="upgrading/./dsl/index.html">new DSL</a>. If you're making use of extensions, custom extractors, or transformers, they'll also need updated to the <a href="upgrading/./api/index.html">new API</a>.</p>
+<h2 id="gradual-update"><a class="header" href="#gradual-update">Gradual update</a></h2>
+<p>Update <code>blueprinter</code> to 1.2.x. This version contains both the legacy/V1 and V2 APIs. You can update your blueprints to use the <a href="upgrading/./dsl/index.html">new DSL</a> one at a time.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
+<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
+class ApplicationBlueprint &lt; Blueprinter::Base
+  options[:exclude_if_nil] = true
+  options[:extractor] = MyExtractor
+  extensions &lt;&lt; MyExtension.new
+end
+</code></pre>
+<p>Read more about <a href="upgrading/../dsl/options.html">options</a> and <a href="upgrading/../dsl/extensions.html">extensions</a>.</p>
+<h2 id="overrides"><a class="header" href="#overrides">Overrides</a></h2>
+<p>Child classes, <a href="upgrading/../dsl/views.html">views</a>, and <a href="upgrading/../dsl/partials.html">partials</a> can override their inherited configuration.</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  options[:exclude_if_nil] = false
+
+  view :foo do
+    options.clear
+    extensions.clear
+  end
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
+<h2 id="id-field-and-identifier-view"><a class="header" href="#id-field-and-identifier-view"><code>id</code> field and <code>identifier</code> view</a></h2>
+<p>Blueprinter Legacy/V1 included a default field called <code>id</code> and a view called <code>identifier</code>. Blueprinter V2 does not have these, but you can easily replicate them with <code>ApplicationBlueprint</code>.</p>
+<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
+class ApplicationBlueprint &lt; Blueprinter::Base
+  field :id
+
+  view :identifier do
+    field :id
+  end
+end
+</code></pre>
+<h2 id="associations"><a class="header" href="#associations">Associations</a></h2>
+<p>Blueprinter Legacy/V1 figured out if associations were single items or arrays at runtime. Blueprinter V2 accounts for this in the DSL. Also, the <code>:blueprint</code> and <code>:view</code> options are gone.</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  field :name
+  object :category, CategoryBlueprint
+  collection :parts, PartBlueprint
+
+  # specify a view
+  object :manufacturer, CompanyBlueprint[:extended]
+end
+</code></pre>
+<h2 id="field-order-1"><a class="header" href="#field-order-1">Field order</a></h2>
+<p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="upgrading/../api/extensions.html#blueprint_fields">blueprint_fields extension hook</a> or the built-in <code>FieldOrder</code> extension.</p>
+<p>The following replicates Legacy/V1's default field order using the built-in <code>FieldOrder</code> extension.</p>
+<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
+class ApplicationBlueprint &lt; Blueprinter::Base
+  # If you're using version 1.x, use Blueprinter::V2::Extensions::FieldOrder
+  extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
+    if a.name == :id
+      -1
+    elsif b.name == :id
+      1
+    else
+      a.name &lt;=&gt; b.name
+    end
+  end
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rendering-1"><a class="header" href="#rendering-1">Rendering</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>
 

@@ -1124,11 +1124,35 @@ end
 <p>A Hash-like interface for creating/fetching class instances. This allows Blueprinter to reuse the same blueprint and extractor instances during a render. You're free to use it, too. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
 <p><em>Present</em>: Always</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
-<p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#gradual-update">gradual update</a>.</p>
+<p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#incremental-update">incremental update</a>.</p>
 <h2 id="full-update"><a class="header" href="#full-update">Full update</a></h2>
 <p>Update <code>blueprinter</code> to 2.x. All of your blueprints will need updated to use the <a href="upgrading/./dsl/index.html">new DSL</a>. If you're making use of extensions, custom extractors, or transformers, they'll also need updated to the <a href="upgrading/./api/index.html">new API</a>.</p>
-<h2 id="gradual-update"><a class="header" href="#gradual-update">Gradual update</a></h2>
-<p>Update <code>blueprinter</code> to 1.2.x. This version contains both the legacy/V1 and V2 APIs. You can update your blueprints to use the <a href="upgrading/./dsl/index.html">new DSL</a> one at a time.</p>
+<h2 id="incremental-update"><a class="header" href="#incremental-update">Incremental update</a></h2>
+<p>Larger applications may find it easier to update incrementally. Update <code>blueprinter</code> to 1.2.x, which contains both the legacy/V1 and V2 APIs. They can be used side-by-side.</p>
+<pre><code class="language-ruby"># A legacy/V1 blueprint
+class WidgetBlueprint &lt; Blueprinter::Base
+  field :name
+
+  view :with_desc do
+    field :description
+  end
+
+  view :with_category do
+    # Using a V2 blueprint in a legacy/V1 blueprint
+    association :category, blueprint: CategoryBlueprint, view: :extended
+  end
+end
+
+# A V2 blueprint
+class CategoryBlueprint &lt; ApplicationBlueprint
+  field :name
+
+  view :extended do
+    # Using a legacy/V1 blueprint in a V2 blueprint
+    collection :widgets, WidgetBlueprint[:with_desc]
+  end
+end
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
 <pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base

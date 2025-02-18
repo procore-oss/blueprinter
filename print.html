@@ -1066,7 +1066,7 @@ field.blueprint.reflections[:default].fields
 =&gt; # array of fields on the :full view of CompanyBlueprint
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
-<p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed.</p>
+<p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values-from-objects">bypasses extractors</a>.)</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
 <p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extractor

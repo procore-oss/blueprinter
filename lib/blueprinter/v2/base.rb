@@ -92,10 +92,20 @@ module Blueprinter
       end
 
       def self.render_object(obj, options = {})
+        # DEPRECATED
+        if options[:view]
+          options = options.dup
+          return self[options.delete(:view)].render_object(obj, options)
+        end
         Render.new(obj, options, serializer: serializer, collection: false)
       end
 
       def self.render_collection(objs, options = {})
+        # DEPRECATED
+        if options[:view]
+          options = options.dup
+          return self[options.delete(:view)].render_collection(objs, options)
+        end
         Render.new(objs, options, serializer: serializer, collection: true)
       end
 

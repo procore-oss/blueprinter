@@ -994,15 +994,24 @@ end
   end
 end
 </code></pre>
-<h2 id="blueprint-names"><a class="header" href="#blueprint-names">Blueprint names</a></h2>
-<pre><code class="language-ruby">WidgetBlueprint.to_s
+<h2 id="blueprint--view-names"><a class="header" href="#blueprint--view-names">Blueprint &amp; view names</a></h2>
+<pre><code class="language-ruby">WidgetBlueprint.blueprint_name
 =&gt; "WidgetBlueprint"
 
-WidgetBlueprint[:extended].to_s
+WidgetBlueprint.view_name
+=&gt; :default
+
+WidgetBlueprint[:extended].blueprint_name
 =&gt; "WidgetBlueprint.extended"
 
-WidgetBlueprint["extended.with_price"].to_s
+WidgetBlueprint[:extended].view_name
+=&gt; :extended
+
+WidgetBlueprint["extended.with_price"].blueprint_name
 =&gt; "WidgetBlueprint.extended.with_price"
+
+WidgetBlueprint["extended.with_price"].view_name
+=&gt; :"extended.with_price"
 </code></pre>
 <h2 id="views-1"><a class="header" href="#views-1">Views</a></h2>
 <p>Here, <code>:default</code> refers to the top level of the blueprint.</p>

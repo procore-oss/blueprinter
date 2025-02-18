@@ -156,6 +156,24 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
+<p>You can read the full <a href="../rendering.html">rendering documentation here</a>. This page highlights the main differences between V1 and V2.</p>
+<h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
+<p>If you're using Rails's <code>render json:</code>, V2 blueprints should continue to work like Legacy/V1:</p>
+<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
+</code></pre>
+<p>Otherwise, it now looks like this:</p>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
+</code></pre>
+<h3 id="rendering-to-hash"><a class="header" href="#rendering-to-hash">Rendering to Hash</a></h3>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
+</code></pre>
+<h3 id="views"><a class="header" href="#views">Views</a></h3>
+<p>V2's preferred method of rendering views is:</p>
+<pre><code class="language-ruby">WidgetBlueprint[:extended].render(widget).to_json
+</code></pre>
+<p>However, as a nod simplifying the migration, the <code>view</code> option is still available. It may be removed in a future version.</p>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :extended).to_json
+</code></pre>
 
                     </main>
 

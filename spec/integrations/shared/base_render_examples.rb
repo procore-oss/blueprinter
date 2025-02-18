@@ -50,6 +50,17 @@ shared_examples 'Base::render' do
     it('returns json with a renamed field') { should eq(result) }
   end
 
+  context 'when field methods use a mix of symbols and strings' do
+    let(:result) { '{"first_name":"Meg","id":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field 'id'
+        field :first_name
+      end
+    end
+    it('renders as expected') { should eq(result) }
+  end
+
   context 'non-default extractor' do
     let(:extractor) do
       Class.new(Blueprinter::Extractor) do

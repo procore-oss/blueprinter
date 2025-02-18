@@ -1126,6 +1126,7 @@ end
 <p><em>Present</em>: Always</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
 <p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#incremental-update">incremental update</a>.</p>
+<p>Regardless which you choose, you'll need to familiarize yourself with the <a href="upgrading/../dsl/index.html">new DSL</a> and <a href="upgrading/../api/index.html">API</a>. The rest of this section will focus on the differences between V1 and V2.</p>
 <h2 id="full-update"><a class="header" href="#full-update">Full update</a></h2>
 <p>Update <code>blueprinter</code> to 2.x. All of your blueprints will need updated to use the <a href="upgrading/./dsl/index.html">new DSL</a>. If you're making use of extensions, custom extractors, or transformers, they'll also need updated to the <a href="upgrading/./api/index.html">new API</a>.</p>
 <h2 id="incremental-update"><a class="header" href="#incremental-update">Incremental update</a></h2>
@@ -1175,6 +1176,10 @@ end
   end
 end
 </code></pre>
+<h2 id="datetime-formatting"><a class="header" href="#datetime-formatting">Date/time formatting</a></h2>
+<p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="upgrading/../dsl/formatters.html">Learn more</a>.</p>
+<h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
+<p>There is no direct equivalent to V1's transformers. Instead, use <a href="upgrading/../dsl/formatters.html">formatters</a> or one of the new <a href="upgrading/../api/extensions.html">extension hooks</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
 <h2 id="id-field-and-identifier-view"><a class="header" href="#id-field-and-identifier-view"><code>id</code> field and <code>identifier</code> view</a></h2>
 <p>Blueprinter Legacy/V1 included a default field called <code>id</code> and a view called <code>identifier</code>. Blueprinter V2 does not have these, but you can easily replicate them with <code>ApplicationBlueprint</code>.</p>

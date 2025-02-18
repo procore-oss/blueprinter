@@ -163,12 +163,7 @@ module Blueprinter
           blueprint: options.fetch(:blueprint),
           parent_blueprint: self,
           view: options.fetch(:view, :default),
-          options: options.except(
-            :name,
-            :extractor,
-            :blueprint,
-            :view
-          ).merge(block:)
+          options: options.except(:name, :extractor, :blueprint, :view).merge(block:)
         )
       end
 

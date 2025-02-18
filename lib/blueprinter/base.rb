@@ -51,7 +51,7 @@ module Blueprinter
           name,
           extractor,
           self,
-          block: block
+          block:
         )
       end
 
@@ -111,12 +111,14 @@ module Blueprinter
       #
       # @return [Field] A Field object
       def field(method, options = {}, &block)
+        method = method.to_sym
+
         current_view << Field.new(
           method,
           options.fetch(:name) { method },
           options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
           self,
-          options.merge(block: block)
+          options.merge(block:)
         )
       end
 
@@ -153,19 +155,15 @@ module Blueprinter
       def association(method, options = {}, &block)
         raise ArgumentError, ':blueprint must be provided when defining an association' unless options[:blueprint]
 
+        method = method.to_sym
         current_view << Association.new(
-          method: method,
+          method:,
           name: options.fetch(:name) { method },
           extractor: options.fetch(:extractor) { AssociationExtractor.new },
           blueprint: options.fetch(:blueprint),
           parent_blueprint: self,
           view: options.fetch(:view, :default),
-          options: options.except(
-            :name,
-            :extractor,
-            :blueprint,
-            :view
-          ).merge(block: block)
+          options: options.except(:name, :extractor, :blueprint, :view).merge(block:)
         )
       end
 

@@ -208,6 +208,9 @@ end
 field :name
 field :tags
 
+# Add multiple fields at once
+fields :description, :price
+
 # Use object to render an object or Hash using another blueprint
 object :category, CategoryBlueprint
 
@@ -253,7 +256,7 @@ object :bar, extractor: MyCustomExtractor
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
 <p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="dsl/./fields.html">fields</a>, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/views.html#nested-views">nested views</a>.</p>
-<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
+<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified. All other views in the Blueprint inherit from it.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
@@ -300,7 +303,10 @@ end
 <h3 id="referencing-views"><a class="header" href="#referencing-views">Referencing views</a></h3>
 <p>When defining an association, you can choose a view from its blueprint:</p>
 <pre><code class="language-ruby">object :widget, WidgetBlueprint[:extended]
-collection :widgets, WidgetBlueprint["extended.with_price"]
+</code></pre>
+<p>Nested views can be accessed with a dot syntax or a nested Hash syntax.</p>
+<pre><code class="language-ruby">collection :widgets, WidgetBlueprint["extended.with_price"]
+collection :widgets, WidgetBlueprint[:extended][:with_price]
 </code></pre>
 <h3 id="inheriting-from-views"><a class="header" href="#inheriting-from-views">Inheriting from views</a></h3>
 <p>You can inherit from another blueprint, or from one of its views:</p>
@@ -1045,7 +1051,7 @@ field.options # all other options passed to the field
 </code></pre>
 <p>Object and collection fields have the same metadata as regular fields, plus a <code>blueprint</code> attribute:</p>
 <pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
-field = view.collection[:parts]
+field = view.collections[:parts]
 
 # it returns the Blueprint class, so you can continue reflecting
 field.blueprint

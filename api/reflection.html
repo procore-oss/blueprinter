@@ -230,7 +230,7 @@ field.options # all other options passed to the field
 </code></pre>
 <p>Object and collection fields have the same metadata as regular fields, plus a <code>blueprint</code> attribute:</p>
 <pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
-field = view.collection[:parts]
+field = view.collections[:parts]
 
 # it returns the Blueprint class, so you can continue reflecting
 field.blueprint

@@ -157,7 +157,7 @@
                     <main>
                         <h1 id="views"><a class="header" href="#views">Views</a></h1>
 <p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="./fields.html">fields</a>, views can define <a href="./options.html">options</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="#nested-views">nested views</a>.</p>
-<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified.</p>
+<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified. All other views in the Blueprint inherit from it.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
@@ -204,7 +204,10 @@ end
 <h3 id="referencing-views"><a class="header" href="#referencing-views">Referencing views</a></h3>
 <p>When defining an association, you can choose a view from its blueprint:</p>
 <pre><code class="language-ruby">object :widget, WidgetBlueprint[:extended]
-collection :widgets, WidgetBlueprint["extended.with_price"]
+</code></pre>
+<p>Nested views can be accessed with a dot syntax or a nested Hash syntax.</p>
+<pre><code class="language-ruby">collection :widgets, WidgetBlueprint["extended.with_price"]
+collection :widgets, WidgetBlueprint[:extended][:with_price]
 </code></pre>
 <h3 id="inheriting-from-views"><a class="header" href="#inheriting-from-views">Inheriting from views</a></h3>
 <p>You can inherit from another blueprint, or from one of its views:</p>

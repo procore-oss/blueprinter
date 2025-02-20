@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+module Blueprinter
+  module V2
+    module Extensions
+      # Core functionality built with extensions
+      module Core
+        autoload :Prelude, 'blueprinter/v2/extensions/core/prelude'
+        autoload :Values, 'blueprinter/v2/extensions/core/values'
+      end
+    end
+  end
+end

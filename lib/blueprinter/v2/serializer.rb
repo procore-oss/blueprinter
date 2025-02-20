@@ -18,7 +18,8 @@ module Blueprinter
           Extensions::Core::Prelude.new,
           Extensions::Core::Values.new,
           Extensions::Core::Conditionals.new,
-          *blueprint.extensions
+          *blueprint.extensions,
+          Extensions::Core::Postlude.new
         ])
         @formatter = Formatter.new(blueprint)
         @blueprint = blueprint

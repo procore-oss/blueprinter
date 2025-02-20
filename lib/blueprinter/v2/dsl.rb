@@ -62,7 +62,8 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @yield [TODO] Generate the value from the block
+      # @param extractor [Class] Extractor class to use for this field
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::Field]
       #
       def field(name, from: name, **options, &definition)
@@ -92,7 +93,8 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @yield [TODO] Generate the value from the block
+      # @param extractor [Class] Extractor class to use for this field
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::ObjectField]
       #
       def object(name, blueprint, from: name, **options, &definition)
@@ -113,7 +115,8 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @yield [TODO] Generate the value from the block
+      # @param extractor [Class] Extractor class to use for this field
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::Collection]
       #
       def collection(name, blueprint, from: name, **options, &definition)

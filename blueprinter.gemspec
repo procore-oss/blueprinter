@@ -24,4 +24,6 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.0'
   s.metadata['rubygems_mfa_required'] = 'true'
+
+  s.add_development_dependency 'multi_json', '~> 1.0'
 end

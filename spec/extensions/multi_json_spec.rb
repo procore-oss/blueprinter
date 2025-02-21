@@ -4,7 +4,7 @@ require 'multi_json'
 
 describe Blueprinter::Extensions::MultiJson do
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       fields :id, :name
     end
   end

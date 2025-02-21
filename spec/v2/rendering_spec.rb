@@ -2,20 +2,20 @@
 
 describe "Blueprinter::V2 Rendering" do
   let(:category_blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name
     end
   end
 
   let(:part_blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :num
     end
   end
 
   let(:widget_blueprint) do
     test = self
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name
       object :cat, test.category_blueprint, from: :category
       collection :parts, test.part_blueprint
@@ -110,7 +110,7 @@ describe "Blueprinter::V2 Rendering" do
       alias_method :object_value, :field_value
       alias_method :collection_value, :field_value
     end
-    application_blueprint = Class.new(Blueprinter::V2::Base) do
+    application_blueprint = Class.new(Blueprinter::Blueprint) do
       extensions << foo_ext.new
     end
     category_blueprint = Class.new(application_blueprint) do

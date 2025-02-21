@@ -42,7 +42,7 @@ module Blueprinter
         # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>] All fields, objects, and collections in the order they were defined
         attr_reader :ordered
 
-        # @param blueprint [Class] A subclass of Blueprinter::V2::Base
+        # @param blueprint [Class] A subclass of Blueprinter::Blueprint
         # @param name [Symbol] Name of the view
         # @api private
         def initialize(blueprint, name)

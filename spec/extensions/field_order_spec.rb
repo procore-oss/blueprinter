@@ -3,7 +3,7 @@
 describe Blueprinter::Extensions::FieldOrder do
   let(:context) { Blueprinter::V2::Context.new(blueprint.new, nil, nil, nil, {}, {}, {}) }
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :foo
       field :id
       object :bar, self

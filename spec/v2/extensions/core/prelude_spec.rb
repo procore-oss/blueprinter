@@ -43,7 +43,7 @@ describe Blueprinter::V2::Extensions::Core::Prelude do
   end
 
   it 'should return all fields in the order they were defined' do
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
       object :category, self
       collection :parts, self

@@ -6,7 +6,7 @@ module ExtensionHelpers
       subject { described_class.new }
 
       let(:sub_blueprint) do
-        Class.new(Blueprinter::V2::Base) do
+        Class.new(Blueprinter::Blueprint) do
           self.blueprint_name = 'SubBlueprint'
           field :name
         end
@@ -14,7 +14,7 @@ module ExtensionHelpers
 
       let(:blueprint) do
         test = self
-        Class.new(Blueprinter::V2::Base) do
+        Class.new(Blueprinter::Blueprint) do
           self.blueprint_name = 'TestBlueprint'
           fields :foo, :bar
           object :foo_obj, test.sub_blueprint

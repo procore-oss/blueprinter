@@ -2,6 +2,7 @@
 
 module Blueprinter
   autoload :Base, 'blueprinter/base'
+  autoload :Blueprint, 'blueprinter/blueprint'
   autoload :BlueprinterError, 'blueprinter/blueprinter_error'
   autoload :Configuration, 'blueprinter/configuration'
   autoload :Errors, 'blueprinter/errors'

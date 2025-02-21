@@ -21,7 +21,7 @@ class WidgetBlueprintV1 < Blueprinter::Base
   NUM_COLLECTIONS.times { |i| association  :"parts_#{i}", blueprint: PartBlueprintV1 }
 end
 
-class ApplicationBlueprintV2 < Blueprinter::V2::Base
+class ApplicationBlueprintV2 < Blueprinter::Blueprint
 end
 
 class CategoryBlueprintV2 < ApplicationBlueprintV2

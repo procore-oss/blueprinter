@@ -11,7 +11,7 @@ module Blueprinter
     class ViewBuilder
       include Enumerable
 
-      # @param parent [Class] A subclass of Blueprinter::V2::Base
+      # @param parent [Class] A subclass of Blueprinter::Blueprint
       def initialize(parent)
         @parent = parent
         @views = { default: parent }

@@ -162,7 +162,7 @@
 <p>If you're using <code>render json:</code> in a Rails controller, you may omit <code>.to_json</code>:</p>
 <pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
 </code></pre>
-<p>The default JSON serializer is Ruby's built-in <code>JSON</code> library. You can switch to the <a href="https://rubygems.org/gems/multi_json">multi_json gem</a> by enabling Blueprinter's built-in <a href="./dsl/extensions.html#multijson">MultiJson extension</a>. Or implement the <a href="../api/extensions.html#json_output">json_output</a> extension hook and use whatever JSON serializer you prefer.</p>
+<p>Ruby's built-in <code>JSON</code> library is used by default. Alternatively, you can use <a href="https://rubygems.org/gems/multi_json">multi_json</a> by enabling the <a href="./dsl/extensions.html#multijson">MultiJson extension</a> or implement the <a href="../api/extensions.html#json_output">json_output</a> extension hook to call whatever JSON serializer you prefer.</p>
 <h3 id="rendering-to-a-hash"><a class="header" href="#rendering-to-a-hash">Rendering to a Hash</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
 </code></pre>

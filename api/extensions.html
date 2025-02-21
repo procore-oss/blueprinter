@@ -401,7 +401,7 @@ end
 <p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the first one</em> will be used.</p>
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json_output(ctx)
-  MultiJson.dump ctx.value
+  JSON.dump ctx.value
 end
 </code></pre>
 

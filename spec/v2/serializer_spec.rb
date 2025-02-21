@@ -5,20 +5,20 @@ require 'json'
 
 describe Blueprinter::V2::Serializer do
   let(:category_blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name
     end
   end
 
   let(:part_blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :num
     end
   end
 
   let(:widget_blueprint) do
     test = self
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name
       object :category, test.category_blueprint
       collection :parts, test.part_blueprint
@@ -84,7 +84,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should enable the if conditionals extension' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
       field :desc, if: ->(ctx) { ctx.options[:n] > 42 }
     end
@@ -99,7 +99,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should enable the unless conditionals extension' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
       field :desc, unless: ->(ctx) { ctx.options[:n] > 42 }
     end
@@ -114,7 +114,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should enable the default values extension' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
       field :desc, default: 'Description!'
     end
@@ -127,7 +127,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should enable the exclude if empty extension' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name, exclude_if_empty: true
       field :desc, exclude_if_empty: true
     end
@@ -137,7 +137,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should enable the exclude if nil extension' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name, exclude_if_nil: true
       field :desc, exclude_if_nil: true
     end
@@ -216,7 +216,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should evaluate value hooks before exclusion hooks' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
       field :desc, default: 'Bar', if: ->(ctx) { !ctx.value.nil? }
     end
@@ -227,7 +227,7 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'should evaluate both ifs and unlesses' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+    widget_blueprint = Class.new(Blueprinter::Blueprint) do
       field :name, if: ->(ctx) { ctx.options[:n] > 42 }
       field :desc, unless: ->(ctx) { ctx.options[:n] < 43 }
       field :zorp,

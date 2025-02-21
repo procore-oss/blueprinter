@@ -5,7 +5,7 @@ describe Blueprinter::Extractor do
   let(:context) { Blueprinter::V2::Context }
 
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       def upcase(str)
         str.upcase
       end

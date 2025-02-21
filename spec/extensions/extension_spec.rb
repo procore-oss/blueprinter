@@ -4,7 +4,7 @@ describe Blueprinter::Extension do
   subject { Class.new(described_class) }
 
   context 'hooks' do
-    let(:blueprint) { Class.new(Blueprinter::V2::Base) }
+    let(:blueprint) { Class.new(Blueprinter::Blueprint) }
     let(:field) { Blueprinter::V2::Field.new(name: :foo, from: :foo) }
     let(:object) { { foo: 'Foo' } }
     let(:context) { Blueprinter::V2::Context }

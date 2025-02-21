@@ -37,7 +37,7 @@ describe 'V1/V2 Compatibility' do
     end
 
     let(:v2_blueprint) do
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         field :description
 
         view :extended do
@@ -100,7 +100,7 @@ describe 'V1/V2 Compatibility' do
   context 'V2' do
     let(:blueprint) do
       test = self
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         field :name
         object :category, test.v1_blueprint
         collection :parts, test.v1_blueprint

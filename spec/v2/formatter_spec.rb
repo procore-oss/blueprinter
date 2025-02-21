@@ -7,7 +7,7 @@ describe Blueprinter::V2::Formatter do
   let(:object) { { foo: 'Foo' } }
   let(:context) { Blueprinter::V2::Context }
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       format(Date) { |date| date.iso8601 }
       format TrueClass, :yes
 

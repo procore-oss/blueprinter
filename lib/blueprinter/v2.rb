@@ -4,7 +4,6 @@ require 'blueprinter/v2/fields'
 
 module Blueprinter
   module V2
-    autoload :Base, 'blueprinter/v2/base'
     autoload :DSL, 'blueprinter/v2/dsl'
     autoload :Extensions, 'blueprinter/v2/extensions'
     autoload :Formatter, 'blueprinter/v2/formatter'

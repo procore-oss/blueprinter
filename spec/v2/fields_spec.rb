@@ -5,7 +5,7 @@ require 'date'
 describe "Blueprinter::V2 Fields" do
   context "fields" do
     it "should add fields with options" do
-      blueprint = Class.new(Blueprinter::V2::Base) do
+      blueprint = Class.new(Blueprinter::Blueprint) do
         field :name
         field :description, from: :desc, if: -> { true }
         field(:foo) { "foo" }
@@ -23,7 +23,7 @@ describe "Blueprinter::V2 Fields" do
     end
 
     it 'should add multiple fields' do
-      blueprint = Class.new(Blueprinter::V2::Base) do
+      blueprint = Class.new(Blueprinter::Blueprint) do
         fields :name, :description, :status
       end
 
@@ -47,9 +47,9 @@ describe "Blueprinter::V2 Fields" do
 
   context "associations" do
     it "should add associations with options" do
-      category_blueprint = Class.new(Blueprinter::V2::Base)
-      widget_blueprint = Class.new(Blueprinter::V2::Base)
-      blueprint = Class.new(Blueprinter::V2::Base) do
+      category_blueprint = Class.new(Blueprinter::Blueprint)
+      widget_blueprint = Class.new(Blueprinter::Blueprint)
+      blueprint = Class.new(Blueprinter::Blueprint) do
         object :category, category_blueprint
         collection :widgets, widget_blueprint, from: :foo, if: -> { true }
         object(:foo, widget_blueprint) { {foo: "bar"} }
@@ -71,7 +71,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "it should inherit from parent classes" do
-    application_blueprint = Class.new(Blueprinter::V2::Base) do
+    application_blueprint = Class.new(Blueprinter::Blueprint) do
       field :id
     end
     blueprint = Class.new(application_blueprint) do
@@ -83,7 +83,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "it should inherit from parent views" do
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
 
       view :extended do
@@ -102,7 +102,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from the parent class" do
-    application_blueprint = Class.new(Blueprinter::V2::Base) do
+    application_blueprint = Class.new(Blueprinter::Blueprint) do
       field :id
       field :foo
     end
@@ -116,9 +116,9 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from the parent view" do
-    category_blueprint = Class.new(Blueprinter::V2::Base)
-    widget_blueprint = Class.new(Blueprinter::V2::Base)
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    category_blueprint = Class.new(Blueprinter::Blueprint)
+    widget_blueprint = Class.new(Blueprinter::Blueprint)
+    blueprint = Class.new(Blueprinter::Blueprint) do
       field :id
       field :name
       object :category, category_blueprint
@@ -140,7 +140,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from partials" do
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    blueprint = Class.new(Blueprinter::Blueprint) do
       partial :desc do
         field :short_desc
         field :long_desc
@@ -160,7 +160,7 @@ describe "Blueprinter::V2 Fields" do
 
   context 'formatters' do
     let(:blueprint) do
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         def fmt_date(d)
           d.iso8601
         end

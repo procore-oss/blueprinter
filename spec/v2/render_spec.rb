@@ -2,14 +2,14 @@
 
 describe Blueprinter::V2::Render do
   let(:category_blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name, from: :n
     end
   end
 
   let(:widget_blueprint) do
     test = self
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name
       field :desc, from: :description
       object :category, test.category_blueprint

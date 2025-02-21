@@ -2,7 +2,7 @@
 
 describe "Blueprinter::V2::Reflection" do
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       view :foo
       view :bar do
         view :foo do
@@ -65,11 +65,11 @@ describe "Blueprinter::V2::Reflection" do
   end
 
   context 'fields and associations' do
-    let(:category_blueprint) { Class.new(Blueprinter::V2::Base) }
-    let(:widget_blueprint) { Class.new(Blueprinter::V2::Base) }
+    let(:category_blueprint) { Class.new(Blueprinter::Blueprint) }
+    let(:widget_blueprint) { Class.new(Blueprinter::Blueprint) }
     let(:blueprint) do
       test = self
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         field :name
         object :category, test.category_blueprint
 

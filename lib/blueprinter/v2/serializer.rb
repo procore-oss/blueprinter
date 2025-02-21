@@ -62,7 +62,7 @@ module Blueprinter
             hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
             next if exclusions.exclude_object?(ctx) || (@run_exclude_object && hooks.any?(:exclude_object?, ctx))
 
-            if instances[field.blueprint].is_a? V2::Base
+            if instances[field.blueprint].is_a? Blueprint
               ctx.value = field.blueprint.serializer.call(ctx.value, options, instances, store)
             else
               ctx.value = field.blueprint.render_as_hash(ctx.value, options.dup.merge({ v2_instances: instances, v2_store: store }))
@@ -73,7 +73,7 @@ module Blueprinter
             hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
             next if exclusions.exclude_collection?(ctx) || (@run_exclude_collection && hooks.any?(:exclude_collection?, ctx))
 
-            if instances[field.blueprint].is_a? V2::Base
+            if instances[field.blueprint].is_a? Blueprint
               ctx.value = ctx.value.map { |val| field.blueprint.serializer.call(val, options, instances, store) }
             else
               ctx.value = field.blueprint.render_as_hash(ctx.value, options.dup.merge({ v2_instances: instances, v2_store: store }))

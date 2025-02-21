@@ -21,7 +21,7 @@ module Blueprinter
 
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
-      if blueprint <= V2::Base
+      if blueprint <= Blueprint
         view = options[:view] || :default
         store = local_options.fetch(:v2_store)
         instances = local_options.fetch(:v2_instances)

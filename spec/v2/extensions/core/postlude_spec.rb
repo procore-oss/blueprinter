@@ -4,7 +4,7 @@ describe Blueprinter::V2::Extensions::Core::Postlude do
   subject { described_class.new }
   let(:context) { Blueprinter::V2::Context }
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :name
 
       def meta_links

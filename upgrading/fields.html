@@ -158,8 +158,7 @@
                         <h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
 <h2 id="id-field-and-identifier-view"><a class="header" href="#id-field-and-identifier-view"><code>id</code> field and <code>identifier</code> view</a></h2>
 <p>Blueprinter Legacy/V1 included a default field called <code>id</code> and a view called <code>identifier</code>. Blueprinter V2 does not have these, but you can easily replicate them with <code>ApplicationBlueprint</code>.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   field :id
 
   view :identifier do
@@ -181,8 +180,7 @@ end
 <h2 id="field-order"><a class="header" href="#field-order">Field order</a></h2>
 <p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="../api/extensions.html#blueprint_fields">blueprint_fields extension hook</a> or the built-in <code>FieldOrder</code> extension.</p>
 <p>The following replicates Legacy/V1's default field order using the built-in <code>FieldOrder</code> extension.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
     if a.name == :id
       -1

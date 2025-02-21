@@ -157,8 +157,7 @@
                     <main>
                         <h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   options[:exclude_if_nil] = true
   options[:extractor] = MyExtractor
   extensions &lt;&lt; MyExtension.new

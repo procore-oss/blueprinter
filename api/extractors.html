@@ -183,8 +183,7 @@ end
 <h2 id="custom-extractors"><a class="header" href="#custom-extractors">Custom Extractors</a></h2>
 <p>Override the <code>field</code>, <code>object</code>, or <code>collection</code> methods as needed. They'll be passed a <a href="./context-objects.html">context object</a> with the following fields populated: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code>.</p>
 <p>Note that a new version of your extractor will be initialized for each render, so it's safe to store state inside.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Extractor
-class WeirdObjectExtractor &lt; Blueprinter::Extractor
+<pre><code class="language-ruby">class WeirdObjectExtractor &lt; Blueprinter::Extractor
   def object(ctx)
     weird_extraction_logic ctx
   end

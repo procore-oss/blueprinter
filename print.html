@@ -187,8 +187,7 @@ WidgetBlueprint[:extended].render(widget).to_hash
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
 <p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; MyExtension.new
   options[:exclude_if_nil] = true
   field :id
@@ -1118,8 +1117,7 @@ end
 <h2 id="custom-extractors-1"><a class="header" href="#custom-extractors-1">Custom Extractors</a></h2>
 <p>Override the <code>field</code>, <code>object</code>, or <code>collection</code> methods as needed. They'll be passed a <a href="api/./context-objects.html">context object</a> with the following fields populated: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code>.</p>
 <p>Note that a new version of your extractor will be initialized for each render, so it's safe to store state inside.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Extractor
-class WeirdObjectExtractor &lt; Blueprinter::Extractor
+<pre><code class="language-ruby">class WeirdObjectExtractor &lt; Blueprinter::Extractor
   def object(ctx)
     weird_extraction_logic ctx
   end
@@ -1157,7 +1155,7 @@ end
 <h2 id="incremental-update"><a class="header" href="#incremental-update">Incremental update</a></h2>
 <p>Larger applications may find it easier to update incrementally. Update <code>blueprinter</code> to 1.2.x, which contains both the legacy/V1 and V2 APIs. They can be used side-by-side.</p>
 <pre><code class="language-ruby"># A legacy/V1 blueprint
-class WidgetBlueprint &lt; Blueprinter::Base
+class WidgetBlueprint &lt; Blueprinter::Blueprint
   field :name
 
   view :with_desc do
@@ -1182,8 +1180,7 @@ end
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   options[:exclude_if_nil] = true
   options[:extractor] = MyExtractor
   extensions &lt;&lt; MyExtension.new
@@ -1210,8 +1207,7 @@ end
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
 <h2 id="id-field-and-identifier-view"><a class="header" href="#id-field-and-identifier-view"><code>id</code> field and <code>identifier</code> view</a></h2>
 <p>Blueprinter Legacy/V1 included a default field called <code>id</code> and a view called <code>identifier</code>. Blueprinter V2 does not have these, but you can easily replicate them with <code>ApplicationBlueprint</code>.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   field :id
 
   view :identifier do
@@ -1233,8 +1229,7 @@ end
 <h2 id="field-order-1"><a class="header" href="#field-order-1">Field order</a></h2>
 <p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="upgrading/../api/extensions.html#blueprint_fields">blueprint_fields extension hook</a> or the built-in <code>FieldOrder</code> extension.</p>
 <p>The following replicates Legacy/V1's default field order using the built-in <code>FieldOrder</code> extension.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
-class ApplicationBlueprint &lt; Blueprinter::Base
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
     if a.name == :id
       -1

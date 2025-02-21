@@ -163,7 +163,7 @@
 <h2 id="incremental-update"><a class="header" href="#incremental-update">Incremental update</a></h2>
 <p>Larger applications may find it easier to update incrementally. Update <code>blueprinter</code> to 1.2.x, which contains both the legacy/V1 and V2 APIs. They can be used side-by-side.</p>
 <pre><code class="language-ruby"># A legacy/V1 blueprint
-class WidgetBlueprint &lt; Blueprinter::Base
+class WidgetBlueprint &lt; Blueprinter::Blueprint
   field :name
 
   view :with_desc do

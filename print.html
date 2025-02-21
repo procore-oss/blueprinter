@@ -685,7 +685,7 @@ extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new(pretty: true)
 # You can also pass MultiJson.dump options during render
 WidgetBlueprint.render(widget, multi_json: { pretty: true })
 </code></pre>
-<p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="dsl/../api/extensions.html#json_output">json_output</a> extension hook to render JSON using whatever you want.</p>
+<p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="dsl/../api/extensions.html#json_output">json_output</a> extension hook to render JSON however you like.</p>
 <h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
 <p><em>Have an extension you'd like to share? Let us know and we may add it to the list!</em></p>
 <h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
@@ -694,10 +694,10 @@ WidgetBlueprint.render(widget, multi_json: { pretty: true })
 <h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
 </code></pre>
-<p>If you're using <code>render json:</code> in a Rails controller, you may omit <code>.to_json</code>:</p>
+<p>You may omit <code>.to_json</code> if you're calling <code>render json:</code> in a Rails controller:</p>
 <pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
 </code></pre>
-<p>Ruby's built-in <code>JSON</code> library is used by default. Alternatively, you can use <a href="https://rubygems.org/gems/multi_json">multi_json</a> by enabling the <a href="./dsl/extensions.html#multijson">MultiJson extension</a> or implement the <a href="../api/extensions.html#json_output">json_output</a> extension hook to call whatever JSON serializer you prefer.</p>
+<p>Ruby's built-in <code>JSON</code> library is used by default. Alternatively, you can use the built-in <a href="./dsl/extensions.html#multijson">MultiJson extension</a>. Or for total control, implement the <a href="../api/extensions.html#json_output">json_output</a> extension hook and call any serializer you like.</p>
 <h3 id="rendering-to-a-hash"><a class="header" href="#rendering-to-a-hash">Rendering to a Hash</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
 </code></pre>

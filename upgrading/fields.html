@@ -183,7 +183,6 @@ end
 <p>The following replicates Legacy/V1's default field order using the built-in <code>FieldOrder</code> extension.</p>
 <pre><code class="language-ruby"># If you're using version 1.x, inherit from Blueprinter::V2::Base
 class ApplicationBlueprint &lt; Blueprinter::Base
-  # If you're using version 1.x, use Blueprinter::V2::Extensions::FieldOrder
   extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
     if a.name == :id
       -1

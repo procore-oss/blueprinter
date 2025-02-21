@@ -158,7 +158,7 @@
                         <h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
 <p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Some are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="../api/extensions.html">Extension API</a>.</p>
 <h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
-<p>Extensions can be added in your blueprints, views, and partials. They're inherited from parent classes and views, but can be overridden.</p>
+<p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They're inherited from parent classes and views, but can be overridden.</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
   extensions &lt;&lt; FooExtension.new
   extensions &lt;&lt; BarExtension.new
@@ -176,12 +176,10 @@ end
 <p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
 <h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
 <p>Control the order of fields in your output. See the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the block parameters.</p>
-<pre><code class="language-ruby"># If you're using version 1.x, use Blueprinter::V2::Extensions::FieldOrder
-extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
+<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
 </code></pre>
 <h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>
-<p>The MultiJson extension switches Blueprinter from Ruby's built-in JSON library to the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. Just add the <code>multi_json</code> gem, your serialization library of choice, and enable the extension.</p>
-<p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="../api/extensions.html#json_output">json_output</a> extension hook to add support directly in Blueprinter.</p>
+<p>The MultiJson extension switches Blueprinter from Ruby's built-in JSON library to the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. Just install the <code>multi_json</code> gem, your serialization library of choice, and enable the extension.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new
 
 # Any options you pass will be forwarded to MultiJson.dump
@@ -190,6 +188,7 @@ extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new(pretty: true)
 # You can also pass MultiJson.dump options during render
 WidgetBlueprint.render(widget, multi_json: { pretty: true })
 </code></pre>
+<p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="../api/extensions.html#json_output">json_output</a> extension hook to render JSON using whatever you want.</p>
 <h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
 <p><em>Have an extension you'd like to share? Let us know and we may add it to the list!</em></p>
 <h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>

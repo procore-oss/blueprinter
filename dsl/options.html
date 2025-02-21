@@ -188,6 +188,9 @@
     # ...
   end
 end
+
+# Passing a supported option to render will override what's in the blueprint
+WidgetBlueprint.render(widget, exclude_if_empty: false).to_json
 </code></pre>
 <p>For easier reference, options are grouped into the following categories:</p>
 <ul>

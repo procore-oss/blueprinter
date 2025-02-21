@@ -1,0 +1,17 @@
+[book]
+authors = ["Procore Technologies, Inc."]
+language = "en"
+multilingual = false
+src = "docs"
+title = "Blueprinter"
+
+[build]
+build-dir = "docs-dist"
+
+# https://rust-lang.github.io/mdBook/format/configuration/renderers.html?highlight=top%20bar#html-renderer-options
+[output.html]
+additional-css = ["theme/hljs-overrides.css"]
+default-theme = "light"
+preferred-dark-theme = "navy"
+no-section-label = true
+git-repository-url = "https://github.com/procore-oss/blueprinter"

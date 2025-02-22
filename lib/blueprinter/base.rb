@@ -5,6 +5,7 @@ require 'blueprinter/extractors/association_extractor'
 require 'blueprinter/field'
 require 'blueprinter/helpers/base_helpers'
 require 'blueprinter/reflection'
+require 'blueprinter/view_wrapper'
 
 module Blueprinter
   class Base
@@ -246,7 +247,7 @@ module Blueprinter
     def self.prepare(object, view_name:, local_options:, root: nil, meta: nil)
       raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view? view_name
 
-      object = Blueprinter.configuration.extensions.pre_render(object, self, view_name, local_options)
+      object = Blueprinter.configuration.hooks.reduce(:pre_render, object) { |val| [val, self, view_name, local_options] }
       data = prepare_data(object, view_name, local_options)
       prepend_root_and_meta(data, root, meta)
     end
@@ -437,6 +438,15 @@ module Blueprinter
     # supported by this Blueprint.
     def self.view?(view_name)
       view_collection.view? view_name
+    end
+
+    # For compatibility with V2
+    #
+    # @return [Blueprinter::ViewWrapper]
+    def self.[](view_name)
+      raise Errors::UnknownView, "View '#{view_name}' could not be found in Blueprint '#{self.name}'" unless view? view_name
+
+      ViewWrapper.new(self, view_name)
     end
   end
 end

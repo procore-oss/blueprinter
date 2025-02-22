@@ -11,7 +11,7 @@ module Blueprinter
     class ViewBuilder
       include Enumerable
 
-      # @param parent [Class] A subclass of Blueprinter::V2::Base
+      # @param parent [Class] A subclass of Blueprinter::Blueprint
       def initialize(parent)
         @parent = parent
         @views = { default: parent }
@@ -26,7 +26,10 @@ module Blueprinter
       # @param definition [Proc]
       #
       def []=(name, definition)
-        @pending[name.to_sym] = definition
+        name = name.to_sym
+        raise Errors::InvalidBlueprint, "A view named '#{name}' in '#{@parent}' already exists" if @pending.has_key?(name) || @views.has_key?(name)
+
+        @pending[name] = definition
       end
 
       #

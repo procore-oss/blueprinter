@@ -2,10 +2,13 @@
 
 module Blueprinter
   autoload :Base, 'blueprinter/base'
+  autoload :Blueprint, 'blueprinter/blueprint'
   autoload :BlueprinterError, 'blueprinter/blueprinter_error'
   autoload :Configuration, 'blueprinter/configuration'
   autoload :Errors, 'blueprinter/errors'
   autoload :Extension, 'blueprinter/extension'
+  autoload :Extensions, 'blueprinter/extensions'
+  autoload :Hooks, 'blueprinter/hooks'
   autoload :Transformer, 'blueprinter/transformer'
   autoload :V2, 'blueprinter/v2'
 

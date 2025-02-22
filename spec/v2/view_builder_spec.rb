@@ -6,7 +6,7 @@ describe "Blueprinter::V2::ViewBuilder" do
   end
 
   let(:blueprint) do
-    Class.new(Blueprinter::V2::Base) do
+    Class.new(Blueprinter::Blueprint) do
       field :id
       field :name
     end
@@ -59,5 +59,18 @@ describe "Blueprinter::V2::ViewBuilder" do
 
     keys = builder.each.map { |name, _| name }
     expect(keys.sort).to eq %i(default foo bar).sort
+  end
+
+  it "should throw an error if you try to define an existing view" do
+    builder[:foo] = proc { field :description }
+    expect {
+      builder[:foo] = proc { field :description }
+    }.to raise_error Blueprinter::Errors::InvalidBlueprint
+  end
+
+  it "should throw an error if you try to define the default view" do
+    expect {
+      builder[:default] = proc { field :description }
+    }.to raise_error Blueprinter::Errors::InvalidBlueprint
   end
 end

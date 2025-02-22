@@ -2,11 +2,210 @@
 
 module Blueprinter
   #
-  # Base class for all extensions. All extension methods are implemented as no-ops.
+  # Base class for all extensions.
+  #
+  # V2 hook call order:
+  #  - collection? (skipped if calling render_object/render_collection)
+  #  - around
+  #    - input_object | input_collection
+  #    - around_blueprint
+  #      - prepare (only first time during a given render)
+  #      - blueprint_fields (only first time during a given render)
+  #      - blueprint_input
+  #      - field_value
+  #      - exclude_field?
+  #      - object_value
+  #      - exclude_object?
+  #      - collection_value
+  #      - exclude_collection?
+  #      - blueprint_output
+  #    - output_object | output_collection
+  #    - json
+  #
+  # V1 hook call order:
+  #  - pre_render
   #
   class Extension
     #
-    # Called eary during "render", this method receives the object to be rendered and
+    # Returns true if the given object should be treated as a collection (i.e. supports `map { |obj| ... }`).
+    #
+    # @param _object [Object]
+    # @return [Boolean]
+    #
+    def collection?(_object)
+      false
+    end
+
+    #
+    # Runs around the entire rendering process. MUST yield!
+    #
+    # @param _context [Blueprinter::V2::Context]
+    #
+    def around(_context)
+      yield
+    end
+
+    #
+    # Runs around any Blueprint serialization. Surrounds the `prepare` through `blueprint_output` hooks. MUST yield!
+    #
+    # @param _context [Blueprinter::V2::Context]
+    #
+    def around_blueprint(_context)
+      yield
+    end
+
+    #
+    # Called once per blueprint per render. A common use is to pre-calculate certain options
+    # and cache them in context.data, so we don't have to recalculate them for every field.
+    #
+    # @param _context [Blueprinter::V2::Context]
+    #
+    def prepare(_context); end
+
+    #
+    # Returns the fields that should be included in the correct order. Default is all fields in the order in which they were defined.
+    #
+    # NOTE Only runs once per Blueprint per render.
+    #
+    # @param _context [Blueprinter::V2::Context]
+    # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
+    #
+    def blueprint_fields(_context)
+      []
+    end
+
+    #
+    # Modify or replace the object passed to render/render_object. The returned object is what will be rendered.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def input_object(context)
+      context.object
+    end
+
+    #
+    # Modify or replace the collection passed to render/render_collection. The returned collection is what will be rendered.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def input_collection(context)
+      context.object
+    end
+
+    #
+    # Modify or replace the object result (stored in context.value) before final render (e.g. to JSON). The returned object is what will be rendered.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def output_object(context)
+      context.value
+    end
+
+    #
+    # Modify or replace the collection result (stored in context.value) before final render (e.g. to JSON). The returned object is what will be rendered.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def output_collection(context)
+      context.value
+    end
+
+    #
+    # Modify or replace an object right before it's serialized by a Blueprint. The returned object will be used as the input to the Blueprint.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def blueprint_input(context)
+      context.object
+    end
+
+    #
+    # Modify or replace the serialized output from any Blueprint. The returned object will be used as the output of the Blueprint.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def blueprint_output(context)
+      context.value
+    end
+
+    #
+    # Modify or replace the value used for the field. The returned value will be run through any formatters and used as the field's value.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def field_value(context)
+      context.value
+    end
+
+    #
+    # Modify or replace the value used for the object. The returned value will be used as the input for the object's Blueprint.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def object_value(context)
+      context.value
+    end
+
+    #
+    # Modify or replace the value used for the collection. The returned value will be used as the input for the collection's Blueprint.
+    #
+    # @param context [Blueprinter::V2::Context]
+    # @return [Object]
+    #
+    def collection_value(context)
+      context.value
+    end
+
+    #
+    # Return true to exclude this field from the result.
+    #
+    # @param _context [Blueprinter::V2::Context]
+    # @return [Boolean]
+    #
+    def exclude_field?(_context)
+      false
+    end
+
+    #
+    # Return true to exclude this object from the result.
+    #
+    # @param _context [Blueprinter::V2::Context]
+    # @return [Boolean]
+    #
+    def exclude_object?(_context)
+      false
+    end
+
+    #
+    # Return true to exclude this collection from the result.
+    #
+    # @param _context [Blueprinter::V2::Context]
+    # @return [Boolean]
+    #
+    def exclude_collection?(_context)
+      false
+    end
+
+    #
+    # Override the default JSON encoder. The returned string will be the JSON output.
+    #
+    # @param _context [Blueprinter::V2::Context]
+    # @return [String]
+    #
+    def json(_context)
+      nil
+    end
+
+    #
+    # Called eary during "render" in V1, this method receives the object to be rendered and
     # may return a modified (or new) object to be rendered.
     #
     # @param object [Object] The object to be rendered

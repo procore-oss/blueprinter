@@ -753,7 +753,7 @@ end
 <li><a href="api/extensions.html#around">around</a>
 <ul>
 <li><a href="api/extensions.html#input_object">input_object</a> | <a href="api/extensions.html#input_collection">input_collection</a></li>
-<li><a href="api/extensions.html#around_blueprint">around_blueprint</a>
+<li><a href="api/extensions.html#around_object">around_object</a> | <a href="api/extensions.html#around_collection">around_collection</a>
 <ul>
 <li><a href="api/extensions.html#prepare">prepare</a></li>
 <li><a href="api/extensions.html#blueprint_fields">blueprint_fields</a></li>
@@ -813,14 +813,27 @@ end
   ctx.object
 end
 </code></pre>
-<h2 id="around_blueprint"><a class="header" href="#around_blueprint">around_blueprint</a></h2>
+<h2 id="around_object"><a class="header" href="#around_object">around_object</a></h2>
 <blockquote>
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Wraps the rendering of each blueprint. This could be the top-level blueprint or one from an association N levels deep. For collections, it will be called once for each item in the collection.</p>
+<p>Wraps the rendering of an object. This could be the top-level blueprint or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_blueprint(ctx)
+<pre><code class="language-ruby">def around_object(ctx)
+  # do something before render
+  yield # render
+  # do something after render
+end
+</code></pre>
+<h2 id="around_collection"><a class="header" href="#around_collection">around_collection</a></h2>
+<blockquote>
+<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
+</blockquote>
+<p>Wraps the rendering of a collection (<code>context.object</code>). This could be the top-level blueprint or one from an association N levels deep.</p>
+<p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around_collection(ctx)
   # do something before render
   yield # render
   # do something after render

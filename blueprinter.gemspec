@@ -26,4 +26,5 @@ Gem::Specification.new do |s|
   s.metadata['rubygems_mfa_required'] = 'true'
 
   s.add_development_dependency 'multi_json', '~> 1.0'
+  s.add_development_dependency 'opentelemetry-sdk', '~> 1.0'
 end

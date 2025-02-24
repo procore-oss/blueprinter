@@ -51,14 +51,10 @@ module Blueprinter
       end
 
       # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
-      def self.inspect
-        blueprint_name
-      end
+      def self.inspect = blueprint_name
 
       # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
-      def self.to_s
-        blueprint_name
-      end
+      def self.to_s = blueprint_name
 
       # Set the view name
       # @api private
@@ -149,6 +145,12 @@ module Blueprinter
         p = partials[name] || raise(Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'")
         class_eval(&p)
       end
+
+      # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"
+      def inspect = self.class.to_s
+
+      # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
+      def to_s = self.class.to_s
     end
   end
 end

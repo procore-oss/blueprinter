@@ -21,6 +21,7 @@ gem 'ammeter', '~> 1.1'
 gem 'factory_bot', '~> 6.2'
 gem 'minitest', '~> 5.25'
 gem 'multi_json', '~> 1.0'
+gem 'opentelemetry-sdk', '~> 1.0'
 gem 'ostruct', '~> 0.6' # not a default gem as of Ruby 4.0; the specs require it
 gem 'pry', '~> 0.14'
 gem 'rainbow', '~> 3.1' # rake perf: colored terminal summary

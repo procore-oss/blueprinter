@@ -659,8 +659,16 @@ WidgetBlueprint
 <h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
 <p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They're inherited from parent classes and views, but can be overridden.</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  # Add extension classes
   extensions &lt;&lt; FooExtension.new
   extensions &lt;&lt; BarExtension.new
+
+  # Or define them inline
+  extension do
+    def blueprint_input(ctx)
+      ctx.object # modify and return the object before serialization
+    end
+  end
 
   view :minimal do
     # extensions is a simple Array, so you can add or remove elements

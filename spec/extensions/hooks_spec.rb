@@ -167,6 +167,76 @@ describe Blueprinter::Hooks do
       end
     end
 
+    context '#around_hook' do
+      let(:ext1) do
+        Class.new(Blueprinter::Extension) do
+          def self.name = 'TestExt1'
+
+          def initialize(log) = @log = log
+
+          def field_value(ctx)
+            @log << 'field_value'
+            'Value'
+          end
+        end
+      end
+
+      let(:ext2) do
+        Class.new(Blueprinter::Extension) do
+          def initialize(log) = @log = log
+
+          def around_object(_ctx)
+            @log << 'around_object: A'
+            yield
+            @log << 'around_object: B'
+          end
+
+          def around_hook(ext, hook)
+            @log << "around_hook(#{ext.class.name}##{hook}): A"
+            yield
+            @log << "around_hook(#{ext.class.name}##{hook}): B"
+          end
+        end
+      end
+
+      it 'should be called around other extension hooks' do
+        log = []
+        ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
+        hooks = described_class.new [ext1.new(log), ext2.new(log)]
+
+        hooks.reduce_into(:field_value, ctx, :value)
+        hooks.around(:around_object, ctx) { log << 'INNER' }
+        expect(log).to eq [
+          "around_hook(#{ext1.name}#field_value): A",
+          'field_value',
+          "around_hook(#{ext1.name}#field_value): B",
+          "around_hook(#{ext2.name}#around_object): A",
+          'around_object: A',
+          'INNER',
+          'around_object: B',
+          "around_hook(#{ext2.name}#around_object): B"
+        ]
+      end
+
+      it 'should be skipped for hidden extensions' do
+        ext2.class_eval { def hidden? = true }
+        log = []
+        ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
+        hooks = described_class.new [ext1.new(log), ext2.new(log)]
+
+        hooks.reduce_into(:field_value, ctx, :value)
+        hooks.around(:around_object, ctx) { log << 'INNER' }
+        expect(log).to eq [
+          "around_hook(#{ext1.name}#field_value): A",
+          'field_value',
+          "around_hook(#{ext1.name}#field_value): B",
+          'around_object: A',
+          'INNER',
+          'around_object: B',
+        ]
+      end
+    end
+
     it 'should nest calls' do
       log = []
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })

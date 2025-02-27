@@ -166,8 +166,8 @@
 
   # Or define them inline
   extension do
-    def blueprint_input(ctx)
-      ctx.object # modify and return the object before serialization
+    def blueprint_output(ctx)
+      ctx.value.merge({ foo: "Foo" })
     end
   end
 

@@ -60,6 +60,27 @@ module Blueprinter
       end
 
       #
+      # Define an anonymous extension and add it to the current context.
+      #
+      #   class WidgetBlueprint < ApplicationBlueprint
+      #     extension do
+      #       # modify and return the object to serialize
+      #       def blueprint_input(ctx)
+      #         ctx.object
+      #       end
+      #     end
+      #   end
+      #
+      def extension(&block)
+        bp_name = blueprint_name
+        extensions << Class.new(Extension) do
+          @blueprint_name = bp_name
+          def self.name = "#{@blueprint_name} extension"
+          class_eval(&block)
+        end.new
+      end
+
+      #
       # Define a field.
       #
       # @param name [Symbol] Name of the field

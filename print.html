@@ -665,9 +665,7 @@ WidgetBlueprint
 
   # Or define them inline
   extension do
-    def blueprint_output(ctx)
-      ctx.value.merge({ foo: "Foo" })
-    end
+    def blueprint_output(ctx) = ctx.value.merge({ foo: "Foo" })
   end
 
   view :minimal do

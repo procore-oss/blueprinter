@@ -28,7 +28,7 @@ module Blueprinter
     # @param arg [Object] Argument to hook
     #
     def each(hook, arg)
-      @hooks.fetch(hook).each { |ext| ext.public_send(hook, arg) }
+      @hooks.fetch(hook).each { |ext| call(ext, hook, arg) }
     end
 
     #
@@ -39,7 +39,7 @@ module Blueprinter
     # @return [Boolean]
     #
     def any?(hook, arg)
-      @hooks.fetch(hook).any? { |ext| ext.public_send(hook, arg) }
+      @hooks.fetch(hook).any? { |ext| call(ext, hook, arg) }
     end
 
     #
@@ -50,7 +50,8 @@ module Blueprinter
     # @return The hook return value, or nil if there was no hook
     #
     def first(hook, *args)
-      @hooks.fetch(hook).first&.public_send(hook, *args)
+      ext = @hooks.fetch(hook).first
+      ext ? call(ext, hook, *args) : nil
     end
 
     #
@@ -61,7 +62,8 @@ module Blueprinter
     # @return The hook return value, or nil if there was no hook
     #
     def last(hook, *args)
-      @hooks.fetch(hook).last&.public_send(hook, *args)
+      ext = @hooks.fetch(hook).last
+      ext ? call(ext, hook, *args) : nil
     end
 
     #
@@ -76,7 +78,7 @@ module Blueprinter
     def reduce(hook, initial_value)
       @hooks.fetch(hook).reduce(initial_value) do |val, ext|
         args = yield val
-        args.is_a?(Array) ? ext.public_send(hook, *args) : ext.public_send(hook, args)
+        args.is_a?(Array) ? call(ext, hook, *args) : call(ext, hook, args)
       end
     end
 
@@ -91,7 +93,7 @@ module Blueprinter
     #
     def reduce_into(hook, target_obj, target_attr)
       @hooks.fetch(hook).each do |ext|
-        target_obj[target_attr] = ext.public_send(hook, target_obj)
+        target_obj[target_attr] = call(ext, hook, target_obj)
       end
       target_obj[target_attr]
     end
@@ -101,19 +103,29 @@ module Blueprinter
     # the nested hooks.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param arg [Object] Argument to hook
+    # @param args [Object] Arguments to hook
     # @return [Object] The return value from the block passed to this method
     #
-    def around(hook, arg)
+    def around(hook, *args)
       result = nil
       @hooks.fetch(hook).reverse.reduce(-> { result = yield }) do |f, ext|
         proc do
           yields = 0
-          ext.public_send(hook, arg) { yields += 1; f.call }
+          call(ext, hook, *args) { yields += 1; f.call }
           raise BlueprinterError, "Extension hook '#{ext.class.name}##{hook}' should have yielded 1 time, but yielded #{yields} times" if yields != 1
         end
       end.call
       result
+    end
+
+    private
+
+    def call(ext, hook, *args, &block)
+      return ext.public_send(hook, *args, &block) if !has?(:around_hook) || ext.hidden? || hook == :around_hook
+
+      around(:around_hook, ext, hook) do
+        ext.public_send(hook, *args, &block)
+      end
     end
   end
 end

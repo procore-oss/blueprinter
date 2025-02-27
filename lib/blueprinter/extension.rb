@@ -5,6 +5,7 @@ module Blueprinter
   # Base class for all extensions.
   #
   # V2 hook call order:
+  #  - around_hook (called around any other extension hook)
   #  - collection? (skipped if calling render_object/render_collection)
   #  - around
   #    - input_object | input_collection
@@ -176,6 +177,17 @@ module Blueprinter
     # @return [String]
     #
     def json(_context) = nil
+
+    #
+    # Instrument extension hook calls. MUST yield!
+    #
+    # @param _extension [Blueprinter::Extension] Instance of the extension
+    # @param _hook [Symbol] Name of hook being called
+    #
+    def around_hook(_extension, _hook) = yield
+
+    # If this returns true, around_hook will not be called when this extension's hooks are run. Used by core extensions.
+    def hidden? = false
 
     #
     # Called eary during "render" in V1, this method receives the object to be rendered and

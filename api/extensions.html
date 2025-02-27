@@ -187,6 +187,7 @@ end
 </ul>
 </li>
 </ul>
+<p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
 <h2 id="collection"><a class="header" href="#collection">collection?</a></h2>
 <blockquote>
 <p><strong>@param Object</strong> The object passed to <code>render</code><br />
@@ -415,6 +416,19 @@ end
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json(ctx)
   JSON.dump ctx.value
+end
+</code></pre>
+<h2 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h2>
+<blockquote>
+<p><strong>@param Extension</strong> Instance of the extension<br />
+<strong>@param Symbol</strong> Name of the hook<br />
+<strong>@cost</strong> Variable - Depends on what hooks your extensions implement</p>
+</blockquote>
+<p>A special hook that runs around all other extension hooks. Useful for instrumenting. You can exclude an extension's hooks from this hook by putting <code>def hidden? = true</code> in the extension.</p>
+<pre><code class="language-ruby">def around_hook(ext, hook)
+  # Do something before extension hook runs
+  yield # hook runs here
+  # Do something after extension hook runs
 end
 </code></pre>
 

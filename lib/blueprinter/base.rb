@@ -47,11 +47,11 @@ module Blueprinter
       # @return [Field] A Field object
       def identifier(method, name: method, extractor: Blueprinter.configuration.extractor_default.new, &block)
         view_collection[:identifier] << Field.new(
-          method,
-          name,
-          extractor,
-          self,
-          block:
+          method:,
+          name:,
+          extractor:,
+          blueprint: self,
+          options: { block: }
         )
       end
 
@@ -114,11 +114,11 @@ module Blueprinter
         method = method.to_sym
 
         current_view << Field.new(
-          method,
-          options.fetch(:name) { method },
-          options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
-          self,
-          options.merge(block:)
+          method:,
+          name: options.fetch(:name) { method },
+          extractor: options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
+          blueprint: self,
+          options: options.merge(block:)
         )
       end
 

@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require 'date'
+
 describe "Blueprinter::V2 Fields" do
   context "fields" do
     it "should add fields with options" do
-      blueprint = Class.new(Blueprinter::V2::Base) do
+      blueprint = Class.new(Blueprinter::Blueprint) do
         field :name
         field :description, from: :desc, if: -> { true }
         field(:foo) { "foo" }
@@ -21,30 +23,33 @@ describe "Blueprinter::V2 Fields" do
     end
 
     it 'should add multiple fields' do
-      blueprint = Class.new(Blueprinter::V2::Base) do
+      blueprint = Class.new(Blueprinter::Blueprint) do
         fields :name, :description, :status
       end
 
       ref = blueprint.reflections[:default]
       expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:name].name).to eq :name
+      expect(ref.fields[:name].from).to eq :name
       expect(ref.fields[:name].options).to eq({})
 
       expect(ref.fields[:description].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:description].name).to eq :description
+      expect(ref.fields[:description].from).to eq :description
       expect(ref.fields[:description].options).to eq({})
 
       expect(ref.fields[:status].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:status].name).to eq :status
+      expect(ref.fields[:status].from).to eq :status
       expect(ref.fields[:status].options).to eq({})
     end
   end
 
   context "associations" do
     it "should add associations with options" do
-      category_blueprint = Class.new(Blueprinter::V2::Base)
-      widget_blueprint = Class.new(Blueprinter::V2::Base)
-      blueprint = Class.new(Blueprinter::V2::Base) do
+      category_blueprint = Class.new(Blueprinter::Blueprint)
+      widget_blueprint = Class.new(Blueprinter::Blueprint)
+      blueprint = Class.new(Blueprinter::Blueprint) do
         object :category, category_blueprint
         collection :widgets, widget_blueprint, from: :foo, if: -> { true }
         object(:foo, widget_blueprint) { {foo: "bar"} }
@@ -66,7 +71,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "it should inherit from parent classes" do
-    application_blueprint = Class.new(Blueprinter::V2::Base) do
+    application_blueprint = Class.new(Blueprinter::Blueprint) do
       field :id
     end
     blueprint = Class.new(application_blueprint) do
@@ -78,7 +83,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "it should inherit from parent views" do
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    blueprint = Class.new(Blueprinter::Blueprint) do
       field :name
 
       view :extended do
@@ -97,7 +102,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from the parent class" do
-    application_blueprint = Class.new(Blueprinter::V2::Base) do
+    application_blueprint = Class.new(Blueprinter::Blueprint) do
       field :id
       field :foo
     end
@@ -111,9 +116,9 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from the parent view" do
-    category_blueprint = Class.new(Blueprinter::V2::Base)
-    widget_blueprint = Class.new(Blueprinter::V2::Base)
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    category_blueprint = Class.new(Blueprinter::Blueprint)
+    widget_blueprint = Class.new(Blueprinter::Blueprint)
+    blueprint = Class.new(Blueprinter::Blueprint) do
       field :id
       field :name
       object :category, category_blueprint
@@ -135,7 +140,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   it "should exclude specified fields and associations from partials" do
-    blueprint = Class.new(Blueprinter::V2::Base) do
+    blueprint = Class.new(Blueprinter::Blueprint) do
       partial :desc do
         field :short_desc
         field :long_desc
@@ -151,5 +156,32 @@ describe "Blueprinter::V2 Fields" do
 
     refs = blueprint.reflections
     expect(refs[:foo].fields.keys).to eq %i(name long_desc)
+  end
+
+  context 'formatters' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Blueprint) do
+        def fmt_date(d)
+          d.iso8601
+        end
+      end
+    end
+
+    it 'should add a block formatter' do
+      iso8601 = ->(x, _opts) { x.iso8601 }
+      blueprint.format(Date, &iso8601)
+      expect(blueprint.formatters[Date]).to eq iso8601
+    end
+
+    it 'should add a method formatter' do
+      blueprint.format(Date, :fmt_date)
+      expect(blueprint.formatters[Date]).to eq :fmt_date
+    end
+
+    it 'should be inherited' do
+      blueprint.format(Date, :fmt_date)
+      child = Class.new(blueprint)
+      expect(child.formatters[Date]).to eq :fmt_date
+    end
   end
 end

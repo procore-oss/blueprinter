@@ -2,7 +2,7 @@
 
 describe "Blueprinter::V2 Names" do
   context 'const named Blueprints' do
-    class NamedBlueprint < Blueprinter::V2::Base
+    class NamedBlueprint < Blueprinter::Blueprint
       view :extended
     end
 
@@ -26,11 +26,18 @@ describe "Blueprinter::V2 Names" do
         "View 'wrong_name' could not be found in Blueprint 'NamedBlueprint'"
       )
     end
+
+    it 'instances should have names' do
+      expect(NamedBlueprint.new.to_s).to eq "NamedBlueprint"
+      expect(NamedBlueprint.new.inspect).to eq "NamedBlueprint"
+      expect(NamedBlueprint[:extended].new.to_s).to eq "NamedBlueprint.extended"
+      expect(NamedBlueprint[:extended].new.inspect).to eq "NamedBlueprint.extended"
+    end
   end
 
   context 'manually named Blueprints' do
     let(:blueprint) do
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         self.blueprint_name = "MyBlueprint"
         view :extended
       end
@@ -45,29 +52,36 @@ describe "Blueprinter::V2 Names" do
       expect(blueprint[:extended].to_s).to eq "MyBlueprint.extended"
       expect(blueprint[:extended].inspect).to eq "MyBlueprint.extended"
     end
+
+    it 'instances should have names' do
+      expect(blueprint.new.to_s).to eq "MyBlueprint"
+      expect(blueprint.new.inspect).to eq "MyBlueprint"
+      expect(blueprint[:extended].new.to_s).to eq "MyBlueprint.extended"
+      expect(blueprint[:extended].new.inspect).to eq "MyBlueprint.extended"
+    end
   end
 
   context 'anonymous Blueprints' do
     let(:blueprint) do
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         view :extended
       end
     end
 
     it 'should have no base name' do
-      expect(blueprint.blueprint_name).to eq "Blueprinter::V2::Base"
+      expect(blueprint.blueprint_name).to eq "Blueprinter::Blueprint"
       expect(blueprint.view_name).to eq :default
     end
 
     it 'should find a view by name' do
-      expect(blueprint[:extended].blueprint_name).to eq "Blueprinter::V2::Base.extended"
+      expect(blueprint[:extended].blueprint_name).to eq "Blueprinter::Blueprint.extended"
       expect(blueprint[:extended].view_name).to eq :extended
     end
   end
 
   context 'deeply nested Blueprints' do
     let(:blueprint) do
-      Class.new(Blueprinter::V2::Base) do
+      Class.new(Blueprinter::Blueprint) do
         self.blueprint_name = "MyBlueprint"
 
         view :foo do
@@ -105,7 +119,7 @@ describe "Blueprinter::V2 Names" do
   end
 
   it "should not contain periods" do
-    blueprint = Class.new(Blueprinter::V2::Base)
+    blueprint = Class.new(Blueprinter::Blueprint)
     expect { blueprint.view :"foo.bar" }.to raise_error(
       Blueprinter::Errors::InvalidBlueprint,
       /name may not contain/
@@ -117,7 +131,7 @@ describe "Blueprinter::V2 Names" do
     foo_name = nil
     foo_bar_name = nil
 
-    bp = Class.new(Blueprinter::V2::Base) do
+    bp = Class.new(Blueprinter::Blueprint) do
       default_name = view_name
       view :foo do
         foo_name = view_name

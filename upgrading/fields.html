@@ -156,14 +156,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
-<h2 id="id-field-and-identifier-view"><a class="header" href="#id-field-and-identifier-view"><code>id</code> field and <code>identifier</code> view</a></h2>
-<p>Blueprinter Legacy/V1 included a default field called <code>id</code> and a view called <code>identifier</code>. Blueprinter V2 does not have these, but you can easily replicate them with <code>ApplicationBlueprint</code>.</p>
+<h2 id="identifier-field-and-view"><a class="header" href="#identifier-field-and-view">Identifier field and view</a></h2>
+<p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
+  # Every Blueprint that inherits from ApplicationBlueprint will have this field
   field :id
+end
 
-  view :identifier do
-    field :id
-  end
+# This Blueprint will only contain the id field
+class IdentifierBlueprint &lt; ApplicationBlueprint
 end
 </code></pre>
 <h2 id="associations"><a class="header" href="#associations">Associations</a></h2>

@@ -186,7 +186,7 @@ WidgetBlueprint[:extended].render(widget).to_hash
 <p>Look interesting? <a href="./dsl/index.html">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; MyExtension.new
   options[:exclude_if_nil] = true
@@ -221,7 +221,7 @@ collection :parts, PartBlueprint
 <pre><code class="language-ruby">field :description, default: "No description"
 collection :parts, PartBlueprint, exclude_if_empty: true
 </code></pre>
-<h2 id="extracting-field-values-from-objects"><a class="header" href="#extracting-field-values-from-objects">Extracting field values from objects</a></h2>
+<h2 id="extracting-field-values"><a class="header" href="#extracting-field-values">Extracting field values</a></h2>
 <p>Blueprinter is pretty smart about extracting field values from objects, but there are ways to customize the behavior if needed.</p>
 <h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
 <ul>
@@ -1127,7 +1127,7 @@ field.blueprint.reflections[:default].fields
 =&gt; # array of fields on the :full view of CompanyBlueprint
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
-<p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values-from-objects">bypasses extractors</a>.)</p>
+<p>Extractors pull values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors as needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values">bypasses extractors</a>.)</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
 <p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extractor
@@ -1242,14 +1242,15 @@ end
 <h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
 <p>There is no direct equivalent to V1's transformers. Instead, use <a href="upgrading/../dsl/formatters.html">formatters</a> or one of the new <a href="upgrading/../api/extensions.html">extension hooks</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
-<h2 id="id-field-and-identifier-view"><a class="header" href="#id-field-and-identifier-view"><code>id</code> field and <code>identifier</code> view</a></h2>
-<p>Blueprinter Legacy/V1 included a default field called <code>id</code> and a view called <code>identifier</code>. Blueprinter V2 does not have these, but you can easily replicate them with <code>ApplicationBlueprint</code>.</p>
+<h2 id="identifier-field-and-view"><a class="header" href="#identifier-field-and-view">Identifier field and view</a></h2>
+<p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
+  # Every Blueprint that inherits from ApplicationBlueprint will have this field
   field :id
+end
 
-  view :identifier do
-    field :id
-  end
+# This Blueprint will only contain the id field
+class IdentifierBlueprint &lt; ApplicationBlueprint
 end
 </code></pre>
 <h2 id="associations"><a class="header" href="#associations">Associations</a></h2>

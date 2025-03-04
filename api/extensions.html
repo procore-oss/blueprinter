@@ -226,7 +226,7 @@ end
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
-<p>Run when <code>render</code> is called with a non-collection object, or when <code>render_object</code> is called. This hook allows you to modify the object before rendering, or even return a new one. <strong>Whatever object is returned will be rendered and used as context.object in subsequent hooks.</strong></p>
+<p>Run when <code>render</code> is called with a non-collection object, or when <code>render_object</code> is called. This hook allows you to modify or replace the object (<code>context.object</code>) before rendering. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
 <pre><code class="language-ruby">def input_object(ctx)
   ctx.object
 end
@@ -237,7 +237,7 @@ end
 <strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
-<p>Run when <code>render</code> is called with a collection object, or when <code>render_collection</code> is called. This hook allows you to modify the array-like object before rendering, or even return a new one. <strong>Whatever collection is returned will be rendered and used as context.object in subsequent hooks.</strong></p>
+<p>Run when <code>render</code> is called with a collection object, or when <code>render_collection</code> is called. This hook allows you to modify the array-like object (<code>context.object</code>) before rendering, or even return a new one. <strong>Whatever collection is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
 <pre><code class="language-ruby">def input_collection(ctx)
   ctx.object
 end
@@ -247,7 +247,7 @@ end
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Wraps the rendering of an object. This could be the top-level blueprint or one from an association N levels deep.</p>
+<p>Wraps the rendering of every object (<code>context.object</code>). This could be the top-level object or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
 <pre><code class="language-ruby">def around_object(ctx)
   # do something before render
@@ -260,7 +260,7 @@ end
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Wraps the rendering of a collection (<code>context.object</code>). This could be the top-level blueprint or one from an association N levels deep.</p>
+<p>Wraps the rendering of every collection (<code>context.object</code>). This could be the top-level collection or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
 <pre><code class="language-ruby">def around_collection(ctx)
   # do something before render
@@ -270,36 +270,37 @@ end
 </code></pre>
 <h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Allows an extension to perform any setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
+<p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
 <pre><code class="language-ruby">def prepare(ctx)
   ctx.store[:my_ext] ||= {}
   ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
 end
 </code></pre>
+<p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Array&lt;Field | ObjectField | Collection&gt;</strong> The fields you want to render in the order you want to render them<br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
-<p>The default behavior is to render all fields in the order they were defined.</p>
-<p>This example uses the <a href="./reflection.html">Reflection API</a> to get the fields from the current view, then sort them by name:</p>
+<p>The default behavior is to render all fields in the order they were defined. The following example uses the <a href="./reflection.html">Reflection API</a> to get the fields from the current view, then sort them by name:</p>
 <pre><code class="language-ruby">def blueprint_fields(ctx)
   ref = ctx.blueprint.class.reflections[:default]
   ref.ordered.sort_by(&amp;:name)
 end
 </code></pre>
+<p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
 <blockquote>
 <p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Run before each blueprint is rendered, allowing you to modify, or return a new, object used for the render. <strong>Whatever object is returned will be rendered and used as context.object in subsequent hooks.</strong></p>
+<p>Run each time a blueprint renders, allowing you to modify or return a new object (<code>context.object</code>) used for the render. For collections of size N, it will be called N times. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
 <pre><code class="language-ruby">def blueprint_input(ctx)
   ctx.object
 end
@@ -379,7 +380,7 @@ end
 <strong>@return Hash</strong> The Hash to use as this blueprint's serialized output<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Run after each blueprint is serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. <strong>Whatever Hash is returned will be used as the serialized output for this blueprint.</strong></p>
+<p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.value in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
 <pre><code class="language-ruby">def blueprint_output(ctx)
   ctx.value.merge({ extra: "data" })
 end
@@ -390,7 +391,7 @@ end
 <strong>@return Hash</strong> The Hash to use as the final serialized output<br />
 <strong>@cost</strong> Low - run once per <code>render</code> (for objects) or <code>render_object</code></p>
 </blockquote>
-<p>Run after the top-level object is fully serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. <strong>Whatever Hash is returned will be the final serialized output.</strong></p>
+<p>Run after the top-level object is fully serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
 <pre><code class="language-ruby">def output_object(ctx)
   ctx.value.merge({ extra: "data" })
 end

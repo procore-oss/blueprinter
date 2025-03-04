@@ -160,8 +160,17 @@
 <p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
 <pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
   # Use the exclude_field? hook to exclude certain fields on Tuesdays
-  def exclude_field?(ctx)
-    ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
+  def exclude_field?(ctx) = ctx.field.options[:tues] == false &amp;&amp; Date.today.tuesday?
+end
+
+class MyBlueprint &lt; ApplicationBlueprint
+  extensions &lt;&lt; MyExtension.new
+end
+</code></pre>
+<p>Alternatively, you can define an extension direclty in your blueprint:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  extension do
+    def exclude_field?(ctx) = ctx.field.options[:tues] == false &amp;&amp; Date.today.tuesday?
   end
 end
 </code></pre>

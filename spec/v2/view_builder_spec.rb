@@ -73,4 +73,31 @@ describe Blueprinter::V2::ViewBuilder do
       builder[:default] = proc { field :description }
     }.to raise_error Blueprinter::Errors::InvalidBlueprint
   end
+
+  context "reset" do
+    it "clears all views but default" do
+      builder[:foo] = proc { field :description }
+      builder[:bar] = proc { field :description }
+      builder.reset
+
+      expect(builder[:foo]).to be_nil
+      expect(builder[:bar]).to be_nil
+      expect(builder[:default]).to eq blueprint
+    end
+  end
+
+  context "dup_for" do
+    let(:blueprint2) { Class.new(blueprint) { field :description } }
+
+    it "duplicates views for another blueprint" do
+      builder[:foo] = proc { field :description }
+      builder[:bar] = proc { field :description }
+      builder2 = builder.dup_for(blueprint2)
+
+      expect(builder[:default]).to eq blueprint
+      expect(builder2[:default]).to eq blueprint2
+      expect(builder2[:foo]).to_not be_nil
+      expect(builder2[:bar]).to_not be_nil
+    end
+  end
 end

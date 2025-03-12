@@ -14,9 +14,8 @@ module Blueprinter
       # @param parent [Class] A subclass of Blueprinter::V2::Base
       def initialize(parent)
         @parent = parent
-        @views = { default: parent }
-        @pending = {}
         @mut = Mutex.new
+        reset
       end
 
       #
@@ -45,6 +44,7 @@ module Blueprinter
             next if @views.key?(name)
 
             view = Class.new(@parent)
+            view.views.reset
             view.append_name(name)
             view.class_eval(&@pending[name]) if @pending[name]
             view.eval!(lock: false)
@@ -65,6 +65,19 @@ module Blueprinter
           @pending.each_key { |name| y.yield(name, self[name]) }
         end
         block ? enum.each(&block) : enum
+      end
+
+      # Create a duplicate of this builder with a different default view
+      def dup_for(blueprint)
+        builder = self.class.new(blueprint)
+        @pending.each { |name, definition| builder[name] = definition }
+        builder
+      end
+
+      # Clear everything but the default view
+      def reset
+        @views = { default: @parent }
+        @pending = {}
       end
     end
   end

@@ -11,7 +11,10 @@ module Blueprinter
     class ViewBuilder
       include Enumerable
 
+      Def = Struct.new(:definition, :fields, :options, :extensions, keyword_init: true)
+
       # @param parent [Class] A subclass of Blueprinter::V2::Base
+
       def initialize(parent)
         @parent = parent
         @mut = Mutex.new
@@ -22,7 +25,7 @@ module Blueprinter
       # Add a view definition.
       #
       # @param name [Symbol]
-      # @param definition [Proc]
+      # @param definition [Blueprinter::V2::ViewBuilder::Def]
       #
       def []=(name, definition)
         name = name.to_sym
@@ -43,10 +46,14 @@ module Blueprinter
           @mut.synchronize do
             next if @views.key?(name)
 
+            p = @pending[name]
             view = Class.new(@parent)
             view.views.reset
             view.append_name(name)
-            view.class_eval(&@pending[name]) if @pending[name]
+            view.schema.clear unless p.fields
+            view.options.clear unless p.options
+            view.extensions.clear unless p.extensions
+            view.class_eval(&p.definition) if p.definition
             view.eval!(false)
             @views[name] = view
           end

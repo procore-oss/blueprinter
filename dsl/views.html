@@ -156,8 +156,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="./fields.html">fields</a>, views can define <a href="./options.html">options</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="#nested-views">nested views</a>.</p>
-<p>At the top level of every Blueprint is an implicit view called <code>default</code>. This view is used when no other is specified. All other views in the Blueprint inherit from it.</p>
+<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="./fields.html">fields</a>, views can define <a href="./options.html">options</a>, <a href="./partials.html">partials</a>, <a href="./formatters.html">formatters</a>, <a href="./extensions.html">extensions</a>, and <a href="#nesting-views">nested views</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
@@ -174,23 +173,8 @@
   end
 end
 </code></pre>
-<h3 id="excluding-fields"><a class="header" href="#excluding-fields">Excluding fields</a></h3>
-<p>Views can exclude fields from parents, views they've included, or from <a href="./partials.html">partials</a>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  fields :name, :description, :price
-
-  view :minimal do
-    exclude :description, :price
-  end
-end
-</code></pre>
-<p>Views can also entirely opt out of inheriting <a href="./fields.html">fields</a>, <a href="./options.html">options</a>, <a href="./formatters.html">formatters</a>, and <a href="./extensions.html">extensions</a>:</p>
-<pre><code class="language-ruby"># This view won't inherit anything from its parent
-view :minimal, fields: false, options: false, formatters: false, extensions: false do
-  field :name
-end
-</code></pre>
-<h3 id="nested-views"><a class="header" href="#nested-views">Nested views</a></h3>
+<p>At the top level of every Blueprint is an implicit view called <code>default</code>. The default view is used when no other is specified. All other views in the Blueprint inherit from it.</p>
+<h3 id="nesting-views"><a class="header" href="#nesting-views">Nesting views</a></h3>
 <p>You can nest views within views, allowing for a hierarchy of inheritance.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
@@ -205,7 +189,27 @@ end
       field :price
     end
   end
+</code></pre>
+<h3 id="excluding-fields"><a class="header" href="#excluding-fields">Excluding fields</a></h3>
+<p>Views can exclude select fields from parents, views they've included, or from <a href="./partials.html">partials</a>.</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  fields :name, :description, :price
 
+  view :minimal do
+    exclude :description, :price
+  end
+end
+</code></pre>
+<h3 id="excluding-everything"><a class="header" href="#excluding-everything">Excluding everything</a></h3>
+<p>Views can opt out of inheriting all <a href="./fields.html">fields</a>, <a href="./options.html">options</a>, <a href="./formatters.html">formatters</a>, and <a href="./extensions.html">extensions</a>.</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  fields :name, :description, :price
+
+  # This view won't inherit anything from its parent
+  view :minimal, fields: false, options: false, formatters: false, extensions: false do
+    field :name
+  end
+end
 </code></pre>
 <h3 id="referencing-views"><a class="header" href="#referencing-views">Referencing views</a></h3>
 <p>When defining an association, you can choose a view from its blueprint:</p>

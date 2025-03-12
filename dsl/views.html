@@ -23,9 +23,9 @@
         <link rel="stylesheet" href="../fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="../highlight.css">
-        <link rel="stylesheet" href="../tomorrow-night.css">
-        <link rel="stylesheet" href="../ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="../theme/hljs-overrides.css">
@@ -182,6 +182,12 @@ end
   view :minimal do
     exclude :description, :price
   end
+end
+</code></pre>
+<p>Views can also entirely opt out of inheriting fields, options, or extensions:</p>
+<pre><code class="language-ruby"># This view won't inherit anything from its parent
+view :minimal, fields: false, options: false, extensions: false do
+  field :name
 end
 </code></pre>
 <h3 id="nested-views"><a class="header" href="#nested-views">Nested views</a></h3>

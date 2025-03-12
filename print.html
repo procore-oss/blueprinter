@@ -24,9 +24,9 @@
         <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
         <link rel="stylesheet" href="theme/hljs-overrides.css">
@@ -280,6 +280,12 @@ end
   view :minimal do
     exclude :description, :price
   end
+end
+</code></pre>
+<p>Views can also entirely opt out of inheriting fields, options, or extensions:</p>
+<pre><code class="language-ruby"># This view won't inherit anything from its parent
+view :minimal, fields: false, options: false, extensions: false do
+  field :name
 end
 </code></pre>
 <h3 id="nested-views"><a class="header" href="#nested-views">Nested views</a></h3>
@@ -1253,14 +1259,16 @@ end
 <p>There is no direct equivalent to V1's transformers. Instead, use <a href="upgrading/../dsl/formatters.html">formatters</a> or one of the new <a href="upgrading/../api/extensions.html">extension hooks</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
 <h2 id="identifier-field-and-view"><a class="header" href="#identifier-field-and-view">Identifier field and view</a></h2>
-<p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it.</p>
+<p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it in your <code>ApplicationBlueprint</code>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   # Every Blueprint that inherits from ApplicationBlueprint will have this field
   field :id
-end
 
-# This Blueprint will only contain the id field
-class IdentifierBlueprint &lt; ApplicationBlueprint
+  # Every Blueprint that inherits from ApplicationBlueprint will have this view,
+  # and it will only have the `id` field
+  view :identifier, fields: false do
+    field :id
+  end
 end
 </code></pre>
 <h2 id="associations"><a class="header" href="#associations">Associations</a></h2>

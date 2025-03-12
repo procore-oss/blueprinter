@@ -33,7 +33,7 @@ module Blueprinter
 
       # Initialize subclass
       def self.inherited(subclass)
-        subclass.views = ViewBuilder.new(subclass)
+        subclass.views = views.dup_for(subclass)
         subclass.schema = schema.transform_values(&:dup)
         subclass.excludes = []
         subclass.partials = partials.dup

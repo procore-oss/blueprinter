@@ -186,7 +186,7 @@ WidgetBlueprint[:extended].render(widget).to_hash
 <p>Look interesting? <a href="./dsl/index.html">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; MyExtension.new
   options[:exclude_if_nil] = true

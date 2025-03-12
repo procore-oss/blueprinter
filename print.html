@@ -282,9 +282,9 @@ end
   end
 end
 </code></pre>
-<p>Views can also entirely opt out of inheriting fields, options, or extensions:</p>
+<p>Views can also entirely opt out of inheriting fields, options, formatters, and extensions:</p>
 <pre><code class="language-ruby"># This view won't inherit anything from its parent
-view :minimal, fields: false, options: false, extensions: false do
+view :minimal, fields: false, options: false, formatters: false, extensions: false do
   field :name
 end
 </code></pre>

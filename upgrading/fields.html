@@ -169,6 +169,14 @@
   end
 end
 </code></pre>
+<h2 id="renaming-fields"><a class="header" href="#renaming-fields">Renaming fields</a></h2>
+<p>In Blueprinter Legacy/V1, you could rename fields using the <code>name</code> option. Blueprinter V2 swaps the order and uses <code>from</code>. We believe this makes your blueprints more readable.</p>
+<pre><code class="language-ruby"># Legacy/V1
+field :desc, name: :description
+
+# V2
+field :description, from: :desc
+</code></pre>
 <h2 id="associations"><a class="header" href="#associations">Associations</a></h2>
 <p>Blueprinter Legacy/V1 figured out if associations were single items or arrays at runtime. Blueprinter V2 accounts for this in the DSL. Also, the <code>:blueprint</code> and <code>:view</code> options are gone.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint

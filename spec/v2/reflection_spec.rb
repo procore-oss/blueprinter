@@ -12,7 +12,7 @@ describe "Blueprinter::V2::Reflection" do
     end
   end
 
-  it "should find all view keys" do
+  it "finds all view keys" do
     view_names = blueprint.reflections.keys
     expect(view_names.sort).to eq %i(
       default
@@ -23,7 +23,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find all view names" do
+  it "finds all view names" do
     view_names = blueprint.reflections.values.map(&:name)
     expect(view_names.sort).to eq %i(
       default
@@ -34,7 +34,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find nested view keys" do
+  it "finds nested view keys" do
     bar_view_names = blueprint[:bar].reflections.keys
     expect(bar_view_names.sort).to eq %i(
       default
@@ -49,7 +49,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find nested view names" do
+  it "finds nested view names" do
     bar_view_names = blueprint[:bar].reflections.values.map(&:name)
     expect(bar_view_names.sort).to eq %i(
       default
@@ -64,7 +64,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find fields and associations" do
+  it "finds fields and associations" do
     category_blueprint = Class.new(Blueprinter::V2::Base)
     widget_blueprint = Class.new(Blueprinter::V2::Base)
     blueprint = Class.new(Blueprinter::V2::Base) do

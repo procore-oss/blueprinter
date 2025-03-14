@@ -116,6 +116,14 @@ module Blueprinter
         end
 
         excludes.each { |f| schema.delete f }
+        extensions.freeze
+        options.freeze
+        schema.freeze
+        schema.each do |_, f|
+          f.options&.freeze
+          f.freeze
+        end
+
         @evaled = true
       end
 

@@ -2,7 +2,7 @@
 
 describe "Blueprinter::V2 Fields" do
   context "fields" do
-    it "should add fields with options" do
+    it "adds fields with options" do
       blueprint = Class.new(Blueprinter::V2::Base) do
         field :name
         field :description, from: :desc, if: -> { true }
@@ -20,7 +20,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.fields[:foo].value_proc.class.name).to eq "Proc"
     end
 
-    it 'should add multiple fields' do
+    it 'adds multiple fields' do
       blueprint = Class.new(Blueprinter::V2::Base) do
         fields :name, :description, :status
       end
@@ -41,7 +41,7 @@ describe "Blueprinter::V2 Fields" do
   end
 
   context "associations" do
-    it "should add associations with options" do
+    it "adds associations with options" do
       category_blueprint = Class.new(Blueprinter::V2::Base)
       widget_blueprint = Class.new(Blueprinter::V2::Base)
       blueprint = Class.new(Blueprinter::V2::Base) do
@@ -65,7 +65,7 @@ describe "Blueprinter::V2 Fields" do
     end
   end
 
-  it "it should inherit from parent classes" do
+  it "inherits from parent classes" do
     application_blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
     end
@@ -77,7 +77,7 @@ describe "Blueprinter::V2 Fields" do
     expect(ref.fields.keys).to eq %i(id name)
   end
 
-  it "it should inherit from parent views" do
+  it "inherits from parent views" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
@@ -96,7 +96,7 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:"extended.plus"].fields.keys.sort).to eq %i(name description foo).sort
   end
 
-  it "should exclude specified fields and associations from the parent class" do
+  it "excludes specified fields and associations from the parent class" do
     application_blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :foo
@@ -110,7 +110,7 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:default].fields.keys.sort).to eq %i(id name).sort
   end
 
-  it "should exclude specified fields and associations from the parent view" do
+  it "excludes specified fields and associations from the parent view" do
     category_blueprint = Class.new(Blueprinter::V2::Base)
     widget_blueprint = Class.new(Blueprinter::V2::Base)
     blueprint = Class.new(Blueprinter::V2::Base) do
@@ -134,7 +134,7 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:foo].collections.keys.sort).to eq %i(widgets).sort
   end
 
-  it "should exclude specified fields and associations from partials" do
+  it "excludes specified fields and associations from partials" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       partial :desc do
         field :short_desc

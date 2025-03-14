@@ -12,12 +12,12 @@ describe "Blueprinter::V2::ViewBuilder" do
     end
   end
 
-  it "should alias the parent as the default view" do
+  it "aliases the parent as the default view" do
     default = builder[:default]
     expect(default).to eq blueprint
   end
 
-  it "should store, but not evaluate, a view" do
+  it "stores, but doesn't evaluates, a view" do
     calls = 0
     builder[:foo] =
       proc do
@@ -28,7 +28,7 @@ describe "Blueprinter::V2::ViewBuilder" do
     expect(calls).to eq 0
   end
 
-  it "should evaluate a view on first access" do
+  it "evaluates a view on first access" do
     calls = 0
     builder[:foo] =
       proc do
@@ -42,18 +42,18 @@ describe "Blueprinter::V2::ViewBuilder" do
     expect(view.reflections[:default].fields.keys.sort).to eq %i(id name description).sort
   end
 
-  it "should fetch a view" do
+  it "fetches a view" do
     builder[:foo] = proc { field :description }
 
     view = builder.fetch(:foo)
     expect(view.reflections[:default].fields.keys.sort).to eq %i(id name description).sort
   end
 
-  it "should throw an error when fetching an invalid name" do
+  it "throws an error when fetching an invalid name" do
     expect { builder.fetch(:foo) }.to raise_error KeyError
   end
 
-  it "should iterate over each view" do
+  it "iterates over each view" do
     builder[:foo] = proc { field :description }
     builder[:bar] = proc { field :description }
 

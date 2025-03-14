@@ -26,7 +26,7 @@ describe Blueprinter::Hooks do
   end
 
   context '#registered?' do
-    it 'should know whether it contains certain hooks' do
+    it 'knows whether it contains certain hooks' do
       hooks = described_class.new [ext1.new, ext2.new]
       expect(hooks.registered? :output_object).to be true
       expect(hooks.registered? :exclude_field?).to be true
@@ -35,19 +35,19 @@ describe Blueprinter::Hooks do
   end
 
   context '#any?' do
-    it 'should return true if any hook returns true' do
+    it 'returns true if any hook returns true' do
       hooks = described_class.new [ext1.new, ext2.new]
       ctx = context.new(blueprint.new, field, nil, object, {})
       expect(hooks.any?(:exclude_field?, ctx)).to be true
     end
 
-    it 'should return false if no hooks return true' do
+    it 'returns false if no hooks return true' do
       hooks = described_class.new [ext1.new, ext2.new]
       ctx = context.new(blueprint.new, field, { name: 'Foo' }, object, {})
       expect(hooks.any?(:exclude_field?, ctx)).to be false
     end
 
-    it 'should return false if there are no extensions' do
+    it 'returns false if there are no extensions' do
       hooks = described_class.new []
       ctx = context.new(blueprint.new, field, nil, object, {})
       expect(hooks.any?(:exclude_field?, ctx)).to be false
@@ -55,14 +55,14 @@ describe Blueprinter::Hooks do
   end
 
   context '#first' do
-    it 'should return the value from the first hook' do
+    it 'returns the value from the first hook' do
       hooks = described_class.new [ext1.new, ext2.new]
       ctx = context.new(blueprint.new, field, '', object, {})
       result = hooks.first(:exclude_field?, ctx)
       expect(result).to be false
     end
 
-    it 'should reutrn nil if there are no hooks' do
+    it 'reutrns nil if there are no hooks' do
       hooks = described_class.new []
       ctx = context.new(blueprint.new, field, { name: 'Foo', n: 0 }, object, {})
       result = hooks.first(:exclude_field?, ctx)
@@ -71,14 +71,14 @@ describe Blueprinter::Hooks do
   end
 
   context '#last' do
-    it 'should return the value from the last hook' do
+    it 'returns the value from the last hook' do
       hooks = described_class.new [ext1.new, ext2.new]
       ctx = context.new(blueprint.new, field, '', object, {})
       result = hooks.last(:exclude_field?, ctx)
       expect(result).to be true
     end
 
-    it 'should reutrn nil if there are no hooks' do
+    it 'reutrns nil if there are no hooks' do
       hooks = described_class.new []
       ctx = context.new(blueprint.new, field, { name: 'Foo', n: 0 }, object, {})
       result = hooks.last(:exclude_field?, ctx)
@@ -87,21 +87,21 @@ describe Blueprinter::Hooks do
   end
 
   context '#reduce' do
-    it 'should return the final value' do
+    it 'returns the final value' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = context.new(blueprint.new, field, { name: 'Foo', n: 0 }, object, {})
       result = hooks.reduce(:output_object, ctx.value) { |val| ctx.value = val; ctx }
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
-    it 'should expand a returned array into args' do
+    it 'expands a returned array into args' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = context.new(blueprint.new, field, { name: 'Foo', n: 0 }, object, {})
       result = hooks.reduce(:output_object, ctx.value) { |val| ctx.value = val; [ctx] }
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
-    it 'should return the initial value if there are no hooks' do
+    it 'returns the initial value if there are no hooks' do
       hooks = described_class.new []
       ctx = context.new(blueprint.new, field, { name: 'Foo' }, object, {})
       result = hooks.reduce(:output_object, ctx.value) { |val| ctx.value = val; ctx }
@@ -110,21 +110,21 @@ describe Blueprinter::Hooks do
   end
 
   context '#reduce_into' do
-    it 'should return the final value' do
+    it 'returns the final value' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = context.new(blueprint.new, field, { name: 'Foo', n: 0 }, object, {})
       result = hooks.reduce_into(:output_object, ctx, :value)
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
-    it 'should expand a returned array into args' do
+    it 'expands a returned array into args' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = context.new(blueprint.new, field, { name: 'Foo', n: 0 }, object, {})
       result = hooks.reduce_into(:output_object, ctx, :value)
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
-    it 'should return the initial value if there are no hooks' do
+    it 'returns the initial value if there are no hooks' do
       hooks = described_class.new []
       ctx = context.new(blueprint.new, field, { name: 'Foo' }, object, {})
       result = hooks.reduce_into(:output_object, ctx, :value)
@@ -199,7 +199,7 @@ describe Blueprinter::Hooks do
         end
       end
 
-      it 'should be called around other extension hooks' do
+      it 'is called around other extension hooks' do
         log = []
         ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
         hooks = described_class.new [ext1.new(log), ext2.new(log)]
@@ -218,7 +218,7 @@ describe Blueprinter::Hooks do
         ]
       end
 
-      it 'should be skipped for hidden extensions' do
+      it 'is skipped for hidden extensions' do
         ext2.class_eval { def hidden? = true }
         log = []
         ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
@@ -237,7 +237,7 @@ describe Blueprinter::Hooks do
       end
     end
 
-    it 'should nest calls' do
+    it 'nests calls' do
       log = []
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
       hooks = described_class.new [ext_a.new(log), ext_b.new(log), ext_c.new(log)]
@@ -245,21 +245,21 @@ describe Blueprinter::Hooks do
       expect(log).to eq ['A: 42', 'B: 42', 'C: 42', 'INNER', 'C END', 'B END', 'A END',]
     end
 
-    it 'should return the inner value' do
+    it 'returns the inner value' do
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
       hooks = described_class.new [ext_a.new([]), ext_b.new([]), ext_c.new([])]
       result = hooks.around(:around_object_serialization, ctx) { 42 }
       expect(result).to eq 42
     end
 
-    it 'should return the inner with no hooks' do
+    it 'returns the inner with no hooks' do
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
       hooks = described_class.new []
       result = hooks.around(:around_object_serialization, ctx) { 42 }
       expect(result).to eq 42
     end
 
-    it "should raise if a hook doesn't yield" do
+    it "raises if a hook doesn't yield" do
       ext = Class.new(Blueprinter::Extension) do
         def around_object_serialization(_ctx); end
       end
@@ -268,7 +268,7 @@ describe Blueprinter::Hooks do
       expect { hooks.around(:around_object_serialization, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
     end
 
-    it 'should raise if a hook yields more than once' do
+    it 'raises if a hook yields more than once' do
       ext = Class.new(Blueprinter::Extension) do
         def around_object_serialization(_ctx)
           yield

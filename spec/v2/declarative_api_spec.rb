@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe "Blueprinter::V2 Declarative API" do
-  it "should inherit fields defined after the view" do
+  it "inherits fields defined after the view" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       view :desc do
         field :description
@@ -15,7 +15,7 @@ describe "Blueprinter::V2 Declarative API" do
     expect(refs[:desc].fields.keys.sort).to eq %i(id name description).sort
   end
 
-  it "should include partials defined after the view" do
+  it "includes partials defined after the view" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
@@ -32,7 +32,7 @@ describe "Blueprinter::V2 Declarative API" do
     expect(refs[:foo].fields.keys.sort).to eq %i(name description).sort
   end
 
-  it "should include partials defined after the use statement" do
+  it "includes partials defined after the use statement" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       use :desc
@@ -46,7 +46,7 @@ describe "Blueprinter::V2 Declarative API" do
     expect(refs[:default].fields.keys.sort).to eq %i(name description).sort
   end
 
-  it "should inherit when accessing views" do
+  it "inherits when accessing views" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       use :desc
       field :name
@@ -68,7 +68,7 @@ describe "Blueprinter::V2 Declarative API" do
     expect(refs[:default].fields.keys.sort).to eq %i(name foo bar description).sort
   end
 
-  it "should exclude fields added after the exclude statement" do
+  it "excludes fields added after the exclude statement" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :name

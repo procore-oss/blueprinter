@@ -25,12 +25,12 @@ describe Blueprinter::Hooks do
     end
   end
 
-  context '#has?' do
+  context '#registered?' do
     it 'should know whether it contains certain hooks' do
       hooks = described_class.new [ext1.new, ext2.new]
-      expect(hooks.has? :output_object).to be true
-      expect(hooks.has? :exclude_field?).to be true
-      expect(hooks.has? :exclude_collection?).to be false
+      expect(hooks.registered? :output_object).to be true
+      expect(hooks.registered? :exclude_field?).to be true
+      expect(hooks.registered? :exclude_collection?).to be false
     end
   end
 
@@ -139,7 +139,7 @@ describe Blueprinter::Hooks do
           @log = log
         end
 
-        def around_object(ctx)
+        def around_object_serialization(ctx)
           @log << "A: #{ctx.store[:value]}"
           yield
           @log << "A END"
@@ -149,7 +149,7 @@ describe Blueprinter::Hooks do
 
     let(:ext_b) do
       Class.new(ext_a) do
-        def around_object(ctx)
+        def around_object_serialization(ctx)
           @log << "B: #{ctx.store[:value]}"
           yield
           @log << "B END"
@@ -159,7 +159,7 @@ describe Blueprinter::Hooks do
 
     let(:ext_c) do
       Class.new(ext_a) do
-        def around_object(ctx)
+        def around_object_serialization(ctx)
           @log << "C: #{ctx.store[:value]}"
           yield
           @log << "C END"
@@ -185,10 +185,10 @@ describe Blueprinter::Hooks do
         Class.new(Blueprinter::Extension) do
           def initialize(log) = @log = log
 
-          def around_object(_ctx)
-            @log << 'around_object: A'
+          def around_object_serialization(_ctx)
+            @log << 'around_object_serialization: A'
             yield
-            @log << 'around_object: B'
+            @log << 'around_object_serialization: B'
           end
 
           def around_hook(ext, hook)
@@ -205,16 +205,16 @@ describe Blueprinter::Hooks do
         hooks = described_class.new [ext1.new(log), ext2.new(log)]
 
         hooks.reduce_into(:field_value, ctx, :value)
-        hooks.around(:around_object, ctx) { log << 'INNER' }
+        hooks.around(:around_object_serialization, ctx) { log << 'INNER' }
         expect(log).to eq [
           "around_hook(#{ext1.name}#field_value): A",
           'field_value',
           "around_hook(#{ext1.name}#field_value): B",
-          "around_hook(#{ext2.name}#around_object): A",
-          'around_object: A',
+          "around_hook(#{ext2.name}#around_object_serialization): A",
+          'around_object_serialization: A',
           'INNER',
-          'around_object: B',
-          "around_hook(#{ext2.name}#around_object): B"
+          'around_object_serialization: B',
+          "around_hook(#{ext2.name}#around_object_serialization): B"
         ]
       end
 
@@ -225,14 +225,14 @@ describe Blueprinter::Hooks do
         hooks = described_class.new [ext1.new(log), ext2.new(log)]
 
         hooks.reduce_into(:field_value, ctx, :value)
-        hooks.around(:around_object, ctx) { log << 'INNER' }
+        hooks.around(:around_object_serialization, ctx) { log << 'INNER' }
         expect(log).to eq [
           "around_hook(#{ext1.name}#field_value): A",
           'field_value',
           "around_hook(#{ext1.name}#field_value): B",
-          'around_object: A',
+          'around_object_serialization: A',
           'INNER',
-          'around_object: B',
+          'around_object_serialization: B',
         ]
       end
     end
@@ -241,43 +241,43 @@ describe Blueprinter::Hooks do
       log = []
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, { value: 42 })
       hooks = described_class.new [ext_a.new(log), ext_b.new(log), ext_c.new(log)]
-      hooks.around(:around_object, ctx) { log << 'INNER' }
+      hooks.around(:around_object_serialization, ctx) { log << 'INNER' }
       expect(log).to eq ['A: 42', 'B: 42', 'C: 42', 'INNER', 'C END', 'B END', 'A END',]
     end
 
     it 'should return the inner value' do
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
       hooks = described_class.new [ext_a.new([]), ext_b.new([]), ext_c.new([])]
-      result = hooks.around(:around_object, ctx) { 42 }
+      result = hooks.around(:around_object_serialization, ctx) { 42 }
       expect(result).to eq 42
     end
 
     it 'should return the inner with no hooks' do
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
       hooks = described_class.new []
-      result = hooks.around(:around_object, ctx) { 42 }
+      result = hooks.around(:around_object_serialization, ctx) { 42 }
       expect(result).to eq 42
     end
 
     it "should raise if a hook doesn't yield" do
       ext = Class.new(Blueprinter::Extension) do
-        def around_object(_ctx); end
+        def around_object_serialization(_ctx); end
       end
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
       hooks = described_class.new [ext.new]
-      expect { hooks.around(:around_object, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+      expect { hooks.around(:around_object_serialization, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
     end
 
     it 'should raise if a hook yields more than once' do
       ext = Class.new(Blueprinter::Extension) do
-        def around_object(_ctx)
+        def around_object_serialization(_ctx)
           yield
           yield
         end
       end
       ctx = Blueprinter::V2::Context.new(nil, nil, nil, nil, nil, nil, {})
       hooks = described_class.new [ext.new]
-      expect { hooks.around(:around_object, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+      expect { hooks.around(:around_object_serialization, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
     end
   end
 end

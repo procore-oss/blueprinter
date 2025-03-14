@@ -9,25 +9,21 @@ describe Blueprinter::Extension do
     let(:object) { { foo: 'Foo' } }
     let(:context) { Blueprinter::V2::Context }
 
-    it 'should default collections? to false' do
-      expect(subject.new.collection? object).to be false
-    end
-
-    it 'should yield on around' do
+    it 'should yield on around_render' do
       ctx = context.new(blueprint.new, field, 'Foo', object, {})
-      res = subject.new.around(ctx) { |_ctx| true }
+      res = subject.new.around_render(ctx) { |_ctx| true }
       expect(res).to be true
     end
 
-    it 'should yield on around_object' do
+    it 'should yield on around_object_serialization' do
       ctx = context.new(blueprint.new, field, 'Foo', object, {})
-      res = subject.new.around_object(ctx) { |_ctx| true }
+      res = subject.new.around_object_serialization(ctx) { |_ctx| true }
       expect(res).to be true
     end
 
-    it 'should yield on around_collection' do
+    it 'should yield on around_collection_serialization' do
       ctx = context.new(blueprint.new, field, 'Foo', object, {})
-      res = subject.new.around_collection(ctx) { |_ctx| true }
+      res = subject.new.around_collection_serialization(ctx) { |_ctx| true }
       expect(res).to be true
     end
 

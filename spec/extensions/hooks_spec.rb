@@ -7,6 +7,12 @@ describe Blueprinter::Hooks do
   let(:context) { Blueprinter::V2::Context }
   let(:ext1) do
     Class.new(Blueprinter::Extension) do
+      attr_reader :log
+
+      def initialize = @log = []
+
+      def prepare(_context) = log << 'prepare'
+
       def output_object(context)
         context.value[:n] += 1 if context.value[:n]
         context.value
@@ -19,6 +25,12 @@ describe Blueprinter::Hooks do
   end
   let(:ext2) do
     Class.new(Blueprinter::Extension) do
+      attr_reader :log
+
+      def initialize = @log = []
+
+      def prepare(_context) = log << 'prepare'
+
       def exclude_field?(context)
         context.value == "" || context.value == []
       end
@@ -31,6 +43,17 @@ describe Blueprinter::Hooks do
       expect(hooks.registered? :output_object).to be true
       expect(hooks.registered? :exclude_field?).to be true
       expect(hooks.registered? :exclude_collection?).to be false
+    end
+  end
+
+  context '#run' do
+    it 'runs each hook' do
+      exti1 = ext1.new
+      exti2 = ext2.new
+      hooks = described_class.new [exti1, exti2, Class.new(Blueprinter::Extension)]
+      ctx = context.new(blueprint.new, field, nil, object, {})
+      hooks.run(:prepare, ctx)
+      expect(exti1.log + exti2.log).to eq ['prepare', 'prepare']
     end
   end
 

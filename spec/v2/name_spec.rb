@@ -6,21 +6,21 @@ describe "Blueprinter::V2 Names" do
       view :extended
     end
 
-    it 'should have a base name' do
+    it 'has a base name' do
       expect(NamedBlueprint.to_s).to eq "NamedBlueprint"
       expect(NamedBlueprint.inspect).to eq "NamedBlueprint"
       expect(NamedBlueprint.blueprint_name).to eq "NamedBlueprint"
       expect(NamedBlueprint.view_name).to eq :default
     end
 
-    it 'should find a view by name' do
+    it 'finds a view by name' do
       expect(NamedBlueprint[:extended].to_s).to eq "NamedBlueprint.extended"
       expect(NamedBlueprint[:extended].inspect).to eq "NamedBlueprint.extended"
       expect(NamedBlueprint[:extended].blueprint_name).to eq "NamedBlueprint.extended"
       expect(NamedBlueprint[:extended].view_name).to eq :extended
     end
 
-    it 'should raise for an invalid view name' do
+    it 'raises for an invalid view name' do
       expect { NamedBlueprint[:wrong_name] }.to raise_error(
         Blueprinter::Errors::UnknownView,
         "View 'wrong_name' could not be found in Blueprint 'NamedBlueprint'"
@@ -36,12 +36,12 @@ describe "Blueprinter::V2 Names" do
       end
     end
 
-    it 'should have no base name' do
+    it 'has no base name' do
       expect(blueprint.to_s).to eq "MyBlueprint"
       expect(blueprint.inspect).to eq "MyBlueprint"
     end
 
-    it 'should find a view by name' do
+    it 'finds a view by name' do
       expect(blueprint[:extended].to_s).to eq "MyBlueprint.extended"
       expect(blueprint[:extended].inspect).to eq "MyBlueprint.extended"
     end
@@ -54,12 +54,12 @@ describe "Blueprinter::V2 Names" do
       end
     end
 
-    it 'should have no base name' do
+    it 'has no base name' do
       expect(blueprint.blueprint_name).to eq "Blueprinter::V2::Base"
       expect(blueprint.view_name).to eq :default
     end
 
-    it 'should find a view by name' do
+    it 'has a view by name' do
       expect(blueprint[:extended].blueprint_name).to eq "Blueprinter::V2::Base.extended"
       expect(blueprint[:extended].view_name).to eq :extended
     end
@@ -78,7 +78,7 @@ describe "Blueprinter::V2 Names" do
       end
     end
 
-    it 'should find deeply nested names' do
+    it 'finds deeply nested names' do
       expect(blueprint.blueprint_name).to eq "MyBlueprint"
       expect(blueprint.view_name).to eq :default
 
@@ -92,7 +92,7 @@ describe "Blueprinter::V2 Names" do
       expect(blueprint[:foo][:bar][:zorp].view_name).to eq :"foo.bar.zorp"
     end
 
-    it 'should find deeply nested names using dot syntax' do
+    it 'finds deeply nested names using dot syntax' do
       expect(blueprint["foo"].blueprint_name).to eq "MyBlueprint.foo"
       expect(blueprint["foo"].view_name).to eq :foo
 
@@ -104,7 +104,7 @@ describe "Blueprinter::V2 Names" do
     end
   end
 
-  it "should not contain periods" do
+  it "doesn't contain periods" do
     blueprint = Class.new(Blueprinter::V2::Base)
     expect { blueprint.view :"foo.bar" }.to raise_error(
       Blueprinter::Errors::InvalidBlueprint,
@@ -112,7 +112,7 @@ describe "Blueprinter::V2 Names" do
     )
   end
 
-  it 'should have the current view name accessible from within the DSL' do
+  it 'has the current view name accessible from within the DSL' do
     default_name = nil
     foo_name = nil
     foo_bar_name = nil

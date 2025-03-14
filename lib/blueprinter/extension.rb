@@ -6,10 +6,9 @@ module Blueprinter
   #
   # V2 hook call order:
   #  - around_hook (called around any other extension hook)
-  #  - collection? (skipped if calling render_object/render_collection)
-  #  - around
+  #  - around_render
   #    - input_object | input_collection
-  #    - around_object | around_collection
+  #    - around_object_serialization | around_collection_serialization
   #      - prepare (only first time during a given render)
   #      - blueprint_fields (only first time during a given render)
   #      - blueprint_input
@@ -28,33 +27,25 @@ module Blueprinter
   #
   class Extension
     #
-    # Returns true if the given object should be treated as a collection (i.e. supports `map { |obj| ... }`).
-    #
-    # @param _object [Object]
-    # @return [Boolean]
-    #
-    def collection?(_object) = false
-
-    #
     # Runs around the entire rendering process. MUST yield!
     #
     # @param _context [Blueprinter::V2::Context]
     #
-    def around(_context) = yield
+    def around_render(_context) = yield
 
     #
     # Runs around serialization of a Blueprint object. Surrounds the `prepare` through `blueprint_output` hooks. MUST yield!
     #
     # @param _context [Blueprinter::V2::Context]
     #
-    def around_object(_context) = yield
+    def around_object_serialization(_context) = yield
 
     #
     # Runs around serialization of a Blueprint collection. Surrounds the `prepare` through `blueprint_output` hooks. MUST yield!
     #
     # @param _context [Blueprinter::V2::Context]
     #
-    def around_collection(_context) = yield
+    def around_collection_serialization(_context) = yield
 
     #
     # Called once per blueprint per render. A common use is to pre-calculate certain options

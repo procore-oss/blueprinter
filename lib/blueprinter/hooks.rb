@@ -27,7 +27,7 @@ module Blueprinter
     # @param hook [Symbol] Name of hook to call
     # @param arg [Object] Argument to hook
     #
-    def each(hook, arg)
+    def run(hook, arg)
       @hooks.fetch(hook).each { |ext| call(ext, hook, arg) }
     end
 

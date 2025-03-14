@@ -18,7 +18,7 @@ module Blueprinter
     # @param hook [Symbol] Name of hook to call
     # @return [Boolean]
     #
-    def has?(hook)
+    def registered?(hook)
       @hooks.fetch(hook).any?
     end
 
@@ -122,7 +122,7 @@ module Blueprinter
     private
 
     def call(ext, hook, *args, &block)
-      return ext.public_send(hook, *args, &block) if !has?(:around_hook) || ext.hidden? || hook == :around_hook
+      return ext.public_send(hook, *args, &block) if !registered?(:around_hook) || ext.hidden? || hook == :around_hook
 
       around(:around_hook, ext, hook) do
         ext.public_send(hook, *args, &block)

@@ -743,7 +743,7 @@ WidgetBlueprint[:default].render(widget).to_json
 
 WidgetBlueprint.render_collection(Widget.all).to_json
 </code></pre>
-<p>Whatever you pass to <code>render_collection</code> must respond to <code>map</code>, yielding zero or more serializable objects.</p>
+<p>Whatever you pass to <code>render_collection</code> must respond to <code>map</code>, yielding zero or more serializable objects, and returning an <code>Enumerable</code> with the mapped results.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
 <p>Blueprinter has a rich API for extending the serialization process and reflecting on your blueprints.</p>
 <h2 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h2>

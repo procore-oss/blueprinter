@@ -177,18 +177,16 @@ WidgetBlueprint["extended.price"].render(widget).to_json
 WidgetBlueprint.render(widget).to_json
 WidgetBlueprint[:default].render(widget).to_json
 </code></pre>
-<h3 id="handling-of-arrays-and-array-like-objects"><a class="header" href="#handling-of-arrays-and-array-like-objects">Handling of arrays and array-like objects</a></h3>
-<p>By default, <code>.render</code> treats the following classes (or their subclasses) as arrays:</p>
-<ul>
-<li><code>Array</code></li>
-<li><code>Set</code></li>
-<li><code>Enumerator</code></li>
-</ul>
-<p>You can use the <a href="./api/extensions.html#collection">collection? extension hook</a> to add support for other array-like classes. For example, <a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> uses it for <code>ActiveRecord::Relation</code>. Alternatively, you can be explicit with <code>render_object</code> and <code>render_collection</code>:</p>
+<h3 id="rendering-collections"><a class="header" href="#rendering-collections">Rendering collections</a></h3>
+<p><code>render</code> will treat any <code>Enumerable</code>, except <code>Hash</code>, as an array of objects:</p>
+<pre><code class="language-ruby">WidgetBlueprint.render(Widget.all).to_json
+</code></pre>
+<p>If you wish to be explicit you may use <code>render_object</code> and <code>render_collection</code>:</p>
 <pre><code class="language-ruby">WidgetBlueprint.render_object(widget).to_json
 
 WidgetBlueprint.render_collection(Widget.all).to_json
 </code></pre>
+<p>Whatever you pass to <code>render_collection</code> must respond to <code>map</code>, yielding zero or more serializable objects.</p>
 
                     </main>
 

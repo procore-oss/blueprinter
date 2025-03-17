@@ -517,8 +517,6 @@ shared_examples 'Base::render' do
   end
 
   context 'Given ::render in a nested included view, original view is accessible in options' do
-    subject { blueprint.render(obj, view: :nested) }
-    let(:result) { '{"id":' + obj_id + ',"view_trigger":"nested"}' }
     let(:blueprint) do
       Class.new(Blueprinter::Base) do
         identifier :id
@@ -531,7 +529,27 @@ shared_examples 'Base::render' do
         end
       end
     end
-    it('returns json with values derived from options') { should eq(result) }
+
+    describe 'with non default view' do
+      subject { blueprint.render(obj, view: :nested) }
+      let(:result) { '{"id":' + obj_id + ',"view_trigger":"nested"}' }
+
+      it('returns json with values derived from options') { should eq(result) }
+    end
+
+    describe 'with explicit default view' do
+      subject { blueprint.render(obj, view: :default) }
+      let(:result) { '{"id":' + obj_id + ',"view_trigger":"default"}' }
+
+      it('returns json with values derived from options') { should eq(result) }
+    end
+
+    describe 'with non explicit default view' do
+      subject { blueprint.render(obj) }
+      let(:result) { '{"id":' + obj_id + ',"view_trigger":"default"}' }
+
+      it('returns json with values derived from options') { should eq(result) }
+    end
   end
 
   context 'Given blueprint has a transformer' do

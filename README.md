@@ -533,9 +533,7 @@ _NOTE:_ `taskable.blueprint` should return a valid Blueprint class. Currently, `
 <summary>Defining A Field Directly In The Blueprint</summary>
 
 
-You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render` with, additionally,
-`view` which can be useful to access the view who triggered the field rendering (imagine view `a` include view `b`, during rendering of a generic field you can see view `a` on `options[:view]`).
-For example:
+You can define a field directly in the Blueprint by passing it a block. This is especially useful if the object does not already have such an attribute or method defined, and you want to define it specifically for use with the Blueprint. This is done by passing `field` a block. The block also yields the object and any options that were passed from `render`. For example:
 
 ```ruby
 class UserBlueprint < Blueprinter::Base
@@ -558,6 +556,44 @@ Output:
 {
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
   "full_name": "Mr John Doe"
+}
+```
+
+</details>
+
+<details>
+<summary>Accessing the View Option</summary>
+
+
+The `view` provided to the `render` call is implicitly available in the `options` hash within a `field` block, and can be referenced as needed. For example:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :full_name do |user, options|
+    prefix = options[:view] == :admin ? '[Admin]' : options[:title_prefix]
+    "#{prefix} #{user.first_name} #{user.last_name}"
+  end
+
+  view :admin do
+    field :access_level
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user, title_prefix: "Mr", view: :admin)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "full_name": "[Admin] John Doe",
+  "access_level": "4"
 }
 ```
 

@@ -5,11 +5,9 @@ module Blueprinter
   class Hooks
     # @param extensions [Array<Blueprinter::Extension>] The extensions we're going to run
     def initialize(extensions)
-      @hooks = Extension.
-        public_instance_methods(false).
-        each_with_object({}) do |hook, acc|
-          acc[hook] = extensions.select { |ext| ext.class.public_instance_methods(false).include? hook }
-        end
+      @hooks = Extension::HOOKS.each_with_object({}) do |hook, acc|
+        acc[hook] = extensions.select { |ext| ext.class.public_instance_methods(false).include? hook }
+      end
     end
 
     #

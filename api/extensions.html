@@ -177,11 +177,10 @@ end
 <h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
 <p>Hooks are called in the following order. Most are passed a <a href="./context-objects.html">context object</a> as an argument.</p>
 <ul>
-<li><a href="#collection">collection?</a></li>
-<li><a href="#around">around</a>
+<li><a href="#around_object_render">around_object_render</a> | <a href="#around_collection_render">around_collection_render</a>
 <ul>
 <li><a href="#input_object">input_object</a> | <a href="#input_collection">input_collection</a></li>
-<li><a href="#around_object">around_object</a> | <a href="#around_collection">around_collection</a>
+<li><a href="#around_object_serialization">around_object_serialization</a> | <a href="#around_collection_serialization">around_collection_serialization</a>
 <ul>
 <li><a href="#prepare">prepare</a></li>
 <li><a href="#blueprint_fields">blueprint_fields</a></li>
@@ -197,24 +196,25 @@ end
 </li>
 </ul>
 <p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
-<h2 id="collection"><a class="header" href="#collection">collection?</a></h2>
+<h2 id="around_object_render"><a class="header" href="#around_object_render">around_object_render</a></h2>
 <blockquote>
-<p><strong>@param Object</strong> The object passed to <code>render</code><br />
-<strong>@return Boolean</strong> Whether the object is a collection or a single item<br />
-<strong>@cost</strong> Low - run exactly once per render (not called for <code>render_object</code> or <code>render_collection</code>)</p>
-</blockquote>
-<p>If any extension with this hook returns <code>true</code>, the object will be considered a collection and rendered as such. For example, the <a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> extension uses this hook to indicate that an <code>ActiveRecord::Relation</code> should be considered a collection.</p>
-<pre><code class="language-ruby">def collection?(object)
-  object.is_a? ArrayLikeThing
-end
-</code></pre>
-<h2 id="around"><a class="header" href="#around">around</a></h2>
-<blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
-<p>Wraps the entire rendering process. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around(ctx)
+<p>Wraps the entire rendering process of objects. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around_object_render(ctx)
+  # do something before render
+  yield # render
+  # do something after render
+end
+</code></pre>
+<h2 id="around_collection_render"><a class="header" href="#around_collection_render">around_collection_render</a></h2>
+<blockquote>
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level collection being rendered<br />
+<strong>@cost</strong> Low - run exactly once per render</p>
+</blockquote>
+<p>Wraps the entire rendering process of collections. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around_collection_render(ctx)
   # do something before render
   yield # render
   # do something after render
@@ -222,7 +222,7 @@ end
 </code></pre>
 <h2 id="input_object"><a class="header" href="#input_object">input_object</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
@@ -233,7 +233,7 @@ end
 </code></pre>
 <h2 id="input_collection"><a class="header" href="#input_collection">input_collection</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level collection being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
@@ -242,27 +242,27 @@ end
   ctx.object
 end
 </code></pre>
-<h2 id="around_object"><a class="header" href="#around_object">around_object</a></h2>
+<h2 id="around_object_serialization"><a class="header" href="#around_object_serialization">around_object_serialization</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
 <p>Wraps the rendering of every object (<code>context.object</code>). This could be the top-level object or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_object(ctx)
+<pre><code class="language-ruby">def around_object_serialization(ctx)
   # do something before render
   yield # render
   # do something after render
 end
 </code></pre>
-<h2 id="around_collection"><a class="header" href="#around_collection">around_collection</a></h2>
+<h2 id="around_collection_serialization"><a class="header" href="#around_collection_serialization">around_collection_serialization</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current collection being rendered<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
 <p>Wraps the rendering of every collection (<code>context.object</code>). This could be the top-level collection or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_collection(ctx)
+<pre><code class="language-ruby">def around_collection_serialization(ctx)
   # do something before render
   yield # render
   # do something after render
@@ -270,7 +270,7 @@ end
 </code></pre>
 <h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
@@ -282,8 +282,7 @@ end
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
-<strong>@return Array&lt;Field | ObjectField | Collection&gt;</strong> The fields you want to render in the order you want to render them<br />
+<p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
@@ -296,7 +295,7 @@ end
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
@@ -307,7 +306,7 @@ end
 </code></pre>
 <h2 id="field_value"><a class="header" href="#field_value">field_value</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Object</strong> The value to be rendered<br />
 <strong>@cost</strong> High - run for every field (not object or collection fields)</p>
 </blockquote>
@@ -321,7 +320,8 @@ end
 </code></pre>
 <h2 id="object_value"><a class="header" href="#object_value">object_value</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Object</strong> The object to be rendered for this field<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
@@ -332,7 +332,7 @@ end
 </code></pre>
 <h2 id="collection_value"><a class="header" href="#collection_value">collection_value</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Object</strong> The array-like collection to be rendered for this field<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
@@ -343,7 +343,7 @@ end
 </code></pre>
 <h2 id="exclude_field"><a class="header" href="#exclude_field">exclude_field?</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
 <strong>@cost</strong> High - run for every field (not object or collection fields)</p>
 </blockquote>
@@ -354,7 +354,7 @@ end
 </code></pre>
 <h2 id="exclude_object"><a class="header" href="#exclude_object">exclude_object?</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
@@ -365,7 +365,7 @@ end
 </code></pre>
 <h2 id="exclude_collection"><a class="header" href="#exclude_collection">exclude_collection?</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
@@ -376,56 +376,57 @@ end
 </code></pre>
 <h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the current blueprint, and <code>context.object</code> the current object<br />
 <strong>@return Hash</strong> The Hash to use as this blueprint's serialized output<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.value in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
+<p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.result</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.result in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
 <pre><code class="language-ruby">def blueprint_output(ctx)
-  ctx.value.merge({ extra: "data" })
+  ctx.result.merge({ extra: "data" })
 end
 </code></pre>
 <h2 id="output_object"><a class="header" href="#output_object">output_object</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the top-level blueprint, and <code>context.object</code> the top-level object<br />
 <strong>@return Hash</strong> The Hash to use as the final serialized output<br />
 <strong>@cost</strong> Low - run once per <code>render</code> (for objects) or <code>render_object</code></p>
 </blockquote>
-<p>Run after the top-level object is fully serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
+<p>Run after the top-level object is fully serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.result</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
 <pre><code class="language-ruby">def output_object(ctx)
-  ctx.value.merge({ extra: "data" })
+  ctx.result.merge({ extra: "data" })
 end
 </code></pre>
 <h2 id="output_collection"><a class="header" href="#output_collection">output_collection</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized array of Hashes from the top-level blueprint, and <code>context.object</code> the top-level collection<br />
 <strong>@return Hash | Array<Hash></strong> The Hash, or array of Hashes, to use as tthe final serialized output<br />
 <strong>@cost</strong> Low - run once per <code>render</code> (for collections) or <code>render_collection</code></p>
 </blockquote>
-<p>Run after the top-level collection is fully serialized to an array of Hashes, allowing you to modify the output. The array of Hashes is available in <code>context.value</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
+<p>Run after the top-level collection is fully serialized to an array of Hashes, allowing you to modify the output. The array of Hashes is available in <code>context.result</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
 <pre><code class="language-ruby"># Wrap the output array in a Hash
 def output_collection(ctx)
   {
-    data: ctx.value,
+    data: ctx.result,
     extra: "metadata"
   }
 end
 
 # Or modify each element
 def output_collection(ctx)
-  ctx.value.map { |item| item.merge({ extra: "data" }) }
+  ctx.result.map { |item| item.merge({ extra: "data" }) }
 end
 </code></pre>
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
+<strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>
 <p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the first one</em> will be used.</p>
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json(ctx)
-  JSON.dump ctx.value
+  JSON.dump ctx.result
 end
 </code></pre>
 <h2 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h2>

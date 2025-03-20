@@ -230,8 +230,7 @@ collection :parts, PartBlueprint, exclude_if_empty: true
 <li>The <a href="dsl/./options.html#from">from</a> field option can be used to specify a different method or Hash key name.</li>
 </ul>
 <h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
-<p>Return whatever you want from a block. It will be passed a context argument which contains the object being rendered, <a href="dsl/../api/context-objects.html">among other things</a>.</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<p>Return whatever you want from a block. It will be passed a <a href="dsl/../api/context-objects.html#field-context">Field context</a> argument containing the object being rendered, among other things.</p>
 <pre><code class="language-ruby">field :description do |ctx|
   ctx.object.description.upcase
 end
@@ -442,13 +441,15 @@ WidgetBlueprint.render(widget, exclude_if_empty: false).to_json
 <li><a href="dsl/options.html#other">Metadata</a>: Wrap or add metadata to the output</li>
 </ul>
 <h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
-<p>Options that accept Procs, lambdas, or method names are usually passed a single "context object" argument. It contains the object being rendered, as well as other useful information. See the <a href="dsl/../api/context-objects.html">Context Objects</a> documentation for more information.</p>
+<p>Options that accept Procs, lambdas, or method names are usually passed a <a href="dsl/../api/context-objects.html#field-context">Field context</a> argument. It contains the object being rendered as well as other useful information.</p>
 <h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
 <p>These options allow you to set default values for fields and associations, and customize when they're used.</p>
 <h4 id="default"><a class="header" href="#default">default</a></h4>
 <p>A default value used when the field or assocation is nil.</p>
-<p><em>Scope:</em> Field, object, collection</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Field, object, collection<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">field :foo, default: "Foo"
 field :foo, default: -&gt;(ctx) { "Foo" }
 field :foo, default: :foo
@@ -459,8 +460,10 @@ end
 </code></pre>
 <h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
 <p>Default value for any nil non-association field in its scope.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:field_default] = "Foo"
 options[:field_default] = -&gt;(ctx) { "Foo" }
 options[:field_default] = :foo
@@ -473,8 +476,10 @@ WidgetBluerpint.render(widget, field_default: "Foo").to_json
 </code></pre>
 <h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
 <p>Default value for any nil object field in its scope.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
 options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
 options[:object_default] = :foo
@@ -487,8 +492,10 @@ WidgetBluerpint.render(widget, object_default: { name: "Foo" }).to_json
 </code></pre>
 <h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
 <p>Default value for any nil collection field.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
 options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
 options[:collection_default] = :foo
@@ -501,8 +508,10 @@ WidgetBluerpint.render(widget, collection_default: [{ name: "Foo" }]).to_json
 </code></pre>
 <h4 id="default_if"><a class="header" href="#default_if">default_if</a></h4>
 <p>Use the default value if the given Proc or method name returns truthy.</p>
-<p><em>Scope:</em> Field, object, collection</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Field, object, collection<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">field :foo, default: "Foo", default_if: -&gt;(ctx) { ctx.object.disabled? }
 field :foo, default: "Foo", default_if: :disabled?
 
@@ -512,8 +521,10 @@ end
 </code></pre>
 <h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
 <p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any non-association field in scope.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:field_default_if] = :disabled?
 
@@ -525,8 +536,10 @@ WidgetBluerpint.render(widget, field_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
 <p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any object field in scope.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:object_default_if] = :disabled?
 
@@ -538,8 +551,10 @@ WidgetBluerpint.render(widget, object_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
 <p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any collection field in scope.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:collection_default_if] = :disabled?
 
@@ -553,7 +568,9 @@ WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
 <p>These options allow you to exclude fields from the output.</p>
 <h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
 <p>Exclude fields if they're nil.</p>
-<p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, field, object, collection, render</p>
+</blockquote>
 <pre><code class="language-ruby">options[:exclude_if_nil] = true
 
 field :description, exclude_if_nil: true
@@ -562,7 +579,9 @@ WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
 </code></pre>
 <h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
 <p>Exclude fields if they're nil, or if they respond to <code>empty?</code> and it returns true.</p>
-<p><em>Scope:</em> Blueprint, view, partial, field, object, collection, render</p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, field, object, collection, render</p>
+</blockquote>
 <pre><code class="language-ruby">options[:exclude_if_empty] = true
 
 field :description, exclude_if_empty: true
@@ -571,8 +590,10 @@ WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
 </code></pre>
 <h4 id="if"><a class="header" href="#if">if</a></h4>
 <p>Only include the field if the given Proc or method name returns truthy.</p>
-<p><em>Scope:</em> Field, object, collection</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Field, object, collection<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">field :foo, if: -&gt;(ctx) { ctx.object.enabled? }
 field :foo, if: :enabled?
 
@@ -582,8 +603,10 @@ end
 </code></pre>
 <h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
 <p>Only include non-association fields if the given Proc or method name returns truthy.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:field_if] = :enabled?
 
@@ -595,8 +618,10 @@ WidgetBluerpint.render(widget, field_if: :enabled?).to_json
 </code></pre>
 <h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
 <p>Only include object fields if the given Proc or method name returns truthy.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:object_if] = :enabled?
 
@@ -608,8 +633,10 @@ WidgetBluerpint.render(widget, object_if: :enabled?).to_json
 </code></pre>
 <h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
 <p>Only include collection fields if the given Proc or method name returns truthy.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:collection_if] = :enabled?
 
@@ -631,12 +658,16 @@ WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 <p>These options let you change how fields values are extracted from your objects.</p>
 <h4 id="from"><a class="header" href="#from">from</a></h4>
 <p>Populate the field using a method/Hash key other than the field name.</p>
-<p><em>Scope</em>: Field, object, collection</p>
+<blockquote>
+<p><strong>Availability</strong>: Field, object, collection</p>
+</blockquote>
 <pre><code class="language-ruby">field :desc, from: :description
 </code></pre>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
 <p>Pass a <a href="dsl/../api/extractors.html">custom extractor</a> class.</p>
-<p><em>Scope:</em> Blueprint, view, partial, field, object, collection</p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, field, object, collection</p>
+</blockquote>
 <pre><code class="language-ruby">options[:extractor] = MyCustomExtractor
 
 object :category, CategoryBlueprint, extractor: MyCategoryExtractor
@@ -645,15 +676,19 @@ object :category, CategoryBlueprint, extractor: MyCategoryExtractor
 <p>These options allow you to add metadata to the rendered output.</p>
 <h4 id="root"><a class="header" href="#root">root</a></h4>
 <p>Pass a root key to wrap the output.</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render</p>
+</blockquote>
 <pre><code class="language-ruby">options[:root] = :data
 
 WidgetBlueprint.render(widget, root: :data).to_json
 </code></pre>
 <h4 id="meta"><a class="header" href="#meta">meta</a></h4>
 <p>Add a <code>meta</code> key and data to the wrapped output (requires the <code>root</code> option).</p>
-<p><em>Scope:</em> Blueprint, view, partial, render</p>
-<p><em>Context object fields</em>: <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>store</code>, <code>instances</code></p>
+<blockquote>
+<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
+<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#result-context">Result context</a></p>
+</blockquote>
 <pre><code class="language-ruby">options[:root] = :data
 options[:meta] = { page: 1 }
 
@@ -776,11 +811,10 @@ end
 <h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
 <p>Hooks are called in the following order. Most are passed a <a href="api/./context-objects.html">context object</a> as an argument.</p>
 <ul>
-<li><a href="api/extensions.html#collection">collection?</a></li>
-<li><a href="api/extensions.html#around">around</a>
+<li><a href="api/extensions.html#around_object_render">around_object_render</a> | <a href="api/extensions.html#around_collection_render">around_collection_render</a>
 <ul>
 <li><a href="api/extensions.html#input_object">input_object</a> | <a href="api/extensions.html#input_collection">input_collection</a></li>
-<li><a href="api/extensions.html#around_object">around_object</a> | <a href="api/extensions.html#around_collection">around_collection</a>
+<li><a href="api/extensions.html#around_object_serialization">around_object_serialization</a> | <a href="api/extensions.html#around_collection_serialization">around_collection_serialization</a>
 <ul>
 <li><a href="api/extensions.html#prepare">prepare</a></li>
 <li><a href="api/extensions.html#blueprint_fields">blueprint_fields</a></li>
@@ -796,24 +830,25 @@ end
 </li>
 </ul>
 <p>Additionally, the <a href="api/extensions.html#around_hook">around_hook</a> hook runs around all other hooks.</p>
-<h2 id="collection"><a class="header" href="#collection">collection?</a></h2>
+<h2 id="around_object_render"><a class="header" href="#around_object_render">around_object_render</a></h2>
 <blockquote>
-<p><strong>@param Object</strong> The object passed to <code>render</code><br />
-<strong>@return Boolean</strong> Whether the object is a collection or a single item<br />
-<strong>@cost</strong> Low - run exactly once per render (not called for <code>render_object</code> or <code>render_collection</code>)</p>
-</blockquote>
-<p>If any extension with this hook returns <code>true</code>, the object will be considered a collection and rendered as such. For example, the <a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> extension uses this hook to indicate that an <code>ActiveRecord::Relation</code> should be considered a collection.</p>
-<pre><code class="language-ruby">def collection?(object)
-  object.is_a? ArrayLikeThing
-end
-</code></pre>
-<h2 id="around"><a class="header" href="#around">around</a></h2>
-<blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
-<p>Wraps the entire rendering process. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around(ctx)
+<p>Wraps the entire rendering process of objects. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around_object_render(ctx)
+  # do something before render
+  yield # render
+  # do something after render
+end
+</code></pre>
+<h2 id="around_collection_render"><a class="header" href="#around_collection_render">around_collection_render</a></h2>
+<blockquote>
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level collection being rendered<br />
+<strong>@cost</strong> Low - run exactly once per render</p>
+</blockquote>
+<p>Wraps the entire rendering process of collections. Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
+<pre><code class="language-ruby">def around_collection_render(ctx)
   # do something before render
   yield # render
   # do something after render
@@ -821,7 +856,7 @@ end
 </code></pre>
 <h2 id="input_object"><a class="header" href="#input_object">input_object</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
@@ -832,7 +867,7 @@ end
 </code></pre>
 <h2 id="input_collection"><a class="header" href="#input_collection">input_collection</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level collection being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
 <strong>@cost</strong> Low - run exactly once per render</p>
 </blockquote>
@@ -841,27 +876,27 @@ end
   ctx.object
 end
 </code></pre>
-<h2 id="around_object"><a class="header" href="#around_object">around_object</a></h2>
+<h2 id="around_object_serialization"><a class="header" href="#around_object_serialization">around_object_serialization</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
 <p>Wraps the rendering of every object (<code>context.object</code>). This could be the top-level object or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_object(ctx)
+<pre><code class="language-ruby">def around_object_serialization(ctx)
   # do something before render
   yield # render
   # do something after render
 end
 </code></pre>
-<h2 id="around_collection"><a class="header" href="#around_collection">around_collection</a></h2>
+<h2 id="around_collection_serialization"><a class="header" href="#around_collection_serialization">around_collection_serialization</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current collection being rendered<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
 <p>Wraps the rendering of every collection (<code>context.object</code>). This could be the top-level collection or one from an association N levels deep.</p>
 <p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_collection(ctx)
+<pre><code class="language-ruby">def around_collection_serialization(ctx)
   # do something before render
   yield # render
   # do something after render
@@ -869,7 +904,7 @@ end
 </code></pre>
 <h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
@@ -881,8 +916,7 @@ end
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
-<strong>@return Array&lt;Field | ObjectField | Collection&gt;</strong> The fields you want to render in the order you want to render them<br />
+<p><strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
@@ -895,7 +929,7 @@ end
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
@@ -906,7 +940,7 @@ end
 </code></pre>
 <h2 id="field_value"><a class="header" href="#field_value">field_value</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Object</strong> The value to be rendered<br />
 <strong>@cost</strong> High - run for every field (not object or collection fields)</p>
 </blockquote>
@@ -920,7 +954,8 @@ end
 </code></pre>
 <h2 id="object_value"><a class="header" href="#object_value">object_value</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Object</strong> The object to be rendered for this field<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
@@ -931,7 +966,7 @@ end
 </code></pre>
 <h2 id="collection_value"><a class="header" href="#collection_value">collection_value</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Object</strong> The array-like collection to be rendered for this field<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
@@ -942,7 +977,7 @@ end
 </code></pre>
 <h2 id="exclude_field"><a class="header" href="#exclude_field">exclude_field?</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
 <strong>@cost</strong> High - run for every field (not object or collection fields)</p>
 </blockquote>
@@ -953,7 +988,7 @@ end
 </code></pre>
 <h2 id="exclude_object"><a class="header" href="#exclude_object">exclude_object?</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
@@ -964,7 +999,7 @@ end
 </code></pre>
 <h2 id="exclude_collection"><a class="header" href="#exclude_collection">exclude_collection?</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
@@ -975,56 +1010,57 @@ end
 </code></pre>
 <h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the current blueprint, and <code>context.object</code> the current object<br />
 <strong>@return Hash</strong> The Hash to use as this blueprint's serialized output<br />
 <strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.value in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
+<p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.result</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.result in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
 <pre><code class="language-ruby">def blueprint_output(ctx)
-  ctx.value.merge({ extra: "data" })
+  ctx.result.merge({ extra: "data" })
 end
 </code></pre>
 <h2 id="output_object"><a class="header" href="#output_object">output_object</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the top-level blueprint, and <code>context.object</code> the top-level object<br />
 <strong>@return Hash</strong> The Hash to use as the final serialized output<br />
 <strong>@cost</strong> Low - run once per <code>render</code> (for objects) or <code>render_object</code></p>
 </blockquote>
-<p>Run after the top-level object is fully serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.value</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
+<p>Run after the top-level object is fully serialized to a Hash, allowing you to modify the output. The Hash is available in <code>context.result</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
 <pre><code class="language-ruby">def output_object(ctx)
-  ctx.value.merge({ extra: "data" })
+  ctx.result.merge({ extra: "data" })
 end
 </code></pre>
 <h2 id="output_collection"><a class="header" href="#output_collection">output_collection</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized array of Hashes from the top-level blueprint, and <code>context.object</code> the top-level collection<br />
 <strong>@return Hash | Array<Hash></strong> The Hash, or array of Hashes, to use as tthe final serialized output<br />
 <strong>@cost</strong> Low - run once per <code>render</code> (for collections) or <code>render_collection</code></p>
 </blockquote>
-<p>Run after the top-level collection is fully serialized to an array of Hashes, allowing you to modify the output. The array of Hashes is available in <code>context.value</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
+<p>Run after the top-level collection is fully serialized to an array of Hashes, allowing you to modify the output. The array of Hashes is available in <code>context.result</code>. <strong>Whatever is returned will be the final serialized output.</strong></p>
 <pre><code class="language-ruby"># Wrap the output array in a Hash
 def output_collection(ctx)
   {
-    data: ctx.value,
+    data: ctx.result,
     extra: "metadata"
   }
 end
 
 # Or modify each element
 def output_collection(ctx)
-  ctx.value.map { |item| item.merge({ extra: "data" }) }
+  ctx.result.map { |item| item.merge({ extra: "data" }) }
 end
 </code></pre>
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
-<p><strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
+<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
+<strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>
 <p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the first one</em> will be used.</p>
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json(ctx)
-  JSON.dump ctx.value
+  JSON.dump ctx.result
 end
 </code></pre>
 <h2 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h2>
@@ -1170,7 +1206,7 @@ field.blueprint.reflections[:default].fields
 end
 </code></pre>
 <h2 id="custom-extractors-1"><a class="header" href="#custom-extractors-1">Custom Extractors</a></h2>
-<p>Override the <code>field</code>, <code>object</code>, or <code>collection</code> methods as needed. They'll be passed a <a href="api/./context-objects.html">context object</a> with the following fields populated: <code>blueprint</code>, <code>field</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code>.</p>
+<p>Override the <code>field</code>, <code>object</code>, or <code>collection</code> methods as needed. They'll be passed a <a href="api/./context-objects.html#field-context">Field context object</a>.</p>
 <p>Note that a new version of your extractor will be initialized for each render, so it's safe to store state inside.</p>
 <pre><code class="language-ruby">class WeirdObjectExtractor &lt; Blueprinter::Extractor
   def object(ctx)
@@ -1181,27 +1217,56 @@ end
 <p>To use your extractor, pass it to the <a href="api/../dsl/options.html#extractor">extractor option</a> in your blueprint, view, or field.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="context-objects-1"><a class="header" href="#context-objects-1">Context Objects</a></h1>
 <p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a>, <a href="api/./extensions.html">extension hooks</a>, and <a href="api/./extractors.html">extractors</a>. They contain the current blueprint, the object being rendered, and more (depending on the specific API).</p>
-<h3 id="blueprint"><a class="header" href="#blueprint">blueprint</a></h3>
-<p>The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
-<p><em>Present</em>: Always</p>
-<h3 id="field"><a class="header" href="#field">field</a></h3>
-<p>A struct of the field, object, or collection being rendered. You can use this to access the field's name and options. See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs.</p>
-<p><em>Present</em>: In field blocks, option procs, extractors, and certain extension hooks</p>
-<h3 id="value"><a class="header" href="#value">value</a></h3>
-<p>Depending on the API, this will be either the extracted value of the current field, or the entire output of the current Blueprint.</p>
-<p><em>Present</em>: Certain option procs and extension hooks</p>
-<h3 id="object"><a class="header" href="#object">object</a></h3>
-<p>The object currently being rendered.</p>
-<p><em>Present</em>: Always</p>
-<h3 id="options-2"><a class="header" href="#options-2">options</a></h3>
-<p>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
-<p><em>Present</em>: Always</p>
-<h3 id="store"><a class="header" href="#store">store</a></h3>
-<p>A Hash for extensions to cache data in. Note that Blueprinter uses this store internally, so be careful not to overwrite Blueprinter's keys (they're all object ids).</p>
-<p><em>Present</em>: Always</p>
-<h3 id="instances"><a class="header" href="#instances">instances</a></h3>
-<p>A Hash-like interface for creating/fetching class instances. This allows Blueprinter to reuse the same blueprint and extractor instances during a render. You're free to use it, too. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
-<p><em>Present</em>: Always</p>
+<h2 id="render-context"><a class="header" href="#render-context">Render Context</a></h2>
+<p>Only the <a href="api/context-objects.html#common-fields">common fields</a> exist in the render context.</p>
+<h2 id="object-context"><a class="header" href="#object-context">Object Context</a></h2>
+<p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
+<blockquote>
+<p><strong>object</strong><br />
+The object or collection currently being serialized.</p>
+</blockquote>
+<h2 id="field-context"><a class="header" href="#field-context">Field Context</a></h2>
+<p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
+<blockquote>
+<p><strong>object</strong><br />
+The object currently being serialized.</p>
+</blockquote>
+<blockquote>
+<p><strong>field</strong><br />
+A struct of the field, object, or collection currently being rendered. You can use this to access the field's name and options. See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs.</p>
+</blockquote>
+<blockquote>
+<p><strong>value</strong><br />
+The extracted field value. (In certain situations, like the extractor API and field blocks, it will always be <code>nil</code> since nothing has been extracted yet.)</p>
+</blockquote>
+<h2 id="result-context"><a class="header" href="#result-context">Result Context</a></h2>
+<p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
+<blockquote>
+<p><strong>object</strong><br />
+The object or collection that was just serialized.</p>
+</blockquote>
+<blockquote>
+<p><strong>result</strong><br />
+A serialized result. Depending on the situation this will be a Hash or an array of Hashes.</p>
+</blockquote>
+<h2 id="common-fields"><a class="header" href="#common-fields">Common fields</a></h2>
+<p>These fields exist on all context objects:</p>
+<blockquote>
+<p><strong>blueprint</strong><br />
+The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>options</strong><br />
+The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+</blockquote>
+<blockquote>
+<p><strong>store</strong><br />
+A Hash for extensions to cache data in. Note that Blueprinter uses this store internally, and any extension may use it, so don't blow away existing keys.</p>
+</blockquote>
+<blockquote>
+<p><strong>instances</strong><br />
+A Hash-like interface for creating/fetching class instances. This allows Blueprinter to reuse the same blueprint and extractor instances during a render. You're free to use it, too. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
 <p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#incremental-update">incremental update</a>.</p>
 <p>Regardless which you choose, you'll need to familiarize yourself with the <a href="upgrading/../dsl/index.html">new DSL</a> and <a href="upgrading/../api/index.html">API</a>. The rest of this section will focus on the differences between V1 and V2.</p>

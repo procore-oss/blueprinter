@@ -447,120 +447,104 @@ WidgetBlueprint.render(widget, exclude_if_empty: false).to_json
 <h4 id="default"><a class="header" href="#default">default</a></h4>
 <p>A default value used when the field or assocation is nil.</p>
 <blockquote>
-<p><strong>Availability</strong>: Field, object, collection<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in field, object, collection</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">field :foo, default: "Foo"
 field :foo, default: -&gt;(ctx) { "Foo" }
 field :foo, default: :foo
 
-def foo(ctx)
-  "Foo"
-end
+def foo(ctx) = "Foo"
 </code></pre>
 <h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
 <p>Default value for any nil non-association field in its scope.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:field_default] = "Foo"
 options[:field_default] = -&gt;(ctx) { "Foo" }
 options[:field_default] = :foo
 
-def foo(ctx)
-  "Foo"
-end
+def foo(ctx) = "Foo"
 
 WidgetBluerpint.render(widget, field_default: "Foo").to_json
 </code></pre>
 <h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
 <p>Default value for any nil object field in its scope.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
 options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
 options[:object_default] = :foo
 
-def foo(ctx)
-  { name: "Foo" }
-end
+def foo(ctx) = { name: "Foo" }
 
 WidgetBluerpint.render(widget, object_default: { name: "Foo" }).to_json
 </code></pre>
 <h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
 <p>Default value for any nil collection field.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
 options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
 options[:collection_default] = :foo
 
-def foo(ctx)
-  [{ name: "Foo" }]
-end
+def foo(ctx) = [{ name: "Foo" }]
 
 WidgetBluerpint.render(widget, collection_default: [{ name: "Foo" }]).to_json
 </code></pre>
 <h4 id="default_if"><a class="header" href="#default_if">default_if</a></h4>
 <p>Use the default value if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><strong>Availability</strong>: Field, object, collection<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in field, object, collection</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">field :foo, default: "Foo", default_if: -&gt;(ctx) { ctx.object.disabled? }
 field :foo, default: "Foo", default_if: :disabled?
 
-def disabled?(ctx)
-  ctx.object.disabled?
-end
+def disabled?(ctx) = ctx.object.disabled?
 </code></pre>
 <h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
 <p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any non-association field in scope.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:field_default_if] = :disabled?
 
-def disabled?(ctx)
-  ctx.object.disabled?
-end
+def disabled?(ctx) = ctx.object.disabled?
 
 WidgetBluerpint.render(widget, field_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
 <p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any object field in scope.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:object_default_if] = :disabled?
 
-def disabled?(ctx)
-  ctx.object.disabled?
-end
+def disabled?(ctx) = ctx.object.disabled?
 
 WidgetBluerpint.render(widget, object_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
 <p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any collection field in scope.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:collection_default_if] = :disabled?
 
-def disabled?(ctx)
-  ctx.object.disabled?
-end
+def disabled?(ctx) = ctx.object.disabled?
 
 WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
 </code></pre>
@@ -569,7 +553,7 @@ WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
 <h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
 <p>Exclude fields if they're nil.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, field, object, collection, render</p>
+<p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
 </blockquote>
 <pre><code class="language-ruby">options[:exclude_if_nil] = true
 
@@ -580,7 +564,7 @@ WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
 <h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
 <p>Exclude fields if they're nil, or if they respond to <code>empty?</code> and it returns true.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, field, object, collection, render</p>
+<p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
 </blockquote>
 <pre><code class="language-ruby">options[:exclude_if_empty] = true
 
@@ -591,58 +575,50 @@ WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
 <h4 id="if"><a class="header" href="#if">if</a></h4>
 <p>Only include the field if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><strong>Availability</strong>: Field, object, collection<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in field, object, collection</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">field :foo, if: -&gt;(ctx) { ctx.object.enabled? }
 field :foo, if: :enabled?
 
-def enabled?(ctx)
-  ctx.object.enabled?
-end
+def enabled?(ctx) = ctx.object.enabled?
 </code></pre>
 <h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
 <p>Only include non-association fields if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:field_if] = :enabled?
 
-def enabled?(ctx)
-  ctx.object.enabled?
-end
+def enabled?(ctx) = ctx.object.enabled?
 
 WidgetBluerpint.render(widget, field_if: :enabled?).to_json
 </code></pre>
 <h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
 <p>Only include object fields if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:object_if] = :enabled?
 
-def enabled?(ctx)
-  ctx.object.enabled?
-end
+def enabled?(ctx) = ctx.object.enabled?
 
 WidgetBluerpint.render(widget, object_if: :enabled?).to_json
 </code></pre>
 <h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
 <p>Only include collection fields if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:collection_if] = :enabled?
 
-def enabled?(ctx)
-  ctx.object.enabled?
-end
+def enabled?(ctx) = ctx.object.enabled?
 
 WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 </code></pre>
@@ -659,14 +635,14 @@ WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 <h4 id="from"><a class="header" href="#from">from</a></h4>
 <p>Populate the field using a method/Hash key other than the field name.</p>
 <blockquote>
-<p><strong>Availability</strong>: Field, object, collection</p>
+<p><em>Available in field, object, collection</em></p>
 </blockquote>
 <pre><code class="language-ruby">field :desc, from: :description
 </code></pre>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
 <p>Pass a <a href="dsl/../api/extractors.html">custom extractor</a> class.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, field, object, collection</p>
+<p><em>Available in blueprint, view, partial, field, object, collection</em></p>
 </blockquote>
 <pre><code class="language-ruby">options[:extractor] = MyCustomExtractor
 
@@ -677,7 +653,7 @@ object :category, CategoryBlueprint, extractor: MyCategoryExtractor
 <h4 id="root"><a class="header" href="#root">root</a></h4>
 <p>Pass a root key to wrap the output.</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render</p>
+<p><em>Available in blueprint, view, partial, render</em></p>
 </blockquote>
 <pre><code class="language-ruby">options[:root] = :data
 
@@ -686,8 +662,8 @@ WidgetBlueprint.render(widget, root: :data).to_json
 <h4 id="meta"><a class="header" href="#meta">meta</a></h4>
 <p>Add a <code>meta</code> key and data to the wrapped output (requires the <code>root</code> option).</p>
 <blockquote>
-<p><strong>Availability</strong>: Blueprint, view, partial, render<br />
-<strong>Argument</strong>: <a href="dsl/../api/context-objects.html#result-context">Result context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br />
+<strong>@param</strong> <a href="dsl/../api/context-objects.html#result-context">Result context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:root] = :data
 options[:meta] = { page: 1 }
@@ -955,7 +931,6 @@ end
 <h2 id="object_value"><a class="header" href="#object_value">object_value</a></h2>
 <blockquote>
 <p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Object</strong> The object to be rendered for this field<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
@@ -1053,11 +1028,10 @@ end
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
 <p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
-<strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>
-<p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the first one</em> will be used.</p>
+<p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json(ctx)
   JSON.dump ctx.result

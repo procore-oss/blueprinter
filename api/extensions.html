@@ -321,7 +321,6 @@ end
 <h2 id="object_value"><a class="header" href="#object_value">object_value</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@param Context</strong> Fields <code>blueprint</code>, <code>field</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return Object</strong> The object to be rendered for this field<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
@@ -419,11 +418,10 @@ end
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
-<strong>@param Context</strong> Fields <code>blueprint</code>, <code>value</code>, <code>object</code>, <code>options</code>, <code>instances</code>, <code>store</code><br />
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>
-<p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the first one</em> will be used.</p>
+<p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json(ctx)
   JSON.dump ctx.result

@@ -192,7 +192,7 @@ end
 extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new(pretty: true)
 
 # You can also pass MultiJson.dump options during render
-WidgetBlueprint.render(widget, multi_json: { pretty: true })
+WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 </code></pre>
 <p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="../api/extensions.html#json">json extension hook</a> to render JSON however you like.</p>
 <h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>

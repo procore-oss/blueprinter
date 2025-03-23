@@ -156,7 +156,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="reflection"><a class="header" href="#reflection">Reflection</a></h1>
-<p>Blueprints may be reflected on to inspect their views, fields, and associations. This is useful for building <a href="./extensions.html">extensions</a>, and possibly even for some applications.</p>
+<p>Blueprints may be reflected on to inspect their views, fields, and options. This is useful for building <a href="./extensions.html">extensions</a>, and possibly even for some applications.</p>
 <p>We will use the following blueprint in the examples below:</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
@@ -191,6 +191,13 @@ WidgetBlueprint["extended.with_price"].blueprint_name
 
 WidgetBlueprint["extended.with_price"].view_name
 =&gt; :"extended.with_price"
+</code></pre>
+<h2 id="blueprint--view-options"><a class="header" href="#blueprint--view-options">Blueprint &amp; view options</a></h2>
+<pre><code class="language-ruby">WidgetBlueprint.options
+=&gt; {exclude_if_nil: true}
+
+WidgetBlueprint[:extended].options
+=&gt; {exclude_if_nil: true, exclude_if_empty: true}
 </code></pre>
 <h2 id="views"><a class="header" href="#views">Views</a></h2>
 <p>Here, <code>:default</code> refers to the top level of the blueprint.</p>

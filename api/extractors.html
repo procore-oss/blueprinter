@@ -170,14 +170,10 @@
   end
 
   # For object fields
-  def object(ctx)
-    field ctx
-  end
+  def object(ctx) = field ctx
 
   # For collection fields
-  def collection(ctx)
-    field ctx
-  end
+  def collection(ctx) = field ctx
 end
 </code></pre>
 <h2 id="custom-extractors"><a class="header" href="#custom-extractors">Custom Extractors</a></h2>

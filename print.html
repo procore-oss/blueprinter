@@ -686,7 +686,7 @@ WidgetBlueprint
 
   # Or define them inline
   extension do
-    def blueprint_output(ctx) = ctx.value.merge({ foo: "Foo" })
+    def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
   end
 
   view :minimal do
@@ -717,6 +717,7 @@ WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 <p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="dsl/../api/extensions.html#json">json extension hook</a> to render JSON however you like.</p>
 <h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>
 <p>Enable the OpenTelemetry extension to see what's happening while you render your blueprints. One outer <code>blueprinter.render</code> span will nest various <code>blueprinter.object</code> and <code>blueprinter.collection</code> spans. Each span will include the blueprint/view name that triggered it.</p>
+<p>Extension hooks will be wrapped in <code>blueprinter.extension</code> spans and annotated with the current extension and hook name.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
 </code></pre>
 <h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
@@ -727,7 +728,7 @@ WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 <h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
 </code></pre>
-<p>You may omit <code>.to_json</code> if you're calling <code>render json:</code> in a Rails controller:</p>
+<p>If you're using Rails, you may omit <code>.to_json</code> when calling <code>render json:</code></p>
 <pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
 </code></pre>
 <p>Ruby's built-in <code>JSON</code> library is used by default. Alternatively, you can use the built-in <a href="./dsl/extensions.html#multijson">MultiJson extension</a>. Or for total control, implement the <a href="./api/extensions.html#json">json extension hook</a> and call any serializer you like.</p>
@@ -744,6 +745,10 @@ WidgetBlueprint["extended.price"].render(widget).to_json
 # These two both render the default view
 WidgetBlueprint.render(widget).to_json
 WidgetBlueprint[:default].render(widget).to_json
+</code></pre>
+<h3 id="passing-options"><a class="header" href="#passing-options">Passing options</a></h3>
+<p>An options hash can be passed to <code>render</code>. Read more about <a href="./dsl/options.html">options</a>.</p>
+<pre><code class="language-ruby">WidgetBlueprint.render(Widget.all, exclude_if_nil: true).to_json
 </code></pre>
 <h3 id="rendering-collections"><a class="header" href="#rendering-collections">Rendering collections</a></h3>
 <p><code>render</code> will treat any <code>Enumerable</code>, except <code>Hash</code>, as an array of objects:</p>

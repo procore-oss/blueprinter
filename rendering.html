@@ -159,7 +159,7 @@
 <h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
 </code></pre>
-<p>You may omit <code>.to_json</code> if you're calling <code>render json:</code> in a Rails controller:</p>
+<p>If you're using Rails, you may omit <code>.to_json</code> when calling <code>render json:</code></p>
 <pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
 </code></pre>
 <p>Ruby's built-in <code>JSON</code> library is used by default. Alternatively, you can use the built-in <a href="./dsl/extensions.html#multijson">MultiJson extension</a>. Or for total control, implement the <a href="./api/extensions.html#json">json extension hook</a> and call any serializer you like.</p>
@@ -176,6 +176,10 @@ WidgetBlueprint["extended.price"].render(widget).to_json
 # These two both render the default view
 WidgetBlueprint.render(widget).to_json
 WidgetBlueprint[:default].render(widget).to_json
+</code></pre>
+<h3 id="passing-options"><a class="header" href="#passing-options">Passing options</a></h3>
+<p>An options hash can be passed to <code>render</code>. Read more about <a href="./dsl/options.html">options</a>.</p>
+<pre><code class="language-ruby">WidgetBlueprint.render(Widget.all, exclude_if_nil: true).to_json
 </code></pre>
 <h3 id="rendering-collections"><a class="header" href="#rendering-collections">Rendering collections</a></h3>
 <p><code>render</code> will treat any <code>Enumerable</code>, except <code>Hash</code>, as an array of objects:</p>

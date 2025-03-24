@@ -166,7 +166,7 @@
 
   # Or define them inline
   extension do
-    def blueprint_output(ctx) = ctx.value.merge({ foo: "Foo" })
+    def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
   end
 
   view :minimal do
@@ -197,6 +197,7 @@ WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 <p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="../api/extensions.html#json">json extension hook</a> to render JSON however you like.</p>
 <h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>
 <p>Enable the OpenTelemetry extension to see what's happening while you render your blueprints. One outer <code>blueprinter.render</code> span will nest various <code>blueprinter.object</code> and <code>blueprinter.collection</code> spans. Each span will include the blueprint/view name that triggered it.</p>
+<p>Extension hooks will be wrapped in <code>blueprinter.extension</code> spans and annotated with the current extension and hook name.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
 </code></pre>
 <h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>

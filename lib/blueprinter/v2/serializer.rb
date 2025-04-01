@@ -11,18 +11,15 @@ module Blueprinter
     # NOTE: Each Blueprint gets a *single* Serializer instance that will live for the duration of the application.
     #
     class Serializer
-      attr_reader :blueprint, :formatter, :hooks
+      attr_reader :blueprint, :formatter, :hooks, :values, :cond
 
       def initialize(blueprint)
-        @hooks = Hooks.new([
-          Extensions::Core::Prelude.new,
-          Extensions::Core::Values.new,
-          Extensions::Core::Conditionals.new,
-          *blueprint.extensions,
-          Extensions::Core::Postlude.new
-        ])
+        @hooks = Hooks.new([Extensions::Core::Prelude.new, *blueprint.extensions, Extensions::Core::Postlude.new])
         @formatter = Formatter.new(blueprint)
         @blueprint = blueprint
+        # "Unroll" these hooks for a significant speed boost
+        @values = Extensions::Core::Values.new
+        @cond = Extensions::Core::Conditionals.new
         find_used_hooks!
       end
 
@@ -85,14 +82,16 @@ module Blueprinter
 
           case field
           when Field
-            hooks.reduce_into(:field_value, ctx, :value)
+            ctx.value = values.field_value ctx
+            hooks.reduce_into(:field_value, ctx, :value) if @run_field_value
             ctx.value = formatter.call(ctx)
-            next if hooks.any?(:exclude_field?, ctx)
+            next if cond.exclude_field?(ctx) || (@run_exclude_field && hooks.any?(:exclude_field?, ctx))
 
             acc[field.name] = ctx.value
           when ObjectField
-            hooks.reduce_into(:object_value, ctx, :value)
-            next if hooks.any?(:exclude_object?, ctx)
+            ctx.value = values.object_value ctx
+            hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
+            next if cond.exclude_object?(ctx) || (@run_exclude_object && hooks.any?(:exclude_object?, ctx))
 
             if ctx.value
               ctx.value =
@@ -104,8 +103,9 @@ module Blueprinter
             end
             acc[field.name] = ctx.value
           when Collection
-            hooks.reduce_into(:collection_value, ctx, :value)
-            next if hooks.any?(:exclude_collection?, ctx)
+            ctx.value = values.collection_value ctx
+            hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
+            next if cond.exclude_collection?(ctx) || (@run_exclude_collection && hooks.any?(:exclude_collection?, ctx))
 
             if ctx.value
               ctx.value =
@@ -132,7 +132,9 @@ module Blueprinter
       # Allow extensions to do time-saving prep work on the current context
       def prepare!(options, instances, store)
         ctx = Context::Render.new(instances[blueprint], options, instances, store)
-        hooks.run(:prepare, ctx)
+        values.prepare ctx
+        cond.prepare ctx
+        hooks.run(:prepare, ctx) if @run_prepare
         hooks.last(:blueprint_fields, ctx).freeze
       end
 
@@ -140,8 +142,15 @@ module Blueprinter
       def find_used_hooks!
         @run_around_object = hooks.registered? :around_object_serialization
         @run_around_collection = hooks.registered? :around_collection_serialization
+        @run_prepare = hooks.registered? :prepare
         @run_blueprint_input = hooks.registered? :blueprint_input
         @run_blueprint_output = hooks.registered? :blueprint_output
+        @run_field_value = hooks.registered? :field_value
+        @run_object_value = hooks.registered? :object_value
+        @run_collection_value = hooks.registered? :collection_value
+        @run_exclude_field = hooks.registered? :exclude_field?
+        @run_exclude_object = hooks.registered? :exclude_object?
+        @run_exclude_collection = hooks.registered? :exclude_collection?
       end
     end
   end

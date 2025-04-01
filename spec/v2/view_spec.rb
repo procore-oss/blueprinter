@@ -91,5 +91,15 @@ describe "Blueprinter::V2 Views" do
       end
       expect(bp2.reflections[:foo].fields.keys.sort).to eq %i(description id name)
     end
+
+    it "can be extended" do
+      bp1 = Class.new(Blueprinter::V2::Base) do
+        view(:foo) { fields :id, :name }
+      end
+      bp2 = Class.new(bp1) do
+        view(:foo) { field :description }
+      end
+      expect(bp2.reflections[:foo].fields.keys.sort).to eq %i(description id name)
+    end
   end
 end

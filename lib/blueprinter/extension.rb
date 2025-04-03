@@ -59,55 +59,66 @@ module Blueprinter
     # around_collection_render: Runs around the entire rendering process for a collection. MUST yield!
     # @param context [Blueprinter::V2::Context::Object]
 
-    # around_object_serialization: Runs around serialization of a Blueprint object. Surrounds the `prepare` through `blueprint_output` hooks. MUST yield!
+    # around_object_serialization: Runs around serialization of a Blueprint object. Surrounds the `prepare` through
+    # `blueprint_output` hooks. MUST yield!
     # @param context [Blueprinter::V2::Context::Object]
 
-    # around_collection_serialization: Runs around serialization of a Blueprint collection. Surrounds the `prepare` through `blueprint_output` hooks. MUST yield!
+    # around_collection_serialization: Runs around serialization of a Blueprint collection. Surrounds the `prepare` through
+    # `blueprint_output` hooks. MUST yield!
     # @param context [Blueprinter::V2::Context::Object]
 
     # prepare: Called once per blueprint per render. A common use is to pre-calculate certain options
     # and cache them in context.data, so we don't have to recalculate them for every field.
     # @param context [Blueprinter::V2::Context::Render]
 
-    # blueprint_fields: Returns the fields that should be included in the correct order. Default is all fields in the order in which they were defined.
+    # blueprint_fields: Returns the fields that should be included in the correct order. Default is all fields in the order
+    # in which they were defined.
     # NOTE Only runs once per Blueprint per render.
     # @param context [Blueprinter::V2::Context::Render]
     # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
 
-    # input_object: Modify or replace the object passed to render/render_object. The returned object is what will be rendered.
+    # input_object: Modify or replace the object passed to render/render_object. The returned object is what will be
+    # rendered.
     # @param context [Blueprinter::V2::Context::Object]
     # @return [Object]
 
-    # input_collection: Modify or replace the collection passed to render/render_collection. The returned collection is what will be rendered.
+    # input_collection: Modify or replace the collection passed to render/render_collection. The returned collection is what
+    # will be rendered.
     # @param context [Blueprinter::V2::Context::Object]
     # @return [Object]
 
-    # output_object: Modify or replace the object result (stored in context.value) before final render (e.g. to JSON). The returned object is what will be rendered.
+    # output_object: Modify or replace the object result (stored in context.value) before final render (e.g. to JSON). The
+    # returned object is what will be rendered.
     # @param context [Blueprinter::V2::Context::Result]
     # @return [Object]
 
-    # output_collection: Modify or replace the collection result (stored in context.value) before final render (e.g. to JSON). The returned object is what will be rendered.
+    # output_collection: Modify or replace the collection result (stored in context.value) before final render (e.g. to
+    # JSON). The returned object is what will be rendered.
     # @param context [Blueprinter::V2::Context::Result]
     # @return [Object]
 
-    # blueprint_input: Modify or replace an object right before it's serialized by a Blueprint. The returned object will be used as the input to the Blueprint.
+    # blueprint_input: Modify or replace an object right before it's serialized by a Blueprint. The returned object will be
+    # used as the input to the Blueprint.
     # @param context [Blueprinter::V2::Context::Object]
     # @return [Object]
 
-    #
-    # blueprint_output: Modify or replace the serialized output from any Blueprint. The returned object will be used as the output of the Blueprint.
+    # blueprint_output: Modify or replace the serialized output from any Blueprint. The returned object will be used as the
+    # output of the Blueprint.
     # @param context [Blueprinter::V2::Context::Result]
     # @return [Object]
 
-    # field_value: Modify or replace the value used for the field. The returned value will be run through any formatters and used as the field's value.
+    # field_value: Modify or replace the value used for the field. The returned value will be run through any formatters and
+    # used as the field's value.
     # @param context [Blueprinter::V2::Context::Field]
     # @return [Object]
 
-    # object_value: Modify or replace the value used for the object. The returned value will be used as the input for the object's Blueprint.
+    # object_value: Modify or replace the value used for the object. The returned value will be used as the input for the
+    # object's Blueprint.
     # @param context [Blueprinter::V2::Context::Field]
     # @return [Object]
 
-    # collection_value: Modify or replace the value used for the collection. The returned value will be used as the input for the collection's Blueprint.
+    # collection_value: Modify or replace the value used for the collection. The returned value will be used as the input for
+    # the collection's Blueprint.
     # @param context [Blueprinter::V2::Context::Field]
     # @return [Object]
 

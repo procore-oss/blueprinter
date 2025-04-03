@@ -10,14 +10,10 @@ module Blueprinter
       # @return [Boolean] true if object is a valid Blueprint
       # @raise [Blueprinter::Errors::InvalidBlueprint] if the object is not a valid Blueprint.
       def validate!(blueprint)
-        if valid_blueprint?(blueprint)
-          true
-        else
-          raise(
-            Errors::InvalidBlueprint,
-            "#{blueprint} is not a valid blueprint. Please ensure it subclasses Blueprinter::Base or is a Proc."
-          )
-        end
+        valid_blueprint?(blueprint) || raise(
+          Errors::InvalidBlueprint,
+          "#{blueprint} is not a valid blueprint. Please ensure it subclasses Blueprinter::Base or is a Proc."
+        )
       end
 
       private

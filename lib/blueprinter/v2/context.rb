@@ -12,7 +12,8 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during a render
+      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
+      # a render
       # @!attribute [r] store
       #   @return [Hash] A Hash for extensions, etc to cache render data in
       #
@@ -26,7 +27,8 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during a render
+      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
+      # a render
       # @!attribute [r] store
       #   @return [Hash] A Hash for extensions, etc to cache render data in
       # @!attribute [r] object
@@ -42,13 +44,15 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during a render
+      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
+      # a render
       # @!attribute [r] store
       #   @return [Hash] A Hash for extensions, etc to cache render data in
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] field
-      #   @return [Blueprinter::V2::Field|Blueprinter::V2::ObjectField|Blueprinter::V2::Collection] The field that's currently being evaluated
+      #   @return [Blueprinter::V2::Field|Blueprinter::V2::ObjectField|Blueprinter::V2::Collection] The field that's
+      # currently being evaluated
       # @!attribute [r] value
       #   @return [Object] The extracted field value
       #
@@ -62,7 +66,8 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during a render
+      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
+      # a render
       # @!attribute [r] store
       #   @return [Hash] A Hash for extensions, etc to cache render data in
       # @!attribute [r] object

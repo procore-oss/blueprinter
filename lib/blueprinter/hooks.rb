@@ -74,7 +74,7 @@ module Blueprinter
     # @param initial_value [Object] The starting value for the block
     # @return [Object] The last hook's return value
     #
-    def reduce(hook, initial_value)
+    def reduce_hook(hook, initial_value)
       @hooks.fetch(hook).reduce(initial_value) do |val, ext|
         args = yield val
         args.is_a?(Array) ? call(ext, hook, *args) : call(ext, hook, args)
@@ -110,8 +110,14 @@ module Blueprinter
       @hooks.fetch(hook).reverse.reduce(-> { result = yield }) do |f, ext|
         proc do
           yields = 0
-          call(ext, hook, *args) { yields += 1; f.call }
-          raise BlueprinterError, "Extension hook '#{ext.class.name}##{hook}' should have yielded 1 time, but yielded #{yields} times" if yields != 1
+          call(ext, hook, *args) do
+            yields += 1
+            f.call
+          end
+          if yields != 1
+            msg = "Extension hook '#{ext.class.name}##{hook}' should have yielded 1 time, but yielded #{yields} times"
+            raise BlueprinterError, msg
+          end
         end
       end.call
       result
@@ -119,11 +125,11 @@ module Blueprinter
 
     private
 
-    def call(ext, hook, *args, &block)
-      return ext.public_send(hook, *args, &block) if !registered?(:around_hook) || ext.hidden? || hook == :around_hook
+    def call(ext, hook, ...)
+      return ext.public_send(hook, ...) if !registered?(:around_hook) || ext.hidden? || hook == :around_hook
 
       around(:around_hook, ext, hook) do
-        ext.public_send(hook, *args, &block)
+        ext.public_send(hook, ...)
       end
     end
   end

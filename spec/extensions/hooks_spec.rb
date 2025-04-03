@@ -113,25 +113,25 @@ describe Blueprinter::Hooks do
     end
   end
 
-  context '#reduce' do
+  context '#reduce_hook' do
     it 'returns the final value' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = result_ctx.new(blueprint.new, {}, instances, {}, object, { name: 'Foo', n: 0 })
-      result = hooks.reduce(:output_object, ctx.result) { |val| ctx.result = val; ctx }
+      result = hooks.reduce_hook(:output_object, ctx.result) { |val| ctx.result = val; ctx }
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
     it 'expands a returned array into args' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = result_ctx.new(blueprint.new, {}, instances, {}, object, { name: 'Foo', n: 0 })
-      result = hooks.reduce(:output_object, ctx.result) { |val| ctx.result = val; [ctx] }
+      result = hooks.reduce_hook(:output_object, ctx.result) { |val| ctx.result = val; [ctx] }
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
     it 'returns the initial value if there are no hooks' do
       hooks = described_class.new []
       ctx = result_ctx.new(blueprint.new, {}, instances, {}, object, { name: 'Foo' })
-      result = hooks.reduce(:output_object, ctx.result) { |val| ctx.result = val; ctx }
+      result = hooks.reduce_hook(:output_object, ctx.result) { |val| ctx.result = val; ctx }
       expect(result).to eq({ name: 'Foo' })
     end
   end

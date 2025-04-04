@@ -120,7 +120,7 @@ module Blueprinter
         extensions.freeze
         options.freeze
         schema.freeze
-        schema.each do |_, f|
+        schema.each_value do |f|
           f.options&.freeze
           f.freeze
         end

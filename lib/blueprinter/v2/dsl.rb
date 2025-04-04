@@ -5,7 +5,8 @@ module Blueprinter
     # Methods for defining Blueprint fields and views
     module DSL
       #
-      # Define a new child view, which is a subclass of self. If a view with this name already exists, the definition will be appended.
+      # Define a new child view, which is a subclass of self. If a view with this name already exists, the definition will be
+      # appended.
       #
       # @param name [Symbol] Name of the view
       # @param fields [Boolean] Inherit fields from parents (default true)

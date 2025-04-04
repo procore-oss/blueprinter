@@ -85,7 +85,7 @@ module Blueprinter
 
       private
 
-      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def build_view(name)
         defs = @pending[name]
         inherit_fields = defs.reduce(true) { |acc, d| d.fields.nil? ? acc : d.fields }
@@ -101,7 +101,7 @@ module Blueprinter
         defs.each { |d| view.class_eval(&d.definition) if d.definition }
         view
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     end
   end
 end

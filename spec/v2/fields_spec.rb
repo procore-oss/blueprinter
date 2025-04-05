@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
+require 'date'
+
 describe "Blueprinter::V2 Fields" do
   context "fields" do
-    it "should add fields with options" do
+    it "adds fields with options" do
       blueprint = Class.new(Blueprinter::V2::Base) do
         field :name
         field :description, from: :desc, if: -> { true }
@@ -20,7 +22,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.fields[:foo].value_proc.class.name).to eq "Proc"
     end
 
-    it 'should add multiple fields' do
+    it 'adds multiple fields' do
       blueprint = Class.new(Blueprinter::V2::Base) do
         fields :name, :description, :status
       end
@@ -28,20 +30,23 @@ describe "Blueprinter::V2 Fields" do
       ref = blueprint.reflections[:default]
       expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:name].name).to eq :name
+      expect(ref.fields[:name].from).to eq :name
       expect(ref.fields[:name].options).to eq({})
 
       expect(ref.fields[:description].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:description].name).to eq :description
+      expect(ref.fields[:description].from).to eq :description
       expect(ref.fields[:description].options).to eq({})
 
       expect(ref.fields[:status].class.name).to eq "Blueprinter::V2::Field"
       expect(ref.fields[:status].name).to eq :status
+      expect(ref.fields[:status].from).to eq :status
       expect(ref.fields[:status].options).to eq({})
     end
   end
 
   context "associations" do
-    it "should add associations with options" do
+    it "adds associations with options" do
       category_blueprint = Class.new(Blueprinter::V2::Base)
       widget_blueprint = Class.new(Blueprinter::V2::Base)
       blueprint = Class.new(Blueprinter::V2::Base) do
@@ -65,7 +70,7 @@ describe "Blueprinter::V2 Fields" do
     end
   end
 
-  it "it should inherit from parent classes" do
+  it "inherits from parent classes" do
     application_blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
     end
@@ -77,7 +82,7 @@ describe "Blueprinter::V2 Fields" do
     expect(ref.fields.keys).to eq %i(id name)
   end
 
-  it "it should inherit from parent views" do
+  it "inherits from parent views" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
@@ -96,7 +101,7 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:"extended.plus"].fields.keys.sort).to eq %i(name description foo).sort
   end
 
-  it "should exclude specified fields and associations from the parent class" do
+  it "excludes specified fields and associations from the parent class" do
     application_blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :foo
@@ -110,7 +115,7 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:default].fields.keys.sort).to eq %i(id name).sort
   end
 
-  it "should exclude specified fields and associations from the parent view" do
+  it "excludes specified fields and associations from the parent view" do
     category_blueprint = Class.new(Blueprinter::V2::Base)
     widget_blueprint = Class.new(Blueprinter::V2::Base)
     blueprint = Class.new(Blueprinter::V2::Base) do
@@ -134,7 +139,7 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:foo].collections.keys.sort).to eq %i(widgets).sort
   end
 
-  it "should exclude specified fields and associations from partials" do
+  it "excludes specified fields and associations from partials" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       partial :desc do
         field :short_desc
@@ -151,5 +156,32 @@ describe "Blueprinter::V2 Fields" do
 
     refs = blueprint.reflections
     expect(refs[:foo].fields.keys).to eq %i(name long_desc)
+  end
+
+  context 'formatters' do
+    let(:blueprint) do
+      Class.new(Blueprinter::V2::Base) do
+        def fmt_date(d)
+          d.iso8601
+        end
+      end
+    end
+
+    it 'adds a block formatter' do
+      iso8601 = ->(x, _opts) { x.iso8601 }
+      blueprint.format(Date, &iso8601)
+      expect(blueprint.formatters[Date]).to eq iso8601
+    end
+
+    it 'adds a method formatter' do
+      blueprint.format(Date, :fmt_date)
+      expect(blueprint.formatters[Date]).to eq :fmt_date
+    end
+
+    it 'are inherited' do
+      blueprint.format(Date, :fmt_date)
+      child = Class.new(blueprint)
+      expect(child.formatters[Date]).to eq :fmt_date
+    end
   end
 end

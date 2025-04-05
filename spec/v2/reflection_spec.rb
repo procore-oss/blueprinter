@@ -12,7 +12,7 @@ describe "Blueprinter::V2::Reflection" do
     end
   end
 
-  it "should find all view keys" do
+  it "finds all view keys" do
     view_names = blueprint.reflections.keys
     expect(view_names.sort).to eq %i(
       default
@@ -23,7 +23,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find all view names" do
+  it "finds all view names" do
     view_names = blueprint.reflections.values.map(&:name)
     expect(view_names.sort).to eq %i(
       default
@@ -34,7 +34,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find nested view keys" do
+  it "finds nested view keys" do
     bar_view_names = blueprint[:bar].reflections.keys
     expect(bar_view_names.sort).to eq %i(
       default
@@ -49,7 +49,7 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find nested view names" do
+  it "finds nested view names" do
     bar_view_names = blueprint[:bar].reflections.values.map(&:name)
     expect(bar_view_names.sort).to eq %i(
       default
@@ -64,25 +64,38 @@ describe "Blueprinter::V2::Reflection" do
     ).sort
   end
 
-  it "should find fields and associations" do
-    category_blueprint = Class.new(Blueprinter::V2::Base)
-    widget_blueprint = Class.new(Blueprinter::V2::Base)
-    blueprint = Class.new(Blueprinter::V2::Base) do
-      field :name
-      object :category, category_blueprint
+  context 'fields and associations' do
+    let(:category_blueprint) { Class.new(Blueprinter::V2::Base) }
+    let(:widget_blueprint) { Class.new(Blueprinter::V2::Base) }
+    let(:blueprint) do
+      test = self
+      Class.new(Blueprinter::V2::Base) do
+        field :name
+        object :category, test.category_blueprint
 
-      view :extended do
-        field :description
-        collection :widgets, widget_blueprint
+        view :extended do
+          collection :widgets, test.widget_blueprint
+          field :description
+        end
       end
     end
 
-    expect(blueprint.reflections[:default].fields.keys).to eq %i(name)
-    expect(blueprint.reflections[:default].objects.keys).to eq %i(category)
-    expect(blueprint.reflections[:default].collections.keys).to eq %i()
+    it 'are found' do
+      expect(blueprint.reflections[:default].fields.keys).to eq %i(name)
+      expect(blueprint.reflections[:default].objects.keys).to eq %i(category)
+      expect(blueprint.reflections[:default].collections.keys).to eq %i()
 
-    expect(blueprint.reflections[:extended].fields.keys).to eq %i(name description)
-    expect(blueprint.reflections[:extended].objects.keys).to eq %i(category)
-    expect(blueprint.reflections[:extended].collections.keys).to eq %i(widgets)
+      expect(blueprint.reflections[:extended].fields.keys).to eq %i(name description)
+      expect(blueprint.reflections[:extended].objects.keys).to eq %i(category)
+      expect(blueprint.reflections[:extended].collections.keys).to eq %i(widgets)
+    end
+
+    it 'are in the definition order' do
+      names = blueprint.reflections[:default].ordered.map(&:name)
+      expect(names).to eq %i(name category)
+
+      names = blueprint.reflections[:extended].ordered.map(&:name)
+      expect(names).to eq %i(name category widgets description)
+    end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 describe "Blueprinter::V2 Partials" do
-  it "should allow a partial to be used in any view" do
+  it "allows a partial to be used in any view" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
@@ -24,7 +24,23 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:bar].fields.keys.sort).to eq %i(name description).sort
   end
 
-  it "should allow use statements to be nested" do
+  it "accepts multiple partials" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+
+      view :extended do
+        use :description, :tags
+      end
+
+      partial(:description) { field :description }
+      partial(:tags) { field :tags }
+    end
+
+    refs = blueprint.reflections
+    expect(refs[:extended].fields.keys.sort).to eq %i(name description tags).sort
+  end
+
+  it "allows use statements to be nested" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       use :foo
@@ -48,7 +64,7 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:default].fields.keys.sort).to eq %i(name foo bar zorp).sort
   end
 
-  it "should allow a view to be defined in a partial" do
+  it "allows a view to be defined in a partial" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
 
@@ -76,7 +92,7 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:"bar.extended"].fields.keys.sort).to eq %i(name description long_description).sort
   end
 
-  it "should throw an error for an invalid partial name" do
+  it "throws an error for an invalid partial name" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       view :foo do
         use :description
@@ -85,7 +101,7 @@ describe "Blueprinter::V2 Partials" do
     expect { blueprint[:foo] }.to raise_error(Blueprinter::Errors::UnknownPartial)
   end
 
-  it 'should create an implicit partial for every view' do
+  it 'creates an implicit partial for every view' do
     blueprint = Class.new(Blueprinter::V2::Base) do
       view :foo do
         field :name
@@ -99,5 +115,56 @@ describe "Blueprinter::V2 Partials" do
 
     refs = blueprint.reflections
     expect(refs[:bar].fields.keys).to eq %i(name description).sort
+  end
+
+  context 'precedence' do
+    it 'partials override what the view inherits' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        field :name
+
+        view :foo do
+          use :non_empty_name
+        end
+
+        partial :non_empty_name do
+          field :name, exclude_if_empty: true
+        end
+      end
+
+      view = blueprint.reflections[:foo]
+      expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
+    end
+
+    it '`use` overrides the view' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        view :foo do
+          use :non_empty_name
+          field :name
+        end
+
+        partial :non_empty_name do
+          field :name, exclude_if_empty: true
+        end
+      end
+
+      view = blueprint.reflections[:foo]
+      expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
+    end
+
+    it '`use!` allows the view to override' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        view :foo do
+          use! :non_empty_name
+          field :name
+        end
+
+        partial :non_empty_name do
+          field :name, exclude_if_empty: true
+        end
+      end
+
+      view = blueprint.reflections[:foo]
+      expect(view.fields[:name].options).to eq({})
+    end
   end
 end

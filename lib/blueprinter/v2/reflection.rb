@@ -11,7 +11,7 @@ module Blueprinter
       #
       def reflections
         eval! unless @evaled
-        @reflections ||= flatten_children(self, :default)
+        @_reflections ||= flatten_children(self, :default)
       end
 
       # Builds a flat Hash of nested views
@@ -39,7 +39,6 @@ module Blueprinter
         attr_reader :objects
         # @return [Hash<Symbol, Blueprinter::V2::Collection>] Associations to collections defined on the view
         attr_reader :collections
-
 
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base
         # @param name [Symbol] Name of the view

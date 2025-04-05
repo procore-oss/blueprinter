@@ -67,7 +67,7 @@ module Blueprinter
 
       private
 
-      # rubocop:disable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+      # rubocop:disable Metrics/MethodLength
       def serialize(object, options, instances, store)
         if @run_blueprint_input
           ctx = Context::Object.new(instances[blueprint], options, instances, store, object)
@@ -75,49 +75,18 @@ module Blueprinter
         end
         ctx = Context::Field.new(instances[blueprint], options, instances, store, object, nil, nil)
 
-        # rubocop:disable Metrics/BlockLength
         result = ctx.store.fetch(blueprint.object_id).each_with_object({}) do |field, acc|
           ctx.field = field
           ctx.value = nil
 
           case field
           when Field
-            ctx.value = values.field_value ctx
-            hooks.reduce_into(:field_value, ctx, :value) if @run_field_value
-            ctx.value = formatter.call(ctx)
-            next if cond.exclude_field?(ctx) || (@run_exclude_field && hooks.any?(:exclude_field?, ctx))
-
-            acc[field.name] = ctx.value
+            serialize_field(ctx, acc)
           when ObjectField
-            ctx.value = values.object_value ctx
-            hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
-            next if cond.exclude_object?(ctx) || (@run_exclude_object && hooks.any?(:exclude_object?, ctx))
-
-            if ctx.value
-              ctx.value =
-                if instances[field.blueprint].is_a? V2::Base
-                  field.blueprint.serializer.object(ctx.value, options, instances, store)
-                else
-                  field.blueprint.render_as_hash(ctx.value, options.dup.merge({ v2_instances: instances, v2_store: store }))
-                end
-            end
-            acc[field.name] = ctx.value
+            serialize_object(ctx, acc)
           when Collection
-            ctx.value = values.collection_value ctx
-            hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
-            next if cond.exclude_collection?(ctx) || (@run_exclude_collection && hooks.any?(:exclude_collection?, ctx))
-
-            if ctx.value
-              ctx.value =
-                if instances[field.blueprint].is_a? V2::Base
-                  field.blueprint.serializer.collection(ctx.value, options, instances, store)
-                else
-                  field.blueprint.render_as_hash(ctx.value, options.dup.merge({ v2_instances: instances, v2_store: store }))
-                end
-            end
-            acc[field.name] = ctx.value
+            serialize_collection(ctx, acc)
           end
-          # rubocop:enable Metrics/BlockLength
         end
 
         if @run_blueprint_output
@@ -127,7 +96,54 @@ module Blueprinter
           result
         end
       end
-      # rubocop:enable Metrics/MethodLength,Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/MethodLength
+
+      def serialize_field(ctx, result)
+        ctx.value = values.field_value ctx
+        hooks.reduce_into(:field_value, ctx, :value) if @run_field_value
+        ctx.value = formatter.call(ctx)
+        return if cond.exclude_field?(ctx) || (@run_exclude_field && hooks.any?(:exclude_field?, ctx))
+
+        result[ctx.field.name] = ctx.value
+      end
+
+      def serialize_object(ctx, result)
+        field = ctx.field
+        instances = ctx.instances
+        ctx.value = values.object_value ctx
+        hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
+        return if cond.exclude_object?(ctx) || (@run_exclude_object && hooks.any?(:exclude_object?, ctx))
+
+        if ctx.value
+          ctx.value =
+            if instances[field.blueprint].is_a? V2::Base
+              field.blueprint.serializer.object(ctx.value, ctx.options, instances, ctx.store)
+            else
+              store = ctx.store
+              field.blueprint.render_as_hash(ctx.value, ctx.options.dup.merge({ v2_instances: instances, v2_store: store }))
+            end
+        end
+        result[field.name] = ctx.value
+      end
+
+      def serialize_collection(ctx, result)
+        field = ctx.field
+        instances = ctx.instances
+        ctx.value = values.collection_value ctx
+        hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
+        return if cond.exclude_collection?(ctx) || (@run_exclude_collection && hooks.any?(:exclude_collection?, ctx))
+
+        if ctx.value
+          ctx.value =
+            if instances[field.blueprint].is_a? V2::Base
+              field.blueprint.serializer.collection(ctx.value, ctx.options, instances, ctx.store)
+            else
+              store = ctx.store
+              field.blueprint.render_as_hash(ctx.value, ctx.options.dup.merge({ v2_instances: instances, v2_store: store }))
+            end
+        end
+        result[field.name] = ctx.value
+      end
 
       # Allow extensions to do time-saving prep work on the current context
       def prepare!(options, instances, store)

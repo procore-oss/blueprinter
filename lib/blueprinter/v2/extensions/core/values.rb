@@ -58,13 +58,11 @@ module Blueprinter
           def prepare_fields(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.fields.each_value do |field|
-              ctx.store[field.object_id] ||= {}
-              ctx.store[field.object_id][:extractor] =
-                ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
-              ctx.store[field.object_id][:default_if] =
+              config = (ctx.store[field.object_id] ||= {})
+              config[:extractor] = ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
+              config[:default] = ctx.options[:field_default] || field.options[:default] || bp_class.options[:field_default]
+              config[:default_if] =
                 ctx.options[:field_default_if] || field.options[:default_if] || bp_class.options[:field_default_if]
-              ctx.store[field.object_id][:default] =
-                ctx.options[:field_default] || field.options[:default] || bp_class.options[:field_default]
             end
           end
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
@@ -73,13 +71,11 @@ module Blueprinter
           def prepare_objects(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.objects.each_value do |field|
-              ctx.store[field.object_id] ||= {}
-              ctx.store[field.object_id][:extractor] =
-                ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
-              ctx.store[field.object_id][:default_if] =
+              config = (ctx.store[field.object_id] ||= {})
+              config[:extractor] = ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
+              config[:default] = ctx.options[:object_default] || field.options[:default] || bp_class.options[:object_default]
+              config[:default_if] =
                 ctx.options[:object_default_if] || field.options[:default_if] || bp_class.options[:object_default_if]
-              ctx.store[field.object_id][:default] =
-                ctx.options[:object_default] || field.options[:default] || bp_class.options[:object_default]
             end
           end
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
@@ -88,13 +84,12 @@ module Blueprinter
           def prepare_collections(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.collections.each_value do |field|
-              ctx.store[field.object_id] ||= {}
-              ctx.store[field.object_id][:extractor] =
-                ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
-              ctx.store[field.object_id][:default_if] =
-                ctx.options[:collection_default_if] || field.options[:default_if] || bp_class.options[:collection_default_if]
-              ctx.store[field.object_id][:default] =
+              config = (ctx.store[field.object_id] ||= {})
+              config[:extractor] = ctx.instances[field.options[:extractor] || bp_class.options[:extractor] || Extractor]
+              config[:default] =
                 ctx.options[:collection_default] || field.options[:default] || bp_class.options[:collection_default]
+              config[:default_if] =
+                ctx.options[:collection_default_if] || field.options[:default_if] || bp_class.options[:collection_default_if]
             end
           end
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity

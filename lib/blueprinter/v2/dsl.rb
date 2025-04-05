@@ -5,21 +5,25 @@ module Blueprinter
     # Methods for defining Blueprint fields and views
     module DSL
       #
-      # Define a new child view, which is a subclass of self.
+      # Define a new child view, which is a subclass of self. If a view with this name already exists, the definition will be
+      # appended.
       #
       # @param name [Symbol] Name of the view
+      # @param fields [Boolean] Inherit fields from parents (default true)
+      # @param options [Boolean] Inherit options from parents (default true)
+      # @param extensions [Boolean] Inherit extensions from parents (default true)
       # @yield Define the view in the block
       #
-      def view(name, &definition)
+      def view(name, fields: nil, options: nil, extensions: nil, &definition)
         raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
         name = name.to_sym
         partials[name] = definition
-        views[name] = definition
+        views[name] = ViewBuilder::Def.new(definition:, fields:, options:, extensions:)
       end
 
       #
-      # Define a new partial.
+      # Define a new partial. If a partial with this name already exists, it will be replaced.
       #
       # @param name [Symbol] Name of the partial to create or import
       # @yield Define a new partial in the block

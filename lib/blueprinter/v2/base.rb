@@ -87,16 +87,16 @@ module Blueprinter
       end
 
       def self.render_object(obj, options = {})
-        # TODO call external renderer
+        # TODO: call external renderer
       end
 
       def self.render_collection(objs, options = {})
-        # TODO call external renderer
+        # TODO: call external renderer
       end
 
       # Apply partials and field exclusions
       # @api private
-      def self.eval!(lock = true)
+      def self.eval!(lock: true)
         return if @evaled
 
         if lock
@@ -109,9 +109,10 @@ module Blueprinter
       # @api private
       def self.run_eval!
         used_partials.each do |name|
-          if !(p = partials[name])
+          unless (p = partials[name])
             raise Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'"
           end
+
           class_eval(&p)
         end
 

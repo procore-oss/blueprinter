@@ -37,14 +37,14 @@ module Blueprinter
       #
       def [](name)
         name = name.to_sym
-        if !@views.key?(name) and @pending.key?(name)
+        if !@views.key?(name) && @pending.key?(name)
           @mut.synchronize do
             next if @views.key?(name)
 
             view = Class.new(@parent)
             view.append_name(name)
             view.class_eval(&@pending[name]) if @pending[name]
-            view.eval!(false)
+            view.eval!(lock: false)
             @views[name] = view
           end
         end

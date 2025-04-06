@@ -21,10 +21,25 @@ module Blueprinter
 
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
-      blueprint.hashify(value, view_name: view, local_options: local_options)
+      if blueprint <= V2::Base
+        extract_v2(value, blueprint, local_options, options)
+      else
+        blueprint.hashify(value, view_name: view, local_options: local_options)
+      end
     end
 
     private
+
+    def extract_v2(value, blueprint, local_options, options)
+      view = options[:view] || :default
+      store = (local_options[:v2_store] ||= {})
+      instances = (local_options[:v2_instances] ||= V2::InstanceCache.new)
+      if value.is_a?(Enumerable) && !value.is_a?(Hash)
+        blueprint[view].serializer.collection(value, local_options, instances, store)
+      else
+        blueprint[view].serializer.object(value, local_options, instances, store)
+      end
+    end
 
     def default_value(association_options)
       return association_options.fetch(:default) if association_options.key?(:default)

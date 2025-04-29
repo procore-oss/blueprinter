@@ -33,7 +33,7 @@ module Blueprinter
 
       # Initialize subclass
       def self.inherited(subclass)
-        subclass.views = ViewBuilder.new(subclass)
+        subclass.views = views.dup_for(subclass)
         subclass.schema = schema.transform_values(&:dup)
         subclass.excludes = []
         subclass.partials = partials.dup
@@ -117,6 +117,14 @@ module Blueprinter
         end
 
         excludes.each { |f| schema.delete f }
+        extensions.freeze
+        options.freeze
+        schema.freeze
+        schema.each_value do |f|
+          f.options&.freeze
+          f.freeze
+        end
+
         @evaled = true
       end
 

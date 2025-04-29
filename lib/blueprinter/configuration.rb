@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'blueprinter/extensions'
+require 'blueprinter/hooks'
 require 'blueprinter/extractors/auto_extractor'
 
 module Blueprinter
@@ -12,6 +12,7 @@ module Blueprinter
       :datetime_format,
       :default_transformers,
       :deprecations,
+      :extensions,
       :extractor_default,
       :field_default,
       :generator,
@@ -20,7 +21,6 @@ module Blueprinter
       :sort_fields_by,
       :unless
     )
-    attr_reader :extensions
 
     VALID_CALLABLES = %i[if unless].freeze
 
@@ -37,11 +37,11 @@ module Blueprinter
       @extractor_default = AutoExtractor
       @default_transformers = []
       @custom_array_like_classes = []
-      @extensions = Extensions.new
+      @extensions = []
     end
 
-    def extensions=(list)
-      @extensions = Extensions.new(list)
+    def hooks
+      @_hooks ||= Blueprinter::Hooks.new(extensions)
     end
 
     def array_like_classes

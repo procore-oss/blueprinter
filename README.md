@@ -1029,6 +1029,7 @@ Extension hooks:
 Some known extensions are:
 
 * [blueprinter-activerecord](https://github.com/procore-oss/blueprinter-activerecord)
+* [blueprinter_schema](https://github.com/thisismydesign/blueprinter_schema)
 </details>
 
 <details>

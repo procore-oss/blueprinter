@@ -122,7 +122,7 @@ module Blueprinter
       result_hash = view_collection.fields_for(view_name).each_with_object({}) do |field, hash|
         next if field.skip?(field.name, object, local_options)
 
-        value = field.extract(object, local_options)
+        value = field.extract(object, local_options.merge(view: view_name))
         next if value.nil? && field.options[:exclude_if_nil]
 
         hash[field.name] = value

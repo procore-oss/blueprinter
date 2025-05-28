@@ -80,11 +80,11 @@ module Blueprinter
           ctx.value = nil
 
           case field
-          when Field
+          when Fields::Field
             serialize_field(ctx, acc)
-          when ObjectField
+          when Fields::Object
             serialize_object(ctx, acc)
-          when Collection
+          when Fields::Collection
             serialize_collection(ctx, acc)
           end
         end

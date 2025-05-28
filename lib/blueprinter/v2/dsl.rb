@@ -93,11 +93,11 @@ module Blueprinter
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::Field]
+      # @return [Blueprinter::V2::Fields::Field]
       #
       def field(name, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Field.new(
+        schema[name] = Fields::Field.new(
           name: name,
           from: from.to_sym,
           from_str: from.to_s,
@@ -112,7 +112,7 @@ module Blueprinter
       def fields(*names)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Field.new(name: name, from: name, from_str: name.to_s, options: {})
+          schema[name] = Fields::Field.new(name: name, from: name, from_str: name.to_s, options: {})
         end
       end
 
@@ -130,11 +130,11 @@ module Blueprinter
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::ObjectField]
+      # @return [Blueprinter::V2::Fields::Object]
       #
       def object(name, blueprint, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = ObjectField.new(
+        schema[name] = Fields::Object.new(
           name: name,
           blueprint: blueprint,
           from: from.to_sym,
@@ -158,11 +158,11 @@ module Blueprinter
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::Collection]
+      # @return [Blueprinter::V2::Fields::Collection]
       #
       def collection(name, blueprint, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Collection.new(
+        schema[name] = Fields::Collection.new(
           name: name,
           blueprint: blueprint,
           from: from.to_sym,

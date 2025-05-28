@@ -33,13 +33,13 @@ module Blueprinter
       class View
         # @return [Symbol] Name of the view
         attr_reader :name
-        # @return [Hash<Symbol, Blueprinter::V2::Field>] Fields defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Fields defined on the view
         attr_reader :fields
-        # @return [Hash<Symbol, Blueprinter::V2::ObjectField>] Associations to single objects defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Object>] Associations to single objects defined on the view
         attr_reader :objects
-        # @return [Hash<Symbol, Blueprinter::V2::Collection>] Associations to collections defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Collection>] Associations to collections defined on the view
         attr_reader :collections
-        # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>] All fields, objects,
+        # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>] All fields, objects,
         # and collections in the order they were defined
         attr_reader :ordered
 
@@ -49,9 +49,9 @@ module Blueprinter
         def initialize(blueprint, name)
           @name = name
           @ordered = blueprint.schema.values
-          @fields = blueprint.schema.select { |_, f| f.is_a? Field }
-          @objects = blueprint.schema.select { |_, f| f.is_a? ObjectField }
-          @collections = blueprint.schema.select { |_, f| f.is_a? Collection }
+          @fields = blueprint.schema.select { |_, f| f.is_a? Fields::Field }
+          @objects = blueprint.schema.select { |_, f| f.is_a? Fields::Object }
+          @collections = blueprint.schema.select { |_, f| f.is_a? Fields::Collection }
         end
       end
     end

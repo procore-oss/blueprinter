@@ -2,7 +2,7 @@
 
 describe Blueprinter::Hooks do
   let(:blueprint) { Class.new(Blueprinter::V2::Base) }
-  let(:field) { Blueprinter::V2::Field.new(name: :foo, from: :foo) }
+  let(:field) { Blueprinter::V2::Fields::Field.new(name: :foo, from: :foo) }
   let(:object) { { foo: 'Foo' } }
   let(:render_ctx) { Blueprinter::V2::Context::Render }
   let(:object_ctx) { Blueprinter::V2::Context::Object }

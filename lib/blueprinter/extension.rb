@@ -75,7 +75,7 @@ module Blueprinter
     # in which they were defined.
     # NOTE Only runs once per Blueprint per render.
     # @param context [Blueprinter::V2::Context::Render]
-    # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
+    # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>]
 
     # input_object: Modify or replace the object passed to render/render_object. The returned object is what will be
     # rendered.

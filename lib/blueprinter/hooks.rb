@@ -8,6 +8,7 @@ module Blueprinter
       @hooks = Extension::HOOKS.each_with_object({}) do |hook, acc|
         acc[hook] = extensions.select { |ext| ext.class.public_instance_methods(false).include? hook }
       end
+      @around_hook_registered = registered? :around_hook
     end
 
     #
@@ -126,7 +127,7 @@ module Blueprinter
     private
 
     def call(ext, hook, ...)
-      return ext.public_send(hook, ...) if !registered?(:around_hook) || ext.hidden? || hook == :around_hook
+      return ext.public_send(hook, ...) if !@around_hook_registered || ext.hidden? || hook == :around_hook
 
       around(:around_hook, ext, hook) do
         ext.public_send(hook, ...)

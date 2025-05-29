@@ -67,6 +67,14 @@ module Blueprinter
     end
 
     #
+    # Returns the last-added extension that implements the given hook.
+    #
+    # @param hook [Symbol] Name of hook to search for
+    # @return [Blueprinter::Extension]
+    #
+    def last_with(hook) = @hooks.fetch(hook).last
+
+    #
     # Call the hooks in series, passing the output of one to the block, which returns the args for the next.
     #
     # If the hook requires multiple arguments, the block should return an array.
@@ -123,8 +131,6 @@ module Blueprinter
       end.call
       result
     end
-
-    private
 
     def call(ext, hook, ...)
       return ext.public_send(hook, ...) if !@around_hook_registered || ext.hidden? || hook == :around_hook

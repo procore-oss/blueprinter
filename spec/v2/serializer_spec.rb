@@ -38,7 +38,6 @@ describe Blueprinter::V2::Serializer do
   let(:instance_cache) { Blueprinter::V2::InstanceCache.new }
 
   it 'works with nil values' do
-    test = self
     widget = { name: nil, category: nil }
 
     result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
@@ -49,21 +48,110 @@ describe Blueprinter::V2::Serializer do
     })
   end
 
-  it 'extracts values and serialize nested Blueprints' do
-    test = self
-    widget = {
-      name: 'Foo',
-      extra: 'bar',
-      category: { name: 'Bar', extra: 'bar' },
-      parts: [{ num: 42, extra: 'bar' }, { num: 43 }]
-    }
+  context 'extraction' do
+    let(:name_of_extractor) do
+      test = self
+      Class.new(Blueprinter::V2::Extensions::Core::Prelude) do
+        def initialize(prefix: 'Name') = @prefix = prefix
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
-    expect(result).to eq({
-      name: 'Foo',
-      category: { name: 'Bar' },
-      parts: [{ num: 42 }, { num: 43 }]
-    })
+        def extract_value(ctx)
+          case ctx.field
+          when Blueprinter::V2::Fields::Field then "#{@prefix} of #{ctx.object[:name]}"
+          when Blueprinter::V2::Fields::Object then { name: "#{@prefix} of #{ctx.object.dig(:category, :name)}" }
+          when Blueprinter::V2::Fields::Collection then ctx.object[:parts].each_with_index.map { |_, i| { num: i + 1 } }
+          end
+        end
+      end
+    end
+
+    let(:widget) do
+      {
+        name: 'Foo',
+        extra: 'bar',
+        category: { name: 'Bar', extra: 'bar' },
+        parts: [{ num: 42, extra: 'bar' }, { num: 43 }]
+      }
+    end
+
+    it 'extracts values and serialize nested Blueprints' do
+      result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+      expect(result).to eq({
+        name: 'Foo',
+        category: { name: 'Bar' },
+        parts: [{ num: 42 }, { num: 43 }]
+      })
+    end
+
+    it 'uses blocks' do
+      test = self
+      block_blueprint = Class.new(application_blueprint) do
+        self.blueprint_name = 'BlockBlueprint'
+        field(:name) { |ctx| "Name of #{ctx.object[:name]}" }
+        object(:category, test.category_blueprint) { |ctx| { name: "Name of #{ctx.object.dig(:category, :name)}" } }
+        collection(:parts, test.part_blueprint) { |ctx| ctx.object[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
+      end
+
+      result = described_class.new(block_blueprint).object(widget, {}, instance_cache, {})
+      expect(result).to eq({
+        name: 'Name of Foo',
+        category: { name: 'Name of Bar' },
+        parts: [{ num: 1 }, { num: 2 }]
+      })
+    end
+
+    it 'uses field-level extractor (class)' do
+      test = self
+      blueprint = Class.new(application_blueprint) do
+        self.blueprint_name = "BlockBlueprint"
+        field :name, extractor: test.name_of_extractor
+        object :category, test.category_blueprint, extractor: test.name_of_extractor
+        collection :parts, test.part_blueprint, extractor: test.name_of_extractor
+      end
+
+      result = described_class.new(blueprint).object(widget, {}, instance_cache, {})
+      expect(result).to eq({
+        name: 'Name of Foo',
+        category: { name: 'Name of Bar' },
+        parts: [{ num: 1 }, { num: 2 }]
+      })
+    end
+
+    it 'uses field-level extractor (instance)' do
+      test = self
+      blueprint = Class.new(application_blueprint) do
+        self.blueprint_name = "BlockBlueprint"
+        extensions << test.name_of_extractor.new
+        field :name, extractor: test.name_of_extractor.new(prefix: 'X')
+        object :category, test.category_blueprint, extractor: test.name_of_extractor.new(prefix: 'Y')
+        collection :parts, test.part_blueprint, extractor: test.name_of_extractor.new
+      end
+
+      result = described_class.new(blueprint).object(widget, {}, instance_cache, {})
+      expect(result).to eq({
+        name: 'X of Foo',
+        category: { name: 'Y of Bar' },
+        parts: [{ num: 1 }, { num: 2 }]
+      })
+    end
+
+    it 'uses blueprint extractor extension' do
+      test = self
+      blueprint = Class.new(application_blueprint) do
+        self.blueprint_name = "BlockBlueprint"
+        extensions << test.name_of_extractor.new
+        extensions << test.name_of_extractor.new(prefix: 'X')
+        field :name
+        object :category, test.category_blueprint
+        collection :parts, test.part_blueprint
+      end
+
+      result = described_class.new(blueprint).object(widget, {}, instance_cache, {})
+      expect(result).to eq({
+        name: 'X of Foo',
+        category: { name: 'X of Bar' },
+        parts: [{ num: 1 }, { num: 2 }]
+      })
+    end
   end
 
   it 'respects the last blueprint_fields hook' do
@@ -415,12 +503,12 @@ describe Blueprinter::V2::Serializer do
     )
 
     expect(log).to eq [
-      'prepare (WidgetBlueprint)',
       'blueprint_fields (WidgetBlueprint)',
-      'prepare (CategoryBlueprint)',
+      'prepare (WidgetBlueprint)',
       'blueprint_fields (CategoryBlueprint)',
-      'prepare (PartBlueprint)',
-      'blueprint_fields (PartBlueprint)'
+      'prepare (CategoryBlueprint)',
+      'blueprint_fields (PartBlueprint)',
+      'prepare (PartBlueprint)'
     ]
   end
 end

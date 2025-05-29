@@ -51,8 +51,8 @@ module Blueprinter
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] field
-      #   @return [Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection] The field that's
-      # currently being evaluated
+      #   @return [Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection] The
+      # field that's currently being evaluated
       # @!attribute [r] value
       #   @return [Object] The extracted field value
       #

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Blueprinter::V2::Extensions::Core::Values do
+describe Blueprinter::V2::Extensions::Core::Defaults do
   include ExtensionHelpers
 
   context 'fields' do
@@ -8,7 +8,7 @@ describe Blueprinter::V2::Extensions::Core::Values do
     let(:object) { { foo: 'Foo' } }
 
     it 'passes values through by default' do
-      ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.field_value ctx).to eq 'Foo'
     end
 
@@ -23,7 +23,7 @@ describe Blueprinter::V2::Extensions::Core::Values do
       blueprint.options[:field_default] = 'Bar'
       blueprint.options[:field_default_if] = ->(_) { false }
       blueprint.field :foo, default: 'Bar', default_if: ->(_) { false }
-      ctx = prepare(blueprint, { field_default: 'Bar', field_default_if: ->(_) { false } }, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, { field_default: 'Bar', field_default_if: ->(_) { false } }, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.field_value ctx).to eq 'Foo'
     end
 
@@ -203,14 +203,14 @@ describe Blueprinter::V2::Extensions::Core::Values do
     let(:object) { { foo_obj: 'Foo' } }
 
     it 'passes values through by default' do
-      ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.object_value ctx).to eq 'Foo'
     end
 
     it 'passes values through by with defaults given' do
       blueprint.options[:object_default] = 'Bar'
       blueprint.object :foo_obj, sub_blueprint, default: 'Bar'
-      ctx = prepare(blueprint, { object_default: 'Bar' }, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, { object_default: 'Bar' }, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.object_value ctx).to eq 'Foo'
     end
 
@@ -218,7 +218,7 @@ describe Blueprinter::V2::Extensions::Core::Values do
       blueprint.options[:object_default] = 'Bar'
       blueprint.options[:object_default_if] = ->(_) { false }
       blueprint.object :foo_obj, sub_blueprint, default: 'Bar', default_if: ->(_) { false }
-      ctx = prepare(blueprint, { object_default: 'Bar', object_default_if: ->(_) { false } }, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, { object_default: 'Bar', object_default_if: ->(_) { false } }, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.object_value ctx).to eq 'Foo'
     end
 
@@ -398,14 +398,14 @@ describe Blueprinter::V2::Extensions::Core::Values do
     let(:object) { { foos: 'Foo' } }
 
     it 'passes values through by default' do
-      ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.collection_value ctx).to eq 'Foo'
     end
 
     it 'passes values through by with defaults given' do
       blueprint.options[:collection_default] = 'Bar'
       blueprint.collection :foos, sub_blueprint, default: 'Bar'
-      ctx = prepare(blueprint, { collection_default: 'Bar' }, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, { collection_default: 'Bar' }, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.collection_value ctx).to eq 'Foo'
     end
 
@@ -413,7 +413,7 @@ describe Blueprinter::V2::Extensions::Core::Values do
       blueprint.options[:collection_default] = 'Bar'
       blueprint.options[:collection_default_if] = ->(_) { false }
       blueprint.collection :foos, sub_blueprint, default: 'Bar', default_if: ->(_) { false }
-      ctx = prepare(blueprint, { collection_default: 'Bar', collection_default_if: ->(_) { false } }, Blueprinter::V2::Context::Field, object, field, nil)
+      ctx = prepare(blueprint, { collection_default: 'Bar', collection_default_if: ->(_) { false } }, Blueprinter::V2::Context::Field, object, field, 'Foo')
       expect(subject.collection_value ctx).to eq 'Foo'
     end
 

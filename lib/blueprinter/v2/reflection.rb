@@ -39,8 +39,8 @@ module Blueprinter
         attr_reader :objects
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Collection>] Associations to collections defined on the view
         attr_reader :collections
-        # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>] All fields, objects,
-        # and collections in the order they were defined
+        # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>]
+        # All fields, objects, and collections in the order they were defined
         attr_reader :ordered
 
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base

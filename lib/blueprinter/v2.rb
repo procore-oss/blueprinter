@@ -9,6 +9,7 @@ module Blueprinter
     autoload :Context, 'blueprinter/v2/context'
     autoload :DSL, 'blueprinter/v2/dsl'
     autoload :Extensions, 'blueprinter/v2/extensions'
+    autoload :FieldSerializer, 'blueprinter/v2/field_serializer'
     autoload :Formatter, 'blueprinter/v2/formatter'
     autoload :InstanceCache, 'blueprinter/v2/instance_cache'
     autoload :Reflection, 'blueprinter/v2/reflection'

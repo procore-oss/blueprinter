@@ -2,6 +2,7 @@
 
 require 'blueprinter/hooks'
 require 'blueprinter/v2/formatter'
+require 'blueprinter/v2/field_serializer'
 
 module Blueprinter
   module V2
@@ -11,14 +12,19 @@ module Blueprinter
     # NOTE: Each Blueprint gets a *single* Serializer instance that will live for the duration of the application.
     #
     class Serializer
-      attr_reader :blueprint, :formatter, :hooks, :values, :cond
+      attr_reader :blueprint, :formatter, :hooks, :defaults, :cond
 
       def initialize(blueprint)
-        @hooks = Hooks.new([Extensions::Core::Prelude.new, *blueprint.extensions, Extensions::Core::Postlude.new])
+        @hooks = Hooks.new([
+          Extensions::Core::Prelude.new,
+          Extensions::Core::Extractor.new,
+          *blueprint.extensions,
+          Extensions::Core::Postlude.new
+        ])
         @formatter = Formatter.new(blueprint)
         @blueprint = blueprint
         # "Unroll" these hooks for a significant speed boost
-        @values = Extensions::Core::Values.new
+        @defaults = Extensions::Core::Defaults.new
         @cond = Extensions::Core::Conditionals.new
         find_used_hooks!
       end
@@ -73,20 +79,13 @@ module Blueprinter
           ctx = Context::Object.new(instances[blueprint], options, instances, store, object)
           object = hooks.reduce_into(:blueprint_input, ctx, :object)
         end
+
         ctx = Context::Field.new(instances[blueprint], options, instances, store, object, nil, nil)
-
-        result = ctx.store.fetch(blueprint.object_id).each_with_object({}) do |field, acc|
-          ctx.field = field
+        result = ctx.store.fetch(blueprint.object_id).each_with_object({}) do |field_conf, acc|
+          ctx.field = field_conf.field
           ctx.value = nil
-
-          case field
-          when Fields::Field
-            serialize_field(ctx, acc)
-          when Fields::Object
-            serialize_object(ctx, acc)
-          when Fields::Collection
-            serialize_collection(ctx, acc)
-          end
+          ctx.value = ctx.field.value_proc ? proc_value(ctx) : hooks.call(field_conf.extractor, :extract_value, ctx)
+          field_conf.serialize(ctx, acc)
         end
 
         if @run_blueprint_output
@@ -98,61 +97,36 @@ module Blueprinter
       end
       # rubocop:enable Metrics/MethodLength
 
-      def serialize_field(ctx, result)
-        ctx.value = values.field_value ctx
-        hooks.reduce_into(:field_value, ctx, :value) if @run_field_value
-        ctx.value = formatter.call(ctx)
-        return if cond.exclude_field?(ctx) || (@run_exclude_field && hooks.any?(:exclude_field?, ctx))
-
-        result[ctx.field.name] = ctx.value
-      end
-
-      def serialize_object(ctx, result)
-        field = ctx.field
-        instances = ctx.instances
-        ctx.value = values.object_value ctx
-        hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
-        return if cond.exclude_object?(ctx) || (@run_exclude_object && hooks.any?(:exclude_object?, ctx))
-
-        if ctx.value
-          ctx.value =
-            if instances[field.blueprint].is_a? V2::Base
-              field.blueprint.serializer.object(ctx.value, ctx.options, instances, ctx.store)
-            else
-              store = ctx.store
-              field.blueprint.render_as_hash(ctx.value, ctx.options.dup.merge({ v2_instances: instances, v2_store: store }))
-            end
-        end
-        result[field.name] = ctx.value
-      end
-
-      def serialize_collection(ctx, result)
-        field = ctx.field
-        instances = ctx.instances
-        ctx.value = values.collection_value ctx
-        hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
-        return if cond.exclude_collection?(ctx) || (@run_exclude_collection && hooks.any?(:exclude_collection?, ctx))
-
-        if ctx.value
-          ctx.value =
-            if instances[field.blueprint].is_a? V2::Base
-              field.blueprint.serializer.collection(ctx.value, ctx.options, instances, ctx.store)
-            else
-              store = ctx.store
-              field.blueprint.render_as_hash(ctx.value, ctx.options.dup.merge({ v2_instances: instances, v2_store: store }))
-            end
-        end
-        result[field.name] = ctx.value
+      # @param ctx [Blueprinter::V2::Context::Field]
+      def proc_value(ctx)
+        ctx.blueprint.instance_exec(ctx, &ctx.field.value_proc)
       end
 
       # Allow extensions to do time-saving prep work on the current context
       def prepare!(options, instances, store)
         ctx = Context::Render.new(instances[blueprint], options, instances, store)
-        values.prepare ctx
+        fields = hooks.last(:blueprint_fields, ctx).map { |field| prepare_field(field, instances, store) }.freeze
+        defaults.prepare ctx
         cond.prepare ctx
         hooks.run(:prepare, ctx) if @run_prepare
-        hooks.last(:blueprint_fields, ctx).freeze
+        fields
       end
+
+      # rubocop:disable Metrics/CyclomaticComplexity
+      def prepare_field(field, instances, store)
+        extractor = instances[field.options[:extractor]] || hooks.last_with(:extract_value)
+        store[extractor.object_id] ||= extractor.prepare(ctx) || true if extractor.respond_to?(:prepare)
+
+        case field
+        when Fields::Field
+          FieldSerializer::Field.new(field, extractor, self)
+        when Fields::Object
+          FieldSerializer::Object.new(field, extractor, self)
+        when Fields::Collection
+          FieldSerializer::Collection.new(field, extractor, self)
+        end
+      end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       # We save a lot of time by skipping hooks that aren't used
       def find_used_hooks!
@@ -161,12 +135,6 @@ module Blueprinter
         @run_prepare = hooks.registered? :prepare
         @run_blueprint_input = hooks.registered? :blueprint_input
         @run_blueprint_output = hooks.registered? :blueprint_output
-        @run_field_value = hooks.registered? :field_value
-        @run_object_value = hooks.registered? :object_value
-        @run_collection_value = hooks.registered? :collection_value
-        @run_exclude_field = hooks.registered? :exclude_field?
-        @run_exclude_object = hooks.registered? :exclude_object?
-        @run_exclude_collection = hooks.registered? :exclude_collection?
       end
     end
   end

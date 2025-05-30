@@ -31,21 +31,33 @@
         <link rel="stylesheet" href="../theme/hljs-overrides.css">
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -182,9 +196,10 @@ end
 <li><a href="#input_object">input_object</a> | <a href="#input_collection">input_collection</a></li>
 <li><a href="#around_object_serialization">around_object_serialization</a> | <a href="#around_collection_serialization">around_collection_serialization</a>
 <ul>
-<li><a href="#prepare">prepare</a></li>
 <li><a href="#blueprint_fields">blueprint_fields</a></li>
+<li><a href="#prepare">prepare</a></li>
 <li><a href="#blueprint_input">blueprint_input</a></li>
+<li><a href="#extract_value">extract_value</a></li>
 <li><a href="#field_value">field_value</a> | <a href="#object_value">object_value</a> | <a href="#collection_value">collection_value</a></li>
 <li><a href="#exclude_field">exclude_field?</a> | <a href="#exclude_object">exclude_object?</a> | <a href="#exclude_collection">exclude_collection?</a></li>
 <li><a href="#blueprint_output">blueprint_output</a></li>
@@ -268,18 +283,6 @@ end
   # do something after render
 end
 </code></pre>
-<h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
-<blockquote>
-<p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
-<strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
-</blockquote>
-<p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
-<pre><code class="language-ruby">def prepare(ctx)
-  ctx.store[:my_ext] ||= {}
-  ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
-end
-</code></pre>
-<p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
@@ -293,6 +296,18 @@ end
 end
 </code></pre>
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
+<h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
+<blockquote>
+<p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
+<strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
+</blockquote>
+<p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
+<pre><code class="language-ruby">def prepare(ctx)
+  ctx.store[:my_ext] ||= {}
+  ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
+end
+</code></pre>
+<p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
 <h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
@@ -302,6 +317,17 @@ end
 <p>Run each time a blueprint renders, allowing you to modify or return a new object (<code>context.object</code>) used for the render. For collections of size N, it will be called N times. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
 <pre><code class="language-ruby">def blueprint_input(ctx)
   ctx.object
+end
+</code></pre>
+<h2 id="extract_value"><a class="header" href="#extract_value">extract_value</a></h2>
+<blockquote>
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<strong>@return Object</strong> The value for the field<br />
+<strong>@cost</strong> High - run for every field, object, and collection</p>
+</blockquote>
+<p>Called on each field, object, and collection. The return value is used as <code>context.value</code> in subsequent hooks. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
+<pre><code class="language-ruby">def extract_value(ctx)
+  ctx.object.public_send(ctx.field.from)
 end
 </code></pre>
 <h2 id="field_value"><a class="header" href="#field_value">field_value</a></h2>
@@ -381,7 +407,7 @@ end
 </blockquote>
 <p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.result</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.result in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
 <pre><code class="language-ruby">def blueprint_output(ctx)
-  ctx.result.merge({ extra: "data" })
+  ctx.result.merge(ctx.object.extra_fields)
 end
 </code></pre>
 <h2 id="output_object"><a class="header" href="#output_object">output_object</a></h2>

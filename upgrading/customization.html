@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rendering - Blueprinter</title>
+        <title>Customization - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -169,35 +169,25 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
-<p>You can read the full <a href="../rendering.html">rendering documentation here</a>. This page highlights the main differences between V1 and V2.</p>
-<h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
-<p>If you're using Rails's <code>render json:</code>, V2 blueprints should continue to work like Legacy/V1:</p>
-<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
+                        <h1 id="customization"><a class="header" href="#customization">Customization</a></h1>
+<h2 id="formatting"><a class="header" href="#formatting">Formatting</a></h2>
+<p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="../dsl/formatters.html">Learn more</a>.</p>
+<pre><code class="language-ruby">format(Date) { |date| date.iso8601 }
 </code></pre>
-<p>Otherwise, it now looks like this:</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
-</code></pre>
-<h3 id="rendering-to-hash"><a class="header" href="#rendering-to-hash">Rendering to Hash</a></h3>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
-</code></pre>
-<h3 id="views"><a class="header" href="#views">Views</a></h3>
-<p>V2's preferred method of rendering views is:</p>
-<pre><code class="language-ruby">WidgetBlueprint[:extended].render(widget).to_json
-</code></pre>
-<p>However, as a nod simplifying the migration, the <code>view</code> option is still available. It may be removed in a future version.</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :extended).to_json
-</code></pre>
+<h2 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h2>
+<p>Extractors have a simplified API. <a href="../api/extractors.html">Learn more</a>.</p>
+<h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
+<p>Blueprinter V2's <a href="../api/extensions.html">extension hooks</a> offer many ways to transform your inputs and outputs. The <a href="../api/extensions.html#blueprint_output">blueprint_output</a> hook offers equivalent functionality to Legacy/V1 transformers.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../upgrading/fields.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../upgrading/configuration.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../v1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../upgrading/fields.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -207,11 +197,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../upgrading/fields.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../upgrading/configuration.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../v1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../upgrading/fields.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

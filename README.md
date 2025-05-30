@@ -562,6 +562,44 @@ Output:
 </details>
 
 <details>
+<summary>Accessing the View Option</summary>
+
+
+The `view` provided to the `render` call is implicitly available in the `options` hash within a `field` block, and can be referenced as needed. For example:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :full_name do |user, options|
+    prefix = options[:view] == :admin ? '[Admin]' : options[:title_prefix]
+    "#{prefix} #{user.first_name} #{user.last_name}"
+  end
+
+  view :admin do
+    field :access_level
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user, title_prefix: "Mr", view: :admin)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "full_name": "[Admin] John Doe",
+  "access_level": "4"
+}
+```
+
+</details>
+
+<details>
 <summary>Defining An Identifier Directly In The Blueprint</summary>
 
 

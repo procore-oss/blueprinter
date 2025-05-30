@@ -20,6 +20,25 @@ module Blueprinter
       Render = Struct.new(:blueprint, :options, :instances, :store)
 
       #
+      # The extension hook currently being called.
+      #
+      # @!attribute [r] blueprint
+      #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
+      # @!attribute [r] options
+      #   @return [Hash] Options passed to `render`
+      # @!attribute [r] instances
+      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
+      # a render
+      # @!attribute [r] store
+      #   @return [Hash] A Hash for extensions, etc to cache render data in
+      # @!attribute [r] extension
+      #   @return [Blueprinter::Extension] Instance of the extension running
+      # @!attribute [r] hook
+      #   @return [Symbol] Name of the symbol being called
+      #
+      Hook = Struct.new(:blueprint, :options, :instances, :store, :extension, :hook)
+
+      #
       # The object or collection currently being serialized.
       #
       # @!attribute [r] blueprint

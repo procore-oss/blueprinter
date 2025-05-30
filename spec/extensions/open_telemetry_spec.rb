@@ -20,10 +20,10 @@ describe Blueprinter::Extensions::OpenTelemetry do
         ctx.value
       end
 
-      def around_hook(ext, hook)
-        @log << "around_hook(#{ext.class.name}##{hook}): A"
+      def around_hook(ctx)
+        @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): A"
         yield
-        @log << "around_hook(#{ext.class.name}##{hook}): B"
+        @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): B"
       end
     end
   end
@@ -64,7 +64,8 @@ describe Blueprinter::Extensions::OpenTelemetry do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foos: [{ name: 'Bar' }] })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :field_value }.merge(attributes)).and_call_original
-    called = subject.around_hook(meta_extension.new([]), :field_value) { :true }
+    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, ctx.options, ctx.instances, ctx.store, meta_extension.new([]), :field_value)
+    called = subject.around_hook(hook_ctx) { :true }
     expect(called).to eq :true
   end
 

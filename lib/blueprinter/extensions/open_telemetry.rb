@@ -32,10 +32,10 @@ module Blueprinter
         tracer.in_span('blueprinter.collection', attributes: attributes(ctx), &)
       end
 
-      # @param ext [Blueprinter::V2::Extension] Extension being run
-      # @param hook [Symbol] Hook name
-      def around_hook(ext, hook, &)
-        attributes = { extension: ext.class.name, hook:, 'library.name' => 'Blueprinter', 'library.version' => VERSION }
+      # @param ctx [Blueprinter::V2::Context::Hook]
+      def around_hook(ctx, &)
+        extension = ctx.extension.class.name
+        attributes = { extension:, hook: ctx.hook, 'library.name' => 'Blueprinter', 'library.version' => VERSION }
         tracer.in_span('blueprinter.extension', attributes:, &)
       end
 

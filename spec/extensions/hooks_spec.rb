@@ -218,10 +218,10 @@ describe Blueprinter::Hooks do
             @log << 'around_object_serialization: B'
           end
 
-          def around_hook(ext, hook)
-            @log << "around_hook(#{ext.class.name}##{hook}): A"
+          def around_hook(ctx)
+            @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): A"
             yield
-            @log << "around_hook(#{ext.class.name}##{hook}): B"
+            @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): B"
           end
         end
       end

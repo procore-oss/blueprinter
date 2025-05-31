@@ -110,11 +110,9 @@ describe "Blueprinter::V2 Rendering" do
     }])
   end
 
-  it 'uses the same Context.store Hash throughout' do
+  it 'uses the same Context.store Hash throughout, for a given extension' do
     log_ext = Class.new(Blueprinter::Extension) do
-      def initialize(log)
-        @log = log
-      end
+      def initialize(log) = @log = log
 
       def input_collection(ctx)
         @log.clear
@@ -122,7 +120,7 @@ describe "Blueprinter::V2 Rendering" do
         ctx.object
       end
     end
-    foo_ext = Class.new(Blueprinter::Extension) do
+    foo_ext = Class.new(log_ext) do
       def field_value(ctx)
         ctx.field.options[:foo]&.call(ctx)
         ctx.value
@@ -130,21 +128,39 @@ describe "Blueprinter::V2 Rendering" do
       alias_method :object_value, :field_value
       alias_method :collection_value, :field_value
     end
+    bar_ext = Class.new(log_ext) do
+      def field_value(ctx)
+        ctx.field.options[:bar]&.call(ctx)
+        ctx.value
+      end
+      alias_method :object_value, :field_value
+      alias_method :collection_value, :field_value
+    end
+
+    log_foo, log_bar = [], []
     application_blueprint = Class.new(Blueprinter::V2::Base) do
-      extensions << foo_ext.new
+      extensions << foo_ext.new(log_foo) << bar_ext.new(log_bar)
     end
     category_blueprint = Class.new(application_blueprint) do
-      field :name, foo: ->(ctx) { ctx.store[:log] << ctx.value }
+      field :name,
+        foo: ->(ctx) { ctx.store[:log] << "Foo: #{ctx.value}" },
+        bar: ->(ctx) { ctx.store[:log] << "Bar: #{ctx.value}" }
     end
     part_blueprint = Class.new(application_blueprint) do
-      field :num, foo: ->(ctx) { ctx.store[:log] << ctx.value }
+      field :num,
+        foo: ->(ctx) { ctx.store[:log] << "Foo: #{ctx.value}" },
+        bar: ->(ctx) { ctx.store[:log] << "Bar: #{ctx.value}" }
     end
-    log = []
     widget_blueprint = Class.new(application_blueprint) do
-      extensions << log_ext.new(log)
-      field :name, foo: ->(ctx) { ctx.store[:log] << ctx.value }
-      object :category, category_blueprint, foo: ->(ctx) { ctx.store[:log] << ctx.value }
-      collection :parts, part_blueprint, foo: ->(ctx) { ctx.store[:log] << ctx.value }
+      field :name,
+        foo: ->(ctx) { ctx.store[:log] << "Foo: #{ctx.value}" },
+        bar: ->(ctx) { ctx.store[:log] << "Bar: #{ctx.value}" }
+      object :category, category_blueprint,
+        foo: ->(ctx) { ctx.store[:log] << "Foo: #{ctx.value}" },
+        bar: ->(ctx) { ctx.store[:log] << "Bar: #{ctx.value}" }
+      collection :parts, part_blueprint,
+        foo: ->(ctx) { ctx.store[:log] << "Foo: #{ctx.value}" },
+        bar: ->(ctx) { ctx.store[:log] << "Bar: #{ctx.value}" }
     end
 
     widget_blueprint.render_collection([
@@ -160,19 +176,34 @@ describe "Blueprinter::V2 Rendering" do
       },
     ]).to_hash
 
-    expect(log).to eq [
-      'Widget A',
-      { name: 'Category 1' },
-      'Category 1',
-      [{ num: 42 }, { num: 43 }],
-      42,
-      43,
-      'Widget B',
-      { name: 'Category 2' },
-      'Category 2',
-      [{ num: 43 }, { num: 44 }],
-      43,
-      44
+    expect(log_foo).to eq [
+      'Foo: Widget A',
+      "Foo: #{{ name: 'Category 1' }}",
+      'Foo: Category 1',
+      "Foo: #{[{ num: 42 }, { num: 43 }]}",
+      'Foo: 42',
+      'Foo: 43',
+      'Foo: Widget B',
+      "Foo: #{{ name: 'Category 2' }}",
+      'Foo: Category 2',
+      "Foo: #{[{ num: 43 }, { num: 44 }]}",
+      'Foo: 43',
+      'Foo: 44'
+    ]
+
+    expect(log_bar).to eq [
+      'Bar: Widget A',
+      "Bar: #{{ name: 'Category 1' }}",
+      'Bar: Category 1',
+      "Bar: #{[{ num: 42 }, { num: 43 }]}",
+      'Bar: 42',
+      'Bar: 43',
+      'Bar: Widget B',
+      "Bar: #{{ name: 'Category 2' }}",
+      'Bar: Category 2',
+      "Bar: #{[{ num: 43 }, { num: 44 }]}",
+      'Bar: 43',
+      'Bar: 44'
     ]
   end
 end

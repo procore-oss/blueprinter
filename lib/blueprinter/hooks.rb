@@ -6,7 +6,7 @@ module Blueprinter
     # @param extensions [Array<Blueprinter::Extension>] The extensions we're going to run
     def initialize(extensions)
       @hooks = Extension::HOOKS.each_with_object({}) do |hook, acc|
-        acc[hook] = extensions.select { |ext| ext.class.public_instance_methods(false).include? hook }
+        acc[hook] = extensions.select { |ext| ext.class.public_instance_methods(true).include? hook }
       end
       @around_hook_registered = registered? :around_hook
     end
@@ -135,9 +135,9 @@ module Blueprinter
     end
 
     def call(ext, hook, ctx, &)
-      return ext.public_send(hook, ctx, &) if !@around_hook_registered || ext.hidden? || hook == :around_hook
+      return ext.public_send(hook, ctx.with_store(ext), &) if !@around_hook_registered || ext.hidden? || hook == :around_hook
 
-      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.options, ctx.instances, ctx.store, ext, hook)
+      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.options, ctx.instances, ctx.stores, ext, hook)
       around(:around_hook, hook_ctx) do
         ext.public_send(hook, ctx, &)
       end

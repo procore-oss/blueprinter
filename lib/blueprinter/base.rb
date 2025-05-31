@@ -6,6 +6,7 @@ require_relative 'field'
 require_relative 'reflection'
 require_relative 'rendering'
 require_relative 'view_collection'
+require_relative 'view_wrapper'
 
 module Blueprinter
   class Base
@@ -369,6 +370,15 @@ module Blueprinter
       def inherited(subclass)
         subclass.send(:view_collection).inherit(view_collection)
       end
+    end
+
+    # For compatibility with V2
+    #
+    # @return [Blueprinter::ViewWrapper]
+    def self.[](view_name)
+      raise Errors::UnknownView, "View '#{view_name}' could not be found in Blueprint '#{name}'" unless view? view_name
+
+      ViewWrapper.new(self, view_name)
     end
   end
 end

@@ -46,11 +46,11 @@ module Blueprinter
         @serializer.hooks.reduce_into(@input_hook, ctx, :object)
         result =
           if @collection
-            @serializer.collection(ctx.object, @options, ctx.instances, ctx.store)
+            @serializer.collection(ctx.object, @options, ctx.instances, ctx.stores)
           else
-            @serializer.object(ctx.object, @options, ctx.instances, ctx.store)
+            @serializer.object(ctx.object, @options, ctx.instances, ctx.stores)
           end
-        Context::Result.new(ctx.blueprint, ctx.options, ctx.instances, ctx.store, ctx.object, result).tap do |context|
+        Context::Result.new(ctx.blueprint, ctx.options, ctx.instances, ctx.stores, ctx.object, result).tap do |context|
           @serializer.hooks.reduce_into(@output_hook, context, :result)
         end
       end
@@ -59,7 +59,7 @@ module Blueprinter
       def create_context
         instances = InstanceCache.new
         blueprint = instances[@serializer.blueprint]
-        Context::Object.new(blueprint, @options, instances, {}, @object)
+        Context::Object.new(blueprint, @options, instances, Context.create_stores, @object)
       end
     end
   end

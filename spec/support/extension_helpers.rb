@@ -49,10 +49,12 @@ module ExtensionHelpers
   end
 
   def prepare(blueprint, options, ctx_type, *args)
-    store = {}
+    stores = Blueprinter::V2::Context.create_stores
     instances = Blueprinter::V2::InstanceCache.new
-    ctx = Blueprinter::V2::Context::Render.new(instances[blueprint], options, instances, store)
-    subject.prepare ctx if subject.respond_to?(:prepare)
-    ctx_type.new(instances[blueprint], options, instances, store, *args)
+    ctx = Blueprinter::V2::Context::Render.new(instances[blueprint], options, instances, stores)
+    subject.prepare ctx.with_store(subject) if subject.respond_to?(:prepare)
+    ctx_type.
+      new(instances[blueprint], options, instances, stores, *args).
+      with_store(subject)
   end
 end

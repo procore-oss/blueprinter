@@ -39,13 +39,13 @@ module Blueprinter
       # @param store [Hash] A cache for blueprints and extensions to use during this serialization
       # @return [Hash] The serialized object
       #
-      def object(object, options, instances, store)
-        store[blueprint.object_id] ||= prepare!(options, instances, store)
+      def object(object, options, instances, stores)
+        stores[blueprint][blueprint.object_id] ||= prepare!(options, instances, stores)
         if @run_around_object
-          ctx = Context::Object.new(instances[blueprint], options, instances, store, object)
-          hooks.around(:around_object_serialization, ctx) { serialize(object, options, instances, store) }
+          ctx = Context::Object.new(instances[blueprint], options, instances, stores, object)
+          hooks.around(:around_object_serialization, ctx) { serialize(object, options, instances, stores) }
         else
-          serialize(object, options, instances, store)
+          serialize(object, options, instances, stores)
         end
       end
 
@@ -59,29 +59,29 @@ module Blueprinter
       # @param store [Hash] A cache for blueprints and extensions to use during this serialization
       # @return [Array<Hash>] The serialized objects
       #
-      def collection(collection, options, instances, store)
-        store[blueprint.object_id] ||= prepare!(options, instances, store)
+      def collection(collection, options, instances, stores)
+        stores[blueprint][blueprint.object_id] ||= prepare!(options, instances, stores)
         if @run_around_collection
-          ctx = Context::Object.new(instances[blueprint], options, instances, store, collection)
+          ctx = Context::Object.new(instances[blueprint], options, instances, stores, collection)
           hooks.around(:around_collection_serialization, ctx) do
-            collection.map { |object| serialize(object, options, instances, store) }.to_a
+            collection.map { |object| serialize(object, options, instances, stores) }.to_a
           end
         else
-          collection.map { |object| serialize(object, options, instances, store) }.to_a
+          collection.map { |object| serialize(object, options, instances, stores) }.to_a
         end
       end
 
       private
 
       # rubocop:disable Metrics/MethodLength
-      def serialize(object, options, instances, store)
+      def serialize(object, options, instances, stores)
         if @run_blueprint_input
-          ctx = Context::Object.new(instances[blueprint], options, instances, store, object)
+          ctx = Context::Object.new(instances[blueprint], options, instances, stores, object)
           object = hooks.reduce_into(:blueprint_input, ctx, :object)
         end
 
-        ctx = Context::Field.new(instances[blueprint], options, instances, store, object, nil, nil)
-        result = ctx.store.fetch(blueprint.object_id).each_with_object({}) do |field_conf, acc|
+        ctx = Context::Field.new(instances[blueprint], options, instances, stores, object, nil, nil)
+        result = stores[blueprint].fetch(blueprint.object_id).each_with_object({}) do |field_conf, acc|
           ctx.field = field_conf.field
           ctx.value = nil
           ctx.value = ctx.field.value_proc ? proc_value(ctx) : hooks.call(field_conf.extractor, :extract_value, ctx)
@@ -89,7 +89,7 @@ module Blueprinter
         end
 
         if @run_blueprint_output
-          ctx = Context::Result.new(ctx.blueprint, options, instances, store, object, result)
+          ctx = Context::Result.new(ctx.blueprint, options, instances, stores, object, result)
           hooks.reduce_into(:blueprint_output, ctx, :result)
         else
           result
@@ -99,23 +99,24 @@ module Blueprinter
 
       # @param ctx [Blueprinter::V2::Context::Field]
       def proc_value(ctx)
+        ctx.with_store ctx.blueprint
         ctx.blueprint.instance_exec(ctx, &ctx.field.value_proc)
       end
 
       # Allow extensions to do time-saving prep work on the current context
-      def prepare!(options, instances, store)
-        ctx = Context::Render.new(instances[blueprint], options, instances, store)
-        fields = hooks.last(:blueprint_fields, ctx).map { |field| prepare_field(field, instances, store) }.freeze
-        defaults.prepare ctx
-        cond.prepare ctx
+      def prepare!(options, instances, stores)
+        ctx = Context::Render.new(instances[blueprint], options, instances, stores)
+        fields = hooks.last(:blueprint_fields, ctx).map { |field| prepare_field(field, instances, stores) }.freeze
+        defaults.prepare ctx.with_store(defaults)
+        cond.prepare ctx.with_store(cond)
         hooks.run(:prepare, ctx) if @run_prepare
         fields
       end
 
       # rubocop:disable Metrics/CyclomaticComplexity
-      def prepare_field(field, instances, store)
+      def prepare_field(field, instances, stores)
         extractor = instances[field.options[:extractor]] || hooks.last_with(:extract_value)
-        store[extractor.object_id] ||= extractor.prepare(ctx) || true if extractor.respond_to?(:prepare)
+        stores[blueprint][extractor.object_id] ||= extractor.prepare(ctx) || true if extractor.respond_to?(:prepare)
 
         case field
         when Fields::Field

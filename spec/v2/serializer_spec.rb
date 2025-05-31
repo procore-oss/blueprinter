@@ -36,11 +36,12 @@ describe Blueprinter::V2::Serializer do
   end
 
   let(:instance_cache) { Blueprinter::V2::InstanceCache.new }
+  let(:stores) { Blueprinter::V2::Context.create_stores }
 
   it 'works with nil values' do
     widget = { name: nil, category: nil }
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
     expect(result).to eq({
       name: nil,
       category: nil,
@@ -74,7 +75,7 @@ describe Blueprinter::V2::Serializer do
     end
 
     it 'extracts values and serialize nested Blueprints' do
-      result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+      result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
       expect(result).to eq({
         name: 'Foo',
         category: { name: 'Bar' },
@@ -91,7 +92,7 @@ describe Blueprinter::V2::Serializer do
         collection(:parts, test.part_blueprint) { |ctx| ctx.object[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
       end
 
-      result = described_class.new(block_blueprint).object(widget, {}, instance_cache, {})
+      result = described_class.new(block_blueprint).object(widget, {}, instance_cache, stores)
       expect(result).to eq({
         name: 'Name of Foo',
         category: { name: 'Name of Bar' },
@@ -108,7 +109,7 @@ describe Blueprinter::V2::Serializer do
         collection :parts, test.part_blueprint, extractor: test.name_of_extractor
       end
 
-      result = described_class.new(blueprint).object(widget, {}, instance_cache, {})
+      result = described_class.new(blueprint).object(widget, {}, instance_cache, stores)
       expect(result).to eq({
         name: 'Name of Foo',
         category: { name: 'Name of Bar' },
@@ -126,7 +127,7 @@ describe Blueprinter::V2::Serializer do
         collection :parts, test.part_blueprint, extractor: test.name_of_extractor.new
       end
 
-      result = described_class.new(blueprint).object(widget, {}, instance_cache, {})
+      result = described_class.new(blueprint).object(widget, {}, instance_cache, stores)
       expect(result).to eq({
         name: 'X of Foo',
         category: { name: 'Y of Bar' },
@@ -145,7 +146,7 @@ describe Blueprinter::V2::Serializer do
         collection :parts, test.part_blueprint
       end
 
-      result = described_class.new(blueprint).object(widget, {}, instance_cache, {})
+      result = described_class.new(blueprint).object(widget, {}, instance_cache, stores)
       expect(result).to eq({
         name: 'X of Foo',
         category: { name: 'X of Bar' },
@@ -171,7 +172,7 @@ describe Blueprinter::V2::Serializer do
       parts: [{ num: 42 }, { num: 43 }]
     }
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
     expect(result.to_json).to eq({
       category: { name: 'Bar' },
       name: 'Foo',
@@ -189,7 +190,7 @@ describe Blueprinter::V2::Serializer do
       { name: 'Foo', desc: 'Bar' },
       { n: 42 },
       instance_cache,
-      {}
+      stores
     )
     expect(result).to eq({ name: 'Foo' })
   end
@@ -204,7 +205,7 @@ describe Blueprinter::V2::Serializer do
       { name: 'Foo', desc: 'Bar' },
       { n: 43 },
       instance_cache,
-      {}
+      stores
     )
     expect(result).to eq({ name: 'Foo' })
   end
@@ -215,7 +216,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, default: 'Description!'
     end
 
-    result = described_class.new(widget_blueprint).object({ name: 'Foo' }, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object({ name: 'Foo' }, {}, instance_cache, stores)
     expect(result).to eq({
       name: 'Foo',
       desc: 'Description!'
@@ -228,7 +229,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, exclude_if_empty: true
     end
 
-    result = described_class.new(widget_blueprint).object({ name: 'Foo', desc: "" }, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object({ name: 'Foo', desc: "" }, {}, instance_cache, stores)
     expect(result).to eq({ name: 'Foo' })
   end
 
@@ -238,13 +239,13 @@ describe Blueprinter::V2::Serializer do
       field :desc, exclude_if_nil: true
     end
 
-    result = described_class.new(widget_blueprint).object({ name: 'Foo', desc: nil }, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object({ name: 'Foo', desc: nil }, {}, instance_cache, stores)
     expect(result).to eq({ name: 'Foo' })
   end
 
   it 'formats fields' do
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
-    result = described_class.new(widget_blueprint[:extended]).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint[:extended]).object(widget, {}, instance_cache, stores)
     expect(result).to eq({
       category: nil,
       name: 'Foo',
@@ -269,7 +270,7 @@ describe Blueprinter::V2::Serializer do
     widget_blueprint.extensions << ext.new
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
 
-    result = described_class.new(widget_blueprint[:extended]).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint[:extended]).object(widget, {}, instance_cache, stores)
     expect(result).to eq({
       category: nil,
       created_on: 'Sun Nov 10, 2024',
@@ -290,7 +291,7 @@ describe Blueprinter::V2::Serializer do
     widget_blueprint.extensions << ext.new
     widget = { name: 'Foo', category: { name: 'Cat' } }
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
     expect(result).to eq({ name: 'Foo', parts: nil })
   end
 
@@ -307,7 +308,7 @@ describe Blueprinter::V2::Serializer do
     widget_blueprint.extensions << ext.new
     widget = { name: 'Foo', parts: [{ num: 42 }] }
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
     expect(result).to eq({ name: 'Foo', category: nil })
   end
 
@@ -318,7 +319,7 @@ describe Blueprinter::V2::Serializer do
     end
     widget = { name: 'Foo', desc: nil }
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
     expect(result).to eq({ name: 'Foo', desc: 'Bar' })
   end
 
@@ -335,7 +336,7 @@ describe Blueprinter::V2::Serializer do
       { name: 'Foo', desc: 'Bar', zorp: 'Zorp' },
       { n: 42, m: 42 },
       instance_cache,
-      {}
+      stores
     )
     expect(result).to eq({})
   end
@@ -352,7 +353,7 @@ describe Blueprinter::V2::Serializer do
       { category: { name: 'Cat' }, parts: [{ num: 42 }] },
       {},
       instance_cache,
-      {}
+      stores
     )
     expect(result).to eq({ name: 'Foo', category: nil, parts: nil })
   end
@@ -369,7 +370,7 @@ describe Blueprinter::V2::Serializer do
       { category: { name: 'Cat' }, parts: [{ num: 42 }] },
       {},
       instance_cache,
-      {}
+      stores
     )
     expect(result).to eq({ name: 'Foo' })
   end
@@ -404,7 +405,7 @@ describe Blueprinter::V2::Serializer do
     widget_blueprint.extensions << ext.new(log)
     widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] }
 
-    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).object(widget, {}, instance_cache, stores)
     expect(result).to eq(widget)
     expect(log).to eq [
       'prepare',
@@ -448,7 +449,7 @@ describe Blueprinter::V2::Serializer do
       { name: 'Bar', category: { name: 'Bar' }, parts: [{ num: 43 }, { num: 43 }] },
     ]
 
-    result = described_class.new(widget_blueprint).collection(widgets, {}, instance_cache, {})
+    result = described_class.new(widget_blueprint).collection(widgets, {}, instance_cache, stores)
     expect(result).to eq(widgets)
     expect(log).to eq [
       'prepare',
@@ -470,7 +471,7 @@ describe Blueprinter::V2::Serializer do
       { description: 'A widget', category: { name: 'Cat' }, parts: [{ num: 42 }], name: 'Foo' },
       {},
       instance_cache,
-      {}
+      stores
     )
     expect(result.to_json).to eq({
       name: 'Foo',
@@ -499,7 +500,7 @@ describe Blueprinter::V2::Serializer do
       ],
       {},
       instance_cache,
-      {}
+      stores
     )
 
     expect(log).to eq [

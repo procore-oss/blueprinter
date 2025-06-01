@@ -40,12 +40,12 @@ module Blueprinter
       # @return [Hash] The serialized object
       #
       def object(object, options, instances, stores)
-        stores[blueprint][blueprint.object_id] ||= prepare!(options, instances, stores)
+        fields = stores[blueprint][blueprint.object_id] ||= prepare!(options, instances, stores)
         if @run_around_object
           ctx = Context::Object.new(instances[blueprint], options, instances, stores, object)
-          hooks.around(:around_object_serialization, ctx) { serialize(object, options, instances, stores) }
+          hooks.around(:around_object_serialization, ctx) { serialize(object, options, fields, instances, stores) }
         else
-          serialize(object, options, instances, stores)
+          serialize(object, options, fields, instances, stores)
         end
       end
 
@@ -60,28 +60,28 @@ module Blueprinter
       # @return [Array<Hash>] The serialized objects
       #
       def collection(collection, options, instances, stores)
-        stores[blueprint][blueprint.object_id] ||= prepare!(options, instances, stores)
+        fields = stores[blueprint][blueprint.object_id] ||= prepare!(options, instances, stores)
         if @run_around_collection
           ctx = Context::Object.new(instances[blueprint], options, instances, stores, collection)
           hooks.around(:around_collection_serialization, ctx) do
-            collection.map { |object| serialize(object, options, instances, stores) }.to_a
+            collection.map { |object| serialize(object, options, fields, instances, stores) }.to_a
           end
         else
-          collection.map { |object| serialize(object, options, instances, stores) }.to_a
+          collection.map { |object| serialize(object, options, fields, instances, stores) }.to_a
         end
       end
 
       private
 
       # rubocop:disable Metrics/MethodLength
-      def serialize(object, options, instances, stores)
+      def serialize(object, options, fields, instances, stores)
         if @run_blueprint_input
           ctx = Context::Object.new(instances[blueprint], options, instances, stores, object)
           object = hooks.reduce_into(:blueprint_input, ctx, :object)
         end
 
         ctx = Context::Field.new(instances[blueprint], options, instances, stores, object, nil, nil)
-        result = stores[blueprint].fetch(blueprint.object_id).each_with_object({}) do |field_conf, acc|
+        result = fields.each_with_object({}) do |field_conf, acc|
           ctx.field = field_conf.field
           ctx.value = nil
           ctx.value = ctx.field.value_proc ? proc_value(ctx) : hooks.call(field_conf.extractor, :extract_value, ctx)

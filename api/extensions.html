@@ -211,6 +211,8 @@ end
 </li>
 </ul>
 <p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
+<h4 id="chain-vs-override-hooks"><a class="header" href="#chain-vs-override-hooks">Chain vs override hooks</a></h4>
+<p>Most hooks are <em>chained</em>; if you have N of the same hook, they run one after the other, piping the output of one to the input to the next. However, a few hooks are <em>override</em> hooks: only the last one runs. (These are often used to replace built-in functionality.)</p>
 <h2 id="around_object_render"><a class="header" href="#around_object_render">around_object_render</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
@@ -285,7 +287,8 @@ end
 </code></pre>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
-<p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
+<p><em>Override hook</em><br />
+<strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
@@ -321,7 +324,8 @@ end
 </code></pre>
 <h2 id="extract_value"><a class="header" href="#extract_value">extract_value</a></h2>
 <blockquote>
-<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<p><em>Override hook</em><br />
+<strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Object</strong> The value for the field<br />
 <strong>@cost</strong> High - run for every field, object, and collection</p>
 </blockquote>
@@ -443,7 +447,8 @@ end
 </code></pre>
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
-<p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
+<p><em>Override hook</em><br />
+<strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>

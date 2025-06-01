@@ -173,6 +173,8 @@
 <p>Context objects are the arguments passed to APIs like <a href="../dsl/fields.html#field-blocks">field blocks</a>, <a href="../dsl/options.html">option procs</a>, <a href="./extensions.html">extension hooks</a>, and <a href="./extractors.html">extractors</a>. There are several kinds of context objects, each with its own set of fields.</p>
 <h2 id="render-context"><a class="header" href="#render-context">Render Context</a></h2>
 <p>Only the <a href="#common-fields">common fields</a> exist in the render context.</p>
+<h2 id="hook-context"><a class="header" href="#hook-context">Hook Context</a></h2>
+<p>Only the <a href="#common-fields">common fields</a> exist in the hook context.</p>
 <h2 id="object-context"><a class="header" href="#object-context">Object Context</a></h2>
 <p>All the <a href="#common-fields">common fields</a> plus:</p>
 <blockquote>
@@ -215,7 +217,9 @@ The frozen options Hash passed to <code>render</code>. An empty Hash if none was
 </blockquote>
 <blockquote>
 <p><strong>store</strong><br />
-A Hash for extensions to cache data in. Note that Blueprinter uses this store internally, and any extension may use it, so don't blow away existing keys.</p>
+A Hash for extensions, field blocks, and option blocks to cache data in. All hooks in a given extension use a shared store. Likewise, all field blocks and option procs in a given Blueprint view use a shared store.<br />
+<br />
+The store is discarded at the end of every render.</p>
 </blockquote>
 <blockquote>
 <p><strong>instances</strong><br />

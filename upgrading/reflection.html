@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Configuration - Blueprinter</title>
+        <title>Reflection - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -169,35 +169,64 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
-  options[:exclude_if_nil] = true
-  extensions &lt;&lt; MyExtension.new
-end
+                        <h1 id="reflection"><a class="header" href="#reflection">Reflection</a></h1>
+<p>The <a href="../api/reflection.html">V2 Reflection API</a> has very few changes from Legacy/V1.</p>
+<h2 id="reflecting-on-fields"><a class="header" href="#reflecting-on-fields">Reflecting on fields</a></h2>
+<p>Regular fields (no change):</p>
+<pre><code class="language-ruby">MyBlueprint.reflections[:default].fields
 </code></pre>
-<p>Read more about <a href="../dsl/options.html">options</a> and <a href="../dsl/extensions.html">extensions</a>.</p>
-<h2 id="overrides"><a class="header" href="#overrides">Overrides</a></h2>
-<p>Child classes, <a href="../dsl/views.html">views</a>, and <a href="../dsl/partials.html">partials</a> can override their inherited configuration.</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  options[:exclude_if_nil] = false
+<p>Objects and collections:</p>
+<pre><code class="language-ruby"># Legacy/V1 does not differentiate between objects and collections
+MyV1Blueprint.reflections[:default].associations
 
-  view :foo do
-    options.clear
-    extensions.clear
-  end
+# V2 does
+MyV2Blueprint.reflections[:default].objects
+MyV2Blueprint.reflections[:default].collections
+</code></pre>
+<h2 id="field-names"><a class="header" href="#field-names">Field names</a></h2>
+<p><a href="../api/reflection.html#field-metadata">V2's field metadata</a> is similar, but there's an important different in <code>name</code>.</p>
+<h4 id="legacyv1"><a class="header" href="#legacyv1">Legacy/V1</a></h4>
+<p>In Legacy/V1, <code>name</code> refers to what the field is called in the <em>input</em>.</p>
+<pre><code class="language-ruby">class MyV1Blueprint &lt; Blueprinter::Base
+  field :foo, name: :bar
 end
+
+ref = MyV1Blueprint.reflections[:default]
+
+# What the field is called in the source object
+ref.fields[:foo].name
+=&gt; :foo
+
+# What the field will be called in the output
+ref.fields[:foo].display_name
+=&gt; :bar
+</code></pre>
+<h4 id="v2"><a class="header" href="#v2">V2</a></h4>
+<p>In V2, <code>name</code> refers to what the field is called in the <em>output</em>. Note that this change is also reflected in the Hash key.</p>
+<pre><code class="language-ruby">class MyV2Blueprint &lt; Blueprinter::Blueprint
+  field :bar, from: :foo
+end
+
+ref = MyV1Blueprint.reflections[:default]
+
+# What the field will be called in the output
+ref.fields[:bar].name
+=&gt; :bar
+
+# What the field is called in the source object
+ref.fields[:bar].from
+=&gt; :foo
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../upgrading/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../upgrading/rendering.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../upgrading/customization.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../upgrading/extensions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -207,11 +236,11 @@ end
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../upgrading/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../upgrading/rendering.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../upgrading/customization.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../upgrading/extensions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

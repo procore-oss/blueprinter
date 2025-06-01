@@ -828,6 +828,8 @@ end
 </li>
 </ul>
 <p>Additionally, the <a href="api/extensions.html#around_hook">around_hook</a> hook runs around all other hooks.</p>
+<h4 id="chain-vs-override-hooks"><a class="header" href="#chain-vs-override-hooks">Chain vs override hooks</a></h4>
+<p>Most hooks are <em>chained</em>; if you have N of the same hook, they run one after the other, piping the output of one to the input to the next. However, a few hooks are <em>override</em> hooks: only the last one runs. (These are often used to replace built-in functionality.)</p>
 <h2 id="around_object_render"><a class="header" href="#around_object_render">around_object_render</a></h2>
 <blockquote>
 <p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
@@ -902,7 +904,8 @@ end
 </code></pre>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
+<p><em>Override hook</em><br />
+<strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
 <p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
@@ -938,7 +941,8 @@ end
 </code></pre>
 <h2 id="extract_value"><a class="header" href="#extract_value">extract_value</a></h2>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<p><em>Override hook</em><br />
+<strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
 <strong>@return Object</strong> The value for the field<br />
 <strong>@cost</strong> High - run for every field, object, and collection</p>
 </blockquote>
@@ -1060,7 +1064,8 @@ end
 </code></pre>
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
+<p><em>Override hook</em><br />
+<strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>
@@ -1195,7 +1200,7 @@ field.blueprint.reflections[:default].fields
 =&gt; # array of fields on the :full view of CompanyBlueprint
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
-<p>Extractors are <a href="api/./extensions.html#extract_value">extensions</a> that pull field values from the objects you're serializing. The default extractor is smart enough for most use cases, but you can create custom extractors if needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values">bypasses extractors</a>.)</p>
+<p>Extractors are <a href="api/./extensions.html#extract_value">extensions</a> that pull field values from the objects you're serializing. The default extraction logic is smart enough for most use cases, but you can create custom extractors if needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values">bypasses extractors</a>.)</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
 <p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extensions::Core::Extractor &lt; Blueprinter::Extension
@@ -1225,6 +1230,8 @@ end
 <p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a>, <a href="api/./extensions.html">extension hooks</a>, and <a href="api/./extractors.html">extractors</a>. There are several kinds of context objects, each with its own set of fields.</p>
 <h2 id="render-context"><a class="header" href="#render-context">Render Context</a></h2>
 <p>Only the <a href="api/context-objects.html#common-fields">common fields</a> exist in the render context.</p>
+<h2 id="hook-context"><a class="header" href="#hook-context">Hook Context</a></h2>
+<p>Only the <a href="api/context-objects.html#common-fields">common fields</a> exist in the hook context.</p>
 <h2 id="object-context"><a class="header" href="#object-context">Object Context</a></h2>
 <p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
 <blockquote>
@@ -1267,7 +1274,9 @@ The frozen options Hash passed to <code>render</code>. An empty Hash if none was
 </blockquote>
 <blockquote>
 <p><strong>store</strong><br />
-A Hash for extensions to cache data in. Note that Blueprinter uses this store internally, and any extension may use it, so don't blow away existing keys.</p>
+A Hash for extensions, field blocks, and option blocks to cache data in. All hooks in a given extension use a shared store. Likewise, all field blocks and option procs in a given Blueprint view use a shared store.<br />
+<br />
+The store is discarded at the end of every render.</p>
 </blockquote>
 <blockquote>
 <p><strong>instances</strong><br />
@@ -1308,7 +1317,6 @@ end
 <p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   options[:exclude_if_nil] = true
-  options[:extractor] = MyExtractor
   extensions &lt;&lt; MyExtension.new
 end
 </code></pre>
@@ -1329,8 +1337,11 @@ end
 <p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="upgrading/../dsl/formatters.html">Learn more</a>.</p>
 <pre><code class="language-ruby">format(Date) { |date| date.iso8601 }
 </code></pre>
+<p>The <a href="upgrading/../api/extensions.html#field_value">field_value</a>, <a href="upgrading/../api/extensions.html#object_value">object_value</a>, and <a href="upgrading/../api/extensions.html#collection_value">collection_value</a> extension hooks can also be used.</p>
 <h2 id="custom-extractors-2"><a class="header" href="#custom-extractors-2">Custom extractors</a></h2>
-<p>Extractors have a simplified API. <a href="upgrading/../api/extractors.html">Learn more</a>.</p>
+<p>Custom extraction in V2 is accomplished using the <a href="upgrading/../api/extensions.html#extract_value">extract_value</a> extension hook.</p>
+<p>Fields, objects, and collections continue to have an <a href="upgrading/../dsl/options.html#extractor">extractor</a> option. Simply pass your extension class to it. <a href="upgrading/../api/extractors.html">Learn more</a>.</p>
+<p>Unlike Legacy/V1, custom extractors <em>do not override blocks</em> passed to fields, objects, and collections. If a field has a block, that's how it's extracted.</p>
 <h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
 <p>Blueprinter V2's <a href="upgrading/../api/extensions.html">extension hooks</a> offer many ways to transform your inputs and outputs. The <a href="upgrading/../api/extensions.html#blueprint_output">blueprint_output</a> hook offers equivalent functionality to Legacy/V1 transformers.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
@@ -1349,6 +1360,7 @@ end
 </code></pre>
 <h2 id="renaming-fields"><a class="header" href="#renaming-fields">Renaming fields</a></h2>
 <p>In Blueprinter Legacy/V1, you could rename fields using the <code>name</code> option. Blueprinter V2 swaps the order and uses <code>from</code>. We believe this makes your blueprints more readable.</p>
+<p>In the following examples, both blueprints are populating the output field <em>description</em> from a source attribute named <em>desc</em>.</p>
 <pre><code class="language-ruby"># Legacy/V1
 field :desc, name: :description
 
@@ -1400,6 +1412,63 @@ end
 <p>However, as a nod simplifying the migration, the <code>view</code> option is still available. It may be removed in a future version.</p>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :extended).to_json
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="reflection-2"><a class="header" href="#reflection-2">Reflection</a></h1>
+<p>The <a href="upgrading/../api/reflection.html">V2 Reflection API</a> has very few changes from Legacy/V1.</p>
+<h2 id="reflecting-on-fields"><a class="header" href="#reflecting-on-fields">Reflecting on fields</a></h2>
+<p>Regular fields (no change):</p>
+<pre><code class="language-ruby">MyBlueprint.reflections[:default].fields
+</code></pre>
+<p>Objects and collections:</p>
+<pre><code class="language-ruby"># Legacy/V1 does not differentiate between objects and collections
+MyV1Blueprint.reflections[:default].associations
+
+# V2 does
+MyV2Blueprint.reflections[:default].objects
+MyV2Blueprint.reflections[:default].collections
+</code></pre>
+<h2 id="field-names"><a class="header" href="#field-names">Field names</a></h2>
+<p><a href="upgrading/../api/reflection.html#field-metadata">V2's field metadata</a> is similar, but there's an important different in <code>name</code>.</p>
+<h4 id="legacyv1"><a class="header" href="#legacyv1">Legacy/V1</a></h4>
+<p>In Legacy/V1, <code>name</code> refers to what the field is called in the <em>input</em>.</p>
+<pre><code class="language-ruby">class MyV1Blueprint &lt; Blueprinter::Base
+  field :foo, name: :bar
+end
+
+ref = MyV1Blueprint.reflections[:default]
+
+# What the field is called in the source object
+ref.fields[:foo].name
+=&gt; :foo
+
+# What the field will be called in the output
+ref.fields[:foo].display_name
+=&gt; :bar
+</code></pre>
+<h4 id="v2"><a class="header" href="#v2">V2</a></h4>
+<p>In V2, <code>name</code> refers to what the field is called in the <em>output</em>. Note that this change is also reflected in the Hash key.</p>
+<pre><code class="language-ruby">class MyV2Blueprint &lt; Blueprinter::Blueprint
+  field :bar, from: :foo
+end
+
+ref = MyV1Blueprint.reflections[:default]
+
+# What the field will be called in the output
+ref.fields[:bar].name
+=&gt; :bar
+
+# What the field is called in the source object
+ref.fields[:bar].from
+=&gt; :foo
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-3"><a class="header" href="#extensions-3">Extensions</a></h1>
+<p>The <a href="upgrading/../api/extensions.html">V2 Extension API</a>, as well as the DSL for <a href="upgrading/../dsl/extensions.html">enabling V2 extensions</a>, are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: <code>pre_render</code>. V2 has <a href="upgrading/../api/extensions.html#hooks">over a dozen</a>.</p>
+<h2 id="porting-pre_render"><a class="header" href="#porting-pre_render">Porting pre_render</a></h2>
+<p>Legacy/V1's <code>pre_render</code> hook does not exist in V2, but it has three possible replacements:</p>
+<ul>
+<li><a href="upgrading/../api/extensions.html#input_object">input_object</a> runs at the beginning of every <code>render</code> call (for objects)</li>
+<li><a href="upgrading/../api/extensions.html#input_collection">input_collection</a> runs at the beginning of every <code>render</code> call (for collections)</li>
+<li><a href="upgrading/../api/extensions.html#blueprint_input">blueprint_input</a> runs each time a blueprint serializes an object</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>
 

@@ -3,7 +3,6 @@
 require 'multi_json'
 
 describe Blueprinter::Extensions::MultiJson do
-  let(:instances) { Blueprinter::V2::InstanceCache.new }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       fields :id, :name
@@ -11,7 +10,7 @@ describe Blueprinter::Extensions::MultiJson do
   end
 
   it 'renders JSON' do
-    context = Blueprinter::V2::Context::Result.new(blueprint, {}, instances, {}, {}, { id: 42, name: 'Foo' })
+    context = Blueprinter::V2::Context::Result.new(blueprint, {}, {}, { id: 42, name: 'Foo' })
     res = described_class.new.json(context)
     expect(res).to eq '{"id":42,"name":"Foo"}'
   end

@@ -10,6 +10,12 @@ module Blueprinter
       @view_name = view_name
     end
 
+    # rubocop:disable Lint/UnusedMethodArgument
+    def hashify(object, view_name:, local_options:)
+      blueprint.hashify(object, view_name: @view_name, local_options:)
+    end
+    # rubocop:enable Lint/UnusedMethodArgument
+
     def render(object, options = {})
       blueprint.render(object, { view: view_name }.merge(options))
     end

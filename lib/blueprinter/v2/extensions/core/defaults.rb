@@ -8,9 +8,11 @@ module Blueprinter
         # A core extension that applies defaults values.
         #
         class Defaults < Extension
+          def initialize = @config = {}.compare_by_identity
+
           # @param ctx [Blueprinter::V2::Context::Field]
           def field_value(ctx)
-            config = ctx.store[ctx.field.object_id]
+            config = @config[ctx.field]
             default_if = config[:default_if]
             return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
 
@@ -19,7 +21,7 @@ module Blueprinter
 
           # @param ctx [Blueprinter::V2::Context::Field]
           def object_value(ctx)
-            config = ctx.store[ctx.field.object_id]
+            config = @config[ctx.field]
             default_if = config[:default_if]
             return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
 
@@ -28,7 +30,7 @@ module Blueprinter
 
           # @param ctx [Blueprinter::V2::Context::Field]
           def collection_value(ctx)
-            config = ctx.store[ctx.field.object_id]
+            config = @config[ctx.field]
             default_if = config[:default_if]
             return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
 
@@ -50,7 +52,7 @@ module Blueprinter
 
           def prepare_field(ctx, field)
             bp_class = ctx.blueprint.class
-            config = (ctx.store[field.object_id] ||= {})
+            config = (@config[field] ||= {})
             config[:default] = ctx.options[:field_default] || field.options[:default] || bp_class.options[:field_default]
             config[:default_if] =
               ctx.options[:field_default_if] || field.options[:default_if] || bp_class.options[:field_default_if]
@@ -58,7 +60,7 @@ module Blueprinter
 
           def prepare_object(ctx, field)
             bp_class = ctx.blueprint.class
-            config = (ctx.store[field.object_id] ||= {})
+            config = (@config[field] ||= {})
             config[:default] = ctx.options[:object_default] || field.options[:default] || bp_class.options[:object_default]
             config[:default_if] =
               ctx.options[:object_default_if] || field.options[:default_if] || bp_class.options[:object_default_if]
@@ -66,7 +68,7 @@ module Blueprinter
 
           def prepare_collection(ctx, field)
             bp_class = ctx.blueprint.class
-            config = (ctx.store[field.object_id] ||= {})
+            config = (@config[field] ||= {})
             config[:default] =
               ctx.options[:collection_default] || field.options[:default] || bp_class.options[:collection_default]
             config[:default_if] =

@@ -36,4 +36,9 @@ describe Blueprinter::V2::Extensions::Core::Extractor do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
     expect(subject.extract_value ctx).to eq([{ num: 42 }])
   end
+
+  it "shouldn't hide subclasses" do
+    sub = Class.new(described_class)
+    expect(sub.new.hidden?).to be false
+  end
 end

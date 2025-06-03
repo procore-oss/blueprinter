@@ -172,4 +172,120 @@ describe 'V1/V2 Compatibility' do
       end
     end
   end
+
+  context 'instance cache' do
+    let(:blueprints) do
+      blueprints = {}
+      blueprints[:barprint] = Class.new(Blueprinter::V2::Base) do
+        bp = blueprints
+        options[:exclude_if_nil] = true
+        field :name do |ctx|
+          "#{ctx.object[:name]} - #{ctx.options[:tag]}"
+        end
+        view :extended do
+          object :foo, bp[:fooprint][:extended]
+        end
+      end
+      blueprints[:fooprint] = Class.new(Blueprinter::Base) do
+        bp = blueprints
+        field :name do |obj, opts|
+          "#{obj[:name]} - #{opts[:tag]}"
+        end
+        view :extended do
+          association :bar1, blueprint: bp[:barprint], view: :extended
+          association :bar2, blueprint: bp[:barprint], view: :extended
+        end
+      end
+      blueprints
+    end
+
+    let(:instances) do
+      Blueprinter::V2::InstanceCache.new.tap do |instances|
+        def instances.cache = @cache
+      end
+    end
+
+    it 'should use the same V2 Serializer and Blueprint instances through V1' do
+      barprint = blueprints[:barprint][:extended]
+      bar_serializer = instances[Blueprinter::V2::Serializer, [barprint, { tag: 'X' }, instances]]
+
+      res = bar_serializer.object({
+        name: 'Bar 1',
+        foo: {
+          name: 'Foo 1',
+          bar1: { name: 'Bar 2' },
+          bar2: { name: 'Bar 2' }
+        }
+      })
+      expect(res).to eq({
+        name: 'Bar 1 - X',
+        foo: {
+          name: 'Foo 1 - X',
+          bar1: { name: 'Bar 2 - X' },
+          bar2: { name: 'Bar 2 - X' }
+        }
+      })
+
+      barprint_serializer_instances = instances.cache.select do |(key, _val)|
+        key == bar_serializer.class.object_id || (key.is_a?(Array) && key[0] == bar_serializer.class.object_id)
+      end
+      expect(barprint_serializer_instances.size).to eq 1
+
+      barprint_instances = instances.cache.select do |key, _val|
+        key == barprint.object_id || (key.is_a?(Array) && key[0] == barprint.object_id)
+      end
+      expect(barprint_instances.size).to eq 1
+    end
+
+    it 'should use the same V2 Serializer and Blueprint instances from V1' do
+      def instances.cache = @cache
+      def instances.log = @log ||= []
+      def instances.[](obj, args = nil)
+        log << [obj, *args]
+        super
+      end
+
+      res = blueprints[:fooprint].render_as_hash({
+        name: 'Foo 1',
+        bar1: {
+          name: 'Bar 1',
+          foo: {
+            name: 'Foo 2',
+            bar1: { name: 'Bar 3' },
+            bar2: { name: 'Bar 4' },
+          }
+        },
+        bar2: {
+          name: 'Bar 2',
+          foo: {
+            name: 'Foo 3',
+            bar1: { name: 'Bar 5' },
+            bar2: { name: 'Bar 6' },
+          }
+        }
+      }, {
+        view: :extended,
+        v2_instances: instances,
+        tag: 'X'
+      })
+
+      barprint = blueprints[:barprint][:extended]
+      serializer = Blueprinter::V2::Serializer
+
+      barprint_serializer_instances = instances.cache.select do |(key, _val)|
+        key == serializer.object_id || (key.is_a?(Array) && key[0] == serializer.object_id)
+      end
+      expect(barprint_serializer_instances.size).to eq 1
+
+      barprint_instances = instances.cache.select do |key, _val|
+        key == barprint.object_id || (key.is_a?(Array) && key[0] == barprint.object_id)
+      end
+      expect(barprint_instances.size).to eq 1
+
+      barprint_serializer_calls = instances.log.select do |(klass, arg1, _)|
+        klass == serializer && arg1 == barprint
+      end
+      expect(barprint_serializer_calls.size).to eq 6
+    end
+  end
 end

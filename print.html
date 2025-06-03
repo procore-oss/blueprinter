@@ -696,18 +696,21 @@ WidgetBlueprint
 <h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
 <p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They're inherited from parent classes and views, but can be overridden.</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  # Add extension classes
+  # This extension instance will exist for the duration of your program
   extensions &lt;&lt; FooExtension.new
-  extensions &lt;&lt; BarExtension.new
 
-  # Or define them inline
+  # These extensions will be initialized once during each render
+  extensions &lt;&lt; BarExtension
+  extensions &lt;&lt; -&gt; { ZorpExtension.new(some_args) }
+
+  # Inline extensions are also initialized once per render
   extension do
     def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
   end
 
   view :minimal do
     # extensions is a simple Array, so you can add or remove elements
-    extensions.reject! { |ext| ext.is_a? BarExtension }
+    extensions.select! { |ext| ext.is_a? FooExtension }
 
     # or simply replace the whole Array
     self.extensions = [FooExtension.new]
@@ -921,10 +924,9 @@ end
 <p><strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
+<p>Allows an extension to perform setup operations for the render of the current blueprint.</p>
 <pre><code class="language-ruby">def prepare(ctx)
-  ctx.store[:my_ext] ||= {}
-  ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
+  # do setup for ctx.blueprint
 end
 </code></pre>
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
@@ -1227,19 +1229,38 @@ end
 <li>Add it to specific fields using the <a href="api/../dsl/options.html#extractor">extractor option</a>.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="context-objects-1"><a class="header" href="#context-objects-1">Context Objects</a></h1>
-<p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a>, <a href="api/./extensions.html">extension hooks</a>, and <a href="api/./extractors.html">extractors</a>. There are several kinds of context objects, each with its own set of fields.</p>
+<p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a> and <a href="api/./extensions.html">extension hooks</a>. There are several kinds of context objects, each with its own set of fields.</p>
 <h2 id="render-context"><a class="header" href="#render-context">Render Context</a></h2>
-<p>Only the <a href="api/context-objects.html#common-fields">common fields</a> exist in the render context.</p>
-<h2 id="hook-context"><a class="header" href="#hook-context">Hook Context</a></h2>
-<p>Only the <a href="api/context-objects.html#common-fields">common fields</a> exist in the hook context.</p>
+<blockquote>
+<p><strong>blueprint</strong><br />
+The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>options</strong><br />
+The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+</blockquote>
 <h2 id="object-context"><a class="header" href="#object-context">Object Context</a></h2>
-<p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
+<blockquote>
+<p><strong>blueprint</strong><br />
+The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>options</strong><br />
+The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+</blockquote>
 <blockquote>
 <p><strong>object</strong><br />
 The object or collection currently being serialized.</p>
 </blockquote>
 <h2 id="field-context"><a class="header" href="#field-context">Field Context</a></h2>
-<p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
+<blockquote>
+<p><strong>blueprint</strong><br />
+The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>options</strong><br />
+The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+</blockquote>
 <blockquote>
 <p><strong>object</strong><br />
 The object currently being serialized.</p>
@@ -1253,17 +1274,6 @@ A struct of the field, object, or collection currently being rendered. You can u
 The extracted field value. (In certain situations, like the extractor API and field blocks, it will always be <code>nil</code> since nothing has been extracted yet.)</p>
 </blockquote>
 <h2 id="result-context"><a class="header" href="#result-context">Result Context</a></h2>
-<p>All the <a href="api/context-objects.html#common-fields">common fields</a> plus:</p>
-<blockquote>
-<p><strong>object</strong><br />
-The object or collection that was just serialized.</p>
-</blockquote>
-<blockquote>
-<p><strong>result</strong><br />
-A serialized result. Depending on the situation this will be a Hash or an array of Hashes.</p>
-</blockquote>
-<h2 id="common-fields"><a class="header" href="#common-fields">Common fields</a></h2>
-<p>These fields exist on all context objects:</p>
 <blockquote>
 <p><strong>blueprint</strong><br />
 The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
@@ -1273,14 +1283,29 @@ The current Blueprint instance. You can use this to access the Blueprint's name,
 The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
 <blockquote>
-<p><strong>store</strong><br />
-A Hash for extensions, field blocks, and option blocks to cache data in. All hooks in a given extension use a shared store. Likewise, all field blocks and option procs in a given Blueprint view use a shared store.<br />
-<br />
-The store is discarded at the end of every render.</p>
+<p><strong>object</strong><br />
+The object or collection that was just serialized.</p>
 </blockquote>
 <blockquote>
-<p><strong>instances</strong><br />
-A Hash-like interface for creating/fetching class instances. This allows Blueprinter to reuse the same blueprint and extractor instances during a render. You're free to use it, too. See <code>InstanceCache</code> in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more details.</p>
+<p><strong>result</strong><br />
+A serialized result. Depending on the situation this will be a Hash or an array of Hashes.</p>
+</blockquote>
+<h2 id="hook-context"><a class="header" href="#hook-context">Hook Context</a></h2>
+<blockquote>
+<p><strong>blueprint</strong><br />
+The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>options</strong><br />
+The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+</blockquote>
+<blockquote>
+<p><strong>extension</strong><br />
+Instance of the current extension</p>
+</blockquote>
+<blockquote>
+<p><strong>hook</strong><br />
+Name of the current hook</p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
 <p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#incremental-update">incremental update</a>.</p>

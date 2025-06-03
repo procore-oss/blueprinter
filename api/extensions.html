@@ -304,10 +304,9 @@ end
 <p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Allows an extension to perform setup operations for the render of the current blueprint. <code>context.store</code> is a good place to cache data since it is shared across all hooks and extensions during a given render.</p>
+<p>Allows an extension to perform setup operations for the render of the current blueprint.</p>
 <pre><code class="language-ruby">def prepare(ctx)
-  ctx.store[:my_ext] ||= {}
-  ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
+  # do setup for ctx.blueprint
 end
 </code></pre>
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>

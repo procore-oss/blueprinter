@@ -8,18 +8,21 @@ Extensions can be added to your `ApplicationBlueprint` or any other blueprint, v
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint
-  # Add extension classes
+  # This extension instance will exist for the duration of your program
   extensions << FooExtension.new
-  extensions << BarExtension.new
 
-  # Or define them inline
+  # These extensions will be initialized once during each render
+  extensions << BarExtension
+  extensions << -> { ZorpExtension.new(some_args) }
+
+  # Inline extensions are also initialized once per render
   extension do
     def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
   end
 
   view :minimal do
     # extensions is a simple Array, so you can add or remove elements
-    extensions.reject! { |ext| ext.is_a? BarExtension }
+    extensions.select! { |ext| ext.is_a? FooExtension }
 
     # or simply replace the whole Array
     self.extensions = [FooExtension.new]

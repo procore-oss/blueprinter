@@ -46,7 +46,7 @@ Additionally, the [around_hook](#around_hook) hook runs around all other hooks.
 
 #### Chain vs override hooks
 
-Most hooks are *chained*; if you have N of the same hook, they run one after the other, piping the output of one to the input to the next. However, a few hooks are *override* hooks: only the last one runs. (These are often used to replace built-in functionality.)
+Most hooks are *chained*; if you have N of the same hook, they run one after the other, using the output of one as input for the next. However, a few hooks are *override* hooks: only the last one runs. Override hooks are used to replace built-in functionality, like the JSON serializer.
 
 ## around_object_render
 
@@ -164,12 +164,11 @@ It's run once _per blueprint class_ during a render. So if you're rendering an a
 > **@param [Render Context](./context-objects.md#render-context)**\
 > **@cost** Low - run once for _every blueprint class_ during render
 
-Allows an extension to perform setup operations for the render of the current blueprint. `context.store` is a good place to cache data since it is shared across all hooks and extensions during a given render.
+Allows an extension to perform setup operations for the render of the current blueprint.
 
 ```ruby
 def prepare(ctx)
-  ctx.store[:my_ext] ||= {}
-  ctx.store[:my_ext][ctx.blueprint.object_id] = setup ctx
+  # do setup for ctx.blueprint
 end
 ```
 

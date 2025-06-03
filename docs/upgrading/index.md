@@ -6,7 +6,7 @@ Regardless which you choose, you'll need to familiarize yourself with the [new D
 
 ## Full update
 
-Update `blueprinter` to 2.x. All of your blueprints will need updated to use the [new DSL](./dsl/index.md). If you're making use of extensions, custom extractors, or transformers, they'll also need updated to the [new API](./api/index.md).
+Update `blueprinter` to 2.x. All of your blueprints will need updated to use the [new DSL](../dsl/index.md). If you're making use of extensions, custom extractors, or transformers, they'll also need updated to the [new API](../api/index.md).
 
 ## Incremental update
 

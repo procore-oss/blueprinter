@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 describe "Blueprinter::V2 Extension DSL" do
+  let(:instances) { Blueprinter::V2::InstanceCache.new }
   let(:blueprint) do
     blueprint = Class.new(Blueprinter::V2::Base) do
       def self.blueprint_name = "NameBlueprint"
@@ -15,14 +16,15 @@ describe "Blueprinter::V2 Extension DSL" do
   end
 
   it "defines multiple extensions" do
+    serializer = Blueprinter::V2::Serializer.new(blueprint, {}, instances)
     expect(blueprint.extensions.size).to eq 2
-    expect(blueprint.serializer.hooks.registered? :field_value).to be true
-    expect(blueprint.serializer.hooks.registered? :blueprint_output).to be true
-    expect(blueprint.serializer.hooks.registered? :around_object_serialization).to be false
+    expect(serializer.hooks.registered? :field_value).to be true
+    expect(serializer.hooks.registered? :blueprint_output).to be true
+    expect(serializer.hooks.registered? :around_object_serialization).to be false
   end
 
   it "names the extensions" do
-    expect(blueprint.extensions.map(&:class).map(&:name)).to eq ["NameBlueprint extension", "NameBlueprint extension"]
+    expect(blueprint.extensions.map(&:name)).to eq ["NameBlueprint extension", "NameBlueprint extension"]
   end
 
   it "runs the extensions" do

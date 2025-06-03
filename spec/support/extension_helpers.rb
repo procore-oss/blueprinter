@@ -5,6 +5,8 @@ module ExtensionHelpers
     klass.class_eval do
       subject { described_class.new }
 
+      let(:instances) { Blueprinter::V2::InstanceCache.new }
+
       let(:sub_blueprint) do
         Class.new(Blueprinter::V2::Base) do
           self.blueprint_name = 'SubBlueprint'
@@ -49,12 +51,8 @@ module ExtensionHelpers
   end
 
   def prepare(blueprint, options, ctx_type, *args)
-    stores = Blueprinter::V2::Context.create_stores
-    instances = Blueprinter::V2::InstanceCache.new
-    ctx = Blueprinter::V2::Context::Render.new(instances[blueprint], options, instances, stores)
-    subject.prepare ctx.with_store(subject) if subject.respond_to?(:prepare)
-    ctx_type.
-      new(instances[blueprint], options, instances, stores, *args).
-      with_store(subject)
+    ctx = Blueprinter::V2::Context::Render.new(instances[blueprint], options)
+    subject.prepare ctx if subject.respond_to?(:prepare)
+    ctx_type.new(instances[blueprint], options, *args)
   end
 end

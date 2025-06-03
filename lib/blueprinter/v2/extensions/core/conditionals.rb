@@ -5,21 +5,27 @@ module Blueprinter
     module Extensions
       module Core
         class Conditionals < Extension
+          def initialize
+            @if = {}.compare_by_identity
+            @unless = {}.compare_by_identity
+            @ex_if_nil = {}.compare_by_identity
+            @ex_if_empty = {}.compare_by_identity
+          end
+
           # @param ctx [Blueprinter::V2::Context::Field]
           # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
           def exclude_field?(ctx)
-            config = ctx.store[ctx.field.object_id]
-            if ctx.value.nil? && config[:exclude_if_nil]
+            if ctx.value.nil? && @ex_if_nil[ctx.field]
               return true
-            elsif config[:exclude_if_empty]
+            elsif @ex_if_empty[ctx.field]
               return true if ctx.value.nil? || (ctx.value.respond_to?(:empty?) && ctx.value.empty?)
             end
 
-            if (cond = config[:if])
+            if (cond = @if[ctx.field])
               result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
               return true unless result
             end
-            if (cond = config[:unless])
+            if (cond = @unless[ctx.field])
               result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
               return true if result
             end
@@ -27,17 +33,10 @@ module Blueprinter
           end
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
 
-          # @param ctx [Blueprinter::V2::Context::Field]
-          def exclude_object?(ctx)
-            exclude_field? ctx
-          end
+          alias exclude_object? exclude_field?
+          alias exclude_collection? exclude_field?
 
-          # @param ctx [Blueprinter::V2::Context::Field]
-          def exclude_collection?(ctx)
-            exclude_field? ctx
-          end
-
-          # It's significantly faster to evaluate these options once and store them in the context
+          # It's significantly faster to evaluate these options once and store them
           # @param ctx [Blueprinter::V2::Context::Render]
           def prepare(ctx)
             ref = ctx.blueprint.class.reflections[:default]
@@ -54,13 +53,11 @@ module Blueprinter
           def prepare_fields(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.fields.each_value do |field|
-              ctx.store[field.object_id] ||= {}
-              ctx.store[field.object_id][:if] = ctx.options[:field_if] || field.options[:if] || bp_class.options[:field_if]
-              ctx.store[field.object_id][:unless] =
-                ctx.options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
-              ctx.store[field.object_id][:exclude_if_nil] =
+              @if[field] = ctx.options[:field_if] || field.options[:if] || bp_class.options[:field_if]
+              @unless[field] = ctx.options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
+              @ex_if_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              ctx.store[field.object_id][:exclude_if_empty] =
+              @ex_if_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end
@@ -70,13 +67,11 @@ module Blueprinter
           def prepare_objects(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.objects.each_value do |field|
-              ctx.store[field.object_id] ||= {}
-              ctx.store[field.object_id][:if] = ctx.options[:object_if] || field.options[:if] || bp_class.options[:object_if]
-              ctx.store[field.object_id][:unless] =
-                ctx.options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
-              ctx.store[field.object_id][:exclude_if_nil] =
+              @if[field] = ctx.options[:object_if] || field.options[:if] || bp_class.options[:object_if]
+              @unless[field] = ctx.options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
+              @ex_if_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              ctx.store[field.object_id][:exclude_if_empty] =
+              @ex_if_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end
@@ -86,14 +81,12 @@ module Blueprinter
           def prepare_collections(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.collections.each_value do |field|
-              ctx.store[field.object_id] ||= {}
-              ctx.store[field.object_id][:if] =
-                ctx.options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
-              ctx.store[field.object_id][:unless] =
+              @if[field] = ctx.options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
+              @unless[field] =
                 ctx.options[:collection_unless] || field.options[:unless] || bp_class.options[:collection_unless]
-              ctx.store[field.object_id][:exclude_if_nil] =
+              @ex_if_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              ctx.store[field.object_id][:exclude_if_empty] =
+              @ex_if_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end

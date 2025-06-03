@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'blueprinter/v2/render'
-require 'blueprinter/v2/serializer'
 
 module Blueprinter
   module V2
@@ -93,7 +92,7 @@ module Blueprinter
           options = options.dup
           return self[options.delete(:view)].render_object(obj, options)
         end
-        Render.new(obj, options, serializer: serializer, collection: false)
+        Render.new(obj, options, blueprint: self, collection: false)
       end
 
       def self.render_collection(objs, options = {})
@@ -102,13 +101,7 @@ module Blueprinter
           options = options.dup
           return self[options.delete(:view)].render_collection(objs, options)
         end
-        Render.new(objs, options, serializer: serializer, collection: true)
-      end
-
-      # @api private
-      def self.serializer
-        eval! unless @evaled
-        @serializer
+        Render.new(objs, options, blueprint: self, collection: true)
       end
 
       # Apply partials and field exclusions
@@ -135,8 +128,6 @@ module Blueprinter
           f.options&.freeze
           f.freeze
         end
-
-        @serializer = Serializer.new(self)
         @evaled = true
       end
 

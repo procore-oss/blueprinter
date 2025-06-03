@@ -3,11 +3,12 @@
 module Blueprinter
   module V2
     class FieldSerializer
-      attr_reader :field, :extractor, :hooks, :defaults, :cond, :formatter
+      attr_reader :field, :extractor, :instances, :hooks, :defaults, :cond, :formatter
 
       def initialize(field, extractor, serializer)
         @field = field
         @extractor = extractor
+        @instances = serializer.instances
         @hooks = serializer.hooks
         @defaults = serializer.defaults
         @cond = serializer.cond
@@ -17,10 +18,10 @@ module Blueprinter
 
       class Field < self
         def serialize(ctx, result)
-          ctx.value = defaults.field_value ctx.with_store(defaults)
+          ctx.value = defaults.field_value ctx
           hooks.reduce_into(:field_value, ctx, :value) if @run_field_value
           ctx.value = formatter.call(ctx)
-          return if cond.exclude_field?(ctx.with_store(cond)) || (@run_ex_field && hooks.any?(:exclude_field?, ctx))
+          return if cond.exclude_field?(ctx) || (@run_ex_field && hooks.any?(:exclude_field?, ctx))
 
           result[ctx.field.name] = ctx.value
         end
@@ -29,18 +30,18 @@ module Blueprinter
       class Object < self
         def serialize(ctx, result)
           field = ctx.field
-          instances = ctx.instances
-          ctx.value = defaults.object_value ctx.with_store(defaults)
+          ctx.value = defaults.object_value ctx
           hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
-          return if cond.exclude_object?(ctx.with_store(cond)) || (@run_ex_object && hooks.any?(:exclude_object?, ctx))
+          return if cond.exclude_object?(ctx) || (@run_ex_object && hooks.any?(:exclude_object?, ctx))
 
           if ctx.value
             ctx.value =
               if instances[field.blueprint].is_a? V2::Base
-                field.blueprint.serializer.object(ctx.value, ctx.options, instances, ctx.stores)
+                child_serializer = instances[Serializer, [field.blueprint, ctx.options, instances]]
+                child_serializer.object(ctx.value)
               else
-                legacy_opts = { v2_instances: instances, v2_stores: ctx.stores }
-                field.blueprint.render_as_hash(ctx.value, ctx.options.dup.merge(legacy_opts))
+                opts = { v2_instances: instances }
+                field.blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
               end
           end
           result[field.name] = ctx.value
@@ -48,27 +49,24 @@ module Blueprinter
       end
 
       class Collection < self
-        # rubocop:disable Metrics/MethodLength
         def serialize(ctx, result)
           field = ctx.field
-          instances = ctx.instances
-          ctx.value = defaults.collection_value ctx.with_store(defaults)
+          ctx.value = defaults.collection_value ctx
           hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
-          ctx.with_store cond
           return if cond.exclude_collection?(ctx) || (@run_ex_collection && hooks.any?(:exclude_collection?, ctx))
 
           if ctx.value
             ctx.value =
               if instances[field.blueprint].is_a? V2::Base
-                field.blueprint.serializer.collection(ctx.value, ctx.options, instances, ctx.stores)
+                child_serializer = instances[Serializer, [field.blueprint, ctx.options, instances]]
+                child_serializer.collection(ctx.value)
               else
-                legacy_opts = { v2_instances: instances, v2_stores: ctx.stores }
-                field.blueprint.render_as_hash(ctx.value, ctx.options.dup.merge(legacy_opts))
+                opts = { v2_instances: instances }
+                field.blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
               end
           end
           result[field.name] = ctx.value
         end
-        # rubocop:enable Metrics/MethodLength
       end
 
       private

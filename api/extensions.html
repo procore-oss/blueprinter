@@ -212,7 +212,7 @@ end
 </ul>
 <p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
 <h4 id="chain-vs-override-hooks"><a class="header" href="#chain-vs-override-hooks">Chain vs override hooks</a></h4>
-<p>Most hooks are <em>chained</em>; if you have N of the same hook, they run one after the other, piping the output of one to the input to the next. However, a few hooks are <em>override</em> hooks: only the last one runs. (These are often used to replace built-in functionality.)</p>
+<p>Most hooks are <em>chained</em>; if you have N of the same hook, they run one after the other, using the output of one as input for the next. However, a few hooks are <em>override</em> hooks: only the last one runs. Override hooks are used to replace built-in functionality, like the JSON serializer.</p>
 <h2 id="around_object_render"><a class="header" href="#around_object_render">around_object_render</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />

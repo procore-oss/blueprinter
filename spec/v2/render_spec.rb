@@ -17,9 +17,8 @@ describe Blueprinter::V2::Render do
   end
 
   it 'renders an object to a hash' do
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, serializer: serializer, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_hash).to eq({
       name: 'Foo',
@@ -29,12 +28,11 @@ describe Blueprinter::V2::Render do
   end
 
   it 'renders a collection to a hash' do
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widgets = [
       { name: 'Foo', description: 'About', category: { n: 'Bar' } },
       { name: 'Foo 2', description: 'About 2', category: { n: 'Bar 2' } },
     ]
-    render = described_class.new(widgets, {}, serializer: serializer, collection: true)
+    render = described_class.new(widgets, {}, blueprint: widget_blueprint, collection: true)
 
     expect(render.to_hash).to eq([
       {
@@ -51,9 +49,8 @@ describe Blueprinter::V2::Render do
   end
 
   it 'renders an object to JSON' do
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, serializer: serializer, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_json).to eq({
       name: 'Foo',
@@ -63,9 +60,8 @@ describe Blueprinter::V2::Render do
   end
 
   it 'renders a collection to JSON' do
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new([widget], {}, serializer: serializer, collection: true)
+    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true)
 
     expect(render.to_json).to eq([{
       name: 'Foo',
@@ -90,17 +86,15 @@ describe Blueprinter::V2::Render do
     widget_blueprint.extensions << json_ext.new('A', log)
     widget_blueprint.extensions << json_ext.new('B', log)
 
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
-    render = described_class.new({ name: 'Foo' }, {}, serializer: serializer, collection: false)
+    render = described_class.new({ name: 'Foo' }, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_json).to eq '{"name":"Foo"}'
     expect(log).to eq ['B: custom json!']
   end
 
   it 'renders to JSON and ignores the arg (for Rails `render json:`)' do
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new([widget], {}, serializer: serializer, collection: true)
+    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true)
 
     expect(render.to_json({ junk: 'junk' })).to eq([{
       name: 'Foo',
@@ -110,9 +104,8 @@ describe Blueprinter::V2::Render do
   end
 
   it 'responds to to_str with json' do
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, serializer: serializer, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_str).to eq({
       name: 'Foo',
@@ -128,9 +121,8 @@ describe Blueprinter::V2::Render do
       end
     end
     widget_blueprint.extensions << ext.new
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, serializer: serializer, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_json).to eq({
       name: 'Foo',
@@ -147,9 +139,8 @@ describe Blueprinter::V2::Render do
       end
     end
     widget_blueprint.extensions << ext.new
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, serializer: serializer, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_hash).to eq({
       name: 'Foo',
@@ -165,9 +156,8 @@ describe Blueprinter::V2::Render do
       end
     end
     widget_blueprint.extensions << ext.new
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widgets = [{ name: 'Foo', description: 'About', category: { n: 'Bar' } }]
-    render = described_class.new(widgets, {}, serializer: serializer, collection: true)
+    render = described_class.new(widgets, {}, blueprint: widget_blueprint, collection: true)
 
     expect(render.to_hash).to eq([{
       name: 'Foo',
@@ -183,9 +173,8 @@ describe Blueprinter::V2::Render do
       end
     end
     widget_blueprint.extensions << ext.new
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, serializer: serializer, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
 
     expect(render.to_hash).to eq({
       data: {
@@ -203,9 +192,8 @@ describe Blueprinter::V2::Render do
       end
     end
     widget_blueprint.extensions << ext.new
-    serializer = Blueprinter::V2::Serializer.new(widget_blueprint)
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new([widget], {}, serializer: serializer, collection: true)
+    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true)
 
     expect(render.to_hash).to eq({
       data: [{
@@ -260,9 +248,8 @@ describe Blueprinter::V2::Render do
     it 'runs the around_object_render hook around all other render hooks' do
       log = []
       category_blueprint.extensions << ext.new(log)
-      serializer = Blueprinter::V2::Serializer.new(category_blueprint)
 
-      result = described_class.new({ n: 'Foo' }, {}, serializer: serializer, collection: false).to_hash
+      result = described_class.new({ n: 'Foo' }, {}, blueprint: category_blueprint, collection: false).to_hash
       expect(result).to eq({ name: 'Foo' })
       expect(log).to eq ['around_object_render: a', 'input_object', 'output_object', 'around_object_render: b']
     end
@@ -270,9 +257,8 @@ describe Blueprinter::V2::Render do
     it 'runs the around_collection_render hook around all other render hooks' do
       log = []
       category_blueprint.extensions << ext.new(log)
-      serializer = Blueprinter::V2::Serializer.new(category_blueprint)
 
-      result = described_class.new([{ n: 'Foo' }], {}, serializer: serializer, collection: true).to_hash
+      result = described_class.new([{ n: 'Foo' }], {}, blueprint: category_blueprint, collection: true).to_hash
       expect(result).to eq([{ name: 'Foo' }])
       expect(log).to eq ['around_collection_render: a', 'input_collection', 'output_collection', 'around_collection_render: b']
     end

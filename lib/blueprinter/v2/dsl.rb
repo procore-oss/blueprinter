@@ -60,7 +60,8 @@ module Blueprinter
       end
 
       #
-      # Define an anonymous extension and add it to the current context.
+      # Define an anonymous extension and add it to the current context. It will be initialized
+      # once per render.
       #
       #   class WidgetBlueprint < ApplicationBlueprint
       #     extension do
@@ -77,7 +78,7 @@ module Blueprinter
           @blueprint_name = bp_name
           def self.name = "#{@blueprint_name} extension"
           class_eval(&block)
-        end.new
+        end
       end
 
       #

@@ -10,6 +10,13 @@ module Blueprinter
         # A core extension to extract values from objects.
         #
         class Extractor < Extension
+          # If someone inherits from this, they probably don't want it hidden
+          def self.inherited(subclass)
+            subclass.class_eval do
+              def hidden? = false
+            end
+          end
+
           # @param ctx [Blueprinter::V2::Context::Field]
           def extract_value(ctx)
             if ctx.object.is_a? Hash

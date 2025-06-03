@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 describe Blueprinter::Extensions::FieldOrder do
-  let(:context) { Blueprinter::V2::Context::Render.new(blueprint.new, {}, instances, {}) }
-  let(:instances) { Blueprinter::V2::InstanceCache.new }
+  let(:context) { Blueprinter::V2::Context::Render.new(blueprint.new, {}) }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       field :foo

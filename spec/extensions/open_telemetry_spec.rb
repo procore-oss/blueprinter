@@ -64,7 +64,7 @@ describe Blueprinter::Extensions::OpenTelemetry do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foos: [{ name: 'Bar' }] })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :field_value }.merge(attributes)).and_call_original
-    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, ctx.options, ctx.instances, ctx.stores, meta_extension.new([]), :field_value)
+    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, ctx.options, meta_extension.new([]), :field_value)
     called = subject.around_hook(hook_ctx) { :true }
     expect(called).to eq :true
   end

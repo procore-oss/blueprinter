@@ -204,8 +204,8 @@ field :description, from: :desc
 end
 </code></pre>
 <h2 id="field-order"><a class="header" href="#field-order">Field order</a></h2>
-<p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="../api/extensions.html#blueprint_fields">blueprint_fields extension hook</a> or the built-in <code>FieldOrder</code> extension.</p>
-<p>The following replicates Legacy/V1's default field order using the built-in <code>FieldOrder</code> extension.</p>
+<p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="../api/extensions.html#blueprint_fields">blueprint_fields</a> extension hook or the built-in <a href="../dsl/extensions.html#field-order">FieldOrder</a> extension.</p>
+<p>The following replicates Legacy/V1's default field order using the built-in <a href="../dsl/extensions.html#field-order">FieldOrder</a> extension.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
     if a.name == :id

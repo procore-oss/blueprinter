@@ -52,7 +52,7 @@ module ExtensionHelpers
 
   def prepare(blueprint, options, ctx_type, *args)
     ctx = Blueprinter::V2::Context::Render.new(instances.blueprint(blueprint), options)
-    subject.prepare ctx if subject.respond_to?(:prepare)
+    subject.blueprint_setup ctx if subject.respond_to?(:blueprint_setup)
     ctx_type.new(instances.blueprint(blueprint), options, *args)
   end
 end

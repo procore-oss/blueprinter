@@ -57,46 +57,46 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
 
     it 'are allowed by default' do
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, { name: 'Foo' })
-      expect(subject.exclude_object? ctx).to be false
+      expect(subject.exclude_object_field? ctx).to be false
     end
 
     it 'are allowed by default if nil' do
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_object? ctx).to be false
+      expect(subject.exclude_object_field? ctx).to be false
     end
 
     it 'are allowed with options set' do
       ctx = prepare(blueprint, { exclude_if_nil: true }, Blueprinter::V2::Context::Field, object, field, { name: 'Foo' })
-      expect(subject.exclude_object? ctx).to be false
+      expect(subject.exclude_object_field? ctx).to be false
     end
 
     it 'are excluded with options set if nil' do
       ctx = prepare(blueprint, { exclude_if_nil: true }, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_object? ctx).to be true
+      expect(subject.exclude_object_field? ctx).to be true
     end
 
     it 'are allowed with field options set' do
       blueprint.object :foo_obj, sub_blueprint, exclude_if_nil: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, { name: 'Foo' })
-      expect(subject.exclude_object? ctx).to be false
+      expect(subject.exclude_object_field? ctx).to be false
     end
 
     it 'are excluded with field options set if nil' do
       blueprint.object :foo_obj, sub_blueprint, exclude_if_nil: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_object? ctx).to be true
+      expect(subject.exclude_object_field? ctx).to be true
     end
 
     it 'are allowed with blueprint options set' do
       blueprint.options[:exclude_if_nil] = true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, { name: 'Foo' })
-      expect(subject.exclude_object? ctx).to be false
+      expect(subject.exclude_object_field? ctx).to be false
     end
 
     it 'are excluded with blueprint options set if nil' do
       blueprint.options[:exclude_if_nil] = true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_object? ctx).to be true
+      expect(subject.exclude_object_field? ctx).to be true
     end
   end
 
@@ -105,46 +105,46 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
 
     it 'are allowed by default' do
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, [{ name: 'Foo' }])
-      expect(subject.exclude_collection? ctx).to be false
+      expect(subject.exclude_collection_field? ctx).to be false
     end
 
     it 'are allowed by default if nil' do
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_collection? ctx).to be false
+      expect(subject.exclude_collection_field? ctx).to be false
     end
 
     it 'are allowed with options set' do
       ctx = prepare(blueprint, { exclude_if_nil: true }, Blueprinter::V2::Context::Field, object, field, [{ name: 'Foo' }])
-      expect(subject.exclude_collection? ctx).to be false
+      expect(subject.exclude_collection_field? ctx).to be false
     end
 
     it 'are excluded with options set if nil' do
       ctx = prepare(blueprint, { exclude_if_nil: true }, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_collection? ctx).to be true
+      expect(subject.exclude_collection_field? ctx).to be true
     end
 
     it 'are allowed with field options set' do
       blueprint.collection :foos, sub_blueprint, exclude_if_nil: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, [{ name: 'Foo' }])
-      expect(subject.exclude_collection? ctx).to be false
+      expect(subject.exclude_collection_field? ctx).to be false
     end
 
     it 'are excluded with field options set if nil' do
       blueprint.collection :foos, sub_blueprint, exclude_if_nil: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_collection? ctx).to be true
+      expect(subject.exclude_collection_field? ctx).to be true
     end
 
     it 'are allowed with blueprint options set' do
       blueprint.options[:exclude_if_nil] = true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, [{ name: 'Foo' }])
-      expect(subject.exclude_collection? ctx).to be false
+      expect(subject.exclude_collection_field? ctx).to be false
     end
 
     it 'are excluded with blueprint options set if nil' do
       blueprint.options[:exclude_if_nil] = true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, nil)
-      expect(subject.exclude_collection? ctx).to be true
+      expect(subject.exclude_collection_field? ctx).to be true
     end
   end
 end

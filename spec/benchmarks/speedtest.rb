@@ -3,9 +3,9 @@
 require 'benchmark'
 require 'blueprinter'
 
-NUM_FIELDS = 100
-NUM_OBJECTS = 50
-NUM_COLLECTIONS = 25
+NUM_FIELDS = 10
+NUM_OBJECTS = 5
+NUM_COLLECTIONS = 2
 
 class CategoryBlueprintV1 < Blueprinter::Base
   field :name

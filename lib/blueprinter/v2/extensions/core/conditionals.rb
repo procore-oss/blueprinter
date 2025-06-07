@@ -33,16 +33,16 @@ module Blueprinter
           end
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
 
-          alias exclude_object? exclude_field?
-          alias exclude_collection? exclude_field?
+          alias exclude_object_field? exclude_field?
+          alias exclude_collection_field? exclude_field?
 
           # It's significantly faster to evaluate these options once and store them
           # @param ctx [Blueprinter::V2::Context::Render]
-          def prepare(ctx)
+          def blueprint_setup(ctx)
             ref = ctx.blueprint.class.reflections[:default]
-            prepare_fields(ctx, ref)
-            prepare_objects(ctx, ref)
-            prepare_collections(ctx, ref)
+            setup_fields(ctx, ref)
+            setup_objects(ctx, ref)
+            setup_collections(ctx, ref)
           end
 
           def hidden? = true
@@ -50,7 +50,7 @@ module Blueprinter
           private
 
           # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-          def prepare_fields(ctx, ref)
+          def setup_fields(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.fields.each_value do |field|
               @if[field] = ctx.options[:field_if] || field.options[:if] || bp_class.options[:field_if]
@@ -64,7 +64,7 @@ module Blueprinter
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
 
           # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-          def prepare_objects(ctx, ref)
+          def setup_objects(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.objects.each_value do |field|
               @if[field] = ctx.options[:object_if] || field.options[:if] || bp_class.options[:object_if]
@@ -78,7 +78,7 @@ module Blueprinter
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
 
           # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-          def prepare_collections(ctx, ref)
+          def setup_collections(ctx, ref)
             bp_class = ctx.blueprint.class
             ref.collections.each_value do |field|
               @if[field] = ctx.options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]

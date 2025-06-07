@@ -20,7 +20,7 @@ describe "Blueprinter::V2 Extension DSL" do
     expect(blueprint.extensions.size).to eq 2
     expect(serializer.hooks.registered? :field_value).to be true
     expect(serializer.hooks.registered? :blueprint_output).to be true
-    expect(serializer.hooks.registered? :around_object_serialization).to be false
+    expect(serializer.hooks.registered? :around_serialize_object).to be false
   end
 
   it "names the extensions" do

@@ -15,9 +15,9 @@ describe Blueprinter::Hooks do
 
       def initialize = @log = []
 
-      def prepare(_context) = log << 'prepare'
+      def blueprint_setup(_context) = log << 'blueprint_setup'
 
-      def output_object(context)
+      def object_output(context)
         context.result[:n] += 1 if context.result[:n]
         context.result
       end
@@ -33,7 +33,7 @@ describe Blueprinter::Hooks do
 
       def initialize = @log = []
 
-      def prepare(_context) = log << 'prepare'
+      def blueprint_setup(_context) = log << 'blueprint_setup'
 
       def exclude_field?(context)
         context.value == "" || context.value == []
@@ -44,9 +44,9 @@ describe Blueprinter::Hooks do
   context '#registered?' do
     it 'knows whether it contains certain hooks' do
       hooks = described_class.new [ext1.new, ext2.new]
-      expect(hooks.registered? :output_object).to be true
+      expect(hooks.registered? :object_output).to be true
       expect(hooks.registered? :exclude_field?).to be true
-      expect(hooks.registered? :exclude_collection?).to be false
+      expect(hooks.registered? :exclude_collection_field?).to be false
     end
   end
 
@@ -56,8 +56,8 @@ describe Blueprinter::Hooks do
       exti2 = ext2.new
       hooks = described_class.new [exti1, exti2, Class.new(Blueprinter::Extension)]
       ctx = render_ctx.new(instances.blueprint(blueprint), {})
-      hooks.run(:prepare, ctx)
-      expect(exti1.log + exti2.log).to eq ['prepare', 'prepare']
+      hooks.run(:blueprint_setup, ctx)
+      expect(exti1.log + exti2.log).to eq ['blueprint_setup', 'blueprint_setup']
     end
   end
 
@@ -117,21 +117,21 @@ describe Blueprinter::Hooks do
     it 'returns the final value' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = result_ctx.new(instances.blueprint(blueprint), {}, object, { name: 'Foo', n: 0 })
-      result = hooks.reduce_hook(:output_object, ctx.result) { |val| ctx.result = val; ctx }
+      result = hooks.reduce_hook(:object_output, ctx.result) { |val| ctx.result = val; ctx }
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
     it 'expands a returned array into args' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = result_ctx.new(instances.blueprint(blueprint), {}, object, { name: 'Foo', n: 0 })
-      result = hooks.reduce_hook(:output_object, ctx.result) { |val| ctx.result = val; [ctx] }
+      result = hooks.reduce_hook(:object_output, ctx.result) { |val| ctx.result = val; [ctx] }
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
     it 'returns the initial value if there are no hooks' do
       hooks = described_class.new []
       ctx = result_ctx.new(instances.blueprint(blueprint), {}, object, { name: 'Foo' })
-      result = hooks.reduce_hook(:output_object, ctx.result) { |val| ctx.result = val; ctx }
+      result = hooks.reduce_hook(:object_output, ctx.result) { |val| ctx.result = val; ctx }
       expect(result).to eq({ name: 'Foo' })
     end
   end
@@ -140,21 +140,21 @@ describe Blueprinter::Hooks do
     it 'returns the final value' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = result_ctx.new(instances.blueprint(blueprint), {}, object, { name: 'Foo', n: 0 })
-      result = hooks.reduce_into(:output_object, ctx, :result)
+      result = hooks.reduce_into(:object_output, ctx, :result)
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
     it 'expands a returned array into args' do
       hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
       ctx = result_ctx.new(instances.blueprint(blueprint), {}, object, { name: 'Foo', n: 0 })
-      result = hooks.reduce_into(:output_object, ctx, :result)
+      result = hooks.reduce_into(:object_output, ctx, :result)
       expect(result).to eq({ name: 'Foo', n: 3 })
     end
 
     it 'returns the initial value if there are no hooks' do
       hooks = described_class.new []
       ctx = result_ctx.new(instances.blueprint(blueprint), {}, object, { name: 'Foo' })
-      result = hooks.reduce_into(:output_object, ctx, :result)
+      result = hooks.reduce_into(:object_output, ctx, :result)
       expect(result).to eq({ name: 'Foo' })
     end
   end
@@ -166,7 +166,7 @@ describe Blueprinter::Hooks do
           @log = log
         end
 
-        def around_object_serialization(ctx)
+        def around_serialize_object(ctx)
           @log << "A: #{ctx.test_value}"
           yield
           @log << "A END"
@@ -176,7 +176,7 @@ describe Blueprinter::Hooks do
 
     let(:ext_b) do
       Class.new(ext_a) do
-        def around_object_serialization(ctx)
+        def around_serialize_object(ctx)
           @log << "B: #{ctx.test_value}"
           yield
           @log << "B END"
@@ -186,7 +186,7 @@ describe Blueprinter::Hooks do
 
     let(:ext_c) do
       Class.new(ext_a) do
-        def around_object_serialization(ctx)
+        def around_serialize_object(ctx)
           @log << "C: #{ctx.test_value}"
           yield
           @log << "C END"
@@ -212,10 +212,10 @@ describe Blueprinter::Hooks do
         Class.new(Blueprinter::Extension) do
           def initialize(log) = @log = log
 
-          def around_object_serialization(_ctx)
-            @log << 'around_object_serialization: A'
+          def around_serialize_object(_ctx)
+            @log << 'around_serialize_object: A'
             yield
-            @log << 'around_object_serialization: B'
+            @log << 'around_serialize_object: B'
           end
 
           def around_hook(ctx)
@@ -234,17 +234,17 @@ describe Blueprinter::Hooks do
         hooks.reduce_into(:field_value, ctx, :value)
 
         ctx = object_ctx.new(instances.blueprint(blueprint), {}, object)
-        hooks.around(:around_object_serialization, ctx) { log << 'INNER' }
+        hooks.around(:around_serialize_object, ctx) { log << 'INNER' }
 
         expect(log).to eq [
           "around_hook(#{ext1.name}#field_value): A",
           'field_value',
           "around_hook(#{ext1.name}#field_value): B",
-          "around_hook(#{ext2.name}#around_object_serialization): A",
-          'around_object_serialization: A',
+          "around_hook(#{ext2.name}#around_serialize_object): A",
+          'around_serialize_object: A',
           'INNER',
-          'around_object_serialization: B',
-          "around_hook(#{ext2.name}#around_object_serialization): B"
+          'around_serialize_object: B',
+          "around_hook(#{ext2.name}#around_serialize_object): B"
         ]
       end
 
@@ -255,14 +255,14 @@ describe Blueprinter::Hooks do
         hooks = described_class.new [ext1.new(log), ext2.new(log)]
 
         hooks.reduce_into(:field_value, ctx, :value)
-        hooks.around(:around_object_serialization, ctx) { log << 'INNER' }
+        hooks.around(:around_serialize_object, ctx) { log << 'INNER' }
         expect(log).to eq [
           "around_hook(#{ext1.name}#field_value): A",
           'field_value',
           "around_hook(#{ext1.name}#field_value): B",
-          'around_object_serialization: A',
+          'around_serialize_object: A',
           'INNER',
-          'around_object_serialization: B',
+          'around_serialize_object: B',
         ]
       end
     end
@@ -273,7 +273,7 @@ describe Blueprinter::Hooks do
       ctx = object_ctx.new(instances.blueprint(blueprint), {}, object)
       def ctx.test_value = 42
       hooks = described_class.new extensions
-      hooks.around(:around_object_serialization, ctx) { log << 'INNER' }
+      hooks.around(:around_serialize_object, ctx) { log << 'INNER' }
       expect(log).to eq ['A: 42', 'B: 42', 'C: 42', 'INNER', 'C END', 'B END', 'A END',]
     end
 
@@ -281,36 +281,36 @@ describe Blueprinter::Hooks do
       ctx = object_ctx.new(instances.blueprint(blueprint), {}, object)
       def ctx.test_value = 42
       hooks = described_class.new [ext_a.new([]), ext_b.new([]), ext_c.new([])]
-      result = hooks.around(:around_object_serialization, ctx) { 42 }
+      result = hooks.around(:around_serialize_object, ctx) { 42 }
       expect(result).to eq 42
     end
 
     it 'returns the inner with no hooks' do
       ctx = object_ctx.new(instances.blueprint(blueprint), {}, object)
       hooks = described_class.new []
-      result = hooks.around(:around_object_serialization, ctx) { 42 }
+      result = hooks.around(:around_serialize_object, ctx) { 42 }
       expect(result).to eq 42
     end
 
     it "raises if a hook doesn't yield" do
       ext = Class.new(Blueprinter::Extension) do
-        def around_object_serialization(_ctx); end
+        def around_serialize_object(_ctx); end
       end
       ctx = object_ctx.new(instances.blueprint(blueprint), {}, object)
       hooks = described_class.new [ext.new]
-      expect { hooks.around(:around_object_serialization, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+      expect { hooks.around(:around_serialize_object, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
     end
 
     it 'raises if a hook yields more than once' do
       ext = Class.new(Blueprinter::Extension) do
-        def around_object_serialization(_ctx)
+        def around_serialize_object(_ctx)
           yield
           yield
         end
       end
       ctx = object_ctx.new(instances.blueprint(blueprint), {}, object)
       hooks = described_class.new [ext.new]
-      expect { hooks.around(:around_object_serialization, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+      expect { hooks.around(:around_serialize_object, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
     end
   end
 end

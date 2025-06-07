@@ -16,6 +16,7 @@ module Blueprinter
         find_used_hooks!
       end
 
+      # Serializesr for regular fields
       class Field < self
         def serialize(ctx, result)
           ctx.value = defaults.field_value ctx
@@ -23,49 +24,59 @@ module Blueprinter
           ctx.value = formatter.call(ctx)
           return if cond.exclude_field?(ctx) || (@run_ex_field && hooks.any?(:exclude_field?, ctx))
 
+          hooks.reduce_into(:field_result, ctx, :value) if @run_field_result
           result[ctx.field.name] = ctx.value
         end
       end
 
+      # Serializesr for object fields
       class Object < self
         def serialize(ctx, result)
-          field = ctx.field
-          ctx.value = defaults.object_value ctx
-          hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
-          return if cond.exclude_object?(ctx) || (@run_ex_object && hooks.any?(:exclude_object?, ctx))
+          ctx.value = defaults.object_field_value ctx
+          hooks.reduce_into(:object_field_value, ctx, :value) if @run_object_field_value
+          return if cond.exclude_object_field?(ctx) || (@run_ex_object && hooks.any?(:exclude_object_field?, ctx))
 
-          if ctx.value
-            ctx.value =
-              if instances.blueprint(field.blueprint).is_a? V2::Base
-                child_serializer = instances.serializer(field.blueprint, ctx.options)
-                child_serializer.object(ctx.value)
-              else
-                opts = { v2_instances: instances }
-                field.blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
-              end
+          hooks.reduce_into(:object_field_result, ctx, :value) if @run_object_field_result
+          result[ctx.field.name] = ctx.value.nil? ? nil : blueprint_value(ctx)
+        end
+
+        private
+
+        def blueprint_value(ctx)
+          blueprint = ctx.field.blueprint
+          if instances.blueprint(blueprint).is_a? V2::Base
+            child_serializer = instances.serializer(blueprint, ctx.options)
+            child_serializer.object(ctx.value, depth: ctx.depth + 1)
+          else
+            opts = { v2_instances: instances, v2_depth: ctx.depth }
+            blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
-          result[field.name] = ctx.value
         end
       end
 
+      # Serializesr for collection fields
       class Collection < self
         def serialize(ctx, result)
-          field = ctx.field
-          ctx.value = defaults.collection_value ctx
-          hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
-          return if cond.exclude_collection?(ctx) || (@run_ex_collection && hooks.any?(:exclude_collection?, ctx))
+          ctx.value = defaults.collection_field_value ctx
+          hooks.reduce_into(:collection_field_value, ctx, :value) if @run_collection_field_value
+          return if cond.exclude_collection_field?(ctx) ||
+                    (@run_ex_collection && hooks.any?(:exclude_collection_field?, ctx))
 
-          if ctx.value
-            ctx.value =
-              if instances.blueprint(field.blueprint).is_a? V2::Base
-                child_serializer = instances.serializer(field.blueprint, ctx.options)
-                child_serializer.collection(ctx.value)
-              else
-                opts = { v2_instances: instances }
-                field.blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
-              end
+          hooks.reduce_into(:collection_field_result, ctx, :value) if @run_collection_field_result
+          result[ctx.field.name] = ctx.value.nil? ? nil : blueprint_value(ctx)
+        end
+
+        private
+
+        def blueprint_value(ctx)
+          blueprint = ctx.field.blueprint
+          if instances.blueprint(blueprint).is_a? V2::Base
+            child_serializer = instances.serializer(blueprint, ctx.options)
+            child_serializer.collection(ctx.value, depth: ctx.depth + 1)
+          else
+            opts = { v2_instances: instances, v2_depth: ctx.depth }
+            blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
-          result[field.name] = ctx.value
         end
       end
 
@@ -74,11 +85,14 @@ module Blueprinter
       # We save a lot of time by skipping hooks that aren't used
       def find_used_hooks!
         @run_field_value = hooks.registered? :field_value
-        @run_object_value = hooks.registered? :object_value
-        @run_collection_value = hooks.registered? :collection_value
+        @run_object_field_value = hooks.registered? :object_field_value
+        @run_collection_field_value = hooks.registered? :collection_field_value
         @run_ex_field = hooks.registered? :exclude_field?
-        @run_ex_object = hooks.registered? :exclude_object?
-        @run_ex_collection = hooks.registered? :exclude_collection?
+        @run_ex_object = hooks.registered? :exclude_object_field?
+        @run_ex_collection = hooks.registered? :exclude_collection_field?
+        @run_field_result = hooks.registered? :field_result
+        @run_object_field_result = hooks.registered? :object_field_result
+        @run_collection_field_result = hooks.registered? :collection_field_result
       end
     end
   end

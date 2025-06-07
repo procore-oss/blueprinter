@@ -40,7 +40,7 @@ describe Blueprinter::V2::Serializer do
   it 'works with nil values' do
     widget = { name: nil, category: nil }
 
-    result = described_class.new(widget_blueprint, {}, instances).object(widget)
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
     expect(result).to eq({
       name: nil,
       category: nil,
@@ -74,7 +74,7 @@ describe Blueprinter::V2::Serializer do
     end
 
     it 'extracts values and serialize nested Blueprints' do
-      result = described_class.new(widget_blueprint, {}, instances).object(widget)
+      result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
       expect(result).to eq({
         name: 'Foo',
         category: { name: 'Bar' },
@@ -91,7 +91,7 @@ describe Blueprinter::V2::Serializer do
         collection(:parts, test.part_blueprint) { |ctx| ctx.object[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
       end
 
-      result = described_class.new(block_blueprint, {}, instances).object(widget)
+      result = described_class.new(block_blueprint, {}, instances).object(widget, depth: 1)
       expect(result).to eq({
         name: 'Name of Foo',
         category: { name: 'Name of Bar' },
@@ -108,7 +108,7 @@ describe Blueprinter::V2::Serializer do
         collection :parts, test.part_blueprint, extractor: test.name_of_extractor
       end
 
-      result = described_class.new(blueprint, {}, instances).object(widget)
+      result = described_class.new(blueprint, {}, instances).object(widget, depth: 1)
       expect(result).to eq({
         name: 'Name of Foo',
         category: { name: 'Name of Bar' },
@@ -126,7 +126,7 @@ describe Blueprinter::V2::Serializer do
         collection :parts, test.part_blueprint, extractor: test.name_of_extractor.new
       end
 
-      result = described_class.new(blueprint, {}, instances).object(widget)
+      result = described_class.new(blueprint, {}, instances).object(widget, depth: 1)
       expect(result).to eq({
         name: 'X of Foo',
         category: { name: 'Y of Bar' },
@@ -145,7 +145,7 @@ describe Blueprinter::V2::Serializer do
         collection :parts, test.part_blueprint
       end
 
-      result = described_class.new(blueprint, {}, instances).object(widget)
+      result = described_class.new(blueprint, {}, instances).object(widget, depth: 1)
       expect(result).to eq({
         name: 'X of Foo',
         category: { name: 'X of Bar' },
@@ -171,7 +171,7 @@ describe Blueprinter::V2::Serializer do
       parts: [{ num: 42 }, { num: 43 }]
     }
 
-    result = described_class.new(widget_blueprint, {}, instances).object(widget)
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
     expect(result.to_json).to eq({
       category: { name: 'Bar' },
       name: 'Foo',
@@ -185,7 +185,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, if: ->(ctx) { ctx.options[:n] > 42 }
     end
 
-    result = described_class.new(widget_blueprint, { n: 42 }, instances).object({ name: 'Foo', desc: 'Bar' })
+    result = described_class.new(widget_blueprint, { n: 42 }, instances).object({ name: 'Foo', desc: 'Bar' }, depth: 1)
     expect(result).to eq({ name: 'Foo' })
   end
 
@@ -195,7 +195,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, unless: ->(ctx) { ctx.options[:n] > 42 }
     end
 
-    result = described_class.new(widget_blueprint, { n: 43 }, instances).object({ name: 'Foo', desc: 'Bar' })
+    result = described_class.new(widget_blueprint, { n: 43 }, instances).object({ name: 'Foo', desc: 'Bar' }, depth: 1)
     expect(result).to eq({ name: 'Foo' })
   end
 
@@ -205,7 +205,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, default: 'Description!'
     end
 
-    result = described_class.new(widget_blueprint, {}, instances).object({ name: 'Foo' })
+    result = described_class.new(widget_blueprint, {}, instances).object({ name: 'Foo' }, depth: 1)
     expect(result).to eq({
       name: 'Foo',
       desc: 'Description!'
@@ -218,7 +218,7 @@ describe Blueprinter::V2::Serializer do
       field :desc, exclude_if_empty: true
     end
 
-    result = described_class.new(widget_blueprint, {}, instances).object({ name: 'Foo', desc: "" })
+    result = described_class.new(widget_blueprint, {}, instances).object({ name: 'Foo', desc: "" }, depth: 1)
     expect(result).to eq({ name: 'Foo' })
   end
 
@@ -228,31 +228,31 @@ describe Blueprinter::V2::Serializer do
       field :desc, exclude_if_nil: true
     end
 
-    result = described_class.new(widget_blueprint, {}, instances).object({ name: 'Foo', desc: nil })
+    result = described_class.new(widget_blueprint, {}, instances).object({ name: 'Foo', desc: nil }, depth: 1)
     expect(result).to eq({ name: 'Foo' })
   end
 
   it 'enables custom extensions' do
     ext1 = Class.new(Blueprinter::Extension) do
-      def around_object_render(_) = yield
+      def around_serialize_object(_) = yield
     end
     ext2 = Class.new(Blueprinter::Extension) do
-      def around_collection_render(_) = yield
+      def around_serialize_collection(_) = yield
     end
     ext3 = Class.new(Blueprinter::Extension) do
-      def around_object_serialization(_) = yield
+      def blueprint_input(ctx) = ctx.object
     end
     category_blueprint.extensions << ext1 << ext2.new << -> { ext3.new }
     serializer = described_class.new(category_blueprint, {}, instances)
 
-    expect(serializer.hooks.registered? :around_object_render).to be true
-    expect(serializer.hooks.registered? :around_collection_render).to be true
-    expect(serializer.hooks.registered? :around_object_serialization).to be true
+    expect(serializer.hooks.registered? :around_serialize_object).to be true
+    expect(serializer.hooks.registered? :around_serialize_collection).to be true
+    expect(serializer.hooks.registered? :blueprint_input).to be true
   end
 
   it 'formats fields' do
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
-    result = described_class.new(widget_blueprint[:extended], {}, instances).object(widget)
+    result = described_class.new(widget_blueprint[:extended], {}, instances).object(widget, depth: 1)
     expect(result).to eq({
       category: nil,
       name: 'Foo',
@@ -261,7 +261,7 @@ describe Blueprinter::V2::Serializer do
     })
   end
 
-  it 'calls field_value hooks, then formatters, then exclude_field? hooks' do
+  it 'calls field_value hooks, then formatters, then exclude_field? hooks, then field_result hooks' do
     ext = Class.new(Blueprinter::Extension) do
       def field_value(ctx)
         case ctx.value
@@ -270,53 +270,59 @@ describe Blueprinter::V2::Serializer do
         end
       end
 
-      def exclude_field?(ctx)
-        ctx.value == '?'
-      end
+      def exclude_field?(ctx) = ctx.value == '?'
+
+      def field_result(ctx) = 'result: ' + ctx.value
     end
     widget_blueprint.extensions << ext.new
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
 
-    result = described_class.new(widget_blueprint[:extended], {}, instances).object(widget)
+    result = described_class.new(widget_blueprint[:extended], {}, instances).object(widget, depth: 1)
     expect(result).to eq({
       category: nil,
-      created_on: 'Sun Nov 10, 2024',
+      created_on: 'result: Sun Nov 10, 2024',
       parts: nil
     })
   end
 
-  it 'calls object_value hooks then exclude_object? hooks' do
+  it 'calls object_field_value hooks, then exclude_object_field? hooks, then object_field_result hooks' do
     ext = Class.new(Blueprinter::Extension) do
-      def object_value(_ctx)
+      def object_field_value(_ctx)
         { name: 'Bar' }
       end
 
-      def exclude_object?(ctx)
+      def exclude_object_field?(ctx)
         ctx.value[:name] == 'Bar'
+      end
+
+      def object_field_result(ctx)
+        ctx.value.transform_values { |val| 'result: ' + val }
       end
     end
     widget_blueprint.extensions << ext.new
-    widget = { name: 'Foo', category: { name: 'Cat' } }
+    widget = { name: 'Foo', category: { name: 'result: Cat' } }
 
-    result = described_class.new(widget_blueprint, {}, instances).object(widget)
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
     expect(result).to eq({ name: 'Foo', parts: nil })
   end
 
-  it 'calls collection_value hooks then exclude_collection? hooks' do
+  it 'calls collection_field_value hooks then, exclude_collection_field? hooks, then collection_field_result' do
     ext = Class.new(Blueprinter::Extension) do
-      def collection_value(_ctx)
-        []
-      end
+      def collection_field_value(ctx) = ctx.value[1..]
 
-      def exclude_collection?(ctx)
-        ctx.value.empty?
-      end
+      def exclude_collection_field?(ctx) = ctx.value.empty?
+
+      def collection_field_result(ctx) = ctx.value << { num: 43 }
     end
     widget_blueprint.extensions << ext.new
-    widget = { name: 'Foo', parts: [{ num: 42 }] }
 
-    result = described_class.new(widget_blueprint, {}, instances).object(widget)
+    widget = { name: 'Foo', parts: [{ num: 42 }] }
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
     expect(result).to eq({ name: 'Foo', category: nil })
+
+    widget = { name: 'Foo', parts: [{ num: 41 }, { num: 42 }] }
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
+    expect(result).to eq({ name: 'Foo', category: nil, parts: [{ num: 42 }, { num: 43 }] })
   end
 
   it 'evaluates value hooks before exclusion hooks' do
@@ -326,7 +332,7 @@ describe Blueprinter::V2::Serializer do
     end
     widget = { name: 'Foo', desc: nil }
 
-    result = described_class.new(widget_blueprint, {}, instances).object(widget)
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
     expect(result).to eq({ name: 'Foo', desc: 'Bar' })
   end
 
@@ -340,7 +346,8 @@ describe Blueprinter::V2::Serializer do
     end
 
     result = described_class.new(widget_blueprint, { n: 42, m: 42 }, instances).object(
-      { name: 'Foo', desc: 'Bar', zorp: 'Zorp' }
+      { name: 'Foo', desc: 'Bar', zorp: 'Zorp' },
+     depth: 1
     )
     expect(result).to eq({})
   end
@@ -354,7 +361,8 @@ describe Blueprinter::V2::Serializer do
     widget_blueprint.extensions << ext.new
 
     result = described_class.new(widget_blueprint, {}, instances).object(
-      { category: { name: 'Cat' }, parts: [{ num: 42 }] }
+      { category: { name: 'Cat' }, parts: [{ num: 42 }] },
+      depth: 1
     )
     expect(result).to eq({ name: 'Foo', category: nil, parts: nil })
   end
@@ -368,25 +376,60 @@ describe Blueprinter::V2::Serializer do
     widget_blueprint.extensions << ext.new
 
     result = described_class.new(widget_blueprint, {}, instances).object(
-      { category: { name: 'Cat' }, parts: [{ num: 42 }] }
+      { category: { name: 'Cat' }, parts: [{ num: 42 }] },
+      depth: 1
     )
     expect(result).to eq({ name: 'Foo' })
   end
 
-  it 'runs around_object_serialization around all other serializer hooks' do
+  it 'runs collection_output hooks after everything else' do
+    ext = Class.new(Blueprinter::Extension) do
+      def collection_output(ctx) = { data: ctx.result }
+    end
+    widget_blueprint.extensions << ext.new
+
+    result = described_class.new(widget_blueprint, {}, instances).collection(
+      [{ name: 'Foo', parts: [{ num: 42 }] }],
+      depth: 1
+    )
+    expect(result).to eq({ data: [{ name: 'Foo', category: nil, parts: [{  num: 42 }] } ] })
+  end
+
+  it 'runs object_output hooks after everything else' do
+    ext = Class.new(Blueprinter::Extension) do
+      def blueprint_output(ctx) = { data: ctx.result }
+    end
+    widget_blueprint.extensions << ext.new
+
+    result = described_class.new(widget_blueprint, {}, instances).object(
+      { name: 'Foo', category: { name: 'Bar' } },
+      depth: 1
+    )
+    expect(result).to eq({ data: { name: 'Foo', category: { name: 'Bar' }, parts: nil } })
+  end
+
+  it 'runs around_serialize_object around all other serializer hooks' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
       end
 
-      def around_object_serialization(ctx)
-        @log << "around_object_serialization (#{ctx.object[:name]}): a"
-        yield
-        @log << "around_object_serialization (#{ctx.object[:name]}): b"
+      def blueprint_fields(ctx)
+        @log << 'blueprint_fields'
+        ctx.blueprint.class.reflections[:default].ordered
       end
 
-      def prepare(ctx)
-        @log << 'prepare'
+      def blueprint_setup(ctx) = @log << 'blueprint_setup'
+
+      def around_serialize_object(ctx)
+        @log << "around_serialize_object (#{ctx.object[:name]}): a"
+        yield
+        @log << "around_serialize_object (#{ctx.object[:name]}): b"
+      end
+
+      def object_input(ctx)
+        @log << 'object_input'
+        ctx.object
       end
 
       def blueprint_input(ctx)
@@ -398,36 +441,54 @@ describe Blueprinter::V2::Serializer do
         @log << 'blueprint_output'
         ctx.result
       end
+
+      def object_output(ctx)
+        @log << 'object_output'
+        ctx.result
+      end
     end
     log = []
     widget_blueprint.extensions << ext.new(log)
     widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] }
 
-    result = described_class.new(widget_blueprint, {}, instances).object(widget)
+    result = described_class.new(widget_blueprint, {}, instances).object(widget, depth: 1)
     expect(result).to eq(widget)
     expect(log).to eq [
-      'prepare',
-      'around_object_serialization (Foo): a',
+      'blueprint_fields',
+      'blueprint_setup',
+      'around_serialize_object (Foo): a',
+      'object_input',
       'blueprint_input',
       'blueprint_output',
-      'around_object_serialization (Foo): b',
+      'object_output',
+      'around_serialize_object (Foo): b',
     ]
   end
 
-  it 'runs around_collection_serialization around all other serializer hooks' do
+  it 'runs around_serialize_collection around all other serializer hooks' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
       end
 
-      def around_collection_serialization(ctx)
-        @log << "around_collection_serialization (#{ctx.object.map { |x| x[:name] }.join(',')}): a"
-        yield
-        @log << "around_collection_serialization (#{ctx.object.map { |x| x[:name] }.join(',')}): b"
+      def blueprint_fields(ctx)
+        @log << 'blueprint_fields'
+        ctx.blueprint.class.reflections[:default].ordered
       end
 
-      def prepare(ctx)
-        @log << 'prepare'
+      def blueprint_setup(ctx)
+        @log << 'blueprint_setup'
+      end
+
+      def around_serialize_collection(ctx)
+        @log << "around_serialize_collection (#{ctx.object.map { |x| x[:name] }.join(',')}): a"
+        yield
+        @log << "around_serialize_collection (#{ctx.object.map { |x| x[:name] }.join(',')}): b"
+      end
+
+      def collection_input(ctx)
+        @log << 'collection_input'
+        ctx.object
       end
 
       def blueprint_input(ctx)
@@ -437,6 +498,11 @@ describe Blueprinter::V2::Serializer do
 
       def blueprint_output(ctx)
         @log << 'blueprint_output'
+        ctx.result
+      end
+
+      def collection_output(ctx)
+        @log << 'collection_output'
         ctx.result
       end
     end
@@ -447,16 +513,19 @@ describe Blueprinter::V2::Serializer do
       { name: 'Bar', category: { name: 'Bar' }, parts: [{ num: 43 }, { num: 43 }] },
     ]
 
-    result = described_class.new(widget_blueprint, {}, instances).collection(widgets)
+    result = described_class.new(widget_blueprint, {}, instances).collection(widgets, depth: 1)
     expect(result).to eq(widgets)
     expect(log).to eq [
-      'prepare',
-      'around_collection_serialization (Foo,Bar): a',
+      'blueprint_fields',
+      'blueprint_setup',
+      'around_serialize_collection (Foo,Bar): a',
+      'collection_input',
       'blueprint_input',
       'blueprint_output',
       'blueprint_input',
       'blueprint_output',
-      'around_collection_serialization (Foo,Bar): b',
+      'collection_output',
+      'around_serialize_collection (Foo,Bar): b',
     ]
   end
 
@@ -466,7 +535,8 @@ describe Blueprinter::V2::Serializer do
     end
 
     result = described_class.new(blueprint, {}, instances).object(
-      { description: 'A widget', category: { name: 'Cat' }, parts: [{ num: 42 }], name: 'Foo' }
+      { description: 'A widget', category: { name: 'Cat' }, parts: [{ num: 42 }], name: 'Foo' },
+      depth: 1
     )
     expect(result.to_json).to eq({
       name: 'Foo',
@@ -476,11 +546,11 @@ describe Blueprinter::V2::Serializer do
       }.to_json)
   end
 
-  it 'only runs prepare and blueprint_fields once per blueprint' do
+  it 'only runs blueprint_setup and blueprint_fields once per blueprint' do
     log = []
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log) = @log = log
-      def prepare(ctx) = @log << "prepare (#{ctx.blueprint.class})"
+      def blueprint_setup(ctx) = @log << "blueprint_setup (#{ctx.blueprint.class})"
       def blueprint_fields(ctx)
         @log << "blueprint_fields (#{ctx.blueprint.class})"
         ctx.blueprint.class.reflections[:default].ordered
@@ -492,16 +562,17 @@ describe Blueprinter::V2::Serializer do
       [
         { name: 'A', description: 'Widget A', category: { name: 'Cat' }, parts: [{ num: 42 }, { num: 43 }] },
         { name: 'B', description: 'Widget B', category: { name: 'Cat' }, parts: [{ num: 43 }, { num: 44 }] },
-      ]
+      ],
+      depth: 1
     )
 
     expect(log).to eq [
       'blueprint_fields (WidgetBlueprint)',
-      'prepare (WidgetBlueprint)',
+      'blueprint_setup (WidgetBlueprint)',
       'blueprint_fields (CategoryBlueprint)',
-      'prepare (CategoryBlueprint)',
+      'blueprint_setup (CategoryBlueprint)',
       'blueprint_fields (PartBlueprint)',
-      'prepare (PartBlueprint)'
+      'blueprint_setup (PartBlueprint)'
     ]
   end
 
@@ -516,7 +587,7 @@ describe Blueprinter::V2::Serializer do
     def instances.blueprints = @blueprints
 
     serializer = instances.serializer(blueprint, { foo: 'bar' })
-    res = serializer.object({ name: 'A', child: { name: 'B', child: { name: 'C' } } })
+    res = serializer.object({ name: 'A', child: { name: 'B', child: { name: 'C' } } }, depth: 1)
     expect(res).to eq({ name: 'A', child: { name: 'B', child: { name: 'C', child: nil } } })
 
     blueprint_serializers = instances.serializers.count

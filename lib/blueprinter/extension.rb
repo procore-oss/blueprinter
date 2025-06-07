@@ -20,6 +20,7 @@ module Blueprinter
   #      - collection_value
   #      - exclude_collection?
   #      - blueprint_output
+  #      - collection_output
   #    - output_object | output_collection
   #    - json
   #
@@ -46,6 +47,8 @@ module Blueprinter
       collection_value
       exclude_collection?
       blueprint_output
+      object_output
+      collection_output
       output_object
       output_collection
       json
@@ -98,7 +101,7 @@ module Blueprinter
     # output_collection: Modify or replace the collection result (stored in context.value) before final render (e.g. to
     # JSON). The returned object is what will be rendered.
     # @param context [Blueprinter::V2::Context::Result]
-    # @return [Object]
+    # @return [Enumerable]
 
     # blueprint_input: Modify or replace an object right before it's serialized by a Blueprint. The returned object will be
     # used as the input to the Blueprint.
@@ -108,6 +111,14 @@ module Blueprinter
     # blueprint_output: Modify or replace the serialized output from any Blueprint. The returned object will be used as the
     # output of the Blueprint.
     # @param context [Blueprinter::V2::Context::Result]
+    # @return [Object]
+
+    # object_output: Modify or replace a serialized object.
+    # @param context [Blueprinter::V2::Context::Field]
+    # @return [Object]
+
+    # collection_output: Modify or replace a serialized collection.
+    # @param context [Blueprinter::V2::Context::Field]
     # @return [Object]
 
     # extract_value: Extract a field, objecet, or collection value from an object. The returned value will be run through the
@@ -127,7 +138,7 @@ module Blueprinter
     # collection_value: Modify or replace the value used for the collection. The returned value will be used as the input for
     # the collection's Blueprint.
     # @param context [Blueprinter::V2::Context::Field]
-    # @return [Object]
+    # @return [Enumerable]
 
     # exclude_field?: Return true to exclude this field from the result.
     # @param context [Blueprinter::V2::Context::Field]

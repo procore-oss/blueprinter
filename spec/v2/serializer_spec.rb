@@ -373,6 +373,30 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo' })
   end
 
+  it 'runs collection_output hooks after everything else' do
+    ext = Class.new(Blueprinter::Extension) do
+      def collection_output(ctx) = { data: ctx.value }
+    end
+    widget_blueprint.extensions << ext.new
+
+    result = described_class.new(widget_blueprint, {}, instances).object(
+      { name: 'Foo', parts: [{ num: 42 }] }
+    )
+    expect(result).to eq({ name: 'Foo', category: nil, parts: { data: [{  num: 42 }] } })
+  end
+
+  it 'runs object_output hooks after everything else' do
+    ext = Class.new(Blueprinter::Extension) do
+      def object_output(ctx) = { data: ctx.value }
+    end
+    widget_blueprint.extensions << ext.new
+
+    result = described_class.new(widget_blueprint, {}, instances).object(
+      { name: 'Foo', category: { name: 'Bar' } }
+    )
+    expect(result).to eq({ name: 'Foo', category: { data: { name: 'Bar' } }, parts: nil })
+  end
+
   it 'runs around_object_serialization around all other serializer hooks' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)

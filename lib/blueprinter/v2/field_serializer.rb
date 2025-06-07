@@ -29,43 +29,55 @@ module Blueprinter
 
       class Object < self
         def serialize(ctx, result)
-          field = ctx.field
           ctx.value = defaults.object_value ctx
           hooks.reduce_into(:object_value, ctx, :value) if @run_object_value
           return if cond.exclude_object?(ctx) || (@run_ex_object && hooks.any?(:exclude_object?, ctx))
 
-          if ctx.value
-            ctx.value =
-              if instances.blueprint(field.blueprint).is_a? V2::Base
-                child_serializer = instances.serializer(field.blueprint, ctx.options)
-                child_serializer.object(ctx.value)
-              else
-                opts = { v2_instances: instances }
-                field.blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
-              end
+          result[ctx.field.name] = ctx.value.nil? ? nil : blueprint_value(ctx)
+        end
+
+        private
+
+        def blueprint_value(ctx)
+          blueprint = ctx.field.blueprint
+          if instances.blueprint(blueprint).is_a? V2::Base
+            child_serializer = instances.serializer(blueprint, ctx.options)
+            value = child_serializer.object(ctx.value)
+            return value unless @run_object_output
+
+            result_ctx = Context::Field.new(ctx.blueprint, ctx.options, ctx.object, ctx.field, value)
+            hooks.reduce_into(:object_output, result_ctx, :value)
+          else
+            opts = { v2_instances: instances }
+            blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
-          result[field.name] = ctx.value
         end
       end
 
       class Collection < self
         def serialize(ctx, result)
-          field = ctx.field
           ctx.value = defaults.collection_value ctx
           hooks.reduce_into(:collection_value, ctx, :value) if @run_collection_value
           return if cond.exclude_collection?(ctx) || (@run_ex_collection && hooks.any?(:exclude_collection?, ctx))
 
-          if ctx.value
-            ctx.value =
-              if instances.blueprint(field.blueprint).is_a? V2::Base
-                child_serializer = instances.serializer(field.blueprint, ctx.options)
-                child_serializer.collection(ctx.value)
-              else
-                opts = { v2_instances: instances }
-                field.blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
-              end
+          result[ctx.field.name] = ctx.value.nil? ? nil : blueprint_value(ctx)
+        end
+
+        private
+
+        def blueprint_value(ctx)
+          blueprint = ctx.field.blueprint
+          if instances.blueprint(blueprint).is_a? V2::Base
+            child_serializer = instances.serializer(blueprint, ctx.options)
+            value = child_serializer.collection(ctx.value)
+            return value unless @run_collection_output
+
+            result_ctx = Context::Field.new(ctx.blueprint, ctx.options, ctx.object, ctx.field, value)
+            hooks.reduce_into(:collection_output, result_ctx, :value)
+          else
+            opts = { v2_instances: instances }
+            blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
-          result[field.name] = ctx.value
         end
       end
 
@@ -79,6 +91,8 @@ module Blueprinter
         @run_ex_field = hooks.registered? :exclude_field?
         @run_ex_object = hooks.registered? :exclude_object?
         @run_ex_collection = hooks.registered? :exclude_collection?
+        @run_object_output = hooks.registered? :object_output
+        @run_collection_output = hooks.registered? :collection_output
       end
     end
   end

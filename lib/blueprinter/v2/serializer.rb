@@ -51,8 +51,8 @@ module Blueprinter
       #
       # Serialize a collection of objects to a Hash.
       #
-      # @param collection [Object] The collection to serialize
-      # @return [Array<Hash>] The serialized objects
+      # @param collection [Enumerable] The collection to serialize
+      # @return [Enumerable] The serialized hashes
       #
       def collection(collection)
         @fields ||= prepare!

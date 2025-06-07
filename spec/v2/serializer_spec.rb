@@ -512,20 +512,17 @@ describe Blueprinter::V2::Serializer do
       object :child, self
     end
     instances = Blueprinter::V2::InstanceCache.new
-    def instances.cache = @cache
+    def instances.serializers = @serializers
+    def instances.blueprints = @blueprints
 
-    serializer = instances[described_class, [blueprint, { foo: 'bar' }, instances]]
+    serializer = instances.serializer(blueprint, { foo: 'bar' })
     res = serializer.object({ name: 'A', child: { name: 'B', child: { name: 'C' } } })
     expect(res).to eq({ name: 'A', child: { name: 'B', child: { name: 'C', child: nil } } })
 
-    blueprint_serializers = instances.cache.select do |key, _val|
-      key == described_class.object_id || (key.is_a?(Array) && key[0] == described_class.object_id)
-    end
-    expect(blueprint_serializers.size).to eq 1
+    blueprint_serializers = instances.serializers.count
+    expect(blueprint_serializers).to eq 1
 
-    blueprint_instances = instances.cache.select do |key, _val|
-      key == blueprint.object_id || (key.is_a?(Array) && key[0] == blueprint.object_id)
-    end
-    expect(blueprint_instances.size).to eq 1
+    blueprint_instances = instances.blueprints.count
+    expect(blueprint_instances).to eq 1
   end
 end

@@ -33,7 +33,7 @@ module Blueprinter
     def extract_v2(value, blueprint, local_options, options)
       view = options[:view] || :default
       instances = local_options[:v2_instances] || V2::InstanceCache.new
-      serializer = instances[V2::Serializer, [blueprint[view], local_options.except(:v2_instances), instances]]
+      serializer = instances.serializer(blueprint[view], local_options.except(:v2_instances))
       if value.is_a?(Enumerable) && !value.is_a?(Hash)
         serializer.collection(value)
       else

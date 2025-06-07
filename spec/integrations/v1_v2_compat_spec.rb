@@ -201,13 +201,14 @@ describe 'V1/V2 Compatibility' do
 
     let(:instances) do
       Blueprinter::V2::InstanceCache.new.tap do |instances|
-        def instances.cache = @cache
+        def instances.serializers = @serializers
+        def instances.blueprints = @blueprints
       end
     end
 
     it 'should use the same V2 Serializer and Blueprint instances through V1' do
       barprint = blueprints[:barprint][:extended]
-      bar_serializer = instances[Blueprinter::V2::Serializer, [barprint, { tag: 'X' }, instances]]
+      bar_serializer = instances.serializer(barprint, { tag: 'X' })
 
       res = bar_serializer.object({
         name: 'Bar 1',
@@ -226,22 +227,17 @@ describe 'V1/V2 Compatibility' do
         }
       })
 
-      barprint_serializer_instances = instances.cache.select do |(key, _val)|
-        key == bar_serializer.class.object_id || (key.is_a?(Array) && key[0] == bar_serializer.class.object_id)
-      end
-      expect(barprint_serializer_instances.size).to eq 1
-
-      barprint_instances = instances.cache.select do |key, _val|
-        key == barprint.object_id || (key.is_a?(Array) && key[0] == barprint.object_id)
-      end
-      expect(barprint_instances.size).to eq 1
+      expect(instances.serializers[barprint]).to be_a Blueprinter::V2::Serializer
+      expect(instances.blueprints[barprint]).to be_a barprint
     end
 
     it 'should use the same V2 Serializer and Blueprint instances from V1' do
-      def instances.cache = @cache
-      def instances.log = @log ||= []
-      def instances.[](obj, args = nil)
-        log << [obj, *args]
+      def instances.serializers = @serializers
+      def instances.blueprints = @blueprints
+      def instances.blueprint_calls = @blueprint_calls ||= {}
+      def instances.blueprint(klass)
+        blueprint_calls[klass] ||= 0
+        blueprint_calls[klass] += 1
         super
       end
 
@@ -270,22 +266,9 @@ describe 'V1/V2 Compatibility' do
       })
 
       barprint = blueprints[:barprint][:extended]
-      serializer = Blueprinter::V2::Serializer
-
-      barprint_serializer_instances = instances.cache.select do |(key, _val)|
-        key == serializer.object_id || (key.is_a?(Array) && key[0] == serializer.object_id)
-      end
-      expect(barprint_serializer_instances.size).to eq 1
-
-      barprint_instances = instances.cache.select do |key, _val|
-        key == barprint.object_id || (key.is_a?(Array) && key[0] == barprint.object_id)
-      end
-      expect(barprint_instances.size).to eq 1
-
-      barprint_serializer_calls = instances.log.select do |(klass, arg1, _)|
-        klass == serializer && arg1 == barprint
-      end
-      expect(barprint_serializer_calls.size).to eq 6
+      expect(instances.serializers[barprint]).to be_a Blueprinter::V2::Serializer
+      expect(instances.blueprints[barprint]).to be_a barprint
+      expect(instances.blueprint_calls[barprint].size).to eq 8
     end
   end
 end

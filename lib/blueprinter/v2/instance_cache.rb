@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'blueprinter/view_wrapper'
+
 module Blueprinter
   module V2
     #
@@ -8,25 +10,36 @@ module Blueprinter
     #
     class InstanceCache
       def initialize
-        @cache = {}
+        @blueprints = {}.compare_by_identity
+        @serializers = {}.compare_by_identity
+        @extensions = {}.compare_by_identity
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
-      def [](obj, args = nil)
-        case obj
-        when Class
-          if args&.any?
-            @cache[[obj.object_id, args]] ||= obj.new(*args)
-          else
-            @cache[obj.object_id] ||= obj.new
-          end
-        when Proc
-          @cache[obj.object_id] ||= obj.call
+      def blueprint(blueprint_class)
+        case blueprint_class
+        when ViewWrapper
+          blueprint_class
         else
-          obj
+          @blueprints[blueprint_class] ||= blueprint_class.new
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
+
+      def serializer(blueprint_class, options)
+        @serializers[blueprint_class] ||= Serializer.new(blueprint_class, options, self)
+      end
+
+      def extension(ext)
+        case ext
+        when Extension
+          ext
+        when Class
+          @extensions[ext] ||= ext.new
+        when Proc
+          @extensions[ext] ||= ext.call
+        else
+          raise ArgumentError, "Unsupported extension type '#{ext.class.name}'"
+        end
+      end
     end
   end
 end

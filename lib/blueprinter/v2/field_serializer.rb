@@ -36,8 +36,8 @@ module Blueprinter
 
           if ctx.value
             ctx.value =
-              if instances[field.blueprint].is_a? V2::Base
-                child_serializer = instances[Serializer, [field.blueprint, ctx.options, instances]]
+              if instances.blueprint(field.blueprint).is_a? V2::Base
+                child_serializer = instances.serializer(field.blueprint, ctx.options)
                 child_serializer.object(ctx.value)
               else
                 opts = { v2_instances: instances }
@@ -57,8 +57,8 @@ module Blueprinter
 
           if ctx.value
             ctx.value =
-              if instances[field.blueprint].is_a? V2::Base
-                child_serializer = instances[Serializer, [field.blueprint, ctx.options, instances]]
+              if instances.blueprint(field.blueprint).is_a? V2::Base
+                child_serializer = instances.serializer(field.blueprint, ctx.options)
                 child_serializer.collection(ctx.value)
               else
                 opts = { v2_instances: instances }

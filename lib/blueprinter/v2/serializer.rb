@@ -23,7 +23,7 @@ module Blueprinter
         @hooks = Hooks.new([
           Extensions::Core::Prelude.new,
           Extensions::Core::Extractor.new,
-          *blueprint.extensions.map { |ext| instances[ext] },
+          *blueprint.extensions.map { |ext| instances.extension ext },
           Extensions::Core::Postlude.new
         ])
         # "Unroll" these hooks for a significant speed boost
@@ -41,7 +41,7 @@ module Blueprinter
       def object(object)
         @fields ||= prepare!
         if @run_around_object
-          ctx = Context::Object.new(instances[blueprint], options, object)
+          ctx = Context::Object.new(instances.blueprint(blueprint), options, object)
           hooks.around(:around_object_serialization, ctx) { serialize(object, @fields, options) }
         else
           serialize(object, @fields, options)
@@ -57,7 +57,7 @@ module Blueprinter
       def collection(collection)
         @fields ||= prepare!
         if @run_around_collection
-          ctx = Context::Object.new(instances[blueprint], options, collection)
+          ctx = Context::Object.new(instances.blueprint(blueprint), options, collection)
           hooks.around(:around_collection_serialization, ctx) do
             collection.map { |object| serialize(object, @fields, options) }.to_a
           end
@@ -71,11 +71,11 @@ module Blueprinter
       # rubocop:disable Metrics/MethodLength
       def serialize(object, fields, options)
         if @run_blueprint_input
-          ctx = Context::Object.new(instances[blueprint], options, object)
+          ctx = Context::Object.new(instances.blueprint(blueprint), options, object)
           object = hooks.reduce_into(:blueprint_input, ctx, :object)
         end
 
-        ctx = Context::Field.new(instances[blueprint], options, object, nil, nil)
+        ctx = Context::Field.new(instances.blueprint(blueprint), options, object, nil, nil)
         result = fields.each_with_object({}) do |field_conf, acc|
           ctx.field = field_conf.field
           ctx.value = nil
@@ -99,7 +99,7 @@ module Blueprinter
 
       # Allow extensions to do time-saving prep work on the current context
       def prepare!
-        ctx = Context::Render.new(instances[blueprint], options)
+        ctx = Context::Render.new(instances.blueprint(blueprint), options)
         prepared_exts = {}.compare_by_identity
         fields = hooks.last(:blueprint_fields, ctx).map { |field| prepare_field(field, prepared_exts) }.freeze
         defaults.prepare ctx
@@ -110,7 +110,8 @@ module Blueprinter
 
       # rubocop:disable Metrics/CyclomaticComplexity
       def prepare_field(field, prepared_exts)
-        extractor = instances[field.options[:extractor]] || hooks.last_with(:extract_value)
+        ext = field.options[:extractor]
+        extractor = ext ? instances.extension(ext) : hooks.last_with(:extract_value)
         prepared_exts[extractor] ||= extractor.prepare(ctx) || true if extractor.respond_to?(:prepare)
 
         case field

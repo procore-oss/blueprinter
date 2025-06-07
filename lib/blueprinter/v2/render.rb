@@ -21,7 +21,7 @@ module Blueprinter
       def to_hash
         instances = InstanceCache.new
         ctx = create_context instances
-        serializer = instances[Serializer, [@blueprint, @options, instances]]
+        serializer = instances.serializer(@blueprint, @options)
         serializer.hooks.around(@around_hook, ctx) do
           serialize(serializer, ctx).result
         end
@@ -32,7 +32,7 @@ module Blueprinter
       def to_json(_arg = nil)
         instances = InstanceCache.new
         ctx = create_context instances
-        serializer = instances[Serializer, [@blueprint, @options, instances]]
+        serializer = instances.serializer(@blueprint, @options)
         serializer.hooks.around(@around_hook, ctx) do
           result_ctx = serialize(serializer, ctx)
           serializer.hooks.last(:json, result_ctx)
@@ -58,7 +58,7 @@ module Blueprinter
       # @return [Blueprinter::V2::Context::Object]
       # @return [Blueprinter::V2::InstanceCache]
       def create_context(instances)
-        blueprint = instances[@blueprint]
+        blueprint = instances.blueprint(@blueprint)
         Context::Object.new(blueprint, @options, @object)
       end
     end

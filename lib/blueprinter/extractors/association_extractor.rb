@@ -32,12 +32,13 @@ module Blueprinter
 
     def extract_v2(value, blueprint, local_options, options)
       view = options[:view] || :default
+      depth = local_options[:v2_depth] || 1
       instances = local_options[:v2_instances] || V2::InstanceCache.new
       serializer = instances.serializer(blueprint[view], local_options.except(:v2_instances))
       if value.is_a?(Enumerable) && !value.is_a?(Hash)
-        serializer.collection(value)
+        serializer.collection(value, depth: depth + 1)
       else
-        serializer.object(value)
+        serializer.object(value, depth: depth + 1)
       end
     end
 

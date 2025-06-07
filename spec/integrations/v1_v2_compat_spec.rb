@@ -217,7 +217,7 @@ describe 'V1/V2 Compatibility' do
           bar1: { name: 'Bar 2' },
           bar2: { name: 'Bar 2' }
         }
-      })
+      }, depth: 1)
       expect(res).to eq({
         name: 'Bar 1 - X',
         foo: {

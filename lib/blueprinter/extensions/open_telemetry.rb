@@ -13,22 +13,12 @@ module Blueprinter
       end
 
       # @param ctx [Blueprinter::V2::Context::Object]
-      def around_object_render(ctx, &)
-        tracer.in_span('blueprinter.render', attributes: attributes(ctx), &)
-      end
-
-      # @param ctx [Blueprinter::V2::Context::Object]
-      def around_collection_render(ctx, &)
-        tracer.in_span('blueprinter.render', attributes: attributes(ctx), &)
-      end
-
-      # @param ctx [Blueprinter::V2::Context::Object]
-      def around_object_serialization(ctx, &)
+      def around_serialize_object(ctx, &)
         tracer.in_span('blueprinter.object', attributes: attributes(ctx), &)
       end
 
       # @param ctx [Blueprinter::V2::Context::Object]
-      def around_collection_serialization(ctx, &)
+      def around_serialize_collection(ctx, &)
         tracer.in_span('blueprinter.collection', attributes: attributes(ctx), &)
       end
 

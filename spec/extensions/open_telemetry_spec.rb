@@ -15,8 +15,8 @@ describe Blueprinter::Extensions::OpenTelemetry do
 
       def initialize(log) = @log = log
 
-      def object_value(ctx)
-        @log << 'object_value'
+      def object_field_value(ctx)
+        @log << 'object_field_value'
         ctx.value
       end
 
@@ -28,27 +28,11 @@ describe Blueprinter::Extensions::OpenTelemetry do
     end
   end
 
-  it 'creates a blueprinter.render span for objects' do
-    ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { name: 'Foo' })
-    expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.render', attributes: { 'blueprint' => ctx.blueprint.class.to_s }.merge(attributes)).and_call_original
-    called = subject.around_object_render(ctx) { :true }
-    expect(called).to eq :true
-  end
-
-  it 'creates a blueprinter.render span for collections' do
-    ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, [{ name: 'Foo' }])
-    expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.render', attributes: { 'blueprint' => ctx.blueprint.class.to_s }.merge(attributes)).and_call_original
-    called = subject.around_collection_render(ctx) { :true }
-    expect(called).to eq :true
-  end
-
   it 'creates a blueprinter.object span' do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foo_obj: { name: 'Bar' } })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => ctx.blueprint.class.to_s }.merge(attributes)).and_call_original
-    called = subject.around_object_serialization(ctx) { :true }
+    called = subject.around_serialize_object(ctx) { :true }
     expect(called).to eq :true
   end
 
@@ -56,7 +40,7 @@ describe Blueprinter::Extensions::OpenTelemetry do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foos: [{ name: 'Bar' }] })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.collection', attributes: { 'blueprint' => ctx.blueprint.class.to_s }.merge(attributes)).and_call_original
-    called = subject.around_collection_serialization(ctx) { :true }
+    called = subject.around_serialize_collection(ctx) { :true }
     expect(called).to eq :true
   end
 
@@ -77,13 +61,11 @@ describe Blueprinter::Extensions::OpenTelemetry do
     attributes = { 'library.name' => 'Blueprinter', 'library.version' => Blueprinter::VERSION }
     object = { foo: 'Foo', foo_obj: { name: 'Bar1' }, foos: [{ name: 'Bar2' }] }
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.render', attributes: { 'blueprint' => blueprint.to_s }.merge(attributes)).and_call_original
-    expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => blueprint.to_s }.merge(attributes)).and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :object_value }.merge(attributes)).twice.and_call_original
+      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :object_field_value }.merge(attributes)).twice.and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.collection', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
     blueprint.render(object).to_hash

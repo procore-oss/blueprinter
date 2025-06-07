@@ -9,7 +9,9 @@ module Blueprinter
         #
         class Postlude < Extension
           # @param ctx [Blueprinter::V2::Context::Result]
-          def output_object(ctx)
+          def object_output(ctx)
+            return ctx.result unless ctx.depth == 1
+
             root_name = ctx.options[:root] || ctx.blueprint.class.options[:root]
             return ctx.result if root_name.nil?
 
@@ -21,10 +23,7 @@ module Blueprinter
             root
           end
 
-          # @param ctx [Blueprinter::V2::Context::Result]
-          def output_collection(ctx)
-            output_object ctx
-          end
+          alias collection_output object_output
 
           def hidden? = true
         end

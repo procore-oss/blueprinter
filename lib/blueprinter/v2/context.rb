@@ -12,7 +12,7 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       #
-      Render = Struct.new(:blueprint, :options)
+      Render = Struct.new(:blueprint, :options, :depth)
 
       #
       # The extension hook currently being called.
@@ -25,8 +25,10 @@ module Blueprinter
       #   @return [Blueprinter::Extension] Instance of the extension running
       # @!attribute [r] hook
       #   @return [Symbol] Name of the symbol being called
+      # @!attribute [r] depth
+      #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Hook = Struct.new(:blueprint, :options, :extension, :hook)
+      Hook = Struct.new(:blueprint, :options, :extension, :hook, :depth)
 
       #
       # The object or collection currently being serialized.
@@ -37,8 +39,10 @@ module Blueprinter
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
+      # @!attribute [r] depth
+      #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Object = Struct.new(:blueprint, :options, :object)
+      Object = Struct.new(:blueprint, :options, :object, :depth)
 
       #
       # The current field and its extracted value.
@@ -54,8 +58,10 @@ module Blueprinter
       # field that's currently being evaluated
       # @!attribute [r] value
       #   @return [Object] The extracted field value
+      # @!attribute [r] depth
+      #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Field = Struct.new(:blueprint, :options, :object, :field, :value)
+      Field = Struct.new(:blueprint, :options, :object, :field, :value, :depth)
 
       #
       # A serialized object/collection. This may be the outer object/collection or a nested one.
@@ -68,8 +74,10 @@ module Blueprinter
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] result
       #   @return [Hash|Array<Hash>] A serialized result
+      # @!attribute [r] depth
+      #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Result = Struct.new(:blueprint, :options, :object, :result)
+      Result = Struct.new(:blueprint, :options, :object, :result, :depth)
     end
   end
 end

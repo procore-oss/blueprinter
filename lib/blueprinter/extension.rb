@@ -9,9 +9,10 @@ module Blueprinter
   #  - around_object_render | around_collection_render
   #    - input_object | input_collection
   #    - around_object_serialization | around_collection_serialization
-  #      - prepare (only first time during a given render)
   #      - blueprint_fields (only first time during a given render)
+  #      - prepare (only first time during a given render)
   #      - blueprint_input
+  #      - extract_value
   #      - field_value
   #      - exclude_field?
   #      - object_value
@@ -19,6 +20,7 @@ module Blueprinter
   #      - collection_value
   #      - exclude_collection?
   #      - blueprint_output
+  #      - collection_output
   #    - output_object | output_collection
   #    - json
   #
@@ -34,9 +36,10 @@ module Blueprinter
       input_collection
       around_object_serialization
       around_collection_serialization
-      prepare
       blueprint_fields
+      prepare
       blueprint_input
+      extract_value
       field_value
       exclude_field?
       object_value
@@ -44,6 +47,8 @@ module Blueprinter
       collection_value
       exclude_collection?
       blueprint_output
+      object_output
+      collection_output
       output_object
       output_collection
       json
@@ -73,9 +78,10 @@ module Blueprinter
 
     # blueprint_fields: Returns the fields that should be included in the correct order. Default is all fields in the order
     # in which they were defined.
+    # NOTE If there are multiple blueprint_fields hooks, only the last one is called.
     # NOTE Only runs once per Blueprint per render.
     # @param context [Blueprinter::V2::Context::Render]
-    # @return [Array<Blueprinter::V2::Field|Blueprinter::V2::Object|Blueprinter::V2::Collection>]
+    # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>]
 
     # input_object: Modify or replace the object passed to render/render_object. The returned object is what will be
     # rendered.
@@ -95,7 +101,7 @@ module Blueprinter
     # output_collection: Modify or replace the collection result (stored in context.value) before final render (e.g. to
     # JSON). The returned object is what will be rendered.
     # @param context [Blueprinter::V2::Context::Result]
-    # @return [Object]
+    # @return [Enumerable]
 
     # blueprint_input: Modify or replace an object right before it's serialized by a Blueprint. The returned object will be
     # used as the input to the Blueprint.
@@ -106,6 +112,18 @@ module Blueprinter
     # output of the Blueprint.
     # @param context [Blueprinter::V2::Context::Result]
     # @return [Object]
+
+    # object_output: Modify or replace a serialized object.
+    # @param context [Blueprinter::V2::Context::Field]
+    # @return [Object]
+
+    # collection_output: Modify or replace a serialized collection.
+    # @param context [Blueprinter::V2::Context::Field]
+    # @return [Object]
+
+    # extract_value: Extract a field, objecet, or collection value from an object. The returned value will be run through the
+    # NOTE If there are multiple extract_value hooks, only the last one is called.
+    # field_value, object_value, or collection_value hooks.
 
     # field_value: Modify or replace the value used for the field. The returned value will be run through any formatters and
     # used as the field's value.
@@ -120,7 +138,7 @@ module Blueprinter
     # collection_value: Modify or replace the value used for the collection. The returned value will be used as the input for
     # the collection's Blueprint.
     # @param context [Blueprinter::V2::Context::Field]
-    # @return [Object]
+    # @return [Enumerable]
 
     # exclude_field?: Return true to exclude this field from the result.
     # @param context [Blueprinter::V2::Context::Field]
@@ -135,6 +153,7 @@ module Blueprinter
     # @return [Boolean]
 
     # json: Override the default JSON encoder. The returned string will be the JSON output.
+    # NOTE If there are multiple json hooks, only the final one is called.
     # @param context [Blueprinter::V2::Context::Result]
     # @return [String]
 

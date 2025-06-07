@@ -11,13 +11,22 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
-      # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
-      # a render
-      # @!attribute [r] store
-      #   @return [Hash] A Hash for extensions, etc to cache render data in
       #
-      Render = Struct.new(:blueprint, :options, :instances, :store)
+      Render = Struct.new(:blueprint, :options)
+
+      #
+      # The extension hook currently being called.
+      #
+      # @!attribute [r] blueprint
+      #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
+      # @!attribute [r] options
+      #   @return [Hash] Options passed to `render`
+      # @!attribute [r] extension
+      #   @return [Blueprinter::Extension] Instance of the extension running
+      # @!attribute [r] hook
+      #   @return [Symbol] Name of the symbol being called
+      #
+      Hook = Struct.new(:blueprint, :options, :extension, :hook)
 
       #
       # The object or collection currently being serialized.
@@ -26,15 +35,10 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
-      # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
-      # a render
-      # @!attribute [r] store
-      #   @return [Hash] A Hash for extensions, etc to cache render data in
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       #
-      Object = Struct.new(:blueprint, :options, :instances, :store, :object)
+      Object = Struct.new(:blueprint, :options, :object)
 
       #
       # The current field and its extracted value.
@@ -43,20 +47,15 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
-      # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
-      # a render
-      # @!attribute [r] store
-      #   @return [Hash] A Hash for extensions, etc to cache render data in
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] field
-      #   @return [Blueprinter::V2::Field|Blueprinter::V2::ObjectField|Blueprinter::V2::Collection] The field that's
-      # currently being evaluated
+      #   @return [Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection] The
+      # field that's currently being evaluated
       # @!attribute [r] value
       #   @return [Object] The extracted field value
       #
-      Field = Struct.new(:blueprint, :options, :instances, :store, :object, :field, :value)
+      Field = Struct.new(:blueprint, :options, :object, :field, :value)
 
       #
       # A serialized object/collection. This may be the outer object/collection or a nested one.
@@ -65,17 +64,12 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
-      # @!attribute [r] instances
-      #   @return [Blueprinter::V2::InstanceCache] An InstanceCache for sharing instances of Blueprints and Extractors during
-      # a render
-      # @!attribute [r] store
-      #   @return [Hash] A Hash for extensions, etc to cache render data in
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] result
       #   @return [Hash|Array<Hash>] A serialized result
       #
-      Result = Struct.new(:blueprint, :options, :instances, :store, :object, :result)
+      Result = Struct.new(:blueprint, :options, :object, :result)
     end
   end
 end

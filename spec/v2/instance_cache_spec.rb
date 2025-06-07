@@ -2,59 +2,74 @@
 
 describe Blueprinter::V2::InstanceCache do
   subject { described_class.new }
-  let(:klass) { Class.new }
-  let(:klass2) { Class.new }
+  let(:widget_blueprint) { Class.new(Blueprinter::V2::Base) }
+  let(:category_blueprint) { Class.new(Blueprinter::V2::Base) }
 
-  it "returns a new instance" do
-    expect(subject[klass]).to be_a klass
-  end
-
-  it "returns the cached instance from a class" do
-    res1 = subject[klass]
-    res2 = subject[klass]
-    res3 = subject[klass2]
-    expect(res2.object_id).to eq res1.object_id
-    expect(res3.object_id).to_not eq res1.object_id
-  end
-
-  it "returns the cached instance from a class with args" do
-    klass = Class.new do
-      attr_reader :arg1, :arg2
-
-      def initialize(arg1, arg2)
-        @arg1 = arg1
-        @arg2 = arg2
-      end
+  context "#blueprint" do
+    it "returns a new instance of a Blueprint subclass" do
+      expect(subject.blueprint(widget_blueprint)).to be_a widget_blueprint
+      expect(subject.blueprint(category_blueprint)).to be_a category_blueprint
     end
 
-    res1 = subject[klass, ["foo", "bar"]]
-    res2 = subject[klass, ["foo", "bar"]]
-    res3 = subject[klass, ["foob", "boop"]]
-
-    expect(res2.object_id).to eq res1.object_id
-    expect(res2.arg1).to eq "foo"
-    expect(res2.arg2).to eq "bar"
-
-    expect(res3.object_id).to_not eq res2.object_id
-    expect(res3.arg1).to eq "foob"
-    expect(res3.arg2).to eq "boop"
+    it "returns the same instance of a Blueprint subclass" do
+      blueprint1 = subject.blueprint widget_blueprint
+      blueprint2 = subject.blueprint widget_blueprint
+      expect(blueprint2).to be blueprint1
+    end
   end
 
-  it "returns the cached instance from a Proc" do
-    p1 = proc { klass.new }
-    p2 = proc { klass.new }
+  context '#serializer' do
+    it "returns a new instance of Serializer"  do
+      widget_serializer = subject.serializer(widget_blueprint, { foo: true })
+      expect(widget_serializer).to be_a Blueprinter::V2::Serializer
+      expect(widget_serializer.blueprint).to be widget_blueprint
+      expect(widget_serializer.options).to eq({ foo: true })
+      expect(widget_serializer.instances).to be subject
 
-    res1 = subject[p1]
-    res2 = subject[p1]
-    res3 = subject[p2]
-    expect(res2.object_id).to eq res1.object_id
-    expect(res3.object_id).to_not eq res1.object_id
+      category_serializer = subject.serializer(category_blueprint, { foo: false })
+      expect(category_serializer).to be_a Blueprinter::V2::Serializer
+      expect(category_serializer.blueprint).to be category_blueprint
+      expect(category_serializer.options).to eq({ foo: false })
+      expect(category_serializer.instances).to be subject
+    end
+
+    it "returns the same instance of Serializer" do
+      widget_serializer1 = subject.serializer(widget_blueprint, { foo: true })
+      widget_serializer2 = subject.serializer(widget_blueprint, { foo: false })
+      expect(widget_serializer2).to be widget_serializer1
+    end
   end
 
-  it "returns x if x is an instance" do
-    x = klass.new
-    y = klass.new
-    expect(subject[x]).to eq x
-    expect(subject[y]).to eq y
+  context "#extension" do
+    let(:extension_a) { Class.new(Blueprinter::Extension) }
+    let(:extension_b) { Class.new(Blueprinter::Extension) }
+
+    it "returns an existing extension instance" do
+      ext = extension_a.new
+      expect(subject.extension(ext)).to be ext
+    end
+
+    it "returns a new instance of an Extension subclass" do
+      expect(subject.extension(extension_a)).to be_a extension_a
+      expect(subject.extension(extension_b)).to be_a extension_b
+    end
+
+    it "returns the same instance of a Blueprint subclass" do
+      ext1 = subject.extension extension_a
+      ext2 = subject.extension extension_a
+      expect(ext2).to be ext1
+    end
+
+    it "returns a new instance of an Extension subclass from a proc" do
+      expect(subject.extension(-> { extension_a.new })).to be_a extension_a
+      expect(subject.extension(-> { extension_b.new })).to be_a extension_b
+    end
+
+    it "returns the same instance of a Blueprint subclass from a proc" do
+      p = -> { extension_a.new }
+      ext1 = subject.extension p
+      ext2 = subject.extension p
+      expect(ext2).to be ext1
+    end
   end
 end

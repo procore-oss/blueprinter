@@ -189,6 +189,34 @@ end
 end
 </code></pre>
 <h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
+<p>Alternate recursive hook structure. Context objects will have a <code>root</code> boolean.</p>
+<ul>
+<li><a href="#foo">around_object_serialization</a> | <a href="#foo">around_collection_serialization</a>
+<ul>
+<li><a href="#foo">input_object</a> | <a href="#foo">input_collection</a>
+<ul>
+<li><a href="#blueprint_fields">blueprint_fields</a></li>
+<li><a href="#blueprint_setup">blueprint_setup</a></li>
+<li><a href="#blueprint_input">blueprint_input</a>
+<ul>
+<li><a href="#extract_value">extract_value</a></li>
+<li><a href="#field_value">field_value</a> | <a href="#object_value">object_value</a> | <a href="#collection_value">collection_value</a></li>
+<li><a href="#exclude_field">exclude_field?</a> | <a href="#exclude_object">exclude_object?</a> | <a href="#exclude_collection">exclude_collection?</a></li>
+<li><em>around_object_serialization | around_collection_serialization</em>
+<ul>
+<li><em>…</em></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#blueprint_output">blueprint_output</a></li>
+</ul>
+</li>
+<li><a href="#output_object">output_object</a> | <a href="#output_collection">output_collection</a></li>
+<li><a href="#json">json</a> (root only)</li>
+</ul>
+</li>
+</ul>
 <p>Hooks are called in the following order. Most are passed a <a href="./context-objects.html">context object</a> as an argument.</p>
 <ul>
 <li><a href="#around_object_render">around_object_render</a> | <a href="#around_collection_render">around_collection_render</a>
@@ -203,6 +231,7 @@ end
 <li><a href="#field_value">field_value</a> | <a href="#object_value">object_value</a> | <a href="#collection_value">collection_value</a></li>
 <li><a href="#exclude_field">exclude_field?</a> | <a href="#exclude_object">exclude_object?</a> | <a href="#exclude_collection">exclude_collection?</a></li>
 <li><a href="#blueprint_output">blueprint_output</a></li>
+<li><a href="#object_result">object_result</a> | <a href="#collection_result">collection_result</a></li>
 </ul>
 </li>
 <li><a href="#output_object">output_object</a> | <a href="#output_collection">output_collection</a></li>
@@ -225,6 +254,7 @@ end
   # do something after render
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="around_collection_render"><a class="header" href="#around_collection_render">around_collection_render</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level collection being rendered<br />
@@ -237,6 +267,7 @@ end
   # do something after render
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="input_object"><a class="header" href="#input_object">input_object</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level object being rendered<br />
@@ -248,6 +279,7 @@ end
   ctx.object
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="input_collection"><a class="header" href="#input_collection">input_collection</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the top-level collection being rendered<br />
@@ -259,6 +291,7 @@ end
   ctx.object
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="around_object_serialization"><a class="header" href="#around_object_serialization">around_object_serialization</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
@@ -272,6 +305,7 @@ end
   # do something after render
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="around_collection_serialization"><a class="header" href="#around_collection_serialization">around_collection_serialization</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current collection being rendered<br />
@@ -285,6 +319,7 @@ end
   # do something after render
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
 <p><em>Override hook</em><br />
@@ -299,6 +334,7 @@ end
 end
 </code></pre>
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="prepare"><a class="header" href="#prepare">prepare</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
@@ -310,6 +346,7 @@ end
 end
 </code></pre>
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
@@ -321,6 +358,7 @@ end
   ctx.object
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="extract_value"><a class="header" href="#extract_value">extract_value</a></h2>
 <blockquote>
 <p><em>Override hook</em><br />
@@ -333,6 +371,7 @@ end
   ctx.object.public_send(ctx.field.from)
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="field_value"><a class="header" href="#field_value">field_value</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
@@ -347,6 +386,7 @@ end
   end
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="object_value"><a class="header" href="#object_value">object_value</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
@@ -358,6 +398,7 @@ end
   ctx.value
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="collection_value"><a class="header" href="#collection_value">collection_value</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
@@ -369,6 +410,7 @@ end
   ctx.value.compact
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="exclude_field"><a class="header" href="#exclude_field">exclude_field?</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
@@ -380,6 +422,7 @@ end
   ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="exclude_object"><a class="header" href="#exclude_object">exclude_object?</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
@@ -391,6 +434,7 @@ end
   ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="exclude_collection"><a class="header" href="#exclude_collection">exclude_collection?</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
@@ -402,6 +446,7 @@ end
   ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the current blueprint, and <code>context.object</code> the current object<br />
@@ -413,6 +458,31 @@ end
   ctx.result.merge(ctx.object.extra_fields)
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
+<h2 id="blueprint_object"><a class="header" href="#blueprint_object">blueprint_object</a></h2>
+<blockquote>
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong><br />
+<strong>@return [Object]</strong> The value to use for the fully serialized object<br />
+<strong>@cost</strong> High - run for every object field</p>
+</blockquote>
+<p>This example wraps the result in a metadata block:</p>
+<pre><code class="language-ruby">def blueprint_object(ctx)
+  { data: ctx.value, metadata: {...} }
+end
+</code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
+<h2 id="blueprint_collection"><a class="header" href="#blueprint_collection">blueprint_collection</a></h2>
+<blockquote>
+<p><strong>@param <a href="./context-objects.html#field-context">Field Context</a></strong><br />
+<strong>@return [Object]</strong> The value to use for the fully serialized collection<br />
+<strong>@cost</strong> High - run for every collection field</p>
+</blockquote>
+<p>This example wraps the result in a metadata block:</p>
+<pre><code class="language-ruby">def blueprint_collection(ctx)
+  { data: ctx.value, metadata: {...} }
+end
+</code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="output_object"><a class="header" href="#output_object">output_object</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the top-level blueprint, and <code>context.object</code> the top-level object<br />
@@ -424,6 +494,7 @@ end
   ctx.result.merge({ extra: "data" })
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="output_collection"><a class="header" href="#output_collection">output_collection</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized array of Hashes from the top-level blueprint, and <code>context.object</code> the top-level collection<br />
@@ -444,6 +515,7 @@ def output_collection(ctx)
   ctx.result.map { |item| item.merge({ extra: "data" }) }
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="json"><a class="header" href="#json">json</a></h2>
 <blockquote>
 <p><em>Override hook</em><br />
@@ -457,6 +529,7 @@ end
   JSON.dump ctx.result
 end
 </code></pre>
+<p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h2>
 <blockquote>
 <p><strong>@param Extension</strong> Instance of the extension<br />

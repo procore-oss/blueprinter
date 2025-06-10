@@ -195,7 +195,7 @@ end
 <li><a href="#blueprint_setup">blueprint_setup</a></li>
 <li><a href="#around_serialize_object">around_serialize_object</a> | <a href="#around_serialize_collection">around_serialize_collection</a>
 <ul>
-<li><a href="#serialize_object_input">serialize_object_input</a> | <a href="#serialize_collection_input">serialize_collection_input</a></li>
+<li><a href="#object_input">object_input</a> | <a href="#collection_input">collection_input</a></li>
 <li><a href="#blueprint_input">blueprint_input</a>
 <ul>
 <li><a href="#extract_value">extract_value</a></li>
@@ -209,7 +209,7 @@ end
 </ul>
 </li>
 <li><a href="#blueprint_output">blueprint_output</a></li>
-<li><a href="#serialize_object_output">serialize_object_output</a> | <a href="#serialize_collection_output">serialize_collection_output</a></li>
+<li><a href="#object_output">object_output</a> | <a href="#collection_output">collection_output</a></li>
 </ul>
 </li>
 <li><a href="#json">json</a></li>
@@ -272,26 +272,26 @@ end
 end
 </code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
-<h2 id="serialize_object_input"><a class="header" href="#serialize_object_input">serialize_object_input</a></h2>
+<h2 id="object_input"><a class="header" href="#object_input">object_input</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Medium - run every time an object is rendered</p>
 </blockquote>
 <p>Run before serialization begins on an object passed to <code>render</code> or <code>render_object</code>, or an <code>object</code> in a blueprint. You may modify and return <code>context.object</code> or return a different object entirely. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
-<pre><code class="language-ruby">def serialize_object_input(ctx)
+<pre><code class="language-ruby">def object_input(ctx)
   ctx.object
 end
 </code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
-<h2 id="serialize_collection_input"><a class="header" href="#serialize_collection_input">serialize_collection_input</a></h2>
+<h2 id="collection_input"><a class="header" href="#collection_input">collection_input</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current collection being rendered<br />
 <strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
 <strong>@cost</strong> Medium - run every time a collection is rendered</p>
 </blockquote>
 <p>Run before serialization begins on a collection passed to <code>render</code> or <code>render_collection</code>, or a <code>collection</code> in a blueprint. You may modify and return <code>context.object</code> or return a different collection entirely. <strong>Whatever collection is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
-<pre><code class="language-ruby">def serialize_collection_input(ctx)
+<pre><code class="language-ruby">def collection_input(ctx)
   ctx.object
 end
 </code></pre>
@@ -417,26 +417,26 @@ end
 end
 </code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
-<h2 id="serialize_object_output"><a class="header" href="#serialize_object_output">serialize_object_output</a></h2>
+<h2 id="object_output"><a class="header" href="#object_output">object_output</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the current blueprint, and <code>context.object</code> the current object<br />
 <strong>@return [Object]</strong> The value to use for the fully serialized object<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
 <p>Run after an object is fully serialized. This may be the root object from <code>render</code> or an <code>object</code> field from a blueprint. This example wraps the result in a metadata block:</p>
-<pre><code class="language-ruby">def serialize_object_output(ctx)
+<pre><code class="language-ruby">def object_output(ctx)
   { data: ctx.value, metadata: {...} }
 end
 </code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
-<h2 id="serialize_collection_output"><a class="header" href="#serialize_collection_output">serialize_collection_output</a></h2>
+<h2 id="collection_output"><a class="header" href="#collection_output">collection_output</a></h2>
 <blockquote>
 <p><strong>@param <a href="./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the array of serialized Hashes from the current blueprint, and <code>context.object</code> the current collection<br />
 <strong>@return [Object]</strong> The value to use for the fully serialized collection<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
 <p>Run after a collection is fully serialized. This may be the root collection from <code>render</code> or a <code>collection</code> field from a blueprint. This example wraps the result in a metadata block:</p>
-<pre><code class="language-ruby">def serialize_collection_output(ctx)
+<pre><code class="language-ruby">def collection_output(ctx)
   { data: ctx.value, metadata: {...} }
 end
 </code></pre>

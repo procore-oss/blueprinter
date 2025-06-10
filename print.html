@@ -898,7 +898,8 @@ end
 <strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
 <strong>@cost</strong> Medium - run every time an object is rendered</p>
 </blockquote>
-<p>Run before serialization begins on an object passed to <code>render</code> or <code>render_object</code>, or an <code>object</code> in a blueprint. You may modify and return <code>context.object</code> or return a different object entirely. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
+<p>Runs before serialization of any object from <code>render</code>, <code>render_object</code>, or a blueprint's <code>object</code> field. You may modify and return <code>context.object</code> or return a different object entirely. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
+<p>If you want to target only the root object, check <code>context.depth == 1</code>.</p>
 <pre><code class="language-ruby">def object_input(ctx)
   ctx.object
 end
@@ -910,7 +911,8 @@ end
 <strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
 <strong>@cost</strong> Medium - run every time a collection is rendered</p>
 </blockquote>
-<p>Run before serialization begins on a collection passed to <code>render</code> or <code>render_collection</code>, or a <code>collection</code> in a blueprint. You may modify and return <code>context.object</code> or return a different collection entirely. <strong>Whatever collection is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
+<p>Runs before serialization of any collection from <code>render</code>, <code>render_collection</code>, or a blueprint's <code>collection</code> field. You may modify and return <code>context.object</code> or return a different collection entirely. <strong>Whatever collection is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
+<p>If you want to target only the root collection, check <code>context.depth == 1</code>.</p>
 <pre><code class="language-ruby">def collection_input(ctx)
   ctx.object
 end
@@ -1017,13 +1019,28 @@ end
 </code></pre>
 <p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
 <h2 id="field_result"><a class="header" href="#field_result">field_result</a></h2>
-<p>TODO</p>
+<blockquote>
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<strong>@return Object</strong> The value to be rendered for this field<br />
+<strong>@cost</strong> High - run for every field</p>
+</blockquote>
+<p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="api/extensions.html#exclude_field">exclude_field?</a> returned <code>true</code>.</p>
 <p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
 <h2 id="object_field_result"><a class="header" href="#object_field_result">object_field_result</a></h2>
-<p>TODO</p>
+<blockquote>
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<strong>@return Object</strong> The value to be rendered for this field<br />
+<strong>@cost</strong> High - run for every field</p>
+</blockquote>
+<p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="api/extensions.html#exclude_object_field">exclude_object_field?</a> returned <code>true</code>.</p>
 <p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
 <h2 id="collection_field_result"><a class="header" href="#collection_field_result">collection_field_result</a></h2>
-<p>TODO</p>
+<blockquote>
+<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
+<strong>@return Object</strong> The value to be rendered for this field<br />
+<strong>@cost</strong> High - run for every field</p>
+</blockquote>
+<p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="api/extensions.html#exclude_collection_field">exclude_collection_field?</a> returned <code>true</code>.</p>
 <p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
 <h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
 <blockquote>
@@ -1052,7 +1069,7 @@ end
 <h2 id="collection_output"><a class="header" href="#collection_output">collection_output</a></h2>
 <blockquote>
 <p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the array of serialized Hashes from the current blueprint, and <code>context.object</code> the current collection<br />
-<strong>@return [Object]</strong> The value to use for the fully serialized collection<br />
+<strong>@return Object</strong> The value to use for the fully serialized collection<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
 <p>Run after a collection is fully serialized. This may be the root collection from <code>render</code> or a <code>collection</code> field from a blueprint. This example wraps the result in a metadata block:</p>
@@ -1068,7 +1085,7 @@ end
 <strong>@return String</strong> The JSON output<br />
 <strong>@cost</strong> Low - run once per JSON render</p>
 </blockquote>
-<p>Serializes the final output to JSON. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
+<p>Serializes the final output to JSON. Only called on the top-level blueprint. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
 <p>The default behavior looks like:</p>
 <pre><code class="language-ruby">def json(ctx)
   JSON.dump ctx.result
@@ -1380,7 +1397,7 @@ end
 <p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="upgrading/../dsl/formatters.html">Learn more</a>.</p>
 <pre><code class="language-ruby">format(Date) { |date| date.iso8601 }
 </code></pre>
-<p>The <a href="upgrading/../api/extensions.html#field_value">field_value</a>, <a href="upgrading/../api/extensions.html#object_value">object_value</a>, and <a href="upgrading/../api/extensions.html#collection_value">collection_value</a> extension hooks can also be used.</p>
+<p>The <a href="upgrading/../api/extensions.html#field_value">field_value</a>, <a href="upgrading/../api/extensions.html#object_field_value">object_field_value</a>, and <a href="upgrading/../api/extensions.html#collection_field_value">collection_field_value</a> extension hooks can also be used.</p>
 <h2 id="custom-extractors-2"><a class="header" href="#custom-extractors-2">Custom extractors</a></h2>
 <p>Custom extraction in V2 is accomplished using the <a href="upgrading/../api/extensions.html#extract_value">extract_value</a> extension hook.</p>
 <p>Fields, objects, and collections continue to have an <a href="upgrading/../dsl/options.html#extractor">extractor</a> option. Simply pass your extension class to it. <a href="upgrading/../api/extractors.html">Learn more</a>.</p>
@@ -1508,8 +1525,8 @@ ref.fields[:bar].from
 <h2 id="porting-pre_render"><a class="header" href="#porting-pre_render">Porting pre_render</a></h2>
 <p>Legacy/V1's <code>pre_render</code> hook does not exist in V2, but it has three possible replacements:</p>
 <ul>
-<li><a href="upgrading/../api/extensions.html#input_object">input_object</a> runs at the beginning of every <code>render</code> call (for objects)</li>
-<li><a href="upgrading/../api/extensions.html#input_collection">input_collection</a> runs at the beginning of every <code>render</code> call (for collections)</li>
+<li><a href="upgrading/../api/extensions.html#object_input">object_input</a> intercept an object before it's serialized</li>
+<li><a href="upgrading/../api/extensions.html#collection_input">collection_input</a> intercept a collection before it's serialized</li>
 <li><a href="upgrading/../api/extensions.html#blueprint_input">blueprint_input</a> runs each time a blueprint serializes an object</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>

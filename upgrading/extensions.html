@@ -174,8 +174,8 @@
 <h2 id="porting-pre_render"><a class="header" href="#porting-pre_render">Porting pre_render</a></h2>
 <p>Legacy/V1's <code>pre_render</code> hook does not exist in V2, but it has three possible replacements:</p>
 <ul>
-<li><a href="../api/extensions.html#input_object">input_object</a> runs at the beginning of every <code>render</code> call (for objects)</li>
-<li><a href="../api/extensions.html#input_collection">input_collection</a> runs at the beginning of every <code>render</code> call (for collections)</li>
+<li><a href="../api/extensions.html#object_input">object_input</a> intercept an object before it's serialized</li>
+<li><a href="../api/extensions.html#collection_input">collection_input</a> intercept a collection before it's serialized</li>
 <li><a href="../api/extensions.html#blueprint_input">blueprint_input</a> runs each time a blueprint serializes an object</li>
 </ul>
 

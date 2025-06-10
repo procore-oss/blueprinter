@@ -174,7 +174,7 @@
 <p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="../dsl/formatters.html">Learn more</a>.</p>
 <pre><code class="language-ruby">format(Date) { |date| date.iso8601 }
 </code></pre>
-<p>The <a href="../api/extensions.html#field_value">field_value</a>, <a href="../api/extensions.html#object_value">object_value</a>, and <a href="../api/extensions.html#collection_value">collection_value</a> extension hooks can also be used.</p>
+<p>The <a href="../api/extensions.html#field_value">field_value</a>, <a href="../api/extensions.html#object_field_value">object_field_value</a>, and <a href="../api/extensions.html#collection_field_value">collection_field_value</a> extension hooks can also be used.</p>
 <h2 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h2>
 <p>Custom extraction in V2 is accomplished using the <a href="../api/extensions.html#extract_value">extract_value</a> extension hook.</p>
 <p>Fields, objects, and collections continue to have an <a href="../dsl/options.html#extractor">extractor</a> option. Simply pass your extension class to it. <a href="../api/extractors.html">Learn more</a>.</p>

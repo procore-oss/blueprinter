@@ -43,13 +43,13 @@ module Blueprinter
         private
 
         def blueprint_value(ctx)
-          blueprint = ctx.field.blueprint
-          if instances.blueprint(blueprint).is_a? V2::Base
-            child_serializer = instances.serializer(blueprint, ctx.options)
+          field_blueprint = ctx.field.blueprint
+          if instances.blueprint(field_blueprint).is_a? V2::Base
+            child_serializer = instances.serializer(field_blueprint, ctx.options)
             child_serializer.object(ctx.value, depth: ctx.depth + 1)
           else
             opts = { v2_instances: instances, v2_depth: ctx.depth }
-            blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
+            field_blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
         end
       end
@@ -69,13 +69,13 @@ module Blueprinter
         private
 
         def blueprint_value(ctx)
-          blueprint = ctx.field.blueprint
-          if instances.blueprint(blueprint).is_a? V2::Base
-            child_serializer = instances.serializer(blueprint, ctx.options)
+          field_blueprint = ctx.field.blueprint
+          if instances.blueprint(field_blueprint).is_a? V2::Base
+            child_serializer = instances.serializer(field_blueprint, ctx.options)
             child_serializer.collection(ctx.value, depth: ctx.depth + 1)
           else
             opts = { v2_instances: instances, v2_depth: ctx.depth }
-            blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
+            field_blueprint.hashify(ctx.value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
         end
       end

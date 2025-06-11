@@ -172,7 +172,7 @@
                         <h1 id="extractors"><a class="header" href="#extractors">Extractors</a></h1>
 <p>Extractors are <a href="./extensions.html#extract_value">extensions</a> that pull field values from the objects you're serializing. The default extraction logic is smart enough for most use cases, but you can create custom extractors if needed. (Note that passing a block to a field completely <a href="../dsl/fields.html#extracting-field-values">bypasses extractors</a>.)</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
-<p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
+<p>The default extractor is a built-in extension. If <code>context.object</code> is a Hash, it tries symbol, then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extensions::Core::Extractor &lt; Blueprinter::Extension
   def extract_value(ctx)
     if ctx.object.is_a? Hash

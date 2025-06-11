@@ -654,7 +654,7 @@ WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 <pre><code class="language-ruby">field :desc, from: :description
 </code></pre>
 <h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
-<p>Pass a <a href="dsl/../api/extractors.html">custom extractor</a> class.</p>
+<p>Pass a <a href="dsl/../api/extractors.html">custom extractor</a> class or instance.</p>
 <blockquote>
 <p><em>Available in field, object, collection</em></p>
 </blockquote>
@@ -937,7 +937,7 @@ end
 <strong>@return Object</strong> The value for the field<br />
 <strong>@cost</strong> High - run for every field, object, and collection</p>
 </blockquote>
-<p>Called on each field, object, and collection. The return value is used as <code>context.value</code> in subsequent hooks. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
+<p>Called on each field, object, and collection to extract a field's value from an object. The return value is used as <code>context.value</code> in subsequent hooks. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
 <pre><code class="language-ruby">def extract_value(ctx)
   ctx.object.public_send(ctx.field.from)
 end
@@ -1060,7 +1060,7 @@ end
 <strong>@return [Object]</strong> The value to use for the fully serialized object<br />
 <strong>@cost</strong> High - run for every object field</p>
 </blockquote>
-<p>Run after an object is fully serialized. This may be the root object from <code>render</code> or an <code>object</code> field from a blueprint. This example wraps the result in a metadata block:</p>
+<p>Run after an object is fully serialized. This may be the root object from <code>render</code> or an <code>object</code> field from a blueprint (check <code>context.depth</code>). This example wraps the result in a metadata block:</p>
 <pre><code class="language-ruby">def object_output(ctx)
   { data: ctx.value, metadata: {...} }
 end
@@ -1072,7 +1072,7 @@ end
 <strong>@return Object</strong> The value to use for the fully serialized collection<br />
 <strong>@cost</strong> High - run for every collection field</p>
 </blockquote>
-<p>Run after a collection is fully serialized. This may be the root collection from <code>render</code> or a <code>collection</code> field from a blueprint. This example wraps the result in a metadata block:</p>
+<p>Run after a collection is fully serialized. This may be the root collection from <code>render</code> or a <code>collection</code> field from a blueprint (check <code>context.depth</code>). This example wraps the result in a metadata block:</p>
 <pre><code class="language-ruby">def collection_output(ctx)
   { data: ctx.value, metadata: {...} }
 end
@@ -1094,8 +1094,7 @@ end
 <p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
 <h2 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h2>
 <blockquote>
-<p><strong>@param Extension</strong> Instance of the extension<br />
-<strong>@param Symbol</strong> Name of the hook<br />
+<p><strong>@param <a href="api/./context-objects.html#hook-context">Hook Context</a></strong><br />
 <strong>@cost</strong> Variable - Depends on what hooks your extensions implement</p>
 </blockquote>
 <p>A special hook that runs around all other extension hooks. Useful for instrumenting. You can exclude an extension's hooks from this hook by putting <code>def hidden? = true</code> in the extension.</p>
@@ -1219,7 +1218,7 @@ field.blueprint.reflections[:default].fields
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
 <p>Extractors are <a href="api/./extensions.html#extract_value">extensions</a> that pull field values from the objects you're serializing. The default extraction logic is smart enough for most use cases, but you can create custom extractors if needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values">bypasses extractors</a>.)</p>
 <h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
-<p>If <code>context.object</code> is a Hash, it tries symbol then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
+<p>The default extractor is a built-in extension. If <code>context.object</code> is a Hash, it tries symbol, then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
 <pre><code class="language-ruby">class Blueprinter::Extensions::Core::Extractor &lt; Blueprinter::Extension
   def extract_value(ctx)
     if ctx.object.is_a? Hash

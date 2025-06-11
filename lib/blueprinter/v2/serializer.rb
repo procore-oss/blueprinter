@@ -15,15 +15,15 @@ module Blueprinter
       attr_reader :blueprint, :options, :instances, :formatter, :hooks, :defaults, :cond
 
       # @param options [Hash] Options passed from the callsite
-      def initialize(blueprint, options, instances)
-        @blueprint = blueprint
+      def initialize(blueprint_class, options, instances)
+        @blueprint = instances.blueprint(blueprint_class)
         @options = options
         @instances = instances
-        @formatter = Formatter.new(blueprint)
+        @formatter = Formatter.new(blueprint.class)
         @hooks = Hooks.new([
           Extensions::Core::Prelude.new,
           Extensions::Core::Extractor.new,
-          *blueprint.extensions.map { |ext| instances.extension ext },
+          *blueprint.class.extensions.map { |ext| instances.extension ext },
           Extensions::Core::Postlude.new
         ])
         # "Unroll" these hooks for a significant speed boost
@@ -41,7 +41,7 @@ module Blueprinter
       def object(object, depth:)
         @fields ||= blueprint_setup depth
         if @run_around_serialize_object
-          ctx = Context::Object.new(instances.blueprint(blueprint), options, object, depth)
+          ctx = Context::Object.new(blueprint, options, object, depth)
           hooks.around(:around_serialize_object, ctx) do
             serialize_object(object, @fields, options, depth:)
           end
@@ -59,7 +59,7 @@ module Blueprinter
       def collection(collection, depth:)
         @fields ||= blueprint_setup depth
         if @run_around_serialize_collection
-          ctx = Context::Object.new(instances.blueprint(blueprint), options, collection, depth)
+          ctx = Context::Object.new(blueprint, options, collection, depth)
           hooks.around(:around_serialize_collection, ctx) do
             serialize_collection(collection, @fields, options, depth:)
           end
@@ -72,38 +72,38 @@ module Blueprinter
 
       def serialize_object(object, fields, options, depth:)
         if @run_object_input
-          ctx = Context::Object.new(instances.blueprint(blueprint), options, object, depth)
+          ctx = Context::Object.new(blueprint, options, object, depth)
           object = hooks.reduce_into(:object_input, ctx, :object)
         end
 
         result = serialize(object, fields, options, depth:)
         return result unless @run_object_output
 
-        ctx = Context::Result.new(instances.blueprint(blueprint), options, object, result, depth)
+        ctx = Context::Result.new(blueprint, options, object, result, depth)
         hooks.reduce_into(:object_output, ctx, :result)
       end
 
       def serialize_collection(collection, fields, options, depth:)
         if @run_collection_input
-          ctx = Context::Object.new(instances.blueprint(blueprint), options, collection, depth)
+          ctx = Context::Object.new(blueprint, options, collection, depth)
           collection = hooks.reduce_into(:collection_input, ctx, :object)
         end
 
         result = collection.map { |object| serialize(object, fields, options, depth:) }.to_a
         return result unless @run_collection_output
 
-        ctx = Context::Result.new(instances.blueprint(blueprint), options, collection, result, depth)
+        ctx = Context::Result.new(blueprint, options, collection, result, depth)
         hooks.reduce_into(:collection_output, ctx, :result)
       end
 
       # rubocop:disable Metrics/MethodLength
       def serialize(object, fields, options, depth:)
         if @run_blueprint_input
-          ctx = Context::Object.new(instances.blueprint(blueprint), options, object, depth)
+          ctx = Context::Object.new(blueprint, options, object, depth)
           object = hooks.reduce_into(:blueprint_input, ctx, :object)
         end
 
-        ctx = Context::Field.new(instances.blueprint(blueprint), options, object, nil, nil, depth)
+        ctx = Context::Field.new(blueprint, options, object, nil, nil, depth)
         result = fields.each_with_object({}) do |field_conf, acc|
           ctx.field = field_conf.field
           ctx.value = nil
@@ -112,7 +112,7 @@ module Blueprinter
         end
 
         if @run_blueprint_output
-          ctx = Context::Result.new(ctx.blueprint, options, object, result, depth)
+          ctx = Context::Result.new(blueprint, options, object, result, depth)
           hooks.reduce_into(:blueprint_output, ctx, :result)
         else
           result
@@ -127,7 +127,7 @@ module Blueprinter
 
       # Allow extensions to do time-saving prep work on the current context
       def blueprint_setup(depth)
-        ctx = Context::Render.new(instances.blueprint(blueprint), options, depth)
+        ctx = Context::Render.new(blueprint, options, depth)
         setup_exts = {}.compare_by_identity
         fields = hooks.last(:blueprint_fields, ctx).map { |field| setup_field(field, setup_exts) }.freeze
         defaults.blueprint_setup ctx

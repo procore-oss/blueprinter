@@ -22,13 +22,13 @@ describe Blueprinter::V2::InstanceCache do
     it "returns a new instance of Serializer"  do
       widget_serializer = subject.serializer(widget_blueprint, { foo: true })
       expect(widget_serializer).to be_a Blueprinter::V2::Serializer
-      expect(widget_serializer.blueprint).to be widget_blueprint
+      expect(widget_serializer.blueprint.class).to be widget_blueprint
       expect(widget_serializer.options).to eq({ foo: true })
       expect(widget_serializer.instances).to be subject
 
       category_serializer = subject.serializer(category_blueprint, { foo: false })
       expect(category_serializer).to be_a Blueprinter::V2::Serializer
-      expect(category_serializer.blueprint).to be category_blueprint
+      expect(category_serializer.blueprint.class).to be category_blueprint
       expect(category_serializer.options).to eq({ foo: false })
       expect(category_serializer.instances).to be subject
     end

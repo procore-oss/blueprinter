@@ -11,9 +11,7 @@ module Blueprinter
         #
         class Prelude < Extension
           # @param ctx [Blueprinter::V2::Context::Render]
-          def blueprint_fields(ctx)
-            ctx.blueprint.class.reflections[:default].ordered
-          end
+          def blueprint_fields(ctx) = ctx.fields
 
           # @param ctx [Blueprinter::V2::Context::Result]
           def json(ctx)

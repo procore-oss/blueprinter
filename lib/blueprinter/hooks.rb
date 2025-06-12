@@ -139,7 +139,7 @@ module Blueprinter
     def call(ext, hook, ctx, &)
       return ext.public_send(hook, ctx, &) if !@around_hook_registered || ext.hidden? || hook == :around_hook
 
-      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.options, ext, hook)
+      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
       around(:around_hook, hook_ctx) do
         ext.public_send(hook, ctx, &)
       end

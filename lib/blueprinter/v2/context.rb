@@ -5,20 +5,24 @@ module Blueprinter
     # Defines structs passed to extension hooks, extractors, and field blocks.
     module Context
       #
-      # The outer blueprint being rendered along with options passed to render/render_object/render_collection.
+      # The blueprint being rendered along with options passed to render/render_object/render_collection.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
+      # @!attribute [r] fields
+      #   @return [Array<Blueprinter::V2::Fields::*>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       #
-      Render = Struct.new(:blueprint, :options, :depth)
+      Render = Struct.new(:blueprint, :fields, :options, :depth)
 
       #
       # The extension hook currently being called.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
+      # @!attribute [r] fields
+      #   @return [Array<Blueprinter::V2::Fields::*>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] extension
@@ -28,13 +32,15 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Hook = Struct.new(:blueprint, :options, :extension, :hook, :depth)
+      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :depth)
 
       #
       # The object or collection currently being serialized.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
+      # @!attribute [r] fields
+      #   @return [Array<Blueprinter::V2::Fields::*>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
@@ -42,13 +48,15 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Object = Struct.new(:blueprint, :options, :object, :depth)
+      Object = Struct.new(:blueprint, :fields, :options, :object, :depth)
 
       #
       # The current field and its extracted value.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
+      # @!attribute [r] fields
+      #   @return [Array<Blueprinter::V2::Fields::*>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
@@ -61,13 +69,15 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Field = Struct.new(:blueprint, :options, :object, :field, :value, :depth)
+      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :value, :depth)
 
       #
       # A serialized object/collection. This may be the outer object/collection or a nested one.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
+      # @!attribute [r] fields
+      #   @return [Array<Blueprinter::V2::Fields::*>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
@@ -77,7 +87,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Result = Struct.new(:blueprint, :options, :object, :result, :depth)
+      Result = Struct.new(:blueprint, :fields, :options, :object, :result, :depth)
     end
   end
 end

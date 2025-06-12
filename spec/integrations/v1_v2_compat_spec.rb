@@ -208,7 +208,7 @@ describe 'V1/V2 Compatibility' do
 
     it 'should use the same V2 Serializer and Blueprint instances through V1' do
       barprint = blueprints[:barprint][:extended]
-      bar_serializer = instances.serializer(barprint, { tag: 'X' })
+      bar_serializer = instances.serializer(barprint, { tag: 'X' }, 1)
 
       res = bar_serializer.object({
         name: 'Bar 1',

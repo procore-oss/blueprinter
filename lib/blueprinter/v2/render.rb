@@ -17,7 +17,7 @@ module Blueprinter
       # @return [Hash|Array<Hash>]
       def to_hash
         instances = InstanceCache.new
-        serializer = instances.serializer(@blueprint, @options)
+        serializer = instances.serializer(@blueprint, @options, 1)
         serialize serializer
       end
 
@@ -25,9 +25,9 @@ module Blueprinter
       # @return [String]
       def to_json(_arg = nil)
         instances = InstanceCache.new
-        serializer = instances.serializer(@blueprint, @options)
+        serializer = instances.serializer(@blueprint, @options, 1)
         result = serialize serializer
-        ctx = Context::Result.new(instances.blueprint(@blueprint), @options, @object, result, 1)
+        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, result, 1)
         serializer.hooks.last(:json, ctx)
       end
 

@@ -34,7 +34,7 @@ module Blueprinter
       view = options[:view] || :default
       depth = local_options[:v2_depth] || 1
       instances = local_options[:v2_instances] || V2::InstanceCache.new
-      serializer = instances.serializer(blueprint[view], local_options.except(:v2_instances))
+      serializer = instances.serializer(blueprint[view], local_options.except(:v2_instances), depth + 1)
       if value.is_a?(Enumerable) && !value.is_a?(Hash)
         serializer.collection(value, depth: depth + 1)
       else

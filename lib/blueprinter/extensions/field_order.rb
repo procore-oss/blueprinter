@@ -17,8 +17,9 @@ module Blueprinter
       end
 
       # @param ctx [Blueprinter::V2::Context::Render]
+      # @return [Array<Blueprinter::V2::Fields::*>]
       def blueprint_fields(ctx)
-        ctx.blueprint.class.reflections[:default].ordered.sort(&@sorter)
+        ctx.fields.sort(&@sorter)
       end
     end
   end

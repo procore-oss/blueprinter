@@ -10,7 +10,8 @@ describe Blueprinter::Extensions::MultiJson do
   end
 
   it 'renders JSON' do
-    context = Blueprinter::V2::Context::Result.new(blueprint, {}, {}, { id: 42, name: 'Foo' })
+    fields = blueprint.reflections[:default].ordered
+    context = Blueprinter::V2::Context::Result.new(blueprint, fields, {}, {}, { id: 42, name: 'Foo' }, 1)
     res = described_class.new.json(context)
     expect(res).to eq '{"id":42,"name":"Foo"}'
   end

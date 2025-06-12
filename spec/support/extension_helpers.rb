@@ -51,8 +51,9 @@ module ExtensionHelpers
   end
 
   def prepare(blueprint, options, ctx_type, *args)
-    ctx = Blueprinter::V2::Context::Render.new(instances.blueprint(blueprint), options)
+    serializer = instances.serializer(blueprint, options, 1)
+    ctx = Blueprinter::V2::Context::Render.new(serializer.blueprint, serializer.fields, options, 1)
     subject.blueprint_setup ctx if subject.respond_to?(:blueprint_setup)
-    ctx_type.new(instances.blueprint(blueprint), options, *args)
+    ctx_type.new(serializer.blueprint, serializer.fields, options, *args, 1)
   end
 end

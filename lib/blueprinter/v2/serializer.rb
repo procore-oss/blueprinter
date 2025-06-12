@@ -121,12 +121,8 @@ module Blueprinter
       end
 
       def extensions
-        [
-          Extensions::Core::Prelude.new,
-          Extensions::Core::Extractor.new,
-          *blueprint.class.extensions.map { |ext| instances.extension ext },
-          Extensions::Core::Postlude.new
-        ]
+        extensions = blueprint.class.extensions.map { |ext| instances.extension ext }
+        [Extensions::Core::Prelude.new, Extensions::Core::Extractor.new, *extensions, Extensions::Core::Postlude.new]
       end
 
       def blueprint_fields(depth)
@@ -151,12 +147,12 @@ module Blueprinter
         extractor = ext ? instances.extension(ext) : hooks.last_with(:extract_value)
         setup_exts[extractor] ||= extractor.blueprint_setup(ctx) || true if extractor.respond_to?(:blueprint_setup)
 
-        case field
-        when Fields::Field
+        case field.type
+        when :field
           FieldSerializer::Field.new(field, extractor, self)
-        when Fields::Object
+        when :object
           FieldSerializer::Object.new(field, extractor, self)
-        when Fields::Collection
+        when :collection
           FieldSerializer::Collection.new(field, extractor, self)
         end
       end

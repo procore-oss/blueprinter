@@ -10,7 +10,9 @@ module Blueprinter
         :value_proc,
         :options,
         keyword_init: true
-      )
+      ) do
+        def type = :field
+      end
 
       Object = Struct.new(
         :name,
@@ -20,7 +22,9 @@ module Blueprinter
         :value_proc,
         :options,
         keyword_init: true
-      )
+      ) do
+        def type = :object
+      end
 
       Collection = Struct.new(
         :name,
@@ -30,7 +34,9 @@ module Blueprinter
         :value_proc,
         :options,
         keyword_init: true
-      )
+      ) do
+        def type = :collection
+      end
     end
   end
 end

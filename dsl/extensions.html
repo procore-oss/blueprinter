@@ -198,7 +198,7 @@ end
 <h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
 <p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
 <h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
-<p>Control the order of fields in your output. See the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the block parameters.</p>
+<p>Control the order of fields in your output. See <a href="../api/fields.html">Fields API</a> for more information about the block parameters.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
 </code></pre>
 <h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>

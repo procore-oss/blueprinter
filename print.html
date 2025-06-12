@@ -720,7 +720,7 @@ end
 <h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
 <p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
 <h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
-<p>Control the order of fields in your output. See the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs in <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the block parameters.</p>
+<p>Control the order of fields in your output. See <a href="dsl/../api/fields.html">Fields API</a> for more information about the block parameters.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
 </code></pre>
 <h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>
@@ -789,6 +789,8 @@ WidgetBlueprint.render_collection(Widget.all).to_json
 <p>By creating and using custom extractors, you can change the way field values are extracted from objects. <a href="api/./extractors.html">Read more</a>.</p>
 <h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
 <p>Context objects are the arguments you'll receive in most of the above APIs. <a href="api/./context-objects.html">Read more</a>.</p>
+<h2 id="fields-1"><a class="header" href="#fields-1">Fields</a></h2>
+<p>Several APIs provide access to structs describing field definitions. <a href="api/./fields.html">Read more</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-2"><a class="header" href="#extensions-2">Extensions</a></h1>
 <p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter's features are implemented as built-in extensions!</p>
 <p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="api/../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
@@ -1158,7 +1160,7 @@ WidgetBlueprint[:extended].options
 =&gt; [:default, :with_price]
 </code></pre>
 <p><strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
-<h2 id="fields-1"><a class="header" href="#fields-1">Fields</a></h2>
+<h2 id="fields-2"><a class="header" href="#fields-2">Fields</a></h2>
 <pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
 
 # Regular fields
@@ -1289,7 +1291,7 @@ The object currently being serialized.</p>
 </blockquote>
 <blockquote>
 <p><strong>field</strong><br />
-A struct of the field, object, or collection currently being rendered. You can use this to access the field's name and options. See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for more information about the <code>Field</code>, <code>ObjectField</code>, and <code>Collection</code> structs.</p>
+A struct of the field, object, or collection currently being rendered. You can use this to access the field's name and options. See <a href="api/./fields.html">Fields API</a>.</p>
 </blockquote>
 <blockquote>
 <p><strong>value</strong><br />
@@ -1340,6 +1342,43 @@ Name of the current hook</p>
 <blockquote>
 <p><strong>depth</strong><br />
 The current blueprint depth (1-indexed).</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fields-3"><a class="header" href="#fields-3">Fields</a></h1>
+<p>Extensions, reflection, and other APIs allow access to structs that describe fields.</p>
+<blockquote>
+<p><strong>type</strong><br />
+<em>Symbol</em> <code>:field | :object | :collection</code><br />
+The type of field.</p>
+</blockquote>
+<blockquote>
+<p><strong>name</strong><br />
+<em>Symbol</em><br />
+Name of the field as it will appear in the JSON or Hash output.</p>
+</blockquote>
+<blockquote>
+<p><strong>from</strong><br />
+<em>Symbol</em><br />
+Name of the field in the source object (usually the same as <code>name</code>).</p>
+</blockquote>
+<blockquote>
+<p><strong>from_str</strong><br />
+<em>String</em><br />
+Same as <code>from</code>, but as a frozen string.</p>
+</blockquote>
+<blockquote>
+<p><strong>value_proc</strong><br />
+<em>nil | Proc</em><br />
+The block passed to the field definition (if given). Expects a <a href="api/./context-objects.html#field-context">Field Context</a> argument and returns the field value.</p>
+</blockquote>
+<blockquote>
+<p><strong>options</strong><br />
+<em>Hash</em><br />
+Any additional options passed to the field.</p>
+</blockquote>
+<blockquote>
+<p><strong>blueprint</strong> (object and collection only)<br />
+<em>Class</em><br />
+The blueprint to use for serializaing the object or collection.</p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
 <p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#incremental-update">incremental update</a>.</p>
@@ -1403,7 +1442,7 @@ end
 <p>Unlike Legacy/V1, custom extractors <em>do not override blocks</em> passed to fields, objects, and collections. If a field has a block, that's how it's extracted.</p>
 <h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
 <p>Blueprinter V2's <a href="upgrading/../api/extensions.html">extension hooks</a> offer many ways to transform your inputs and outputs. The <a href="upgrading/../api/extensions.html#blueprint_output">blueprint_output</a> hook offers equivalent functionality to Legacy/V1 transformers.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="fields-2"><a class="header" href="#fields-2">Fields</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="fields-4"><a class="header" href="#fields-4">Fields</a></h1>
 <h2 id="identifier-field-and-view"><a class="header" href="#identifier-field-and-view">Identifier field and view</a></h2>
 <p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it in your <code>ApplicationBlueprint</code>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint

@@ -45,7 +45,7 @@ module Blueprinter
         def blueprint_value(ctx)
           field_blueprint = ctx.field.blueprint
           if instances.blueprint(field_blueprint).is_a? V2::Base
-            child_serializer = instances.serializer(field_blueprint, ctx.options)
+            child_serializer = instances.serializer(field_blueprint, ctx.options, ctx.depth + 1)
             child_serializer.object(ctx.value, depth: ctx.depth + 1)
           else
             opts = { v2_instances: instances, v2_depth: ctx.depth }
@@ -71,7 +71,7 @@ module Blueprinter
         def blueprint_value(ctx)
           field_blueprint = ctx.field.blueprint
           if instances.blueprint(field_blueprint).is_a? V2::Base
-            child_serializer = instances.serializer(field_blueprint, ctx.options)
+            child_serializer = instances.serializer(field_blueprint, ctx.options, ctx.depth + 1)
             child_serializer.collection(ctx.value, depth: ctx.depth + 1)
           else
             opts = { v2_instances: instances, v2_depth: ctx.depth }

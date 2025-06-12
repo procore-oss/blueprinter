@@ -49,9 +49,9 @@ module Blueprinter
         def initialize(blueprint, name)
           @name = name
           @ordered = blueprint.schema.values
-          @fields = blueprint.schema.select { |_, f| f.is_a? Fields::Field }
-          @objects = blueprint.schema.select { |_, f| f.is_a? Fields::Object }
-          @collections = blueprint.schema.select { |_, f| f.is_a? Fields::Collection }
+          @fields = blueprint.schema.select { |_, f| f.type == :field }
+          @objects = blueprint.schema.select { |_, f| f.type == :object }
+          @collections = blueprint.schema.select { |_, f| f.type == :collection }
         end
       end
     end

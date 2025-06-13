@@ -55,7 +55,7 @@ describe Blueprinter::Hooks do
     it 'runs each hook' do
       exti1 = ext1.new
       exti2 = ext2.new
-      hooks = described_class.new [exti1, exti2, Class.new(Blueprinter::Extension)]
+      hooks = described_class.new [exti1, exti2, Class.new(Blueprinter::Extension).new]
       ctx = render_ctx.new(serializer.blueprint, serializer.fields, {})
       hooks.run(:blueprint_setup, ctx)
       expect(exti1.log + exti2.log).to eq ['blueprint_setup', 'blueprint_setup']

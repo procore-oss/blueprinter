@@ -9,7 +9,7 @@ module Blueprinter
       @hooks = extensions.each_with_object(hooks) do |ext, acc|
         ext_hooks = ext.class.public_instance_methods(true)
         ext_hooks.each { |hook| acc[hook] << ext if acc.key? hook }
-      end
+      end.freeze
       @around_hook_registered = registered? :around_hook
     end
 
@@ -112,7 +112,7 @@ module Blueprinter
 
     #
     # Runs nested hooks that yield. A block MUST be passed, and it will be run at the "apex" of
-    # the nested hooks.
+    # the nested hooks. It's return value will be used as this method's return value.
     #
     # @param hook [Symbol] Name of hook to call
     # @param ctx [Blueprinter::V2::Context] The argument to the hooks
@@ -120,7 +120,8 @@ module Blueprinter
     #
     def around(hook, ctx)
       result = nil
-      @hooks.fetch(hook).reverse.reduce(-> { result = yield }) do |f, ext|
+      @reversed_hooks ||= @hooks.transform_values(&:reverse).freeze
+      @reversed_hooks.fetch(hook).reduce(-> { result = yield }) do |f, ext|
         proc do
           yields = 0
           call(ext, hook, ctx) do

@@ -221,9 +221,10 @@ end
 <blockquote>
 <p><em>Override hook</em><br />
 <strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong><br />
+<strong>@return <a href="./fields.html">Array&lt;Field&gt;</a></strong> The fields to serialize<br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
+<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="../dsl/extensions.html#field-order">Field Order extension</a> uses this hook. Available in all subsequent hooks as <code>context.fields</code>.</p>
 <p>The default behavior is to render all fields in the order they were defined. The following example uses the <a href="./reflection.html">Reflection API</a> to get the fields from the current view, then sort them by name:</p>
 <pre><code class="language-ruby">def blueprint_fields(ctx)
   ref = ctx.blueprint.class.reflections[:default]

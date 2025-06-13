@@ -843,9 +843,10 @@ end
 <blockquote>
 <p><em>Override hook</em><br />
 <strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
+<strong>@return <a href="api/./fields.html">Array&lt;Field&gt;</a></strong> The fields to serialize<br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
+<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook. Available in all subsequent hooks as <code>context.fields</code>.</p>
 <p>The default behavior is to render all fields in the order they were defined. The following example uses the <a href="api/./reflection.html">Reflection API</a> to get the fields from the current view, then sort them by name:</p>
 <pre><code class="language-ruby">def blueprint_fields(ctx)
   ref = ctx.blueprint.class.reflections[:default]
@@ -1252,6 +1253,10 @@ end
 The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
+<p><strong>fields</strong><br />
+A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+</blockquote>
+<blockquote>
 <p><strong>options</strong><br />
 The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
@@ -1263,6 +1268,10 @@ The current blueprint depth (1-indexed).</p>
 <blockquote>
 <p><strong>blueprint</strong><br />
 The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>fields</strong><br />
+A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
 </blockquote>
 <blockquote>
 <p><strong>options</strong><br />
@@ -1280,6 +1289,10 @@ The current blueprint depth (1-indexed).</p>
 <blockquote>
 <p><strong>blueprint</strong><br />
 The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>fields</strong><br />
+A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
 </blockquote>
 <blockquote>
 <p><strong>options</strong><br />
@@ -1307,6 +1320,10 @@ The current blueprint depth (1-indexed).</p>
 The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
+<p><strong>fields</strong><br />
+A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+</blockquote>
+<blockquote>
 <p><strong>options</strong><br />
 The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
@@ -1326,6 +1343,10 @@ The current blueprint depth (1-indexed).</p>
 <blockquote>
 <p><strong>blueprint</strong><br />
 The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+</blockquote>
+<blockquote>
+<p><strong>fields</strong><br />
+A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
 </blockquote>
 <blockquote>
 <p><strong>options</strong><br />

@@ -128,7 +128,7 @@ module Blueprinter
       def blueprint_fields(depth)
         default_fields = blueprint.class.reflections[:default].ordered
         ctx = Context::Render.new(blueprint, default_fields, options, depth)
-        hooks.last(:blueprint_fields, ctx)
+        hooks.last(:blueprint_fields, ctx).freeze
       end
 
       # Allow extensions to do time-saving prep work on the current context

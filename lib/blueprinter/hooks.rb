@@ -5,11 +5,11 @@ module Blueprinter
   class Hooks
     # @param extensions [Array<Blueprinter::Extension>] The extensions we're going to run
     def initialize(extensions)
-      hooks = Extension::HOOKS.each_with_object({}) { |hook, acc| acc[hook] = [] }
-      @hooks = extensions.each_with_object(hooks) do |ext, acc|
-        ext_hooks = ext.class.public_instance_methods(true)
-        ext_hooks.each { |hook| acc[hook] << ext if acc.key? hook }
-      end.freeze
+      @hooks = Extension::HOOKS.each_with_object({}) { |hook, acc| acc[hook] = [] }
+      extensions.each do |ext|
+        ext.class.hooks.each { |hook| @hooks[hook] << ext }
+      end
+      @hooks.freeze
       @around_hook_registered = registered? :around_hook
     end
 

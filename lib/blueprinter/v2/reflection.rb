@@ -11,7 +11,7 @@ module Blueprinter
       #
       def reflections
         eval! unless @evaled
-        @_reflections ||= flatten_children(self, :default)
+        @_reflections ||= flatten_children(self, :default).freeze
       end
 
       # Builds a flat Hash of nested views
@@ -48,10 +48,10 @@ module Blueprinter
         # @api private
         def initialize(blueprint, name)
           @name = name
-          @ordered = blueprint.schema.values
-          @fields = blueprint.schema.select { |_, f| f.type == :field }
-          @objects = blueprint.schema.select { |_, f| f.type == :object }
-          @collections = blueprint.schema.select { |_, f| f.type == :collection }
+          @ordered = blueprint.schema.values.freeze
+          @fields = blueprint.schema.select { |_, f| f.type == :field }.freeze
+          @objects = blueprint.schema.select { |_, f| f.type == :object }.freeze
+          @collections = blueprint.schema.select { |_, f| f.type == :collection }.freeze
         end
       end
     end

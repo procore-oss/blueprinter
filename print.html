@@ -846,11 +846,13 @@ end
 <strong>@return <a href="api/./fields.html">Array&lt;Field&gt;</a></strong> The fields to serialize<br />
 <strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
 </blockquote>
-<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook. Available in all subsequent hooks as <code>context.fields</code>.</p>
-<p>The default behavior is to render all fields in the order they were defined. The following example uses the <a href="api/./reflection.html">Reflection API</a> to get the fields from the current view, then sort them by name:</p>
+<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
+<p>In this hook, <code>context.fields</code> will contain all of the view's fields in the order in which they were defined. (Fields from <code>use</code>d partials are appended.) The fields this hook returns are used as <code>context.fields</code> in all subsequent hooks:</p>
+<p>The following example removes all collection fields and sorts the rest by name:</p>
 <pre><code class="language-ruby">def blueprint_fields(ctx)
-  ref = ctx.blueprint.class.reflections[:default]
-  ref.ordered.sort_by(&amp;:name)
+  ctx.fields.
+    reject { |f| f.type == :collection }.
+    sort_by(&amp;:name)
 end
 </code></pre>
 <p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
@@ -1321,7 +1323,7 @@ The current Blueprint instance. You can use this to access the Blueprint's name,
 </blockquote>
 <blockquote>
 <p><strong>fields</strong><br />
-A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+A frozen array of field definitions that were serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
 </blockquote>
 <blockquote>
 <p><strong>options</strong><br />

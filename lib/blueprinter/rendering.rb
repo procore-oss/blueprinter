@@ -159,7 +159,7 @@ module Blueprinter
       prepared_object = hashify(
         object,
         view_name: view_name,
-        local_options: options.except(:view, :root, :meta)
+        local_options: { v2_instances: V2::InstanceCache.new }.merge(options).except(:view, :root, :meta)
       )
       object_with_root = apply_root_key(
         object: prepared_object,

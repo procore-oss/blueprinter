@@ -52,7 +52,9 @@ describe Blueprinter::V2::Serializer do
     let(:name_of_extractor) do
       test = self
       Class.new(Blueprinter::V2::Extensions::Core::Extractor) do
-        def initialize(prefix: 'Name') = @prefix = prefix
+        def initialize(prefix: 'Name') = @tmp_prefix = prefix
+
+        def blueprint_setup(_ctx) = @prefix = @tmp_prefix
 
         def extract_value(ctx)
           case ctx.field

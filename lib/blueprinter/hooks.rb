@@ -5,9 +5,13 @@ module Blueprinter
   class Hooks
     # @param extensions [Array<Blueprinter::Extension>] The extensions we're going to run
     def initialize(extensions)
-      @hooks = Extension::HOOKS.each_with_object({}) do |hook, acc|
-        acc[hook] = extensions.select { |ext| ext.class.public_instance_methods(false).include? hook }
+      @hooks = Extension::HOOKS.each_with_object({}) { |hook, acc| acc[hook] = [] }
+      extensions.each do |ext|
+        ext.class.hooks.each { |hook| @hooks[hook] << ext }
       end
+      @hooks.freeze
+      @reversed_hooks ||= @hooks.transform_values(&:reverse).freeze
+      @around_hook_registered = registered? :around_hook
     end
 
     #
@@ -24,47 +28,57 @@ module Blueprinter
     # Runs each hook.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param arg [Object] Argument to hook
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
     #
-    def run(hook, arg)
-      @hooks.fetch(hook).each { |ext| call(ext, hook, arg) }
+    def run(hook, ctx)
+      @hooks.fetch(hook).each { |ext| call(ext, hook, ctx) }
     end
 
     #
     # Return true if any of "hook" returns truthy.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param arg [Object] Argument to hook
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
     # @return [Boolean]
     #
-    def any?(hook, arg)
-      @hooks.fetch(hook).any? { |ext| call(ext, hook, arg) }
+    def any?(hook, ctx)
+      @hooks.fetch(hook).any? { |ext| call(ext, hook, ctx) }
     end
 
     #
     # Run only the first-added instance of the hook.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param *args Any args for the hook
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
     # @return The hook return value, or nil if there was no hook
     #
-    def first(hook, *args)
+    def first(hook, ctx)
       ext = @hooks.fetch(hook).first
-      ext ? call(ext, hook, *args) : nil
+      ext ? call(ext, hook, ctx) : nil
     end
 
     #
     # Run only the last-added instance of the hook.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param *args Any args for the hook
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
     # @return The hook return value, or nil if there was no hook
     #
-    def last(hook, *args)
+    def last(hook, ctx)
       ext = @hooks.fetch(hook).last
-      ext ? call(ext, hook, *args) : nil
+      ext ? call(ext, hook, ctx) : nil
     end
 
+    #
+    # Returns the last-added extension that implements the given hook.
+    #
+    # @param hook [Symbol] Name of hook to search for
+    # @return [Blueprinter::Extension]
+    #
+    def last_with(hook) = @hooks.fetch(hook).last
+
+    #
+    # DEPRECATED - do not use in V2!
     #
     # Call the hooks in series, passing the output of one to the block, which returns the args for the next.
     #
@@ -77,7 +91,7 @@ module Blueprinter
     def reduce_hook(hook, initial_value)
       @hooks.fetch(hook).reduce(initial_value) do |val, ext|
         args = yield val
-        args.is_a?(Array) ? call(ext, hook, *args) : call(ext, hook, args)
+        args.is_a?(Array) ? ext.public_send(hook, *args) : ext.public_send(hook, args)
       end
     end
 
@@ -86,50 +100,49 @@ module Blueprinter
     # Blueprinter::V2::Context and returns an attribute from it.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param target_obj [Object] The argument to the hooks (usually a Blueprinter::V2::Context)
-    # @param target_attr [Symbol] The attribute on target_obj to update with the hook return value
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks (usually a Blueprinter::V2::Context)
+    # @param attr [Symbol] The attribute on target_obj to update with the hook return value
     # @return [Object] The last hook's return value
     #
-    def reduce_into(hook, target_obj, target_attr)
+    def reduce_into(hook, ctx, attr)
       @hooks.fetch(hook).each do |ext|
-        target_obj[target_attr] = call(ext, hook, target_obj)
+        ctx[attr] = call(ext, hook, ctx)
       end
-      target_obj[target_attr]
+      ctx[attr]
     end
 
     #
     # Runs nested hooks that yield. A block MUST be passed, and it will be run at the "apex" of
-    # the nested hooks.
+    # the nested hooks. It's return value will be used as this method's return value.
     #
     # @param hook [Symbol] Name of hook to call
-    # @param args [Object] Arguments to hook
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
     # @return [Object] The return value from the block passed to this method
     #
-    def around(hook, *args)
+    def around(hook, ctx)
       result = nil
-      @hooks.fetch(hook).reverse.reduce(-> { result = yield }) do |f, ext|
+      @reversed_hooks.fetch(hook).reduce(-> { result = yield }) do |f, ext|
         proc do
           yields = 0
-          call(ext, hook, *args) do
+          call(ext, hook, ctx) do
             yields += 1
             f.call
           end
           if yields != 1
             msg = "Extension hook '#{ext.class.name}##{hook}' should have yielded 1 time, but yielded #{yields} times"
-            raise BlueprinterError, msg
+            raise Errors::ExtensionHook.new(ext, hook, msg)
           end
         end
       end.call
       result
     end
 
-    private
+    def call(ext, hook, ctx, &)
+      return ext.public_send(hook, ctx, &) if !@around_hook_registered || ext.hidden? || hook == :around_hook
 
-    def call(ext, hook, ...)
-      return ext.public_send(hook, ...) if !registered?(:around_hook) || ext.hidden? || hook == :around_hook
-
-      around(:around_hook, ext, hook) do
-        ext.public_send(hook, ...)
+      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
+      around(:around_hook, hook_ctx) do
+        ext.public_send(hook, ctx, &)
       end
     end
   end

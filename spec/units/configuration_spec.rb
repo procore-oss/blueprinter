@@ -85,6 +85,7 @@ describe 'Blueprinter' do
     it 'should set the `default_transformers` option' do
       Blueprinter.configure { |config| config.default_transformers = [transform] }
       expect(Blueprinter.configuration.default_transformers).to eq([transform])
+      Blueprinter.configure { |config| config.default_transformers = [] }
     end
   end
 

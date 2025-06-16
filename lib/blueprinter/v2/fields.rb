@@ -2,30 +2,41 @@
 
 module Blueprinter
   module V2
-    Field = Struct.new(
-      :name,
-      :from,
-      :value_proc,
-      :options,
-      keyword_init: true
-    )
+    module Fields
+      Field = Struct.new(
+        :name,
+        :from,
+        :from_str,
+        :value_proc,
+        :options,
+        keyword_init: true
+      ) do
+        def type = :field
+      end
 
-    ObjectField = Struct.new(
-      :name,
-      :blueprint,
-      :from,
-      :value_proc,
-      :options,
-      keyword_init: true
-    )
+      Object = Struct.new(
+        :name,
+        :blueprint,
+        :from,
+        :from_str,
+        :value_proc,
+        :options,
+        keyword_init: true
+      ) do
+        def type = :object
+      end
 
-    Collection = Struct.new(
-      :name,
-      :blueprint,
-      :from,
-      :value_proc,
-      :options,
-      keyword_init: true
-    )
+      Collection = Struct.new(
+        :name,
+        :blueprint,
+        :from,
+        :from_str,
+        :value_proc,
+        :options,
+        keyword_init: true
+      ) do
+        def type = :collection
+      end
+    end
   end
 end

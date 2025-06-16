@@ -10,6 +10,7 @@ module Blueprinter
         ext.class.hooks.each { |hook| @hooks[hook] << ext }
       end
       @hooks.freeze
+      @reversed_hooks ||= @hooks.transform_values(&:reverse).freeze
       @around_hook_registered = registered? :around_hook
     end
 
@@ -120,7 +121,6 @@ module Blueprinter
     #
     def around(hook, ctx)
       result = nil
-      @reversed_hooks ||= @hooks.transform_values(&:reverse).freeze
       @reversed_hooks.fetch(hook).reduce(-> { result = yield }) do |f, ext|
         proc do
           yields = 0
@@ -130,7 +130,7 @@ module Blueprinter
           end
           if yields != 1
             msg = "Extension hook '#{ext.class.name}##{hook}' should have yielded 1 time, but yielded #{yields} times"
-            raise BlueprinterError, msg
+            raise Errors::ExtensionHook.new(ext, hook, msg)
           end
         end
       end.call

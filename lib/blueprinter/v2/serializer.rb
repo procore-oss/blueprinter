@@ -91,7 +91,6 @@ module Blueprinter
         @hooks.reduce_into(:collection_output, ctx, :result)
       end
 
-      # rubocop:disable Metrics/MethodLength
       def serialize(object, depth:)
         if @run_blueprint_input
           ctx = Context::Object.new(@blueprint, @fields, @options, object, depth)
@@ -105,15 +104,11 @@ module Blueprinter
           ctx.value = ctx.field.value_proc ? proc_value(ctx) : @hooks.call(field_conf.extractor, :extract_value, ctx)
           field_conf.serialize(ctx, acc)
         end
+        return result unless @run_blueprint_output
 
-        if @run_blueprint_output
-          ctx = Context::Result.new(@blueprint, @fields, @options, object, result, depth)
-          @hooks.reduce_into(:blueprint_output, ctx, :result)
-        else
-          result
-        end
+        ctx = Context::Result.new(@blueprint, @fields, @options, object, result, depth)
+        @hooks.reduce_into(:blueprint_output, ctx, :result)
       end
-      # rubocop:enable Metrics/MethodLength
 
       # @param ctx [Blueprinter::V2::Context::Field]
       def proc_value(ctx)

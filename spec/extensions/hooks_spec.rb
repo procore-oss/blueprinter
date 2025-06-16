@@ -299,7 +299,7 @@ describe Blueprinter::Hooks do
       end
       ctx = object_ctx.new(serializer.blueprint, serializer.fields, {}, object)
       hooks = described_class.new [ext.new]
-      expect { hooks.around(:around_serialize_object, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+      expect { hooks.around(:around_serialize_object, ctx) { 42 } }.to raise_error Blueprinter::Errors::ExtensionHook
     end
 
     it 'raises if a hook yields more than once' do
@@ -311,7 +311,7 @@ describe Blueprinter::Hooks do
       end
       ctx = object_ctx.new(serializer.blueprint, serializer.fields, {}, object)
       hooks = described_class.new [ext.new]
-      expect { hooks.around(:around_serialize_object, ctx) { 42 } }.to raise_error Blueprinter::BlueprinterError
+      expect { hooks.around(:around_serialize_object, ctx) { 42 } }.to raise_error Blueprinter::Errors::ExtensionHook
     end
   end
 end

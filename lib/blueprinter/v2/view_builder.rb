@@ -30,7 +30,8 @@ module Blueprinter
         name = name.to_sym
         raise Errors::InvalidBlueprint, 'You may not redefine the default view' if name == :default
 
-        @pending[name] = definition
+        @pending[name] ||= []
+        @pending[name] << definition
       end
 
       #
@@ -45,12 +46,7 @@ module Blueprinter
           @mut.synchronize do
             next if @views.key?(name)
 
-            p = @pending[name]
-            view = Class.new(@parent)
-            view.views.reset
-            view.append_name(name)
-            view.schema.clear if p.empty
-            view.class_eval(&p.definition) if p.definition
+            view = build_view name
             view.eval!(lock: false)
             @views[name] = view
           end
@@ -63,6 +59,7 @@ module Blueprinter
         self[name] || raise(KeyError, "View '#{name}' not found")
       end
 
+      # Yield each name and view
       def each(&block)
         enum = Enumerator.new do |y|
           y.yield(:default, self[:default])
@@ -74,7 +71,9 @@ module Blueprinter
       # Create a duplicate of this builder with a different default view
       def dup_for(blueprint)
         builder = self.class.new(blueprint)
-        @pending.each { |name, definition| builder[name] = definition }
+        @pending.each do |name, defs|
+          defs.each { |d| builder[name] = d }
+        end
         builder
       end
 
@@ -82,6 +81,20 @@ module Blueprinter
       def reset
         @views = { default: @parent }
         @pending = {}
+      end
+
+      private
+
+      def build_view(name)
+        defs = @pending[name]
+        empty = defs.reduce(false) { |acc, d| d.empty.nil? ? acc : d.empty }
+
+        view = Class.new(@parent)
+        view.views.reset
+        view.append_name(name)
+        view.schema.clear if empty
+        defs.each { |d| view.class_eval(&d.definition) if d.definition }
+        view
       end
     end
   end

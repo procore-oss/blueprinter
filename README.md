@@ -1095,7 +1095,7 @@ end
 
 #### Gem Extensions
 
-Gems can be created that extend `blueprinter`'s core functionality via extensions.
+Gems can be created that enrich `blueprinter`'s core functionality via extensions.
 
 ##### Procore Supported Gems
 

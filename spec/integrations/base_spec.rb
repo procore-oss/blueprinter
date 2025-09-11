@@ -580,6 +580,23 @@ describe '::Base' do
     end
   end
 
+  describe '.prepare' do
+    subject { blueprint_with_block.prepare(object_with_attributes, view_name: :default, local_options: {}) }
+    it 'returns a hash with expected format' do
+      expect(subject).to eq({ id: object_with_attributes.id, position_and_company: "#{object_with_attributes.position} at #{object_with_attributes.company}"})
+    end
+
+    it 'logs a deprecation warning' do
+      expect(Blueprinter::Deprecation).to receive(:report).with(
+        <<~MESSAGE
+          The `prepare` method is no longer supported will be removed in the next minor release.
+          If similar functionality is needed, use `.render_as_hash` instead.
+        MESSAGE
+      )
+      subject
+    end
+  end
+
   describe '::render_as_json' do
     subject { blueprint_with_block.render_as_json(object_with_attributes) }
     context 'Outside Rails project' do

@@ -1,7 +1,10 @@
 ## Unreleased
 --
 
-## 1.2.0 - 2025/09/10
+## 1.2.1 - 2025/09/11
+- 🐛 [BUGFIX] Adds back `Blueprinter.prepare` method with a deprecated warning. This method was previously public, but was removed as part of **1.2.0**.
+
+## [REMOVED] 1.2.0 - 2025/09/10
 - ‼️ [BREAKING] Drops support for Ruby 3.0. See [#496](https://github.com/procore-oss/blueprinter/pull/496)
 - 💅 [ENHANCEMENT] Allows for the current view to be accessible from within the `options` hash provided to the `field` block. See [#503](https://github.com/procore-oss/blueprinter/pull/503). Thanks to [@neo87cs](https://github.com/neo87cs).
 - 🐛 [BUGFIX] Fixes an issue where specifying fields using a mix of symbols and strings would cause an `ArgumentError` when rendering. See [#505](https://github.com/procore-oss/blueprinter/pull/505). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).

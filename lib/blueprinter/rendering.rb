@@ -96,6 +96,26 @@ module Blueprinter
       prepare_data(object, view_name, local_options)
     end
 
+    # @deprecated This method is no longer supported, and was not originally intended to be public. This will be removed
+    #   in the next minor release. If similar functionality is needed, use `.render_as_hash` instead.
+    #
+    # This is the magic method that converts complex objects into a simple hash
+    # ready for JSON conversion.
+    #
+    # Note: we accept view (public interface) that is in reality a view_name,
+    # so we rename it for clarity
+    #
+    # @api private
+    def prepare(object, view_name:, local_options:)
+      Blueprinter::Deprecation.report(
+        <<~MESSAGE
+          The `prepare` method is no longer supported will be removed in the next minor release.
+          If similar functionality is needed, use `.render_as_hash` instead.
+        MESSAGE
+      )
+      render_as_hash(object, view_name:, local_options:)
+    end
+
     private
 
     attr_reader :blueprint, :options

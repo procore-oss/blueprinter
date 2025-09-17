@@ -1,5 +1,14 @@
 ## Unreleased
-- [BREAKING] Drops support for Ruby 3.0. See [#496](https://github.com/procore-oss/blueprinter/pull/496)
+--
+
+## 1.2.1 - 2025/09/11
+- 🐛 [BUGFIX] Adds back `Blueprinter.prepare` method with a deprecated warning. This method was previously public, but was removed as part of **1.2.0**.
+
+## [REMOVED] 1.2.0 - 2025/09/10
+- ‼️ [BREAKING] Drops support for Ruby 3.0. See [#496](https://github.com/procore-oss/blueprinter/pull/496)
+- 💅 [ENHANCEMENT] Allows for the current view to be accessible from within the `options` hash provided to the `field` block. See [#503](https://github.com/procore-oss/blueprinter/pull/503). Thanks to [@neo87cs](https://github.com/neo87cs).
+- 🐛 [BUGFIX] Fixes an issue where specifying fields using a mix of symbols and strings would cause an `ArgumentError` when rendering. See [#505](https://github.com/procore-oss/blueprinter/pull/505). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+- 🚜 [REFACTOR] Reorganizes rendering/serialization logic and removes `BaseHelper` module. See [#476](https://github.com/procore-oss/blueprinter/pull/476). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.1.2 - 2024/10/3
 - 🐛 [BUGFIX] Fixes an issue where a `Blueprinter::BlueprinterError` would be raised on render when providing `view: nil`, instead of falling back on the `:default` view. See
@@ -10,7 +19,7 @@
 * 🐛 [BUGFIX] Fixes an issue when passing in a `Symbol` (representing a method) to the `if:` condition on an association. The provided `Symbol` would be erroneously sent to the association's Blueprint, instead of the Blueprint in which the association was defined within. See [#464](https://github.com/procore-oss/blueprinter/pull/464). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.1.0 - 2024/08/02
-* [BREAKING] Drops support for Ruby 2.7. See [#402](https://github.com/procore-oss/blueprinter/pull/402). Thanks to [@jmeridth](https://github.com/jmeridth)
+* ‼️ [BREAKING] Drops support for Ruby 2.7. See [#402](https://github.com/procore-oss/blueprinter/pull/402). Thanks to [@jmeridth](https://github.com/jmeridth)
 * 🚜 [REFACTOR] Cleans up Blueprint validation logic and implements an `Association` class with a clearer interface. See [#414](https://github.com/procore-oss/blueprinter/pull/414). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 * 💅 [ENHANCEMENT] Updates **Transform Classes** documentation to provide a more understandable example. See [#415](https://github.com/procore-oss/blueprinter/pull/415). Thanks to [@SaxtonDrey](https://github.com/SaxtonDrey).
 * 💅 [ENHANCEMENT] Implements field-level configuration option for excluding an attribute from the result of a render if its value is `nil`. See [#425](https://github.com/procore-oss/blueprinter/pull/425). Thanks to [jamesst20](https://github.com/jamesst20).
@@ -24,7 +33,7 @@
 * 🐛 [BUGFIX] Fixes an issue where serialization performance would become degraded when using a Blueprint that leverages transformers. See [#381](https://github.com/procore-oss/blueprinter/pull/381). Thanks to [@Pritilender](https://github.com/Pritilender).
 
 ## 1.0.0 - 2024/01/17
-* 🚀 [BREAKING] Allow transformers to be included across views. See [README](https://github.com/procore-oss/blueprinter#transform-across-views), PR [#372](https://github.com/procore-oss/blueprinter/pull/372) and issue [#225](https://github.com/procore-oss/blueprinter/issues/225) for details. Note this changes the behavior of transformers which were previously only applied to the view they were defined on. Thanks to [@njbbaer](https://github.com/njbbaer) and [@bhooshiek-narendiran](https://github.com/bhooshiek-narendiran).
+* ‼️ [BREAKING] Allow transformers to be included across views. See [README](https://github.com/procore-oss/blueprinter#transform-across-views), PR [#372](https://github.com/procore-oss/blueprinter/pull/372) and issue [#225](https://github.com/procore-oss/blueprinter/issues/225) for details. Note this changes the behavior of transformers which were previously only applied to the view they were defined on. Thanks to [@njbbaer](https://github.com/njbbaer) and [@bhooshiek-narendiran](https://github.com/bhooshiek-narendiran).
 * 🚀 [FEATURE] Introduce extension API, with initial support for pre_render hook. See [#358](https://github.com/procore-oss/blueprinter/pull/358) for details. Thanks to [@jhollinger](https://github.com/jhollinger).
 * 💅 [ENHANCEMENT] Add reflection on views, fields, and associations. See PR [#357](https://github.com/procore-oss/blueprinter/pull/357), and issue [#341](https://github.com/procore-oss/blueprinter/issues/341) for details. Thanks to [@jhollinger](https://github.com/jhollinger).
 
@@ -34,7 +43,7 @@
 * 💅 [ENHANCEMENT] Introduce rubocop
 * 💅 [ENHANCEMENT] if/:unless procs with two arguments and invalid empty type deprecations are now removed
 ## 0.26.0  - 2023/08/17
-* 🐛 [BREAKING] Transition to GitHub Actions from CircleCI and update to handle Ruby versions 2.7, 3.0, 3.1, 3.2. Drop support for any ruby version less than 2.7. See [#307](https://github.com/procore-oss/blueprinter/pull/307)
+* ‼️ [BREAKING] Transition to GitHub Actions from CircleCI and update to handle Ruby versions 2.7, 3.0, 3.1, 3.2. Drop support for any ruby version less than 2.7. See [#307](https://github.com/procore-oss/blueprinter/pull/307)
 
 ## 0.25.3  - 2021/03/03
 * 🐛 [BUGFIX] Fixes issue where fields and associations that are redefined by later views were not properly overwritten. See [#201](https://github.com/procore-oss/blueprinter/pull/201) thanks to [@Berardpi](https://github.com/Berardpi).
@@ -175,7 +184,7 @@ a JSON String. See PR [#76](https://github.com/procore-oss/blueprinter/pull/76) 
 
 ## 0.3.0  - 2018/04/05
 
-💥 [BREAKING] Sort of a breaking Change. Serializer classes has been renamed to Extractor. To upgrade, if you passed in a specific serializer to `field` or `identifier` such as:
+‼️ [BREAKING] Sort of a breaking Change. Serializer classes has been renamed to Extractor. To upgrade, if you passed in a specific serializer to `field` or `identifier` such as:
 
 ```
 field(:first_name, serializer: CustomSerializer)
@@ -192,7 +201,7 @@ field(:first_name, extractor: CustomExtractor)
 
 ## 0.2.0  - 2018/01/22
 
-💥 [BREAKING] Breaking Changes. To upgrade, ensure that any associated objects have a blueprint. For example:
+‼️ [BREAKING] Breaking Changes. To upgrade, ensure that any associated objects have a blueprint. For example:
 ```
 association :comments, blueprint: CommentsBlueprint
 ```

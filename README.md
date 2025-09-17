@@ -1105,7 +1105,7 @@ Gems can be created that enrich `blueprinter`'s core functionality via extension
 
 > **_NOTE:_** The following are not officially maintained/supported by Procore OSS.
 
-* [blueprinter_schema](https://github.com/thisismydesign/blueprinter_schema)
+* [blueprinter_schema](https://github.com/thisismydesign/blueprinter_schema) - Create JSON Schemas from Blueprinter Serializers
 
 </details>
 

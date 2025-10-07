@@ -90,6 +90,10 @@ module Blueprinter
     #   additional key value pairs will be exposed during serialization.
     # @return [Hash]
     def hashify(object, view_name:, local_options:)
+      if Blueprinter.configuration.view_name_resolver.respond_to?(:call)
+        view_name = Blueprinter.configuration.view_name_resolver.call(view_name, object, local_options, view_collection)
+      end
+
       raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
 
       object = Blueprinter.configuration.extensions.pre_render(object, self, view_name, local_options)

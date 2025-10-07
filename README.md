@@ -976,6 +976,61 @@ end
 </details>
 
 <details>
+<summary>View Name Resolver</summary>
+
+
+You can add your own logic to determine which view will be used and override the `view` passed to `render`.
+
+#### Example
+
+One of the possible use cases is to version responses with view names. Below, you can find a simplified example of how to achieve that.
+
+Other use cases might include multi-tenant applications where various tenants need different extended views.
+
+##### Blueprinter
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :id
+
+  view :v1 do
+    fields :full_name, :email
+  end
+
+  view :v2 do
+    fields :first_name, :last_name, :email
+  end
+end
+```
+
+##### Configuration
+
+Any object that responds to `.call` can be used. Original `view_name`, `object`, `local_options`, and available `view_collection` are passed to the callable.
+
+```ruby
+Blueprinter.configure do |config|
+  config.view_name_resolver = ->(view_name, object, local_options, view_collection) do
+    # we can check if the view exists
+    if view_collection.view?(Current.api_version)
+      Current.api_version # based on ActiveSupport::CurrentAttributes
+    else
+      # if not, we can fallback to the default view (version)
+      :v1
+    end
+  end
+end
+```
+
+##### Usage
+
+```ruby
+Current.api_version = :v2
+puts UserBlueprint.render(user) # view: :v2 will be used
+````
+
+</details>
+
+<details>
 <summary>Sorting Fields</summary>
 
 

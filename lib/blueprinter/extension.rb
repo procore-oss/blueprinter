@@ -7,6 +7,7 @@ module Blueprinter
   # V2 hook call order:
   #
   # - around_hook (called around any other extension hook)
+  # - blueprint
   # - blueprint_fields
   # - blueprint_setup
   # - around_serialize_object | around_serialize_collection
@@ -27,6 +28,7 @@ module Blueprinter
   class Extension
     HOOKS = %i[
       around_hook
+      blueprint
       blueprint_fields
       blueprint_setup
       around_serialize_object
@@ -66,6 +68,9 @@ module Blueprinter
     # around_collection: Runs around serialization of a Blueprint collection. Surrounds the `prepare` through
     # `blueprint_output` hooks. MUST yield!
     # @param context [Blueprinter::V2::Context::Object]
+
+    # blueprint: Returns the blueprint class to render with. The context's "fields" field will be empty.
+    # @param context [Blueprinter::V2::Context::Render]
 
     # blueprint_fields: Returns the fields that should be included in the correct order. Default is all fields in the order
     # in which they were defined.

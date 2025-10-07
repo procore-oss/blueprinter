@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/instance_cache'
 require 'blueprinter/v2/render'
 
 module Blueprinter
@@ -87,21 +88,26 @@ module Blueprinter
       end
 
       def self.render_object(obj, options = {})
-        # DEPRECATED
-        if options[:view]
-          options = options.dup
-          return self[options.delete(:view)].render_object(obj, options)
-        end
-        Render.new(obj, options, blueprint: self, collection: false)
+        instances = InstanceCache.new
+        blueprint = get_blueprint_class(instances, options)
+        Render.new(obj, options, blueprint:, instances:, collection: false)
       end
 
       def self.render_collection(objs, options = {})
-        # DEPRECATED
-        if options[:view]
-          options = options.dup
-          return self[options.delete(:view)].render_collection(objs, options)
+        instances = InstanceCache.new
+        blueprint = get_blueprint_class(instances, options)
+        Render.new(objs, options, blueprint:, instances:, collection: true)
+      end
+
+      # @api private
+      def self.get_blueprint_class(instances, options)
+        hooks = Hooks.new(extensions.map { |ext| instances.extension ext })
+        if hooks.registered? :blueprint
+          ctx = Context::Render.new(instances.blueprint(self), [], options, 1)
+          hooks.last(:blueprint, ctx) || self
+        else
+          self
         end
-        Render.new(objs, options, blueprint: self, collection: true)
       end
 
       # Apply partials and field exclusions

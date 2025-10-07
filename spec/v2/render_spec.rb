@@ -16,9 +16,11 @@ describe Blueprinter::V2::Render do
     end
   end
 
+  let(:instances) { Blueprinter::V2::InstanceCache.new }
+
   it 'renders an object to a hash' do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
     expect(render.to_hash).to eq({
       name: 'Foo',
@@ -32,7 +34,7 @@ describe Blueprinter::V2::Render do
       { name: 'Foo', description: 'About', category: { n: 'Bar' } },
       { name: 'Foo 2', description: 'About 2', category: { n: 'Bar 2' } },
     ]
-    render = described_class.new(widgets, {}, blueprint: widget_blueprint, collection: true)
+    render = described_class.new(widgets, {}, blueprint: widget_blueprint, collection: true, instances:)
 
     expect(render.to_hash).to eq([
       {
@@ -50,7 +52,7 @@ describe Blueprinter::V2::Render do
 
   it 'renders an object to JSON' do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
     expect(render.to_json).to eq({
       name: 'Foo',
@@ -61,7 +63,7 @@ describe Blueprinter::V2::Render do
 
   it 'renders a collection to JSON' do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true)
+    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true, instances:)
 
     expect(render.to_json).to eq([{
       name: 'Foo',
@@ -86,7 +88,7 @@ describe Blueprinter::V2::Render do
     widget_blueprint.extensions << json_ext.new('A', log)
     widget_blueprint.extensions << json_ext.new('B', log)
 
-    render = described_class.new({ name: 'Foo' }, {}, blueprint: widget_blueprint, collection: false)
+    render = described_class.new({ name: 'Foo' }, {}, blueprint: widget_blueprint, collection: false, instances:)
 
     expect(render.to_json).to eq '{"name":"Foo"}'
     expect(log).to eq ['B: custom json!']
@@ -94,7 +96,7 @@ describe Blueprinter::V2::Render do
 
   it 'renders to JSON and ignores the arg (for Rails `render json:`)' do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true)
+    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true, instances:)
 
     expect(render.to_json({ junk: 'junk' })).to eq([{
       name: 'Foo',
@@ -105,7 +107,7 @@ describe Blueprinter::V2::Render do
 
   it 'responds to to_str with json' do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
     expect(render.to_str).to eq({
       name: 'Foo',
@@ -122,7 +124,7 @@ describe Blueprinter::V2::Render do
     end
     widget_blueprint.extensions << ext.new
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false)
+    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
     expect(render.to_json).to eq({
       name: 'Foo',

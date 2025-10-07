@@ -90,7 +90,8 @@ describe "Blueprinter::V2 Rendering" do
     })
   end
 
-  it 'renders an object with the deprecated view option' do
+  it 'renders an object using the blueprint hook' do
+    widget_blueprint.extensions << Blueprinter::Extensions::ViewOption.new
     result = widget_blueprint.render_object(widget, { view: :extended }).to_hash
     expect(result).to eq({
       name: 'Foo',
@@ -100,7 +101,8 @@ describe "Blueprinter::V2 Rendering" do
     })
   end
 
-  it 'renders a collection with the deprecated view option' do
+  it 'renders a collection using the blueprint hook' do
+    widget_blueprint.extensions << Blueprinter::Extensions::ViewOption.new
     result = widget_blueprint.render_collection([widget], { view: :extended }).to_hash
     expect(result).to eq([{
       name: 'Foo',

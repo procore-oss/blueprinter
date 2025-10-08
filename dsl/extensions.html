@@ -36,6 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -92,10 +93,13 @@
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -149,7 +153,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -217,6 +226,16 @@ WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 <p>Extension hooks will be wrapped in <code>blueprinter.extension</code> spans and annotated with the current extension and hook name.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
 </code></pre>
+<h3 id="viewoption"><a class="header" href="#viewoption">ViewOption</a></h3>
+<p>The ViewOption extension uses the <a href="../api/extensions.html#blueprint">blueprint</a> extension hook to add a <code>view</code> option to <code>render</code>, <code>render_object</code>, and <code>render_collection</code>. It allows V1-compatible rendering of views.</p>
+<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::ViewOption.new
+</code></pre>
+<p>Now you can render a view either way:</p>
+<pre><code class="language-ruby"># V2 style
+MyBlueprint[:foo].render(obj)
+# or V1 style
+MyBlueprint.render(obj, view: :foo)
+</code></pre>
 <h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
 <p><em>Have an extension you'd like to share? Let us know and we may add it to the list!</em></p>
 <h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
@@ -268,6 +287,7 @@ WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

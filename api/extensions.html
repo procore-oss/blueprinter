@@ -36,6 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc.js"></script>
@@ -92,10 +93,13 @@
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -149,7 +153,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -191,6 +200,7 @@ end
 <h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
 <p>Hooks are called in the following order. They are passed a <a href="./context-objects.html">context object</a> as an argument.</p>
 <ul>
+<li><a href="#blueprint">blueprint</a></li>
 <li><a href="#blueprint_fields">blueprint_fields</a></li>
 <li><a href="#blueprint_setup">blueprint_setup</a></li>
 <li><a href="#around_serialize_object">around_serialize_object</a> | <a href="#around_serialize_collection">around_serialize_collection</a>
@@ -217,6 +227,13 @@ end
 <p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
 <h4 id="chain-vs-override-hooks"><a class="header" href="#chain-vs-override-hooks">Chain vs override hooks</a></h4>
 <p>Most hooks are <em>chained</em>; if you have N of the same hook, they run one after the other, using the output of one as input for the next. However, a few hooks are <em>override</em> hooks: only the last one runs. Override hooks are used to replace built-in functionality, like the JSON serializer.</p>
+<h2 id="blueprint"><a class="header" href="#blueprint">blueprint</a></h2>
+<blockquote>
+<p><em>Override hook</em><br />
+<strong>@param <a href="./context-objects.html#render-context">Render Context</a></strong> NOTE <code>fields</code> will be empty<br />
+<strong>@return <a href="./fields.html">Class</a></strong> The Blueprint class to use<br />
+<strong>@cost</strong> Low - run once during render</p>
+</blockquote>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
 <p><em>Override hook</em><br />
@@ -408,6 +425,10 @@ end
 <strong>@cost</strong> High - run for every field</p>
 </blockquote>
 <p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="#exclude_field">exclude_field?</a> returned <code>true</code>.</p>
+<pre><code class="language-ruby">def field_result(ctx)
+  ctx.value
+end
+</code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="object_field_result"><a class="header" href="#object_field_result">object_field_result</a></h2>
 <blockquote>
@@ -416,6 +437,10 @@ end
 <strong>@cost</strong> High - run for every field</p>
 </blockquote>
 <p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="#exclude_object_field">exclude_object_field?</a> returned <code>true</code>.</p>
+<pre><code class="language-ruby">def object_field_result(ctx)
+  ctx.value
+end
+</code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="collection_field_result"><a class="header" href="#collection_field_result">collection_field_result</a></h2>
 <blockquote>
@@ -424,6 +449,10 @@ end
 <strong>@cost</strong> High - run for every field</p>
 </blockquote>
 <p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="#exclude_collection_field">exclude_collection_field?</a> returned <code>true</code>.</p>
+<pre><code class="language-ruby">def collection_field_result(ctx)
+  ctx.value
+end
+</code></pre>
 <p><a href="#hooks">↑ Back to Hooks</a></p>
 <h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
 <blockquote>
@@ -534,6 +563,7 @@ end
         <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
+
 
 
     </div>

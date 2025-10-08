@@ -864,6 +864,13 @@ end
 <strong>@return <a href="api/./fields.html">Class</a></strong> The Blueprint class to use<br />
 <strong>@cost</strong> Low - run once during render</p>
 </blockquote>
+<p>Return a different blueprint class to render with. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#viewoption">View Option extension</a> uses this hook.</p>
+<p>The following example looks for a <code>view</code> option passed in to <code>render</code>. If present, it attempts to return a child view.</p>
+<pre><code class="language-ruby">def blueprint(ctx)
+  view = ctx.options[:view]
+  view ? ctx.blueprint.class[view] : ctx.blueprint.class
+end
+</code></pre>
 <h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
 <blockquote>
 <p><em>Override hook</em><br />

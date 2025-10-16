@@ -49,18 +49,59 @@ module Blueprinter
       end
 
       #
+      # Add a formatter for field values of the given class.
+      #
+      # @param klass [Class] The class of objects to format
+      # @param formatter_method [Symbol] Name of a public instance method to call for formatting
+      # @yield Do formatting in the block instead
+      #
+      def format(klass, formatter_method = nil, &formatter_block)
+        formatters[klass] = formatter_method || formatter_block
+      end
+
+      #
+      # Define an anonymous extension and add it to the current context. It will be initialized
+      # once per render.
+      #
+      #   class WidgetBlueprint < ApplicationBlueprint
+      #     extension do
+      #       # modify and return the object to serialize
+      #       def blueprint_input(ctx)
+      #         ctx.object
+      #       end
+      #     end
+      #   end
+      #
+      def extension(&block)
+        bp_name = blueprint_name
+        extensions << Class.new(Extension) do
+          @blueprint_name = bp_name
+          def self.name = "#{@blueprint_name} extension"
+          class_eval(&block)
+        end
+      end
+
+      #
       # Define a field.
       #
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @yield [TODO] Generate the value from the block
-      # @return [Blueprinter::V2::Field]
+      # @param extractor [Class] Extractor class to use for this field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
+      # @return [Blueprinter::V2::Fields::Field]
       #
       def field(name, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Field.new(
+        schema[name] = Fields::Field.new(
           name: name,
           from: from.to_sym,
+          from_str: from.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -72,7 +113,7 @@ module Blueprinter
       def fields(*names)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Field.new(name: name, options: {})
+          schema[name] = Fields::Field.new(name: name, from: name, from_str: name.to_s, options: {})
         end
       end
 
@@ -82,15 +123,23 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @yield [TODO] Generate the value from the block
-      # @return [Blueprinter::V2::ObjectField]
+      # @param extractor [Class] Extractor class to use for this field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
+      # @return [Blueprinter::V2::Fields::Object]
       #
       def object(name, blueprint, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = ObjectField.new(
+        schema[name] = Fields::Object.new(
           name: name,
           blueprint: blueprint,
           from: from.to_sym,
+          from_str: from.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -102,15 +151,23 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @yield [TODO] Generate the value from the block
-      # @return [Blueprinter::V2::Collection]
+      # @param extractor [Class] Extractor class to use for this field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
+      # @return [Blueprinter::V2::Fields::Collection]
       #
       def collection(name, blueprint, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Collection.new(
+        schema[name] = Fields::Collection.new(
           name: name,
           blueprint: blueprint,
           from: from.to_sym,
+          from_str: from.to_s,
           value_proc: definition,
           options: options.dup
         )

@@ -26,6 +26,13 @@ describe "Blueprinter::V2 Names" do
         "View 'wrong_name' could not be found in Blueprint 'NamedBlueprint'"
       )
     end
+
+    it 'instances should have names' do
+      expect(NamedBlueprint.new.to_s).to eq "NamedBlueprint"
+      expect(NamedBlueprint.new.inspect).to eq "NamedBlueprint"
+      expect(NamedBlueprint[:extended].new.to_s).to eq "NamedBlueprint.extended"
+      expect(NamedBlueprint[:extended].new.inspect).to eq "NamedBlueprint.extended"
+    end
   end
 
   context 'manually named Blueprints' do
@@ -44,6 +51,13 @@ describe "Blueprinter::V2 Names" do
     it 'finds a view by name' do
       expect(blueprint[:extended].to_s).to eq "MyBlueprint.extended"
       expect(blueprint[:extended].inspect).to eq "MyBlueprint.extended"
+    end
+
+    it 'instances should have names' do
+      expect(blueprint.new.to_s).to eq "MyBlueprint"
+      expect(blueprint.new.inspect).to eq "MyBlueprint"
+      expect(blueprint[:extended].new.to_s).to eq "MyBlueprint.extended"
+      expect(blueprint[:extended].new.inspect).to eq "MyBlueprint.extended"
     end
   end
 

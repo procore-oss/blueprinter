@@ -13,11 +13,20 @@ Style/Documentation:
 Style/SafeNavigation:
   Enabled: false
 
+Layout/FirstArrayElementIndentation:
+  Enabled: false
+
 Layout/LineLength:
   Max: 125
 
+Lint/HashCompareByIdentity:
+  Enabled: false
+
 Lint/MissingSuper:
   Enabled: false
+
+Metrics/ClassLength:
+  Max: 120
 
 Metrics/MethodLength:
   Max: 15

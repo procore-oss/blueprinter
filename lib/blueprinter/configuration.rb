@@ -6,13 +6,13 @@ require 'blueprinter/extractors/auto_extractor'
 
 module Blueprinter
   class Configuration
+    attr_reader :extensions
     attr_accessor(
       :association_default,
       :custom_array_like_classes,
       :datetime_format,
       :default_transformers,
       :deprecations,
-      :extensions,
       :extractor_default,
       :field_default,
       :generator,
@@ -38,6 +38,11 @@ module Blueprinter
       @default_transformers = []
       @custom_array_like_classes = []
       @extensions = []
+    end
+
+    def extensions=(list)
+      @_hooks = nil
+      @extensions = list
     end
 
     def hooks

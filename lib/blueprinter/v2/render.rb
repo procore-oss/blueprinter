@@ -15,23 +15,34 @@ module Blueprinter
 
       # Serialize the object to a Hash or array of Hashes
       # @return [Hash|Array<Hash>]
-      def to_hash
-        serializer = @instances.serializer(@blueprint, @options, 1)
-        serialize serializer
-      end
+      def to_hash = to :hash
 
       # Serialize the object to a JSON string
+      # @param _arg Ignored (Rails controller compatibility)
       # @return [String]
-      def to_json(_arg = nil)
+      def to_json(_arg = nil) = to :json
+
+      # Serialize the object to the given format
+      # @param format [Symbol] Only :json and :hash are supported out of the box. Extensions may add support for others,
+      # or change the way :json and :hash behave.
+      # @return [Object]
+      def to(format)
         serializer = @instances.serializer(@blueprint, @options, 1)
-        result = serialize serializer
-        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, result, 1)
-        serializer.hooks.last(:json, ctx)
+        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, format)
+        result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
+          @options = new_ctx.options
+          if new_ctx.blueprint == serializer.blueprint
+            serialize serializer
+          else
+            blueprint = new_ctx.blueprint.class
+            render = Render.new(new_ctx.object, @options, blueprint:, collection: @collection, instances: @instances)
+            return render.to format
+          end
+        end
+        result.is_a?(Context::Final) ? result.value : result
       end
 
       alias to_h to_hash
-      alias to_s to_json
-      alias to_str to_json
 
       private
 

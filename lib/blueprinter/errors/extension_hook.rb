@@ -3,12 +3,10 @@
 module Blueprinter
   module Errors
     class ExtensionHook < StandardError
-      attr_reader :extension, :hook, :message
+      attr_reader :message
 
       def initialize(extension, hook, message)
-        @extension = extension
-        @hook = hook
-        @message = message
+        @message = "Extension hook error in #{extension.class.name}##{hook}: #{message}"
       end
     end
   end

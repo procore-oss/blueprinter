@@ -11,35 +11,38 @@ module Blueprinter
           def initialize = @config = {}.compare_by_identity
 
           # @param ctx [Blueprinter::V2::Context::Field]
-          def field_value(ctx)
+          def around_field_value(ctx)
+            value = yield ctx
             config = @config[ctx.field]
             default_if = config[:default_if]
-            return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
+            return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
 
-            get_default(config[:default], ctx)
+            get_default(config[:default], value, ctx)
           end
 
           # @param ctx [Blueprinter::V2::Context::Field]
-          def object_field_value(ctx)
+          def around_object_value(ctx)
+            value = yield ctx
             config = @config[ctx.field]
             default_if = config[:default_if]
-            return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
+            return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
 
-            get_default(config[:default], ctx)
+            get_default(config[:default], value, ctx)
           end
 
           # @param ctx [Blueprinter::V2::Context::Field]
-          def collection_field_value(ctx)
+          def around_collection_value(ctx)
+            value = yield ctx
             config = @config[ctx.field]
             default_if = config[:default_if]
-            return ctx.value unless ctx.value.nil? || (default_if && use_default?(default_if, ctx))
+            return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
 
-            get_default(config[:default], ctx)
+            get_default(config[:default], value, ctx)
           end
 
           # It's significantly faster to evaluate these options once and store them in the context
           # @param ctx [Blueprinter::V2::Context::Render]
-          def blueprint_setup(ctx)
+          def around_blueprint_init(ctx)
             ref = ctx.blueprint.class.reflections[:default]
             ref.fields.each_value { |field| setup_field ctx, field }
             ref.objects.each_value { |object| setup_object ctx, object }
@@ -75,18 +78,18 @@ module Blueprinter
               ctx.options[:collection_default_if] || field.options[:default_if] || bp_class.options[:collection_default_if]
           end
 
-          def get_default(value, ctx)
-            case value
-            when Proc then ctx.blueprint.instance_exec(ctx, &value)
-            when Symbol then ctx.blueprint.public_send(value, ctx)
-            else value
+          def get_default(default_value, value, ctx)
+            case default_value
+            when Proc then ctx.blueprint.instance_exec(value, ctx, &default_value)
+            when Symbol then ctx.blueprint.public_send(default_value, value, ctx)
+            else default_value
             end
           end
 
-          def use_default?(cond, ctx)
+          def use_default?(cond, value, ctx)
             case cond
-            when Proc then ctx.blueprint.instance_exec(ctx, &cond)
-            else ctx.blueprint.public_send(cond, ctx)
+            when Proc then ctx.blueprint.instance_exec(value, ctx, &cond)
+            else ctx.blueprint.public_send(cond, value, ctx)
             end
           end
         end

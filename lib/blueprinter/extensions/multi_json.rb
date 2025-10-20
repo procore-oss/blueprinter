@@ -16,9 +16,16 @@ module Blueprinter
       end
 
       # @param ctx [Blueprinter::V2::Context::Result]
-      def json(ctx)
-        opts = ctx.options[:multi_json] ? @options.merge(ctx.options[:multi_json]) : @options
-        ::MultiJson.dump(ctx.result, opts)
+      def around_result(ctx)
+        case ctx.format
+        when :json
+          ctx.format = :hash
+          result = yield ctx
+          opts = ctx.options[:multi_json] ? @options.merge(ctx.options[:multi_json]) : @options
+          final ::MultiJson.dump(result, opts)
+        else
+          yield ctx
+        end
       end
     end
   end

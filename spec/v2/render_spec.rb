@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'json'
+
 describe Blueprinter::V2::Render do
   let(:category_blueprint) do
     Class.new(Blueprinter::V2::Base) do
@@ -13,6 +15,12 @@ describe Blueprinter::V2::Render do
       field :name
       field :desc, from: :description
       object :category, test.category_blueprint
+
+      view :extended do
+        field :long_desc do |_ctx|
+          'Long desc'
+        end
+      end
     end
   end
 
@@ -72,28 +80,6 @@ describe Blueprinter::V2::Render do
     }].to_json)
   end
 
-  it 'uses the last json hook' do
-    json_ext = Class.new(Blueprinter::Extension) do
-      def initialize(name, log)
-        @name = name
-        @log = log
-      end
-
-      def json(ctx)
-        @log << "#{@name}: custom json!"
-        JSON.dump ctx.result.reject { |_k, v| v.nil? }
-      end
-    end
-    log = []
-    widget_blueprint.extensions << json_ext.new('A', log)
-    widget_blueprint.extensions << json_ext.new('B', log)
-
-    render = described_class.new({ name: 'Foo' }, {}, blueprint: widget_blueprint, collection: false, instances:)
-
-    expect(render.to_json).to eq '{"name":"Foo"}'
-    expect(log).to eq ['B: custom json!']
-  end
-
   it 'renders to JSON and ignores the arg (for Rails `render json:`)' do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
     render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true, instances:)
@@ -105,21 +91,17 @@ describe Blueprinter::V2::Render do
     }].to_json)
   end
 
-  it 'responds to to_str with json' do
-    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
-
-    expect(render.to_str).to eq({
-      name: 'Foo',
-      desc: 'About',
-      category: { name: 'Bar' }
-    }.to_json)
-  end
-
-  it 'calls the json hook' do
+  it 'runs around_result around the entire result' do
     ext = Class.new(Blueprinter::Extension) do
-      def json(ctx)
-        ctx.result.merge({ foo: 'bar' }).to_json
+      def around_result(ctx)
+        case ctx.format
+        when :json
+          ctx.format = :hash
+          result = yield(ctx).merge({ foo: 'bar' })
+          JSON.dump result
+        else
+          yield ctx
+        end
       end
     end
     widget_blueprint.extensions << ext.new
@@ -132,5 +114,18 @@ describe Blueprinter::V2::Render do
       category: { name: 'Bar' },
       foo: 'bar'
     }.to_json)
+  end
+
+  it 'respects the view option' do
+    widget_blueprint.extensions << Blueprinter::Extensions::ViewOption.new
+    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+    render = described_class.new(widget, { view: :extended }, blueprint: widget_blueprint, collection: false, instances:)
+
+    expect(render.to_hash).to eq({
+      name: 'Foo',
+      desc: 'About',
+      long_desc: 'Long desc',
+      category: { name: 'Bar' },
+    })
   end
 end

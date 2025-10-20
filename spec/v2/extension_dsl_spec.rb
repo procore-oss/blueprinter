@@ -7,10 +7,13 @@ describe "Blueprinter::V2 Extension DSL" do
       def self.blueprint_name = "NameBlueprint"
       field :name
       extension do
-        def field_value(ctx) = ctx.value.upcase
+        def around_field_value(ctx) = yield(ctx).upcase
       end
       extension do
-        def blueprint_output(ctx) = { data: ctx.result }
+        def around_blueprint(ctx)
+          res = yield ctx
+          { data: res }
+        end
       end
     end
   end
@@ -18,9 +21,8 @@ describe "Blueprinter::V2 Extension DSL" do
   it "defines multiple extensions" do
     serializer = Blueprinter::V2::Serializer.new(blueprint, {}, instances, initial_depth: 1)
     expect(blueprint.extensions.size).to eq 2
-    expect(serializer.hooks.registered? :field_value).to be true
-    expect(serializer.hooks.registered? :blueprint_output).to be true
-    expect(serializer.hooks.registered? :around_serialize_object).to be false
+    expect(serializer.hooks.registered? :around_field_value).to be true
+    expect(serializer.hooks.registered? :around_blueprint).to be true
   end
 
   it "names the extensions" do

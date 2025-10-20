@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 module Blueprinter
   module V2
     module Extensions
@@ -18,13 +16,21 @@ module Blueprinter
           end
 
           # @param ctx [Blueprinter::V2::Context::Field]
-          def extract_value(ctx)
-            if ctx.object.is_a? Hash
-              ctx.object[ctx.field.from] || ctx.object[ctx.field.from_str]
+          def around_field_value(ctx)
+            field = ctx.field
+            object = ctx.object
+
+            if field.value_proc
+              ctx.blueprint.instance_exec(ctx, &field.value_proc)
+            elsif object.is_a? Hash
+              object[field.from] || object[field.from_str]
             else
-              ctx.object.public_send(ctx.field.from)
+              object.public_send(field.from)
             end
           end
+
+          alias around_object_value around_field_value
+          alias around_collection_value around_field_value
 
           def hidden? = true
         end

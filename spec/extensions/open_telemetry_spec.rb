@@ -15,9 +15,9 @@ describe Blueprinter::Extensions::OpenTelemetry do
 
       def initialize(log) = @log = log
 
-      def object_field_value(ctx)
-        @log << 'object_field_value'
-        ctx.value
+      def around_object_value(ctx)
+        @log << 'around_object_value'
+        yield ctx
       end
 
       def around_hook(ctx)
@@ -47,8 +47,8 @@ describe Blueprinter::Extensions::OpenTelemetry do
   it 'creates a blueprinter.extension span with an extension' do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foos: [{ name: 'Bar' }] })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :field_value }.merge(attributes)).and_call_original
-    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, [], ctx.options, meta_extension.new([]), :field_value)
+      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :around_field_value }.merge(attributes)).and_call_original
+    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, [], ctx.options, meta_extension.new([]), :around_field_value)
     called = subject.around_hook(hook_ctx) { :true }
     expect(called).to eq :true
   end
@@ -65,7 +65,7 @@ describe Blueprinter::Extensions::OpenTelemetry do
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :object_field_value }.merge(attributes)).twice.and_call_original
+      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :around_object_value }.merge(attributes)).twice.and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.collection', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
     blueprint.render(object).to_hash

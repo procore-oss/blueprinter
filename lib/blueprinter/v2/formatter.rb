@@ -8,16 +8,17 @@ module Blueprinter
         @formatters = blueprint.formatters
       end
 
+      # @param value
       # @param ctx [Blueprinter::V2::Context::Field]
-      def call(ctx)
-        fmt = @formatters[ctx.value.class]
+      def call(value, ctx)
+        fmt = @formatters[value.class]
         case fmt
         when nil
-          ctx.value
+          value
         when Proc
-          ctx.blueprint.instance_exec(ctx.value, &fmt)
+          ctx.blueprint.instance_exec(value, &fmt)
         when Symbol, String
-          ctx.blueprint.public_send(fmt, ctx.value)
+          ctx.blueprint.public_send(fmt, value)
         end
       end
     end

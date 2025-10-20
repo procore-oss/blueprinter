@@ -19,10 +19,6 @@ describe "Blueprinter::V2 Rendering" do
       field :name
       object :cat, test.category_blueprint, from: :category
       collection :parts, test.part_blueprint
-
-      view :extended do
-        field :description
-      end
     end
   end
 
@@ -69,46 +65,24 @@ describe "Blueprinter::V2 Rendering" do
   end
 
   it 'renders an object with options' do
-    result = widget_blueprint.render_object(widget, { root: :data }).to_hash
+    result = widget_blueprint.render_object(widget, { root: :data }).to_json
     expect(result).to eq({
       data: {
         name: 'Foo',
         cat: { name: 'Bar' },
         parts: [{ num: 42 }, { num: 43 }]
       }
-    })
+    }.to_json)
   end
 
   it 'renders a collection with options' do
-    result = widget_blueprint.render_collection([widget], { root: :data }).to_hash
+    result = widget_blueprint.render_collection([widget], { root: :data }).to_json
     expect(result).to eq({
       data: [{
         name: 'Foo',
         cat: { name: 'Bar' },
         parts: [{ num: 42 }, { num: 43 }]
       }]
-    })
-  end
-
-  it 'renders an object using the blueprint hook' do
-    widget_blueprint.extensions << Blueprinter::Extensions::ViewOption.new
-    result = widget_blueprint.render_object(widget, { view: :extended }).to_hash
-    expect(result).to eq({
-      name: 'Foo',
-      description: 'About Foo',
-      cat: { name: 'Bar' },
-      parts: [{ num: 42 }, { num: 43 }]
-    })
-  end
-
-  it 'renders a collection using the blueprint hook' do
-    widget_blueprint.extensions << Blueprinter::Extensions::ViewOption.new
-    result = widget_blueprint.render_collection([widget], { view: :extended }).to_hash
-    expect(result).to eq([{
-      name: 'Foo',
-      description: 'About Foo',
-      cat: { name: 'Bar' },
-      parts: [{ num: 42 }, { num: 43 }]
-    }])
+    }.to_json)
   end
 end

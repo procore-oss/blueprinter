@@ -65,9 +65,10 @@ module Blueprinter
       #
       #   class WidgetBlueprint < ApplicationBlueprint
       #     extension do
-      #       # modify and return the object to serialize
-      #       def blueprint_input(ctx)
-      #         ctx.object
+      #       # modify every object before serialization
+      #       def around_blueprint(ctx)
+      #         object = modify ctx.object
+      #         yield object
       #       end
       #     end
       #   end

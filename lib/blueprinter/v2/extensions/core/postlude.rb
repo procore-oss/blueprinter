@@ -8,14 +8,15 @@ module Blueprinter
         # A core extension with hooks that must run AFTER all others.
         #
         class Postlude < Extension
-          # @param ctx [Blueprinter::V2::Context::Result]
-          def object_output(ctx)
-            return ctx.result unless ctx.depth == 1
+          # @param ctx [Blueprinter::V2::Context::Object]
+          def around_serialize_object(ctx)
+            result = yield ctx.object
+            return result unless ctx.depth == 1
 
             root_name = ctx.options[:root] || ctx.blueprint.class.options[:root]
-            return ctx.result if root_name.nil?
+            return result if root_name.nil?
 
-            root = { root_name => ctx.result }
+            root = { root_name => result }
             if (meta = ctx.options[:meta] || ctx.blueprint.class.options[:meta])
               meta = ctx.blueprint.instance_exec(ctx, &meta) if meta.is_a? Proc
               root[:meta] = meta
@@ -23,7 +24,7 @@ module Blueprinter
             root
           end
 
-          alias collection_output object_output
+          alias around_serialize_collection around_serialize_object
 
           def hidden? = true
         end

@@ -26,24 +26,24 @@ module ExtensionHelpers
           object(:foo_obj2, test.sub_blueprint) { |ctx| { name: "name: #{ctx.object[:foo_obj][:name]}" } }
           collection(:foos2, test.sub_blueprint) { |ctx| [{ name: "nums: #{ctx.object[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
 
-          def was(ctx)
-            "was #{ctx.value.inspect}"
+          def was(val, _ctx)
+            "was #{val.inspect}"
           end
 
-          def is?(ctx, val)
-            ctx.value == val
+          def is?(val, expected_val)
+            val == expected_val
           end
 
-          def foo?(ctx)
-            is? ctx, 'Foo'
+          def foo?(val, _ctx)
+            is? val, 'Foo'
           end
 
-          def name_foo?(ctx)
-            ctx.value[:name] == 'Foo'
+          def name_foo?(val, _ctx)
+            val[:name] == 'Foo'
           end
 
-          def names_foo?(ctx)
-            ctx.value.all? { |v| v[:name] == 'Foo' }
+          def names_foo?(val, _ctx)
+            val.all? { |v| v[:name] == 'Foo' }
           end
         end
       end

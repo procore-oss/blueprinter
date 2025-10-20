@@ -11,21 +11,17 @@ module Blueprinter
   # - blueprint_fields
   # - blueprint_setup
   # - around_serialize_object | around_serialize_collection
-  #   - object_input | collection_input
-  #   - blueprint_input
-  #     - extract_value
-  #     - field_value | object_field_value | collection_field_value
-  #     - exclude_field? | exclude_object_field? | exclude_collection_field?
-  #       - blueprint_fields …
-  #     - field_result | object_field_result | collection_field_result
-  #   - blueprint_output
-  #   - object_output | collection_output
+  #   - around_blueprint
+  #     - around_field_value | around_object_value | around_collection_value
+  #       - blueprint …
   # - json
   #
   # V1 hook call order:
   #  - pre_render
   #
   class Extension
+    include V2::Helpers
+
     HOOKS = %i[
       around_hook
       blueprint
@@ -33,22 +29,10 @@ module Blueprinter
       blueprint_setup
       around_serialize_object
       around_serialize_collection
-      object_input
-      collection_input
-      blueprint_input
-      extract_value
-      field_value
-      exclude_field?
-      field_result
-      object_field_value
-      exclude_object_field?
-      object_field_result
-      collection_field_value
-      exclude_collection_field?
-      collection_field_result
-      blueprint_output
-      object_output
-      collection_output
+      around_blueprint
+      around_field_value
+      around_object_value
+      around_collection_value
       json
       pre_render
     ].freeze
@@ -61,13 +45,20 @@ module Blueprinter
     # If this returns true, around_hook will not be called when this extension's hooks are run. Used by core extensions.
     def hidden? = false
 
-    # around_serialize_object: Runs around serialization of a Blueprint object. Surrounds the `prepare` through
-    # `blueprint_output` hooks. MUST yield!
+    # around_serialize_object: Runs around serialization of a Blueprint object.
     # @param context [Blueprinter::V2::Context::Object]
 
-    # around_collection: Runs around serialization of a Blueprint collection. Surrounds the `prepare` through
-    # `blueprint_output` hooks. MUST yield!
+    # around_serialize_collection: Runs around serialization of a Blueprint collection.
     # @param context [Blueprinter::V2::Context::Object]
+
+    # around_blueprint: Runs around serialization of every Blueprint.
+    # @param context [Blueprinter::V2::Context::Object]
+
+    # around_field_value TODO
+
+    # around_object_value TODO
+
+    # around_collection_value TODO
 
     # blueprint: Returns the blueprint class to render with. The context's "fields" field will be empty.
     # @param context [Blueprinter::V2::Context::Render]
@@ -82,47 +73,6 @@ module Blueprinter
     # blueprint_setup: Called once per blueprint per render. A common use is to pre-calculate certain options
     # and cache them in context.data, so we don't have to recalculate them for every field.
     # @param context [Blueprinter::V2::Context::Render]
-
-    # blueprint_input: Modify or replace an object right before it's serialized by a Blueprint. The returned object will be
-    # used as the input to the Blueprint.
-    # @param context [Blueprinter::V2::Context::Object]
-    # @return [Object]
-
-    # blueprint_output: Modify or replace the serialized output from any Blueprint. The returned object will be used as the
-    # output of the Blueprint.
-    # @param context [Blueprinter::V2::Context::Result]
-    # @return [Object]
-
-    # extract_value: Extract a field, objecet, or collection value from an object. The returned value will be run through the
-    # NOTE If there are multiple extract_value hooks, only the last one is called.
-    # field_value, object_fled_value, or collection_fled_value hooks.
-
-    # field_value: Modify or replace the value used for the field. The returned value will be run through any formatters and
-    # used as the field's value.
-    # @param context [Blueprinter::V2::Context::Field]
-    # @return [Object]
-
-    # object_field_value: Modify or replace the value used for the object. The returned value will be used as the input for
-    # the object's Blueprint.
-    # @param context [Blueprinter::V2::Context::Field]
-    # @return [Object]
-
-    # collection_field_value: Modify or replace the value used for the collection. The returned value will be used as the
-    # input for the collection's Blueprint.
-    # @param context [Blueprinter::V2::Context::Field]
-    # @return [Enumerable]
-
-    # exclude_field?: Return true to exclude this field from the result.
-    # @param context [Blueprinter::V2::Context::Field]
-    # @return [Boolean]
-
-    # exclude_object_field?: Return true to exclude this object from the result.
-    # @param context [Blueprinter::V2::Context::Field]
-    # @return [Boolean]
-
-    # exclude_collection_field?: Return true to exclude this collection from the result.
-    # @param context [Blueprinter::V2::Context::Field]
-    # @return [Boolean]
 
     # json: Override the default JSON encoder. The returned string will be the JSON output.
     # NOTE If there are multiple json hooks, only the final one is called.

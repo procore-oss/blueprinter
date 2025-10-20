@@ -2,7 +2,14 @@
 
 require 'blueprinter/hooks'
 require 'blueprinter/v2/formatter'
-require 'blueprinter/v2/field_serializer'
+require 'blueprinter/v2/field_serializers/field'
+require 'blueprinter/v2/field_serializers/object'
+require 'blueprinter/v2/field_serializers/collection'
+require 'blueprinter/v2/extensions/core/extractor'
+require 'blueprinter/v2/extensions/core/defaults'
+require 'blueprinter/v2/extensions/core/conditionals'
+require 'blueprinter/v2/extensions/core/prelude'
+require 'blueprinter/v2/extensions/core/postlude'
 
 module Blueprinter
   module V2
@@ -12,7 +19,9 @@ module Blueprinter
     # NOTE: The instance is re-used for the duration of the render.
     #
     class Serializer
-      attr_reader :blueprint, :fields, :options, :instances, :formatter, :hooks, :defaults, :cond
+      SKIP = :_blueprinter_skip_field
+
+      attr_reader :blueprint, :fields, :options, :instances, :formatter, :hooks, :extractor, :defaults, :cond
 
       # @param options [Hash] Options passed from the callsite
       def initialize(blueprint_class, options, instances, initial_depth:)
@@ -21,7 +30,7 @@ module Blueprinter
         @instances = instances
         @formatter = Formatter.new(blueprint.class)
         @hooks = Hooks.new(extensions)
-        # "Unroll" these hooks for a significant speed boost
+        @extractor = Extensions::Core::Extractor.new
         @defaults = Extensions::Core::Defaults.new
         @cond = Extensions::Core::Conditionals.new
         @fields = blueprint_fields initial_depth
@@ -38,7 +47,7 @@ module Blueprinter
       def object(object, depth:)
         if @run_around_serialize_object
           ctx = Context::Object.new(@blueprint, @fields, @options, object, depth)
-          @hooks.around(:around_serialize_object, ctx) do
+          @hooks.reduce_around(:around_serialize_object, ctx, :object) do |object|
             serialize_object(object, depth:)
           end
         else
@@ -55,69 +64,38 @@ module Blueprinter
       def collection(collection, depth:)
         if @run_around_serialize_collection
           ctx = Context::Object.new(@blueprint, @fields, @options, collection, depth)
-          @hooks.around(:around_serialize_collection, ctx) do
-            serialize_collection(collection, depth:)
+          @hooks.reduce_around(:around_serialize_collection, ctx, :object) do |collection|
+            collection.map { |object| serialize_object(object, depth:) }.to_a
           end
         else
-          serialize_collection(collection, depth:)
+          collection.map { |object| serialize_object(object, depth:) }.to_a
         end
       end
 
       private
 
       def serialize_object(object, depth:)
-        if @run_object_input
+        if @run_around_blueprint
           ctx = Context::Object.new(@blueprint, @fields, @options, object, depth)
-          object = @hooks.reduce_into(:object_input, ctx, :object)
+          @hooks.reduce_around(:around_blueprint, ctx, :object) do |object|
+            serialize(object, depth:)
+          end
+        else
+          serialize(object, depth:)
         end
-
-        result = serialize(object, depth:)
-        return result unless @run_object_output
-
-        ctx = Context::Result.new(@blueprint, @fields, @options, object, result, depth)
-        @hooks.reduce_into(:object_output, ctx, :result)
-      end
-
-      def serialize_collection(collection, depth:)
-        if @run_collection_input
-          ctx = Context::Object.new(@blueprint, @fields, @options, collection, depth)
-          collection = @hooks.reduce_into(:collection_input, ctx, :object)
-        end
-
-        result = collection.map { |object| serialize(object, depth:) }.to_a
-        return result unless @run_collection_output
-
-        ctx = Context::Result.new(@blueprint, @fields, @options, collection, result, depth)
-        @hooks.reduce_into(:collection_output, ctx, :result)
       end
 
       def serialize(object, depth:)
-        if @run_blueprint_input
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, depth)
-          object = @hooks.reduce_into(:blueprint_input, ctx, :object)
-        end
-
-        ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, nil, depth)
-        result = @field_serializers.each_with_object({}) do |field_conf, acc|
+        ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, depth)
+        @field_serializers.each_with_object({}) do |field_conf, acc|
           ctx.field = field_conf.field
-          ctx.value = nil
-          ctx.value = ctx.field.value_proc ? proc_value(ctx) : @hooks.call(field_conf.extractor, :extract_value, ctx)
           field_conf.serialize(ctx, acc)
         end
-        return result unless @run_blueprint_output
-
-        ctx = Context::Result.new(@blueprint, @fields, @options, object, result, depth)
-        @hooks.reduce_into(:blueprint_output, ctx, :result)
-      end
-
-      # @param ctx [Blueprinter::V2::Context::Field]
-      def proc_value(ctx)
-        ctx.blueprint.instance_exec(ctx, &ctx.field.value_proc)
       end
 
       def extensions
         extensions = @blueprint.class.extensions.map { |ext| @instances.extension ext }
-        [Extensions::Core::Prelude.new, Extensions::Core::Extractor.new, *extensions, Extensions::Core::Postlude.new]
+        [Extensions::Core::Prelude.new, *extensions, Extensions::Core::Postlude.new]
       end
 
       def blueprint_fields(depth)
@@ -129,40 +107,28 @@ module Blueprinter
       # Allow extensions to do time-saving prep work on the current context
       def blueprint_setup(depth)
         ctx = Context::Render.new(@blueprint, @fields, @options, depth)
-        @defaults.blueprint_setup ctx
         @cond.blueprint_setup ctx
+        @defaults.blueprint_setup ctx
         @hooks.run(:blueprint_setup, ctx)
-        setup_exts = {}.compare_by_identity
-        @fields.map { |field| field_serializer(field, setup_exts, ctx) }.freeze
+        @fields.map { |field| field_serializer(field, ctx) }.freeze
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity
-      def field_serializer(field, setup_exts, ctx)
-        ext = field.options[:extractor]
-        extractor = ext ? @instances.extension(ext) : @hooks.last_with(:extract_value)
-        setup_exts[extractor] ||= extractor.blueprint_setup(ctx) || true if extractor.respond_to?(:blueprint_setup)
-
+      def field_serializer(field, ctx)
         case field.type
         when :field
-          FieldSerializer::Field.new(field, extractor, self)
+          FieldSerializers::Field.new(field, self)
         when :object
-          FieldSerializer::Object.new(field, extractor, self)
+          FieldSerializers::Object.new(field, self)
         when :collection
-          FieldSerializer::Collection.new(field, extractor, self)
+          FieldSerializers::Collection.new(field, self)
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       # We save a lot of time by skipping hooks that aren't used
       def find_used_hooks!
         @run_around_serialize_object = @hooks.registered? :around_serialize_object
         @run_around_serialize_collection = @hooks.registered? :around_serialize_collection
-        @run_object_input = @hooks.registered? :object_input
-        @run_collection_input = @hooks.registered? :collection_input
-        @run_blueprint_input = @hooks.registered? :blueprint_input
-        @run_blueprint_output = @hooks.registered? :blueprint_output
-        @run_object_output = @hooks.registered? :object_output
-        @run_collection_output = @hooks.registered? :collection_output
+        @run_around_blueprint = @hooks.registered? :around_blueprint
       end
     end
   end

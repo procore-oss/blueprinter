@@ -51,7 +51,7 @@ module Blueprinter
       Object = Struct.new(:blueprint, :fields, :options, :object, :depth)
 
       #
-      # The current field and its extracted value.
+      # The current field.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
@@ -64,12 +64,10 @@ module Blueprinter
       # @!attribute [r] field
       #   @return [Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection] The
       # field that's currently being evaluated
-      # @!attribute [r] value
-      #   @return [Object] The extracted field value
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :value, :depth)
+      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :depth)
 
       #
       # A serialized object/collection. This may be the outer object/collection or a nested one.

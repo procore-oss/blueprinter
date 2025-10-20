@@ -4,6 +4,9 @@ module Blueprinter
   module V2
     module Extensions
       module Core
+        #
+        # A core extension that skips fields based on given options.
+        #
         class Conditionals < Extension
           def initialize
             @if = {}.compare_by_identity
@@ -14,27 +17,28 @@ module Blueprinter
 
           # @param ctx [Blueprinter::V2::Context::Field]
           # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-          def exclude_field?(ctx)
-            if ctx.value.nil? && @ex_if_nil[ctx.field]
-              return true
+          def around_field_value(ctx)
+            value = yield
+            if value.nil? && @ex_if_nil[ctx.field]
+              return skip
             elsif @ex_if_empty[ctx.field]
-              return true if ctx.value.nil? || (ctx.value.respond_to?(:empty?) && ctx.value.empty?)
+              return skip if value.nil? || (value.respond_to?(:empty?) && value.empty?)
             end
 
             if (cond = @if[ctx.field])
-              result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-              return true unless result
+              result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(value, ctx, &cond) : ctx.blueprint.public_send(cond, value, ctx)
+              return skip unless result
             end
             if (cond = @unless[ctx.field])
-              result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-              return true if result
+              result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(value, ctx, &cond) : ctx.blueprint.public_send(cond, value, ctx)
+              return skip if result
             end
-            false
+            value
           end
           # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
 
-          alias exclude_object_field? exclude_field?
-          alias exclude_collection_field? exclude_field?
+          alias around_object_value around_field_value
+          alias around_collection_value around_field_value
 
           # It's significantly faster to evaluate these options once and store them
           # @param ctx [Blueprinter::V2::Context::Render]

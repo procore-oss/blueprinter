@@ -35,17 +35,6 @@ module Blueprinter
     end
 
     #
-    # Return true if any of "hook" returns truthy.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @return [Boolean]
-    #
-    def any?(hook, ctx)
-      @hooks.fetch(hook).any? { |ext| call(ext, hook, ctx) }
-    end
-
-    #
     # Run only the first-added instance of the hook.
     #
     # @param hook [Symbol] Name of hook to call
@@ -96,28 +85,15 @@ module Blueprinter
     end
 
     #
-    # An optimized version of reduce for hooks that are in the hot path. It accepts a
-    # Blueprinter::V2::Context and returns an attribute from it.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks (usually a Blueprinter::V2::Context)
-    # @param attr [Symbol] The attribute on target_obj to update with the hook return value
-    # @return [Object] The last hook's return value
-    #
-    def reduce_into(hook, ctx, attr)
-      @hooks.fetch(hook).each do |ext|
-        ctx[attr] = call(ext, hook, ctx)
-      end
-      ctx[attr]
-    end
-
-    #
     # Runs nested hooks that yield. A block MUST be passed, and it will be run at the "apex" of
-    # the nested hooks. It's return value will be used as this method's return value.
+    # the nested hooks. It's return value will be the final return value.
+    #
+    # Each hook MUST yield exactly once, or an exception will be raised.
     #
     # @param hook [Symbol] Name of hook to call
     # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @return [Object] The return value from the block passed to this method
+    # @yield [Object] "attr" from "ctx" as it's been yielded by hooks. Should return it/new/modified version.
+    # @return [Object] Object returned from the given block
     #
     def around(hook, ctx)
       result = nil
@@ -137,12 +113,53 @@ module Blueprinter
       result
     end
 
+    #
+    # Runs nested hooks that yield. A block MUST be passed, and it will be run at the "apex" of
+    # the nested hooks. It's return value will be passed as the "yield" value to the final hook.
+    #
+    # Each hook SHOULD yield unless it wants to bypass subseqent hooks and return a final value.
+    #
+    # @param hook [Symbol] Name of hook to call
+    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
+    # @yield [Object] "attr" from "ctx" as it's been yielded by hooks. Should return it/new/modified version.
+    # @return [Object] Object returned from the outer hook (or from the given block, if there are no hooks)
+    #
+    def reduce_around(hook, ctx, attr = nil, &inner)
+      hooks = @hooks.fetch(hook)
+      initial_val = attr.nil? ? nil : ctx[attr]
+      catch V2::Serializer::SKIP do
+        _reduce_around(hooks, hook, 0, ctx, attr, inner, initial_val)
+      end
+    end
+
     def call(ext, hook, ctx, &)
       return ext.public_send(hook, ctx, &) if !@around_hook_registered || ext.hidden? || hook == :around_hook
 
       hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
       around(:around_hook, hook_ctx) do
         ext.public_send(hook, ctx, &)
+      end
+    end
+
+    private
+
+    def _reduce_around(hooks, hook, idx, ctx, attr, inner, res)
+      #throw res if res == V2::Serializer::SKIP
+
+      ext = hooks[idx]
+      return inner ? inner.call(res) : res if ext.nil?
+
+      call(ext, hook, ctx) do |y|
+        #throw y if y == V2::Serializer::SKIP
+        #next y if y == V2::Serializer::SKIP
+
+        if attr
+          ctx = ctx.dup
+          ctx[attr] = y
+        end
+        res = _reduce_around(hooks, hook, idx + 1, ctx, attr, inner, y)
+        throw res, res if res == V2::Serializer::SKIP
+        res
       end
     end
   end

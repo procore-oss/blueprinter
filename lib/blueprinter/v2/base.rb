@@ -9,6 +9,7 @@ module Blueprinter
     class Base
       extend DSL
       extend Reflection
+      include Helpers
 
       class << self
         # @return [Hash] Options set on this Blueprint
@@ -89,25 +90,12 @@ module Blueprinter
 
       def self.render_object(obj, options = {})
         instances = InstanceCache.new
-        blueprint = get_blueprint_class(instances, options)
-        Render.new(obj, options, blueprint:, instances:, collection: false)
+        Render.new(obj, options, blueprint: self, instances:, collection: false)
       end
 
       def self.render_collection(objs, options = {})
         instances = InstanceCache.new
-        blueprint = get_blueprint_class(instances, options)
-        Render.new(objs, options, blueprint:, instances:, collection: true)
-      end
-
-      # @api private
-      def self.get_blueprint_class(instances, options)
-        hooks = Hooks.new(extensions.map { |ext| instances.extension ext })
-        if hooks.registered? :blueprint
-          ctx = Context::Render.new(instances.blueprint(self), [], options, 1)
-          hooks.last(:blueprint, ctx) || self
-        else
-          self
-        end
+        Render.new(objs, options, blueprint: self, instances:, collection: true)
       end
 
       # Apply partials and field exclusions

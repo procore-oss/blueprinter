@@ -33,11 +33,6 @@ describe Blueprinter::Hooks do
         res[:n] += 1 if res[:n]
         res
       end
-
-      def pre_render(object, _blueprint, _view, _options)
-        foo = object[:foo]
-        { foo: "#{foo} 1" }
-      end
     end
   end
   let(:ext2) do
@@ -51,11 +46,6 @@ describe Blueprinter::Hooks do
         ctx.fields = ctx.blueprint.class.reflections[:default].ordered.reverse
         yield ctx
       end
-
-      def pre_render(object, _blueprint, _view, _options)
-        foo = object[:foo]
-        { foo: "#{foo} 2" }
-      end
     end
   end
 
@@ -65,31 +55,6 @@ describe Blueprinter::Hooks do
       expect(hooks.registered? :around_serialize_object).to be true
       expect(hooks.registered? :around_blueprint_init).to be true
       expect(hooks.registered? :around_result).to be false
-    end
-  end
-
-  context '#reduce_hook' do
-    it 'returns the final value' do
-      hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
-      result = hooks.reduce_hook(:pre_render, object) do |obj|
-        [obj, 'blueprint', 'view', {}]
-      end
-      expect(result[:foo]).to eq 'Foo 1 2 1 1'
-    end
-
-    it 'expands a returned array into args' do
-      hooks = described_class.new [ext1.new, ext2.new, ext1.new, ext1.new]
-      result = hooks.reduce_hook(:pre_render, object) do |obj|
-        [obj, 'blueprint', 'view', {}]
-      end
-      expect(result[:foo]).to eq 'Foo 1 2 1 1'
-    end
-
-    it 'returns the initial value if there are no hooks' do
-      hooks = described_class.new []
-      ctx = object_ctx.new(serializer.blueprint, serializer.fields, {}, object)
-      result = hooks.reduce_hook(:pre_render, ctx.object) { |val| ctx.object = val; ctx }
-      expect(result[:foo]).to eq 'Foo'
     end
   end
 

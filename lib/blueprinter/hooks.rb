@@ -24,6 +24,9 @@ module Blueprinter
       @hooks.fetch(hook).any?
     end
 
+    # Return all hooks of name `hook`. NOTE: Only needed for V1
+    def [](hook) = @hooks.fetch(hook)
+
     #
     # Runs nested hooks that may yield to further hooks/Blueprinter core. A block MUST be passed,
     # and will run at the innermost yield (if reached).
@@ -38,24 +41,6 @@ module Blueprinter
       hooks = @hooks.fetch(hook)
       catch V2::Serializer::SKIP do
         _around(hooks, hook, 0, ctx, ctx.class, inner)
-      end
-    end
-
-    #
-    # DEPRECATED - do not use in V2!
-    #
-    # Call the hooks in series, passing the output of one to the block, which returns the args for the next.
-    #
-    # If the hook requires multiple arguments, the block should return an array.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param initial_value [Object] The starting value for the block
-    # @return [Object] The last hook's return value
-    #
-    def reduce_hook(hook, initial_value)
-      @hooks.fetch(hook).reduce(initial_value) do |val, ext|
-        args = yield val
-        args.is_a?(Array) ? ext.public_send(hook, *args) : ext.public_send(hook, args)
       end
     end
 

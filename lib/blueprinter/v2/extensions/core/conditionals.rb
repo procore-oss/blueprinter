@@ -11,17 +11,17 @@ module Blueprinter
           def initialize
             @if = {}.compare_by_identity
             @unless = {}.compare_by_identity
-            @ex_if_nil = {}.compare_by_identity
-            @ex_if_empty = {}.compare_by_identity
+            @skip_nil = {}.compare_by_identity
+            @skip_empty = {}.compare_by_identity
           end
 
           # @param ctx [Blueprinter::V2::Context::Field]
           # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/MethodLength,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
           def around_field_value(ctx)
             value = yield ctx
-            if value.nil? && @ex_if_nil[ctx.field]
+            if value.nil? && @skip_nil[ctx.field]
               skip
-            elsif @ex_if_empty[ctx.field]
+            elsif @skip_empty[ctx.field]
               skip if value.nil? || (value.respond_to?(:empty?) && value.empty?)
             end
 
@@ -63,9 +63,9 @@ module Blueprinter
             ref.fields.each_value do |field|
               @if[field] = ctx.options[:field_if] || field.options[:if] || bp_class.options[:field_if]
               @unless[field] = ctx.options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
-              @ex_if_nil[field] =
+              @skip_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              @ex_if_empty[field] =
+              @skip_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end
@@ -77,9 +77,9 @@ module Blueprinter
             ref.objects.each_value do |field|
               @if[field] = ctx.options[:object_if] || field.options[:if] || bp_class.options[:object_if]
               @unless[field] = ctx.options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
-              @ex_if_nil[field] =
+              @skip_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              @ex_if_empty[field] =
+              @skip_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end
@@ -92,9 +92,9 @@ module Blueprinter
               @if[field] = ctx.options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
               @unless[field] =
                 ctx.options[:collection_unless] || field.options[:unless] || bp_class.options[:collection_unless]
-              @ex_if_nil[field] =
+              @skip_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              @ex_if_empty[field] =
+              @skip_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end

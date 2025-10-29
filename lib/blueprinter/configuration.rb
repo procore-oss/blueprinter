@@ -18,7 +18,8 @@ module Blueprinter
       :if,
       :method,
       :sort_fields_by,
-      :unless
+      :unless,
+      :view_name_resolver
     )
     attr_reader :extensions
 
@@ -38,6 +39,7 @@ module Blueprinter
       @default_transformers = []
       @custom_array_like_classes = []
       @extensions = Extensions.new
+      @view_name_resolver = nil
     end
 
     def extensions=(list)

@@ -29,6 +29,11 @@ describe 'Blueprinter' do
       expect(Blueprinter.configuration.method).to be(:encode)
     end
 
+    it 'should set the `view_name_resolver`' do
+      Blueprinter.configure { |config| config.view_name_resolver = -> { "custom" } }
+      expect(Blueprinter.configuration.view_name_resolver.call).to be("custom")
+    end
+
     it 'should set the `sort_fields_by`' do
       Blueprinter.configure { |config|
         config.sort_fields_by = :definition

@@ -597,6 +597,33 @@ describe '::Base' do
     end
   end
 
+  describe '::hashify' do
+    context "Given global view_name_resolver is configured" do
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          field :first_name
+
+          view :extended do
+            field :last_name
+          end
+        end
+      end
+
+      before do
+        reset_blueprinter_config!
+        Blueprinter.configure { |config| config.view_name_resolver = ->(_, _, _, _) { :extended } }
+      end
+      after { reset_blueprinter_config! }
+
+      subject { blueprint.render_as_hash(object_with_attributes) }
+
+      it 'uses the resolved view name' do
+        expect(subject).to include(last_name: 'Ryan')
+      end
+    end
+  end
+
   describe '::render_as_json' do
     subject { blueprint_with_block.render_as_json(object_with_attributes) }
     context 'Outside Rails project' do

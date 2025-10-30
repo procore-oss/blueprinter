@@ -103,7 +103,7 @@ module Blueprinter
         ctx = Context::Render.new(@blueprint, fields, @options, depth)
         @conditionals.around_blueprint_init ctx
         @defaults.around_blueprint_init ctx
-        @hooks.around(:around_blueprint_init, ctx) do |ctx|
+        @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           @options = ctx.options
           @fields = ctx.fields
         end

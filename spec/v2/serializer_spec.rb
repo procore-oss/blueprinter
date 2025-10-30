@@ -473,6 +473,17 @@ describe Blueprinter::V2::Serializer do
     ]
   end
 
+  it "raises if around_blueprint_init doesn't yield" do
+    ext = Class.new(Blueprinter::Extension) do
+      def around_blueprint_init(ctx) = true
+    end
+    application_blueprint.extensions << ext.new
+
+    expect do
+      described_class.new(widget_blueprint, {}, instances, initial_depth: 1).object({}, depth: 1)
+    end.to raise_error(Blueprinter::Errors::ExtensionHook, /did not yield/)
+  end
+
   it 'uses the same serializer and blueprint instances throughout, for a given blueprint' do
     blueprint = Class.new(Blueprinter::V2::Base) do
       self.blueprint_name = 'Foo'

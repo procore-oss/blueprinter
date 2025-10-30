@@ -35,12 +35,13 @@ module Blueprinter
     #
     # @param hook [Symbol] Name of hook to call
     # @param ctx [Blueprinter::V2::Context] The argument to the hooks
+    # @param require_yield [Boolean] Throw an exception if a hook doesn't yield
     # @return [Object] Object returned from the outer hook (or from the given block, if there are no hooks)
     #
-    def around(hook, ctx, &inner)
+    def around(hook, ctx, require_yield: false, &inner)
       hooks = @hooks.fetch(hook)
       catch V2::Serializer::SKIP do
-        _around(hooks, hook, 0, ctx, ctx.class, inner)
+        _around(hooks, hook, 0, ctx, ctx.class, inner, require_yield:)
       end
     end
 
@@ -54,26 +55,26 @@ module Blueprinter
       hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
       _around(hooks, :around_hook, 0, hook_ctx, NilClass, lambda do |_|
         result = ext.public_send(hook, ctx, &)
-      end, required: true)
+      end, require_yield: true)
       result
     end
 
-    def _around(hooks, hook, idx, ctx, expected_yield, inner, required: false)
+    def _around(hooks, hook, idx, ctx, expected_yield, inner, require_yield: false)
       ext = hooks[idx]
       return inner.call(ctx) if ext.nil?
 
-      reached = false
+      yielded = false
       result = call(ext, hook, ctx) do |yielded_ctx|
-        reached = true
+        yielded = true
         unless yielded_ctx.is_a? expected_yield
           msg = "should yield `#{expected_yield.name}` but yielded `#{yielded_ctx.inspect}`"
           raise Errors::ExtensionHook.new(ext, hook, msg)
         end
 
         ctx = yielded_ctx.dup if yielded_ctx
-        _around(hooks, hook, idx + 1, ctx, expected_yield, inner, required:)
+        _around(hooks, hook, idx + 1, ctx, expected_yield, inner, require_yield:)
       end
-      raise Errors::ExtensionHook.new(ext, hook, 'did not yield') if required && !reached
+      raise Errors::ExtensionHook.new(ext, hook, 'did not yield') if require_yield && !yielded
 
       result
     end

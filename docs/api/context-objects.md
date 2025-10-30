@@ -1,97 +1,91 @@
 # Context Objects
 
-Context objects are the arguments passed to APIs like [field blocks](../dsl/fields.md#field-blocks), [option procs](../dsl/options.md) and [extension hooks](./extensions.md). There are several kinds of context objects, each with its own set of fields.
+Context objects are the arguments passed to APIs like [field blocks](../dsl/fields.md#field-blocks), [option procs](../dsl/options.md) and [extension hooks](./extensions.md). There are several kinds of context objects, each with its own set of fields. Some fields are read-only (_RO_), others can be changed (_RW_).
 
 ## Render Context
 
-> **blueprint**\
+> **blueprint** _RO_\
 > The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.
 
-> **fields**\
-> A frozen array of field definitions that will be serialized, in order. See [Fields API](./fields.md) and the [blueprint_fields](./extensions.md#blueprint_fields) hook.
+> **fields** _RW_\
+> A frozen array of field definitions that will be serialized, in order. See [Fields API](./fields.md).
 
-> **options**\
+> **options** _RW_\
 > The frozen options Hash passed to `render`. An empty Hash if none was passed.
 
-> **depth**\
+> **depth** _RO_\
 > The current blueprint depth (1-indexed).
 
 ## Object Context
 
-> **blueprint**\
+> **blueprint** _RO_\
 > The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.
 
-> **fields**\
+> **fields** _RO_\
 > A frozen array of field definitions that will be serialized, in order. See [Fields API](./fields.md) and the [blueprint_fields](./extensions.md#blueprint_fields) hook.
 
-> **options**\
+> **options** _RO_\
 > The frozen options Hash passed to `render`. An empty Hash if none was passed.
 
-> **object**\
+> **object** _RW_\
 > The object or collection currently being serialized.
 
-> **depth**\
+> **depth** _RO_\
 > The current blueprint depth (1-indexed).
 
 ## Field Context
 
-> **blueprint**\
+> **blueprint** _RO_\
 > The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.
 
-> **fields**\
+> **fields** _RO_\
 > A frozen array of field definitions that will be serialized, in order. See [Fields API](./fields.md) and the [blueprint_fields](./extensions.md#blueprint_fields) hook.
 
-> **options**\
+> **options** _RO_\
 > The frozen options Hash passed to `render`. An empty Hash if none was passed.
 
-> **object**\
+> **object** _RO_\
 > The object currently being serialized.
 
-> **field**\
+> **field** _RO_\
 > A struct of the field, object, or collection currently being rendered. You can use this to access the field's name and options. See [Fields API](./fields.md).
 
-> **value**\
-> The extracted field value. (In certain situations, like the extractor API and field blocks, it will always be `nil` since nothing has been extracted yet.)
-
-> **depth**\
+> **depth** _RO_\
 > The current blueprint depth (1-indexed).
 
 ## Result Context
 
-> **blueprint**\
+> **blueprint** _RW_\
 > The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.
 
-> **fields**\
+> **fields** _RO_\
 > A frozen array of field definitions that were serialized, in order. See [Fields API](./fields.md) and the [blueprint_fields](./extensions.md#blueprint_fields) hook.
 
-> **options**\
+> **options** _RW_\
 > The frozen options Hash passed to `render`. An empty Hash if none was passed.
 
-> **object**\
+> **object** _RW_\
 > The object or collection that was just serialized.
 
-> **result**\
-> A serialized result. Depending on the situation this will be a Hash or an array of Hashes.
-
-> **depth**\
-> The current blueprint depth (1-indexed).
+> **format** _RW_\
+> The requested serialization format (e.g. `:json`, `:hash`).
 
 ## Hook Context
 
-> **blueprint**\
+> **blueprint** _RO_\
 > The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.
 
-> **fields**\
+> **fields** _RO_\
 > A frozen array of field definitions that will be serialized, in order. See [Fields API](./fields.md) and the [blueprint_fields](./extensions.md#blueprint_fields) hook.
 
-> **options**\
+> **options** _RO_\
 > The frozen options Hash passed to `render`. An empty Hash if none was passed.
 
-> **extension**\
+> **extension** _RO_\
 > Instance of the current extension
 
-> **hook**\
+> **hook** _RO_\
 > Name of the current hook
 
-> **depth**\
+> **depth** _RO_\
 > The current blueprint depth (1-indexed).

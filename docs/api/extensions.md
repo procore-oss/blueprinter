@@ -1,54 +1,115 @@
 # Extensions
 
-Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter's features are implemented as built-in extensions!
+Blueprinter has a powerful middleware-based extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter's features are implemented as built-in extensions!
 
 Simply extend the `Blueprinter::Extension` class, define the hooks you need, and [add it to your configuration](../dsl/extensions.md#using-extensions).
-
-```ruby
-class MyExtension < Blueprinter::Extension
-  # Use the exclude_field? hook to exclude certain fields on Tuesdays
-  def exclude_field?(ctx) = ctx.field.options[:tues] == false && Date.today.tuesday?
-end
-
-class MyBlueprint < ApplicationBlueprint
-  extensions << MyExtension.new
-end
-```
-
-Alternatively, you can define an extension direclty in your blueprint:
-
-```ruby
-class MyBlueprint < ApplicationBlueprint
-  extension do
-    def exclude_field?(ctx) = ctx.field.options[:tues] == false && Date.today.tuesday?
-  end
-end
-```
 
 ## Hooks
 
 Hooks are called in the following order. They are passed a [context object](./context-objects.md) as an argument.
 
-- [blueprint](#blueprint)
-- [blueprint_fields](#blueprint_fields)
-- [blueprint_setup](#blueprint_setup)
-- [around_serialize_object](#around_serialize_object) | [around_serialize_collection](#around_serialize_collection)
-  - [object_input](#object_input) | [collection_input](#collection_input)
-  - [blueprint_input](#blueprint_input)
-    - [extract_value](#extract_value)
-    - [field_value](#field_value) | [object_field_value](#object_field_value) | [collection_field_value](#collection_field_value)
-    - [exclude_field?](#exclude_field) | [exclude_object_field?](#exclude_object_field) | [exclude_collection_field?](#exclude_collection_field)
-      - *blueprint_fields &hellip;*
-    - [field_result](#field_result) | [object_field_result](#object_field_result) | [collection_field_result](#collection_field_result)
-  - [blueprint_output](#blueprint_output)
-  - [object_output](#object_output) | [collection_output](#collection_output)
-- [json](#json)
+```
+around_result
+  around_blueprint_init
+    around_serialize_object | around_serialize_collection
+      around_blueprint
+        around_field_value | around_object_value | around_collection_value
+          around_blueprint_init...
+```
 
 Additionally, the [around_hook](#around_hook) hook runs around all other hooks.
 
-#### Chain vs override hooks
+### around_result
 
-Most hooks are *chained*; if you have N of the same hook, they run one after the other, using the output of one as input for the next. However, a few hooks are *override* hooks: only the last one runs. Override hooks are used to replace built-in functionality, like the JSON serializer.
+> **param** [Result Context](./context-objects.md#result-context) \
+> **return** result \
+> **cost** Low - run once during render
+
+The `around_result` hook runs around the entire serialization process, allowing you to modify the initial input and final output.
+
+```ruby
+# Cache the entire result for 5 minutes
+def around_result(ctx)
+  cache(ctx.blueprint.class, ctx.object, ctx.format, ttl: 300) do
+    yield ctx
+  end
+end
+```
+
+#### Finalizing
+
+The `final` and `final?` helpers allow middleware to declare, and check if, a result is "finalized" and should no longer be altered. These helpers should **only** be used in `around_result`.
+
+```ruby
+def around_result(ctx)
+  result = yield ctx
+  return result if final? result
+
+  result = somehow_modify result
+  final result
+end
+```
+
+### around_blueprint_init
+
+> **param** [Render Context](./context-objects.md#render-context) \
+> **cost** Medium - run once per used blueprint during render
+
+The `around_blueprint_init` hook runs the first time a new Blueprint is used during a render cycle. It can be used by extensions to perform time-saving setup before a render.
+
+```ruby
+def around_blueprint_init(ctx)
+  perform_setup
+  yield ctx
+end
+```
+
+`around_blueprint_init` MUST yield, otherwise a `Blueprinter::Errors::ExtensionHook` will be raised.
+
+### around_serialize_object
+
+> **param** [Object Context](./context-objects.md#object-context) \
+> **return** result \
+> **cost** Medium - run every time any blueprint is rendered
+
+### around_serialize_collection
+
+> **param** [Object Context](./context-objects.md#object-context) \
+> **return** result \
+> **cost** Medium - run every time any blueprint is rendered
+
+### around_blueprint
+
+> **param** [Object Context](./context-objects.md#object-context) \
+> **return** result \
+> **cost** Medium - run every time any blueprint is rendered
+
+### around_field_value
+
+> **param** [Field Context](./context-objects.md#field-context) \
+> **return** result \
+> **cost** High - run for every (non-object, non-collection) field
+
+### around_object_value
+
+> **param** [Field Context](./context-objects.md#field-context) \
+> **return** result \
+> **cost** High - run for every object field
+
+### around_collection_value
+
+> **param** [Field Context](./context-objects.md#field-context) \
+> **return** result \
+> **cost** High - run for every collection field
+
+### around_hook
+
+> **param** [Hook Context](./context-objects.md#hook-context) \
+> **cost** Variable - runs around all your extensions
+
+`around_hook` MUST yield, otherwise a `Blueprinter::Errors::ExtensionHook` will be raised.
+
+<hr>
 
 ## blueprint
 

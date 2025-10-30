@@ -1,6 +1,6 @@
 # Extensions
 
-Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Some are included with Blueprinter, others are available as gems, and you can easily write your own using the [Extension API](../api/extensions.md).
+Blueprinter has a powerful extension system that permits middleware throughout the entire serialization lifecycle. Some extensions are included with Blueprinter, others are available as gems, and you can easily write your own using the [Extension API](../api/extensions.md).
 
 ## Using extensions
 

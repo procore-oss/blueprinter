@@ -13,20 +13,24 @@ module Blueprinter
       end
 
       # @param ctx [Blueprinter::V2::Context::Object]
-      def around_serialize_object(ctx, &)
-        tracer.in_span('blueprinter.object', attributes: attributes(ctx), &)
+      def around_serialize_object(ctx)
+        tracer.in_span('blueprinter.object', attributes: attributes(ctx)) do
+          yield ctx
+        end
       end
 
       # @param ctx [Blueprinter::V2::Context::Object]
-      def around_serialize_collection(ctx, &)
-        tracer.in_span('blueprinter.collection', attributes: attributes(ctx), &)
+      def around_serialize_collection(ctx)
+        tracer.in_span('blueprinter.collection', attributes: attributes(ctx)) do
+          yield ctx
+        end
       end
 
       # @param ctx [Blueprinter::V2::Context::Hook]
-      def around_hook(ctx, &)
+      def around_hook(ctx)
         extension = ctx.extension.class.name
         attributes = { extension:, hook: ctx.hook, 'library.name' => 'Blueprinter', 'library.version' => VERSION }
-        tracer.in_span('blueprinter.extension', attributes:, &)
+        tracer.in_span('blueprinter.extension', attributes:) { |_| yield }
       end
 
       def hidden? = true

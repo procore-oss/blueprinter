@@ -48,7 +48,7 @@ end
 
 ## Field order
 
-Blueprinter Legacy/V1 offered two options for ordering fields: `:name_asc` (default), and `:definition` (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the [blueprint_fields](../api/extensions.md#blueprint_fields) extension hook or the built-in [FieldOrder](../dsl/extensions.md#field-order) extension.
+Blueprinter Legacy/V1 offered two options for ordering fields: `:name_asc` (default), and `:definition` (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the [around_blueprint_init](../api/extensions.md#around_blueprint_init) extension hook or the built-in [FieldOrder](../dsl/extensions.md#field-order) extension.
 
 The following replicates Legacy/V1's default field order using the built-in [FieldOrder](../dsl/extensions.md#field-order) extension.
 

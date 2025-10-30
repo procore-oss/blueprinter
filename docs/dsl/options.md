@@ -306,21 +306,6 @@ Populate the field using a method/Hash key other than the field name.
 field :desc, from: :description
 ```
 
-#### extractor
-
-Pass a [custom extractor](../api/extractors.md) class or instance.
-
-> *Available in field, object, collection*
-
-```ruby
-# Pass as a class
-object :category, CategoryBlueprint, extractor: MyCategoryExtractor
-# or an instance
-object :category, CategoryBlueprint, extractor: MyCategoryExtractor.new(args)
-```
-
-Note that when you pass a class, it will be initialized _once per render_.
-
 ## Metadata
 
 These options allow you to add metadata to the rendered output.

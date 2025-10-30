@@ -15,7 +15,6 @@
 - [Blueprinter API](./api/index.md)
   - [Extensions](./api/extensions.md)
   - [Reflection](./api/reflection.md)
-  - [Extractors](./api/extractors.md)
   - [Context Objects](./api/context-objects.md)
   - [Fields](./api/fields.md)
 

@@ -4,8 +4,9 @@ The [V2 Extension API](../api/extensions.md), as well as the DSL for [enabling V
 
 ## Porting pre_render
 
-Legacy/V1's `pre_render` hook does not exist in V2, but it has three possible replacements:
+Legacy/V1's `pre_render` hook does not exist in V2, but it has several possible replacements:
 
-* [object_input](../api/extensions.md#object_input) intercept an object before it's serialized
-* [collection_input](../api/extensions.md#collection_input) intercept a collection before it's serialized
-* [blueprint_input](../api/extensions.md#blueprint_input) runs each time a blueprint serializes an object
+* [around_result](../api/extensions.md#around_result) runs once around each entire result
+* [around_serialize_object](../api/extensions.md#around_serialize_object) runs around each object's serialization
+* [around_serialize_collection](../api/extensions.md#around_serialize_collection) runs around each collection's serialization
+* [around_blueprint](../api/extensions.md#around_blueprint) runs each time a blueprint serializes an object

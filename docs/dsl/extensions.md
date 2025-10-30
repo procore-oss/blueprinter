@@ -1,6 +1,6 @@
 # Extensions
 
-Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Some are included with Blueprinter, others are available as gems, and you can easily write your own using the [Extension API](../api/extensions.md).
+Blueprinter has a powerful extension system that permits middleware throughout the entire serialization lifecycle. Some extensions are included with Blueprinter, others are available as gems, and you can easily write your own using the [Extension API](../api/extensions.md).
 
 ## Using extensions
 
@@ -17,7 +17,10 @@ class MyBlueprint < ApplicationBlueprint
 
   # Inline extensions are also initialized once per render
   extension do
-    def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
+    def around_blueprint(ctx)
+      result = yield ctx
+      result.merge({ foo: "Foo" })
+    end
   end
 
   view :minimal do
@@ -56,7 +59,7 @@ extensions << Blueprinter::Extensions::MultiJson.new(pretty: true)
 WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 ```
 
-If `multi_json` doesn't support your preferred JSON library, you can use Blueprinter's [json extension hook](../api/extensions.md#json) to render JSON however you like.
+If `multi_json` doesn't support your preferred JSON library, you can use Blueprinter's [around_result](../api/extensions.md#around_result) extension hook to render JSON however you like.
 
 ### OpenTelemetry
 
@@ -70,7 +73,7 @@ extensions << Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
 
 ### ViewOption
 
-The ViewOption extension uses the [blueprint](../api/extensions.md#blueprint) extension hook to add a `view` option to `render`, `render_object`, and `render_collection`. It allows V1-compatible rendering of views.
+The ViewOption extension uses the [around_result](../api/extensions.md#around_result) extension hook to add a `view` option to `render`, `render_object`, and `render_collection`. It allows V1-compatible rendering of views.
 
 ```ruby
 extensions << Blueprinter::Extensions::ViewOption.new

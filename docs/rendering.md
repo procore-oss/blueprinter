@@ -12,7 +12,7 @@ If you're using Rails, you may omit `.to_json` when calling `render json:`
 render json: WidgetBlueprint.render(widget)
 ```
 
-Ruby's built-in `JSON` library is used by default. Alternatively, you can use the built-in [MultiJson extension](./dsl/extensions.md#multijson). Or for total control, implement the [json extension hook](./api/extensions.md#json) and call any serializer you like.
+Ruby's built-in `JSON` library is used by default. Alternatively, you can use the built-in [MultiJson extension](./dsl/extensions.md#multijson). Or for total control, implement the [around_result](./api/extensions.md#around_result) and call any serializer you like.
 
 ### Rendering to a Hash
 

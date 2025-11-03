@@ -56,7 +56,7 @@ extensions << Blueprinter::Extensions::MultiJson.new(pretty: true)
 WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 ```
 
-If `multi_json` doesn't support your preferred JSON library, you can use Blueprinter's [json extension hook](../api/extensions.md#json) to render JSON however you like.
+If `multi_json` doesn't support your preferred JSON library, you can use Blueprinter's [around_result](../api/extensions.md#around_result) extension hook to render JSON however you like.
 
 ### OpenTelemetry
 
@@ -70,7 +70,7 @@ extensions << Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
 
 ### ViewOption
 
-The ViewOption extension uses the [blueprint](../api/extensions.md#blueprint) extension hook to add a `view` option to `render`, `render_object`, and `render_collection`. It allows V1-compatible rendering of views.
+The ViewOption extension uses the [around_result](../api/extensions.md#around_result) extension hook to add a `view` option to `render`, `render_object`, and `render_collection`. It allows V1-compatible rendering of views.
 
 ```ruby
 extensions << Blueprinter::Extensions::ViewOption.new

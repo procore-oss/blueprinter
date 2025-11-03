@@ -10,7 +10,7 @@ build-dir = "docs-dist"
 
 # https://rust-lang.github.io/mdBook/format/configuration/renderers.html?highlight=top%20bar#html-renderer-options
 [output.html]
-additional-css = ["theme/hljs-overrides.css"]
+additional-css = ["theme/hljs-overrides.css", "theme/custom.css"]
 default-theme = "light"
 preferred-dark-theme = "navy"
 no-section-label = true

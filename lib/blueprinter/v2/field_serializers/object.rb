@@ -13,10 +13,10 @@ module Blueprinter
                 # perf boost by skipping `around` when no extensions use it
                 if @hook_around_object_value
                   @hooks.around(:around_object_value, ctx) do |ctx|
-                    @extractor.around_object_value ctx
+                    extract ctx
                   end
                 else
-                  @extractor.around_object_value ctx
+                  extract ctx
                 end
               end
             end

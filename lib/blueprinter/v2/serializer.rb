@@ -5,7 +5,6 @@ require 'blueprinter/v2/formatter'
 require 'blueprinter/v2/field_serializers/field'
 require 'blueprinter/v2/field_serializers/object'
 require 'blueprinter/v2/field_serializers/collection'
-require 'blueprinter/v2/extensions/core/extractor'
 require 'blueprinter/v2/extensions/core/defaults'
 require 'blueprinter/v2/extensions/core/conditionals'
 require 'blueprinter/v2/extensions/core/json'
@@ -21,7 +20,7 @@ module Blueprinter
     class Serializer
       SKIP = :_blueprinter_skip_field
 
-      attr_reader :blueprint, :fields, :options, :instances, :formatter, :hooks, :extractor, :defaults, :conditionals
+      attr_reader :blueprint, :fields, :options, :instances, :formatter, :hooks, :defaults, :conditionals
 
       # @param options [Hash] Options passed from the callsite
       def initialize(blueprint_class, options, instances, initial_depth:)
@@ -30,7 +29,6 @@ module Blueprinter
         @instances = instances
         @formatter = Formatter.new(blueprint.class)
         @hooks = Hooks.new(extensions)
-        @extractor = Extensions::Core::Extractor.new
         @defaults = Extensions::Core::Defaults.new
         @conditionals = Extensions::Core::Conditionals.new
         @fields = @blueprint.class.reflections[:default].ordered

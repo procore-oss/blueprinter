@@ -12,7 +12,7 @@ The [around_field_value](../api/extensions.md#around_field_value), [around_objec
 
 ## Custom extractors
 
-Custom extraction in V2 can also be accomplished with the [around_field_value](../api/extensions.md#around_field_value), [around_object_value](../api/extensions.md#around_object_value), and [around_collection_value](../api/extensions.md#around_collection_value) hooks. Instead of yielding to get the value, your hook can extract and return the value itself.
+Custom extraction in V2 can also be accomplished with the [around_field_value](../api/extensions.md#around_field_value), [around_object_value](../api/extensions.md#around_object_value), and [around_collection_value](../api/extensions.md#around_collection_value) hooks. [Read more](../dsl/fields.md#extracting-with-extensions).
 
 ## Transformers
 

@@ -26,7 +26,7 @@ collection :parts, PartBlueprint, exclude_if_empty: true
 
 ## Extracting field values
 
-Blueprinter is pretty smart about extracting field values from objects, but there are ways to customize the behavior if needed.
+Blueprinter is pretty smart about extracting field values from objects and Hashes, but there are ways to customize the behavior if needed.
 
 ### Default behavior
 
@@ -36,7 +36,7 @@ Blueprinter is pretty smart about extracting field values from objects, but ther
 
 ### Field blocks
 
-Return whatever you want from a block. It will be passed a [Field context](../api/context-objects.md#field-context) argument containing the object being rendered, among other things.
+If you pass a block to your field, the default behavior will be bypassed and the block's return value will be used. It will be passed a [Field context](../api/context-objects.md#field-context) argument containing the object being rendered, among other things.
 
 ```ruby
 field :description do |ctx|
@@ -53,14 +53,18 @@ def active_parts(object)
 end
 ```
 
-### Custom extractors
+### Extracting with extensions
 
-Define your own extraction behavior with a [custom extractor](../api/extractors.md).
+The [around_field_value](../api/extensions.md#around_field_value), [around_object_value](../api/extensions.md#around_object_value), and [around_collection_value](../api/extensions.md#around_collection_value) middleware hooks can intercept extraction and return whatever values they want.
 
 ```ruby
-# For an entire Blueprint or view
-extensions << MyCustomExtractor.new
-
-# For a single field
-object :bar, extractor: MyCustomExtractor
+def around_field_value(ctx)
+  if ctx.field.options[:custom_extraction]
+    # If the field has the "custom_extraction" option, use custom extraction
+    my_custom_extraction(ctx.object, ctx.field)
+  else
+    # Otherwise use the default behavior
+    yield ctx
+  end
+end
 ```

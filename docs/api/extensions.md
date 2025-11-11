@@ -168,6 +168,18 @@ def around_field_value(ctx)
 end
 ```
 
+#### Skipping fields
+
+You can tell blueprinter to completely skip a field using `skip`. It will bail out of the hook and any previous hooks that yielded.
+
+```ruby
+def around_field_value(ctx)
+  val = yield ctx
+  skip if ctx.field.options[:skip_on] == val
+  val
+end
+```
+
 ### around_object_value
 
 > **param** [Field Context](./context-objects.md#field-context) \
@@ -183,6 +195,18 @@ def around_object_value(ctx)
   when Hash then val.merge({ foo: "bar" })
   else val
   end
+end
+```
+
+#### Skipping fields
+
+You can tell blueprinter to completely skip a field using `skip`. It will bail out of the hook and any previous hooks that yielded.
+
+```ruby
+def around_object_value(ctx)
+  val = yield ctx
+  skip if ctx.field.options[:skip_on] == val
+  val
 end
 ```
 
@@ -203,6 +227,18 @@ def around_collection_value(ctx)
   else
     val
   end
+end
+```
+
+#### Skipping fields
+
+You can tell blueprinter to completely skip a field using `skip`. It will bail out of the hook and any previous hooks that yielded.
+
+```ruby
+def around_collection_value(ctx)
+  val = yield ctx
+  skip if ctx.field.options[:skip_on] == val
+  val
 end
 ```
 

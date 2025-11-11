@@ -17,7 +17,10 @@ class MyBlueprint < ApplicationBlueprint
 
   # Inline extensions are also initialized once per render
   extension do
-    def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
+    def around_blueprint(ctx)
+      result = yield ctx
+      result.merge({ foo: "Foo" })
+    end
   end
 
   view :minimal do

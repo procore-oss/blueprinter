@@ -46,9 +46,10 @@ module Blueprinter
           @mut.synchronize do
             next if @views.key?(name)
 
-            view = build_view name
-            view.eval!(lock: false)
+            view = Class.new(@parent)
             @views[name] = view
+            build_view name
+            view.eval!(lock: false)
           end
         end
         @views[name]
@@ -89,12 +90,11 @@ module Blueprinter
         defs = @pending[name]
         empty = defs.reduce(false) { |acc, d| d.empty.nil? ? acc : d.empty }
 
-        view = Class.new(@parent)
+        view = @views.fetch name
         view.views.reset
         view.append_name(name)
         view.schema.clear if empty
         defs.each { |d| view.class_eval(&d.definition) if d.definition }
-        view
       end
     end
   end

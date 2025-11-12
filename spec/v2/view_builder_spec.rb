@@ -108,6 +108,25 @@ describe Blueprinter::V2::ViewBuilder do
     end
   end
 
+  it "handles cyclic references" do
+    widget_blueprint = nil
+    category_blueprint = Class.new(Blueprinter::V2::Base) do
+      self.blueprint_name = "CategoryBlueprint"
+      view :cyclic do
+        collection :widgets, widget_blueprint[:cyclic]
+      end
+    end
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      self.blueprint_name = "WidgetBlueprint"
+      view :cyclic do
+        object :category, category_blueprint[:cyclic]
+      end
+    end
+    expect do
+      widget_blueprint[:cyclic].reflections
+    end.to_not raise_error
+  end
+
   def definition(definition)
     described_class::Def.new(definition:, empty: false)
   end

@@ -20,7 +20,8 @@ module Blueprinter
     class Serializer
       SKIP = :_blueprinter_skip_field
 
-      attr_reader :blueprint, :fields, :options, :instances, :formatter, :hooks, :defaults, :conditionals
+      attr_reader :blueprint, :fields, :instances, :formatter, :hooks, :defaults, :conditionals
+      attr_accessor :options
 
       # @param options [Hash] Options passed from the callsite
       def initialize(blueprint_class, options, instances, initial_depth:)

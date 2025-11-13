@@ -91,41 +91,144 @@ describe Blueprinter::V2::Render do
     }].to_json)
   end
 
-  it 'runs around_result around the entire result' do
-    ext = Class.new(Blueprinter::Extension) do
-      def around_result(ctx)
-        case ctx.format
-        when :json
-          ctx.format = :hash
-          result = yield(ctx).merge({ foo: 'bar' })
-          JSON.dump result
-        else
+  context 'around_result' do
+    it 'runs around the entire result' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          case ctx.format
+          when :json
+            ctx.format = :hash
+            result = yield(ctx).merge({ foo: 'bar' })
+            JSON.dump result
+          else
+            yield ctx
+          end
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect(render.to_json).to eq({
+        name: 'Foo',
+        desc: 'About',
+        category: { name: 'Bar' },
+        foo: 'bar'
+      }.to_json)
+    end
+
+    it 'can change the blueprint' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
           yield ctx
         end
       end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect(render.to_json).to eq({ name: 'Foo' }.to_json)
     end
-    widget_blueprint.extensions << ext.new
-    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-    expect(render.to_json).to eq({
-      name: 'Foo',
-      desc: 'About',
-      category: { name: 'Bar' },
-      foo: 'bar'
-    }.to_json)
-  end
+    it 'can change the object' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          ctx.object = ctx.object.merge({ name: 'Bar' })
+          yield ctx
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-  it 'respects the view option' do
-    widget_blueprint.extensions << Blueprinter::Extensions::ViewOption.new
-    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new(widget, { view: :extended }, blueprint: widget_blueprint, collection: false, instances:)
+      expect(render.to_json).to eq({
+        name: 'Bar',
+        desc: 'About',
+        category: { name: 'Bar' },
+      }.to_json)
+    end
 
-    expect(render.to_hash).to eq({
-      name: 'Foo',
-      desc: 'About',
-      long_desc: 'Long desc',
-      category: { name: 'Bar' },
-    })
+    it 'can change the object (different blueprint)' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
+          ctx.object = ctx.object.merge({ name: 'Bar' })
+          yield ctx
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect(render.to_json).to eq({ name: 'Bar' }.to_json)
+    end
+
+    it 'can change the options' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          num = ctx.options[:num] || 0
+          ctx.options = ctx.options.merge({ num: num + 1 })
+          yield ctx
+        end
+      end
+      widget_blueprint.extension do
+        def around_result(ctx)
+          res = yield ctx
+          res.merge({ num: ctx.options[:num] })
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect(render.to_hash).to eq({
+        name: 'Foo',
+        desc: 'About',
+        category: { name: 'Bar' },
+        num: 43,
+      })
+    end
+
+    it 'can change the options (different blueprint)' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          num = ctx.options[:num] || 0
+          ctx.options = ctx.options.merge({ num: num + 1 })
+          ctx.blueprint = Class.new(Blueprinter::V2::Base) do
+            field :name do |ctx|
+              "#{ctx.object[:name]} #{ctx.options[:num]}"
+            end
+          end
+          yield ctx
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect(render.to_hash).to eq({ name: 'Foo 43' })
+    end
+
+    it 'can change the format' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          ctx.format = :yaml
+          yield ctx
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect { render.to_hash }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
+    end
+
+    it 'can change the format (different blueprint)' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          ctx.format = :yaml
+          ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
+          yield ctx
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect { render.to_hash }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
+    end
   end
 end

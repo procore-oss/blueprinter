@@ -3,7 +3,7 @@
 module Blueprinter
   module V2
     module Helpers
-      def skip = throw Serializer::SKIP, Serializer::SKIP
+      def skip = throw Serializer::SIGNAL, Serializer::SIG_SKIP
     end
   end
 end

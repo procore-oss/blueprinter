@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 describe Blueprinter::Hooks do
-  let(:skip_field) { Blueprinter::V2::Serializer::SKIP }
+  let(:sig) { Blueprinter::V2::Serializer::SIGNAL }
+  let(:skip_field) { Blueprinter::V2::Serializer::SIG_SKIP }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       fields :name, :description
@@ -171,7 +172,7 @@ describe Blueprinter::Hooks do
       hooks = described_class.new extensions
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
         log << 'INNER'
-        throw skip_field, skip_field
+        throw sig, skip_field
       end
       expect(log).to eq ['A: 0', 'B: 1', 'C: 2', 'INNER']
       expect(res).to be skip_field

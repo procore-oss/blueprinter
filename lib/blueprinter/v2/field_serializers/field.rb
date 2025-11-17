@@ -6,7 +6,7 @@ module Blueprinter
       # Serializesr for regular fields
       class Field < Base
         def serialize(ctx, result)
-          value = catch Serializer::SKIP do
+          value = catch Serializer::SIGNAL do
             # perf boost from "unrolled" built-in hooks
             @conditionals.around_field_value(ctx) do |ctx|
               @defaults.around_field_value(ctx) do |ctx|
@@ -21,7 +21,7 @@ module Blueprinter
               end
             end
           end
-          return if value == Serializer::SKIP
+          return if value == Serializer::SIG_SKIP
 
           result[ctx.field.name] = @formatter.call(value, ctx)
         end

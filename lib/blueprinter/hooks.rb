@@ -40,7 +40,7 @@ module Blueprinter
     #
     def around(hook, ctx, require_yield: false, &inner)
       hooks = @hooks.fetch(hook)
-      catch V2::Serializer::SKIP do
+      catch V2::Serializer::SIGNAL do
         _around(hooks, hook, 0, ctx, ctx.class, inner, require_yield:)
       end
     end

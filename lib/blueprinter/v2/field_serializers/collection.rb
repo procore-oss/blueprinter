@@ -6,7 +6,7 @@ module Blueprinter
       # Serializesr for collection fields
       class Collection < Base
         def serialize(ctx, result)
-          value = catch Serializer::SKIP do
+          value = catch Serializer::SIGNAL do
             # perf boost from "unrolled" built-in hooks
             @conditionals.around_collection_value(ctx) do |ctx|
               @defaults.around_collection_value(ctx) do |ctx|
@@ -21,7 +21,7 @@ module Blueprinter
               end
             end
           end
-          return if value == Serializer::SKIP
+          return if value == Serializer::SIG_SKIP
 
           result[ctx.field.name] = value.nil? ? nil : blueprint_value(value, ctx)
         end

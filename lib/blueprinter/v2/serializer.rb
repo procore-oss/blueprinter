@@ -18,7 +18,8 @@ module Blueprinter
     # NOTE: The instance is re-used for the duration of the render.
     #
     class Serializer
-      SKIP = :_blueprinter_skip_field
+      SIGNAL = :_blueprinter_signal
+      SIG_SKIP = :_blueprinter_skip_field_sig
 
       attr_reader :blueprint, :fields, :instances, :formatter, :hooks, :defaults, :conditionals
       attr_accessor :options

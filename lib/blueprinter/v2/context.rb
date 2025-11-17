@@ -55,13 +55,22 @@ module Blueprinter
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
+      # @!attribute [r] parent
+      #   @return [Blueprinter::V2::Context::Parent] Information about the parent, if any
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Object = Struct.new(:blueprint, :fields, :options, :object, :depth) do
+      Object = Struct.new(:blueprint, :fields, :options, :object, :parent, :depth) do
         (members - %i[object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
+        end
+      end
+
+      Parent = Struct.new(:blueprint, :field, :object) do
+        members.each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Parent field `#{attr}` is immutable" }
         end
       end
 

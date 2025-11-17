@@ -42,16 +42,18 @@ module Blueprinter
       # Serialize a single object to a Hash.
       #
       # @param object [Object] The object to serialize
+      # @param depth [Object] Depth of this object in the serialization tree
+      # @param parent [Blueprinter::V2::Context::Parent] Information about the container object (if any)
       # @return [Hash] The serialized object
       #
-      def object(object, depth:)
+      def object(object, depth:, parent: nil)
         if @hook_around_serialize_object
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, depth)
+          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, depth)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize_object(ctx.object, depth:)
+            serialize_object(ctx.object, depth:, parent:)
           end
         else
-          serialize_object(object, depth:)
+          serialize_object(object, depth:, parent:)
         end
       end
 
@@ -59,24 +61,26 @@ module Blueprinter
       # Serialize a collection of objects to a Hash.
       #
       # @param collection [Enumerable] The collection to serialize
+      # @param depth [Object] Depth of this object in the serialization tree
+      # @param parent [Blueprinter::V2::Context::Parent] Information about the container object (if any)
       # @return [Enumerable] The serialized hashes
       #
-      def collection(collection, depth:)
+      def collection(collection, depth:, parent: nil)
         if @hook_around_serialize_collection
-          ctx = Context::Object.new(@blueprint, @fields, @options, collection, depth)
+          ctx = Context::Object.new(@blueprint, @fields, @options, collection, parent, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            ctx.object.map { |object| serialize_object(object, depth:) }.to_a
+            ctx.object.map { |object| serialize_object(object, depth:, parent:) }.to_a
           end
         else
-          collection.map { |object| serialize_object(object, depth:) }.to_a
+          collection.map { |object| serialize_object(object, depth:, parent:) }.to_a
         end
       end
 
       private
 
-      def serialize_object(object, depth:)
+      def serialize_object(object, depth:, parent: nil)
         if @hook_around_blueprint
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, depth)
+          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, depth)
           @hooks.around(:around_blueprint, ctx) do |ctx|
             serialize(ctx.object, depth:)
           end

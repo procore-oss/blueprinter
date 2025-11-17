@@ -111,41 +111,6 @@ describe Blueprinter::V2::Serializer do
       })
     end
 
-    # it 'uses field-level extractor (class)' do
-    #   test = self
-    #   blueprint = Class.new(application_blueprint) do
-    #     self.blueprint_name = "BlockBlueprint"
-    #     field :name, extractor: test.name_of_extractor
-    #     object :category, test.category_blueprint, extractor: test.name_of_extractor
-    #     collection :parts, test.part_blueprint, extractor: test.name_of_extractor
-    #   end
-
-    #   result = described_class.new(blueprint, {}, instances, initial_depth: 1).object(widget, depth: 1)
-    #   expect(result).to eq({
-    #     name: 'Name of Foo',
-    #     category: { name: 'Name of Bar' },
-    #     parts: [{ num: 1 }, { num: 2 }]
-    #   })
-    # end
-
-    # it 'uses field-level extractor (instance)' do
-    #   test = self
-    #   blueprint = Class.new(application_blueprint) do
-    #     self.blueprint_name = "BlockBlueprint"
-    #     extensions << test.name_of_extractor.new
-    #     field :name, extractor: test.name_of_extractor.new(prefix: 'X')
-    #     object :category, test.category_blueprint, extractor: test.name_of_extractor.new(prefix: 'Y')
-    #     collection :parts, test.part_blueprint, extractor: test.name_of_extractor.new
-    #   end
-
-    #   result = described_class.new(blueprint, {}, instances, initial_depth: 1).object(widget, depth: 1)
-    #   expect(result).to eq({
-    #     name: 'X of Foo',
-    #     category: { name: 'Y of Bar' },
-    #     parts: [{ num: 1 }, { num: 2 }]
-    #   })
-    # end
-
     it 'uses blueprint extractor extension' do
       test = self
       blueprint = Class.new(application_blueprint) do
@@ -503,5 +468,44 @@ describe Blueprinter::V2::Serializer do
 
     blueprint_instances = instances.blueprints.count
     expect(blueprint_instances).to eq 1
+  end
+
+  it 'passes objects information about the parent' do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize(log) = @log = log
+
+      def around_serialize_object(ctx)
+        if ctx.parent
+          @log << "Object Parent Blueprint: #{ctx.parent.blueprint}"
+          @log << "Object Parent field: #{ctx.parent.field.name}"
+          @log << "Object Parent object: #{ctx.parent.object[:name]}"
+        end
+        yield ctx
+      end
+
+      def around_serialize_collection(ctx)
+        if ctx.parent
+          @log << "Collection Parent Blueprint: #{ctx.parent.blueprint}"
+          @log << "Collection Parent field: #{ctx.parent.field.name}"
+          @log << "Collection Parent object: #{ctx.parent.object[:name]}"
+        end
+        yield ctx
+      end
+    end
+    log = []
+    category_blueprint.extensions << ext.new(log)
+    part_blueprint.extensions << ext.new(log)
+    serializer = described_class.new(widget_blueprint, {}, instances, initial_depth: 1)
+
+    widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }] }
+    result = serializer.object(widget, depth: 1)
+    expect(log).to eq [
+      "Object Parent Blueprint: WidgetBlueprint",
+      "Object Parent field: category",
+      "Object Parent object: Foo",
+      "Collection Parent Blueprint: WidgetBlueprint",
+      "Collection Parent field: parts",
+      "Collection Parent object: Foo"
+    ]
   end
 end

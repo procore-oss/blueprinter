@@ -55,6 +55,63 @@ describe '::Base' do
       end
     end
 
+    context 'when using Symbol#to_proc syntax' do
+      let(:obj) { object_with_attributes }
+
+      context 'with field using &:method_name' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            field :name, &:first_name
+            field :job_position, &:position
+          end
+        end
+
+        it 'renders the field by calling the method on the object' do
+          result = JSON.parse(blueprint.render(obj))
+          expect(result['id']).to eq(1)
+          expect(result['name']).to eq('Meg')
+          expect(result['job_position']).to eq('Manager')
+        end
+      end
+
+      context 'with identifier using &:method_name' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :user_id, &:id
+            field :first_name
+          end
+        end
+
+        it 'renders the identifier using Symbol#to_proc' do
+          expect(blueprint.render(obj)).to eq('{"user_id":1,"first_name":"Meg"}')
+        end
+      end
+
+      context 'when mixing Symbol#to_proc and regular blocks' do
+        let(:blueprint) do
+          Class.new(Blueprinter::Base) do
+            identifier :id
+            field :name, &:first_name
+            field :full_name do |obj|
+              "#{obj.first_name} #{obj.last_name}"
+            end
+            field :info do |obj, options|
+              "#{obj.position} (options: #{options.inspect})"
+            end
+          end
+        end
+
+        it 'handles both block types correctly' do
+          result = JSON.parse(blueprint.render(obj))
+          expect(result['id']).to eq(1)
+          expect(result['name']).to eq('Meg')
+          expect(result['full_name']).to eq('Meg Ryan')
+          expect(result['info']).to include('Manager')
+        end
+      end
+    end
+
     context 'Outside Rails project' do
       context 'Given passed object has dot notation accessible attributes' do
         let(:obj) { object_with_attributes }

@@ -22,7 +22,7 @@ module Blueprinter
           object = ctx.object
 
           if field.value_proc
-            ctx.blueprint.instance_exec(ctx, &field.value_proc)
+            ctx.blueprint.instance_exec(ctx.object, ctx, &field.value_proc)
           elsif object.is_a? Hash
             object[field.from] || object[field.from_str]
           else

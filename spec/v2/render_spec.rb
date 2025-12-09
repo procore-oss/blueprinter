@@ -191,8 +191,8 @@ describe Blueprinter::V2::Render do
           num = ctx.options[:num] || 0
           ctx.options = ctx.options.merge({ num: num + 1 })
           ctx.blueprint = Class.new(Blueprinter::V2::Base) do
-            field :name do |ctx|
-              "#{ctx.object[:name]} #{ctx.options[:num]}"
+            field :name do |obj, ctx|
+              "#{obj[:name]} #{ctx.options[:num]}"
             end
           end
           yield ctx

@@ -22,9 +22,9 @@ module ExtensionHelpers
           object :foo_obj, test.sub_blueprint
           collection :foos, test.sub_blueprint
 
-          field(:foo2) { |ctx| "value: #{ctx.object[:foo]}" }
-          object(:foo_obj2, test.sub_blueprint) { |ctx| { name: "name: #{ctx.object[:foo_obj][:name]}" } }
-          collection(:foos2, test.sub_blueprint) { |ctx| [{ name: "nums: #{ctx.object[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
+          field(:foo2) { |obj, _ctx| "value: #{obj[:foo]}" }
+          object(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj[:foo_obj][:name]}" } }
+          collection(:foos2, test.sub_blueprint) { |obj, _ctx| [{ name: "nums: #{obj[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
 
           def was(val, _ctx)
             "was #{val.inspect}"

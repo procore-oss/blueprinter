@@ -98,9 +98,9 @@ describe Blueprinter::V2::Serializer do
       test = self
       block_blueprint = Class.new(application_blueprint) do
         self.blueprint_name = 'BlockBlueprint'
-        field(:name) { |ctx| "Name of #{ctx.object[:name]}" }
-        object(:category, test.category_blueprint) { |ctx| { name: "Name of #{ctx.object.dig(:category, :name)}" } }
-        collection(:parts, test.part_blueprint) { |ctx| ctx.object[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
+        field(:name) { |obj, _ctx| "Name of #{obj[:name]}" }
+        object(:category, test.category_blueprint) { |obj, _ctx| { name: "Name of #{obj.dig(:category, :name)}" } }
+        collection(:parts, test.part_blueprint) { |obj, _ctx| obj[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
       end
 
       result = described_class.new(block_blueprint, {}, instances, initial_depth: 1).object(widget, depth: 1)

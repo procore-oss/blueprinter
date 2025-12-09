@@ -29,7 +29,7 @@ describe 'Extraction' do
 
   it 'extracts using a proc' do
     blueprint = Class.new(Blueprinter::V2::Base) do
-      field(:foo) { |ctx| "#{ctx.object[:foo]}!" }
+      field(:foo) { |obj, _ctx| "#{obj[:foo]}!" }
     end
     serializer = Blueprinter::V2::Serializer.new(blueprint, {}, instances, initial_depth: 1)
 

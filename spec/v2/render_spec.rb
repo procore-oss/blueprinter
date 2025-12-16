@@ -116,10 +116,23 @@ describe Blueprinter::V2::Render do
       }.to_json)
     end
 
-    it 'can change the blueprint' do
+    it 'can change the blueprint (class)' do
       widget_blueprint.extension do
         def around_result(ctx)
           ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
+          yield ctx
+        end
+      end
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
+
+      expect(render.to_json).to eq({ name: 'Foo' }.to_json)
+    end
+
+    it 'can change the blueprint (instance)' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }.new
           yield ctx
         end
       end

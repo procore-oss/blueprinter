@@ -31,7 +31,7 @@ module Blueprinter
         ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, format)
         result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
           if new_ctx.blueprint != serializer.blueprint
-            blueprint = new_ctx.blueprint
+            blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class
             render = Render.new(new_ctx.object, new_ctx.options, blueprint:, collection: @collection, instances: @instances)
             return render.to new_ctx.format
           end

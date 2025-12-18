@@ -8,7 +8,7 @@ describe Blueprinter::Hooks do
       fields :name, :description
     end
   end
-  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, initial_depth: 1) }
+  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1) }
   let(:field) { Blueprinter::V2::Fields::Field.new(name: :foo, from: :foo) }
   let(:object) { { foo: 'Foo' } }
   let(:render_ctx) { Blueprinter::V2::Context::Render }

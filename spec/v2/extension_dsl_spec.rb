@@ -19,7 +19,7 @@ describe "Blueprinter::V2 Extension DSL" do
   end
 
   it "defines multiple extensions" do
-    serializer = Blueprinter::V2::Serializer.new(blueprint, {}, instances, initial_depth: 1)
+    serializer = Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1)
     expect(blueprint.extensions.size).to eq 2
     expect(serializer.hooks.registered? :around_field_value).to be true
     expect(serializer.hooks.registered? :around_blueprint).to be true

@@ -21,11 +21,11 @@ module Blueprinter
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_skip_field_sig
 
-      attr_reader :blueprint, :fields, :instances, :formatter, :hooks, :defaults, :conditionals
+      attr_reader :blueprint, :fields, :instances, :store, :formatter, :hooks, :defaults, :conditionals
       attr_accessor :options
 
       # @param options [Hash] Options passed from the callsite
-      def initialize(blueprint_class, options, instances, initial_depth:)
+      def initialize(blueprint_class, options, instances, store:, initial_depth:)
         @blueprint = instances.blueprint(blueprint_class)
         @options = options
         @instances = instances
@@ -34,6 +34,7 @@ module Blueprinter
         @defaults = Extensions::Core::Defaults.new
         @conditionals = Extensions::Core::Conditionals.new
         @fields = @blueprint.class.reflections[:default].ordered
+        @store = store
         @field_serializers = blueprint_init initial_depth
         find_used_hooks!
       end
@@ -48,7 +49,7 @@ module Blueprinter
       #
       def object(object, depth:, parent: nil)
         if @hook_around_serialize_object
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, depth)
+          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, store, depth)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
             serialize_object(ctx.object, depth:, parent:)
           end
@@ -67,7 +68,7 @@ module Blueprinter
       #
       def collection(collection, depth:, parent: nil)
         if @hook_around_serialize_collection
-          ctx = Context::Object.new(@blueprint, @fields, @options, collection, parent, depth)
+          ctx = Context::Object.new(@blueprint, @fields, @options, collection, parent, store, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
             ctx.object.map { |object| serialize_object(object, depth:, parent:) }.to_a
           end
@@ -80,7 +81,7 @@ module Blueprinter
 
       def serialize_object(object, depth:, parent: nil)
         if @hook_around_blueprint
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, depth)
+          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, store, depth)
           @hooks.around(:around_blueprint, ctx) do |ctx|
             serialize(ctx.object, depth:)
           end
@@ -90,7 +91,7 @@ module Blueprinter
       end
 
       def serialize(object, depth:)
-        ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, depth)
+        ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, store, depth)
         @field_serializers.each_with_object({}) do |field_conf, acc|
           ctx.field = field_conf.field
           field_conf.serialize(ctx, acc)
@@ -104,7 +105,7 @@ module Blueprinter
 
       # Allow extensions to do time-saving prep work on the current context
       def blueprint_init(depth)
-        ctx = Context::Render.new(@blueprint, fields, @options, depth)
+        ctx = Context::Render.new(@blueprint, fields, @options, store, depth)
         @conditionals.around_blueprint_init ctx
         @defaults.around_blueprint_init ctx
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|

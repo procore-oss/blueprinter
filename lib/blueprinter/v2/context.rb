@@ -14,7 +14,7 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       #
-      Render = Struct.new(:blueprint, :fields, :options, :depth) do
+      Render = Struct.new(:blueprint, :fields, :options, :store, :depth) do
         (members - %i[fields options]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
@@ -37,7 +37,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :depth) do
+      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth) do
         members.each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
@@ -60,7 +60,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Object = Struct.new(:blueprint, :fields, :options, :object, :parent, :depth) do
+      Object = Struct.new(:blueprint, :fields, :options, :object, :parent, :store, :depth) do
         (members - %i[object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
@@ -91,7 +91,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :depth) do
+      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :store, :depth) do
         (members - %i[field]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
@@ -112,7 +112,7 @@ module Blueprinter
       # @!attribute [r] format
       #   @return [Symbol] Requested format of result, e.g. :json
       #
-      Result = Struct.new(:blueprint, :fields, :options, :object, :format) do
+      Result = Struct.new(:blueprint, :fields, :options, :object, :format, :store) do
         (members - %i[blueprint options object format]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }

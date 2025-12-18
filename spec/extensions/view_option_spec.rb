@@ -2,7 +2,7 @@
 
 describe Blueprinter::Extensions::ViewOption do
   let(:instances) { Blueprinter::V2::InstanceCache.new }
-  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, initial_depth: 1) }
+  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1) }
   let(:context) { Blueprinter::V2::Context::Result }
   let(:object) { { id: 42, foo: 'Foo', bar: 'Bar' } }
   let(:blueprint) do

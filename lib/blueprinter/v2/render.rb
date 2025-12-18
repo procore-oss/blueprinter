@@ -5,12 +5,15 @@ require 'blueprinter/v2/serializer'
 module Blueprinter
   module V2
     class Render
+      attr_accessor :store
+
       def initialize(object, options, blueprint:, collection:, instances:)
         @object = object
         @options = options.dup.freeze
         @blueprint = blueprint
         @instances = instances
         @collection = collection
+        @store = {}
       end
 
       # Serialize the object to a Hash or array of Hashes
@@ -27,8 +30,8 @@ module Blueprinter
       # or change the way :json and :hash behave.
       # @return [Object]
       def to(format)
-        serializer = @instances.serializer(@blueprint, @options, 1)
-        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, format)
+        serializer = @instances.serializer(@blueprint, @options, store, 1)
+        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, format, store)
         result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
           if new_ctx.blueprint != serializer.blueprint
             blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class

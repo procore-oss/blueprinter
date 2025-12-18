@@ -32,10 +32,10 @@ module Blueprinter
           field_blueprint = ctx.field.blueprint
           if @instances.blueprint(field_blueprint).is_a? V2::Base
             parent = Context::Parent.new(ctx.blueprint.class, ctx.field, ctx.object)
-            child_serializer = @instances.serializer(field_blueprint, ctx.options, ctx.depth + 1)
+            child_serializer = @instances.serializer(field_blueprint, ctx.options, ctx.store, ctx.depth + 1)
             child_serializer.object(value, parent:, depth: ctx.depth + 1)
           else
-            opts = { v2_instances: @instances, v2_depth: ctx.depth }
+            opts = { v2_instances: @instances, v2_depth: ctx.depth, v2_store: ctx.store }
             field_blueprint.hashify(value, view_name: :default, local_options: ctx.options.dup.merge(opts))
           end
         end

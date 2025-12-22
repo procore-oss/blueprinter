@@ -4,6 +4,7 @@ module Blueprinter
   autoload :Base, 'blueprinter/base'
   autoload :BlueprinterError, 'blueprinter/blueprinter_error'
   autoload :Configuration, 'blueprinter/configuration'
+  autoload :Deprecation, 'blueprinter/deprecation'
   autoload :Errors, 'blueprinter/errors'
   autoload :Extension, 'blueprinter/extension'
   autoload :Transformer, 'blueprinter/transformer'

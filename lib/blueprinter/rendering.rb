@@ -2,6 +2,7 @@
 
 require 'blueprinter/errors/invalid_root'
 require 'blueprinter/errors/meta_requires_root'
+require 'blueprinter/deprecation'
 
 module Blueprinter
   # Encapsulates the rendering logic for Blueprinter.

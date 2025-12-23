@@ -35,6 +35,13 @@ describe Blueprinter::V2::Extensions::Core::Wrapper do
     expect(result).to eq({ root: { name: 'Foo' } })
   end
 
+  it 'allows a false root option to override the blueprint' do
+    blueprint.options[:root] = :data
+    ctx = context.new(blueprint.new, fields, { root: false }, object, :json)
+    result = subject.around_result(ctx) { |ctx| ctx.object }
+    expect(result).to eq({ name: 'Foo' })
+  end
+
   it 'looks for a meta option in the blueprint' do
     blueprint.options[:root] = :data
     blueprint.options[:meta] = { links: [] }

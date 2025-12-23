@@ -16,7 +16,7 @@ module Blueprinter
             return result if final? result
 
             root_name = ctx.options[:root] || ctx.blueprint.class.options[:root]
-            return result if root_name.nil?
+            return result if root_name.nil? || ctx.options[:root] == false
 
             root = { root_name => result }
             if (meta = ctx.options[:meta] || ctx.blueprint.class.options[:meta])

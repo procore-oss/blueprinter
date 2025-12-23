@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-
 module Blueprinter
   module V2
     module Extensions
@@ -16,8 +14,16 @@ module Blueprinter
             return result if final? result
 
             root_name = ctx.options[:root] || ctx.blueprint.class.options[:root]
-            return result if root_name.nil?
+            return result if root_name.nil? || ctx.options[:root] == false
 
+            wrap result, root_name, ctx
+          end
+
+          def hidden? = true
+
+          private
+
+          def wrap(result, root_name, ctx)
             root = { root_name => result }
             if (meta = ctx.options[:meta] || ctx.blueprint.class.options[:meta])
               meta = ctx.blueprint.instance_exec(ctx, &meta) if meta.is_a? Proc
@@ -25,8 +31,6 @@ module Blueprinter
             end
             root
           end
-
-          def hidden? = true
         end
       end
     end

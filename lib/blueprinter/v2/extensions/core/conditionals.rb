@@ -4,41 +4,49 @@ module Blueprinter
   module V2
     module Extensions
       module Core
+        #
+        # A core extension that skips fields based on given options.
+        #
         class Conditionals < Extension
           def initialize
             @if = {}.compare_by_identity
             @unless = {}.compare_by_identity
-            @ex_if_nil = {}.compare_by_identity
-            @ex_if_empty = {}.compare_by_identity
+            @skip_nil = {}.compare_by_identity
+            @skip_empty = {}.compare_by_identity
           end
 
           # @param ctx [Blueprinter::V2::Context::Field]
-          # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
-          def exclude_field?(ctx)
-            if ctx.value.nil? && @ex_if_nil[ctx.field]
-              return true
-            elsif @ex_if_empty[ctx.field]
-              return true if ctx.value.nil? || (ctx.value.respond_to?(:empty?) && ctx.value.empty?)
+          # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/MethodLength,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
+          def around_field_value(ctx)
+            value = yield ctx
+            if value.nil? && @skip_nil[ctx.field]
+              skip
+            elsif @skip_empty[ctx.field]
+              skip if value.nil? || (value.respond_to?(:empty?) && value.empty?)
             end
 
             if (cond = @if[ctx.field])
-              result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-              return true unless result
+              result = cond.is_a?(Proc) \
+                ? ctx.blueprint.instance_exec(value, ctx, &cond) \
+                : ctx.blueprint.public_send(cond, value, ctx)
+              skip unless result
             end
             if (cond = @unless[ctx.field])
-              result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
-              return true if result
+              result = cond.is_a?(Proc) \
+                ? ctx.blueprint.instance_exec(value, ctx, &cond) \
+                : ctx.blueprint.public_send(cond, value, ctx)
+              skip if result
             end
-            false
+            value
           end
-          # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
+          # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/MethodLength,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
 
-          alias exclude_object_field? exclude_field?
-          alias exclude_collection_field? exclude_field?
+          alias around_object_value around_field_value
+          alias around_collection_value around_field_value
 
           # It's significantly faster to evaluate these options once and store them
           # @param ctx [Blueprinter::V2::Context::Render]
-          def blueprint_setup(ctx)
+          def around_blueprint_init(ctx)
             ref = ctx.blueprint.class.reflections[:default]
             setup_fields(ctx, ref)
             setup_objects(ctx, ref)
@@ -55,9 +63,9 @@ module Blueprinter
             ref.fields.each_value do |field|
               @if[field] = ctx.options[:field_if] || field.options[:if] || bp_class.options[:field_if]
               @unless[field] = ctx.options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
-              @ex_if_nil[field] =
+              @skip_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              @ex_if_empty[field] =
+              @skip_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end
@@ -69,9 +77,9 @@ module Blueprinter
             ref.objects.each_value do |field|
               @if[field] = ctx.options[:object_if] || field.options[:if] || bp_class.options[:object_if]
               @unless[field] = ctx.options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
-              @ex_if_nil[field] =
+              @skip_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              @ex_if_empty[field] =
+              @skip_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end
@@ -84,9 +92,9 @@ module Blueprinter
               @if[field] = ctx.options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
               @unless[field] =
                 ctx.options[:collection_unless] || field.options[:unless] || bp_class.options[:collection_unless]
-              @ex_if_nil[field] =
+              @skip_nil[field] =
                 ctx.options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-              @ex_if_empty[field] =
+              @skip_empty[field] =
                 ctx.options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
             end
           end

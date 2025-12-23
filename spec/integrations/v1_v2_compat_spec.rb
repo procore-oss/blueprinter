@@ -179,8 +179,8 @@ describe 'V1/V2 Compatibility' do
       blueprints[:barprint] = Class.new(Blueprinter::V2::Base) do
         bp = blueprints
         options[:exclude_if_nil] = true
-        field :name do |ctx|
-          "#{ctx.object[:name]} - #{ctx.options[:tag]}"
+        field :name do |obj, ctx|
+          "#{obj[:name]} - #{ctx.options[:tag]}"
         end
         view :extended do
           object :foo, bp[:fooprint][:extended]
@@ -208,7 +208,7 @@ describe 'V1/V2 Compatibility' do
 
     it 'should use the same V2 Serializer and Blueprint instances through V1' do
       barprint = blueprints[:barprint][:extended]
-      bar_serializer = instances.serializer(barprint, { tag: 'X' }, 1)
+      bar_serializer = instances.serializer(barprint, { tag: 'X' }, {}, 1)
 
       res = bar_serializer.object({
         name: 'Bar 1',

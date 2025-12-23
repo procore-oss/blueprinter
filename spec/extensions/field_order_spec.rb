@@ -2,7 +2,7 @@
 
 describe Blueprinter::Extensions::FieldOrder do
   let(:instances) { Blueprinter::V2::InstanceCache.new }
-  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, initial_depth: 1) }
+  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1) }
   let(:context) { Blueprinter::V2::Context::Render.new(serializer.blueprint, serializer.fields, {}, 1) }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
@@ -14,8 +14,8 @@ describe Blueprinter::Extensions::FieldOrder do
 
   it 'sorts fields alphabetically' do
     ext = described_class.new { |a, b| a.name <=> b.name }
-    result = ext.blueprint_fields(context)
-    expect(result.map(&:name)).to eq %i(bar foo id)
+    ctx = ext.around_blueprint_init(context) { |ctx| ctx }
+    expect(ctx.fields.map(&:name)).to eq %i(bar foo id)
   end
 
   it 'sorts fields alphabetically with id first' do
@@ -28,7 +28,7 @@ describe Blueprinter::Extensions::FieldOrder do
         a.name <=> b.name
       end
     end
-    result = ext.blueprint_fields(context)
-    expect(result.map(&:name)).to eq %i(id bar foo)
+    ctx = ext.around_blueprint_init(context) { |ctx| ctx }
+    expect(ctx.fields.map(&:name)).to eq %i(id bar foo)
   end
 end

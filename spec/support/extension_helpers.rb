@@ -22,28 +22,28 @@ module ExtensionHelpers
           object :foo_obj, test.sub_blueprint
           collection :foos, test.sub_blueprint
 
-          field(:foo2) { |ctx| "value: #{ctx.object[:foo]}" }
-          object(:foo_obj2, test.sub_blueprint) { |ctx| { name: "name: #{ctx.object[:foo_obj][:name]}" } }
-          collection(:foos2, test.sub_blueprint) { |ctx| [{ name: "nums: #{ctx.object[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
+          field(:foo2) { |obj, _ctx| "value: #{obj[:foo]}" }
+          object(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj[:foo_obj][:name]}" } }
+          collection(:foos2, test.sub_blueprint) { |obj, _ctx| [{ name: "nums: #{obj[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
 
-          def was(ctx)
-            "was #{ctx.value.inspect}"
+          def was(val, _ctx)
+            "was #{val.inspect}"
           end
 
-          def is?(ctx, val)
-            ctx.value == val
+          def is?(val, expected_val)
+            val == expected_val
           end
 
-          def foo?(ctx)
-            is? ctx, 'Foo'
+          def foo?(val, _ctx)
+            is? val, 'Foo'
           end
 
-          def name_foo?(ctx)
-            ctx.value[:name] == 'Foo'
+          def name_foo?(val, _ctx)
+            val[:name] == 'Foo'
           end
 
-          def names_foo?(ctx)
-            ctx.value.all? { |v| v[:name] == 'Foo' }
+          def names_foo?(val, _ctx)
+            val.all? { |v| v[:name] == 'Foo' }
           end
         end
       end
@@ -51,9 +51,9 @@ module ExtensionHelpers
   end
 
   def prepare(blueprint, options, ctx_type, *args)
-    serializer = instances.serializer(blueprint, options, 1)
+    serializer = instances.serializer(blueprint, options, {}, 1)
     ctx = Blueprinter::V2::Context::Render.new(serializer.blueprint, serializer.fields, options, 1)
-    subject.blueprint_setup ctx if subject.respond_to?(:blueprint_setup)
+    subject.around_blueprint_init(ctx) { yield ctx } if subject.respond_to?(:around_blueprint_init)
     ctx_type.new(serializer.blueprint, serializer.fields, options, *args, 1)
   end
 end

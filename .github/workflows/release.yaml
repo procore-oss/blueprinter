@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
       - name: Check if version has been updated
         id: check
-        uses: tj-actions/changed-files@dbf178ceecb9304128c8e0648591d71208c6e2c9 # v44
+        uses: tj-actions/changed-files@70069877f29101175ed2b055d210fe8b1d54d7d7 # v44
         with:
           files: lib/blueprinter/version.rb
   release:
@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
       - name: Set up Ruby
-        uses: ruby/setup-ruby@d5126b9b3579e429dd52e51e68624dda2e05be25 # v1
+        uses: ruby/setup-ruby@d697be2f83c6234b20877c3b5eac7a7f342f0d0c # v1
         with:
           ruby-version: 3.2
           bundler-cache: true

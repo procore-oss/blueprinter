@@ -12,10 +12,10 @@ jobs:
     outputs:
       changed: ${{ steps.check.outputs.any_changed }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
       - name: Check if version has been updated
         id: check
-        uses: tj-actions/changed-files@d6e91a2266cdb9d62096cebf1e8546899c6aa18f # v44
+        uses: tj-actions/changed-files@3c4bc6fa0ca4718d438e0a4bd3ea81fbb0e6e2be # v44
         with:
           files: lib/blueprinter/version.rb
   release:
@@ -23,9 +23,9 @@ jobs:
     needs: version-check
     if: ${{ github.event_name == 'workflow_dispatch' || needs.version-check.outputs.changed == 'true' }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
       - name: Set up Ruby
-        uses: ruby/setup-ruby@1287d2b408066abada82d5ad1c63652e758428d9 # v1
+        uses: ruby/setup-ruby@4c24fa5ec04b2e79eb40571b1cee2a0d2b705771 # v1
         with:
           ruby-version: 3.2
           bundler-cache: true

@@ -562,6 +562,44 @@ Output:
 </details>
 
 <details>
+<summary>Accessing the View Option</summary>
+
+
+The `view` provided to the `render` call is implicitly available in the `options` hash within a `field` block, and can be referenced as needed. For example:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :full_name do |user, options|
+    prefix = options[:view] == :admin ? '[Admin]' : options[:title_prefix]
+    "#{prefix} #{user.first_name} #{user.last_name}"
+  end
+
+  view :admin do
+    field :access_level
+  end
+end
+```
+
+Usage:
+
+```ruby
+puts UserBlueprint.render(user, title_prefix: "Mr", view: :admin)
+```
+
+Output:
+
+```json
+{
+  "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
+  "full_name": "[Admin] John Doe",
+  "access_level": "4"
+}
+```
+
+</details>
+
+<details>
 <summary>Defining An Identifier Directly In The Blueprint</summary>
 
 
@@ -1013,7 +1051,7 @@ assoc[:category].options
 <details>
 <summary>Extensions</summary>
 
-Blueprinter offers an extension system to hook into and modify certain behavior.
+Blueprinter provides an extension system that enables certain behavior to be modified as needed.
 
 ```ruby
 Blueprinter.configure do |config|
@@ -1022,13 +1060,53 @@ Blueprinter.configure do |config|
 end
 ```
 
-Extension hooks:
+#### Available Hooks
 
-* [pre_render](https://github.com/procore-oss/blueprinter/blob/abca9ca8ed23edd65a0f4b5ae43e25b8e27a2afc/lib/blueprinter/extension.rb#L18): Intercept the object before rendering begins
+* **pre_render** - Intercept the object before rendering begins. This allows you to modify, transform, or replace the object that will be serialized.
 
-Some known extensions are:
+#### Creating Extensions
 
-* [blueprinter-activerecord](https://github.com/procore-oss/blueprinter-activerecord)
+To create an extension, simply subclass `Blueprinter::Extension` and override the method representing the desired hook:
+
+```ruby
+class ObfuscateNameExtension < Blueprinter::Extension
+  def pre_render(object, blueprint, view, options)
+    return object unless object.respond_to?(:name)
+
+    modified_object = object.dup
+    modified_object.name = ObsfuscateName.call(modified_object.name)
+
+    modified_object
+  end
+end
+```
+
+#### Extension Execution Order
+
+Extensions are executed in the order they are added to the configuration. Each extension receives the result from the previous extension, allowing for chained transformations:
+
+```ruby
+Blueprinter.configure do |config|
+  config.extensions << SecurityExtension.new           # Runs first
+  config.extensions << AssociationLoaderExtension.new  # Runs second
+  config.extensions << UserEnrichmentExtension.new     # Runs third
+end
+```
+
+#### Gem Extensions
+
+Gems can be created that enrich `blueprinter`'s core functionality via extensions.
+
+##### Procore Supported Gems
+
+* [blueprinter-activerecord](https://github.com/procore-oss/blueprinter-activerecord) - Provides ActiveRecord-specific optimizations and features
+
+##### Community Gems
+
+> **_NOTE:_** The following are not officially maintained/supported by Procore OSS.
+
+* [blueprinter_schema](https://github.com/thisismydesign/blueprinter_schema) - Create JSON Schemas from Blueprinter Serializers
+
 </details>
 
 <details>

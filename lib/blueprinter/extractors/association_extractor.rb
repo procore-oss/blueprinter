@@ -8,7 +8,7 @@ module Blueprinter
   class AssociationExtractor < Extractor
     include EmptyTypes
 
-    def extract(association_name, object, local_options = {}, options = {})
+    def extract(association_name, object, local_options, options = {})
       options_without_default = options.except(:default, :default_if)
       # Merge in association options hash
       local_options = local_options.merge(options[:options]) if options[:options].is_a?(Hash)

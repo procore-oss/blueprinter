@@ -5,7 +5,7 @@ module Blueprinter
   class Field
     attr_reader :method, :name, :extractor, :options, :blueprint
 
-    def initialize(method, name, extractor, blueprint, options = {})
+    def initialize(method:, name:, extractor:, blueprint:, options: {})
       @method = method
       @name = name
       @extractor = extractor

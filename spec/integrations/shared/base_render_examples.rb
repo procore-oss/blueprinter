@@ -521,7 +521,7 @@ shared_examples 'Base::render' do
       Class.new(Blueprinter::Base) do
         identifier :id
         field :view_trigger do |_obj, options|
-          "#{options[:view]}"
+          "#{options[:current_view]}"
         end
 
         view :nested do

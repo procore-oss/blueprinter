@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b3e83313.js";
+            window.path_to_searchindex_js = "../searchindex-f04616ff.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-f275a713.js"></script>
@@ -219,12 +219,15 @@ end
 <p><strong>param</strong> <a href="./context-objects.html#render-context">Render Context</a> <br><strong>cost</strong> Low - run once per used blueprint during render</p>
 </blockquote>
 <p>The <code>around_blueprint_init</code> hook runs the first time a new Blueprint is used during a render cycle. It can be used by extensions to perform time-saving setup before a render.</p>
+<blockquote class="blockquote-tag blockquote-tag-important">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
+<p><code>around_blueprint_init</code> <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
+</blockquote>
 <pre><code class="language-ruby">def around_blueprint_init(ctx)
   perform_setup ctx.blueprint, ctx.options
   yield ctx
 end
 </code></pre>
-<p><code>around_blueprint_init</code> MUST yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
 <h3 id="around_serialize_object"><a class="header" href="#around_serialize_object">around_serialize_object</a></h3>
 <blockquote>
 <p><strong>param</strong> <a href="./context-objects.html#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
@@ -354,7 +357,11 @@ end
 <blockquote>
 <p><strong>param</strong> <a href="./context-objects.html#hook-context">Hook Context</a> <br><strong>cost</strong> Variable - runs around all your extensions</p>
 </blockquote>
-<p>The <code>around_hook</code> hook runs around all other extension hooks. It <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised. The return value from <code>yield</code> is <strong>not</strong> used, nor is the return value of <code>around_hook</code>.</p>
+<p>The <code>around_hook</code> hook runs around all other extension hooks. Unlike other hooks, the return value <strong>not</strong> used.</p>
+<blockquote class="blockquote-tag blockquote-tag-important">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
+<p><code>around_hook</code> <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
+</blockquote>
 <pre><code class="language-ruby">def around_hook(ctx)
   # do something
   yield

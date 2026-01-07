@@ -13,23 +13,23 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon.svg">
-        <link rel="stylesheet" href="css/variables.css">
-        <link rel="stylesheet" href="css/general.css">
-        <link rel="stylesheet" href="css/chrome.css">
-        <link rel="stylesheet" href="css/print.css" media="print">
+        <link rel="icon" href="favicon-bc91b3a9.svg">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link rel="stylesheet" href="fonts/fonts.css">
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="theme/hljs-overrides.css">
+        <link rel="stylesheet" href="theme/hljs-overrides-ac35c0bd.css">
+        <link rel="stylesheet" href="theme/custom-e18203ad.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex.js";
+            window.path_to_searchindex_js = "searchindex-5a0820d0.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
+        <script src="toc-5b40a50b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -54,7 +54,7 @@
             </div>
         </div>
     </div>
-    <div id="body-container">
+    <div id="mdbook-body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
@@ -83,12 +83,12 @@
             html.classList.add("js");
         </script>
 
-        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
             let sidebar = null;
-            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -103,39 +103,39 @@
             }
         </script>
 
-        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
                 <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
             </noscript>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
 
-        <div id="page-wrapper" class="page-wrapper">
+        <div id="mdbook-page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
-                            <i class="fa fa-bars"></i>
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
                         </label>
-                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
-                            <i class="fa fa-paint-brush"></i>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
                         </button>
-                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
-                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
-                            <i class="fa fa-search"></i>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
                         </button>
                     </div>
 
@@ -143,46 +143,46 @@
 
                     <div class="right-buttons">
                         <a href="print.html" title="Print this book" aria-label="Print this book">
-                            <i id="print-button" class="fa fa-print"></i>
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/procore-oss/blueprinter" title="Git repository" aria-label="Git repository">
-                            <i id="git-repository-button" class="fa fa-github"></i>
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
                         </a>
 
                     </div>
                 </div>
 
-                <div id="search-wrapper" class="hidden">
-                    <form id="searchbar-outer" class="searchbar-outer">
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
                         <div class="search-wrapper">
-                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
                             <div class="spinner-wrapper">
-                                <i class="fa fa-spinner fa-spin"></i>
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
                             </div>
                         </div>
                     </form>
-                    <div id="searchresults-outer" class="searchresults-outer hidden">
-                        <div id="searchresults-header" class="searchresults-header"></div>
-                        <ul id="searchresults">
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
                         </ul>
                     </div>
                 </div>
 
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script>
-                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
-                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
-                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
                         link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
                     });
                 </script>
 
-                <div id="content" class="content">
+                <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="blueprinter"><a class="header" href="#blueprinter">Blueprinter</a></h1>
 <h3 id="note-this-is-a-wip-for-api-v2"><a class="header" href="#note-this-is-a-wip-for-api-v2">NOTE This is a WIP for API V2!</a></h3>
 <p>Blueprinter is a JSON serializer for your business objects. It is designed to be simple, flexible, and performant.</p>
-<p>Upgrading from 1.x? <a href="./upgrading/index.html">Read the upgrade guide!</a></p>
+<p>Upgrading from 1.x? <a href="#upgrading-to-api-v2">Read the upgrade guide!</a></p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
 <pre><code class="language-bash">bundle add blueprinter
 </code></pre>
@@ -206,10 +206,11 @@ WidgetBlueprint.render(widget).to_json
 # Render the extended view to a Hash
 WidgetBlueprint[:extended].render(widget).to_hash
 </code></pre>
-<p>Look interesting? <a href="./dsl/index.html">Learn the DSL!</a></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
+<p>Look interesting? <a href="#blueprinter-dsl">Learn the DSL!</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
 <h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="dsl/./fields.html">fields</a>, <a href="dsl/./views.html">views</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/./options.html">options</a>.</p>
+<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="#fields">fields</a>, <a href="#views">views</a>, <a href="#partials">partials</a>, <a href="#formatters">formatters</a>, <a href="#extensions">extensions</a>, and <a href="#options-1">options</a>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; MyExtension.new
   options[:exclude_if_nil] = true
@@ -224,8 +225,9 @@ end
   collection :parts, PartBlueprint
 end
 </code></pre>
-<p>There's a lot more you can do with the Blueprinter DSL. <a href="dsl/./fields.html">Fields</a> are a good place to start!</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
+<p>There’s a lot more you can do with the Blueprinter DSL. <a href="#fields">Fields</a> are a good place to start!</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
 <pre><code class="language-ruby"># Use field for scalar values, arrays of scalar values, or even a Hash
 field :name
 field :tags
@@ -240,43 +242,56 @@ object :category, CategoryBlueprint
 collection :parts, PartBlueprint
 </code></pre>
 <h2 id="options"><a class="header" href="#options">Options</a></h2>
-<p>Fields accept a wide array of built-in options, and <a href="dsl/./extensions.html">extensions</a> can define even more. <a href="dsl/./options.html">Find all built-in options here.</a></p>
+<p>Fields accept a wide array of built-in options, and <a href="#extensions">extensions</a> can define even more. <a href="#options-1">Find all built-in options here.</a></p>
 <pre><code class="language-ruby">field :description, default: "No description"
 collection :parts, PartBlueprint, exclude_if_empty: true
 </code></pre>
 <h2 id="extracting-field-values"><a class="header" href="#extracting-field-values">Extracting field values</a></h2>
-<p>Blueprinter is pretty smart about extracting field values from objects, but there are ways to customize the behavior if needed.</p>
+<p>Blueprinter is pretty smart about extracting field values from objects and Hashes, but there are ways to customize the behavior if needed.</p>
 <h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
 <ul>
 <li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
 <li>For anything else, Blueprinter will look for a public method matching the field name.</li>
-<li>The <a href="dsl/./options.html#from">from</a> field option can be used to specify a different method or Hash key name.</li>
+<li>The <a href="#from">from</a> field option can be used to specify a different method or Hash key name.</li>
 </ul>
 <h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
-<p>Return whatever you want from a block. It will be passed a <a href="dsl/../api/context-objects.html#field-context">Field context</a> argument containing the object being rendered, among other things.</p>
-<pre><code class="language-ruby">field :description do |ctx|
-  ctx.object.description.upcase
+<p>If you pass a block to your field, the default behavior will be bypassed and the block’s return value will be used. It will be passed a <a href="#field-context">Field context</a> argument containing the object being rendered, among other things.</p>
+<pre><code class="language-ruby">field :description do |object, ctx|
+  object.description.upcase
 end
 
 # Blocks can call instance methods defined on your Blueprint
-collection :parts, PartBlueprint do |ctx|
-  active_parts ctx.object
+collection :parts, PartBlueprint do |object, ctx|
+  active_parts object
 end
 
 def active_parts(object)
   object.parts.select(&amp;:active?)
 end
 </code></pre>
-<h3 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h3>
-<p>Define your own extraction behavior with a <a href="dsl/../api/extractors.html">custom extractor</a>.</p>
-<pre><code class="language-ruby"># For an entire Blueprint or view
-extensions &lt;&lt; MyCustomExtractor.new
+<h3 id="extracting-with-extensions"><a class="header" href="#extracting-with-extensions">Extracting with extensions</a></h3>
+<p>The <a href="#around_field_value">around_field_value</a>, <a href="#around_object_value">around_object_value</a>, and <a href="#around_collection_value">around_collection_value</a> middleware hooks can intercept extraction and return whatever values they want. <a href="#extensions">Learn more about using extensions</a>.</p>
+<pre><code class="language-ruby">class MyExtractor &lt; Blueprinter::Extension
+  def around_field_value(ctx)
+    if ctx.field.options[:my_extractor] || ctx.blueprint.class.options[:my_extractor]
+      # If the field or blueprint has the "my_extractor" option, use custom extraction
+      my_custom_extraction(ctx.object, ctx.field)
+    else
+      # Otherwise use the default behavior
+      yield ctx
+    end
+  end
 
-# For a single field
-object :bar, extractor: MyCustomExtractor
+  private
+
+  def my_custom_extraction(object, field)
+    # ...
+  end
+end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="dsl/./fields.html">fields</a>, views can define <a href="dsl/./options.html">options</a>, <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, <a href="dsl/./extensions.html">extensions</a>, and <a href="dsl/views.html#nesting-views">nested views</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="views"><a class="header" href="#views">Views</a></h1>
+<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="#fields">fields</a>, views can define <a href="#options-1">options</a>, <a href="#partials">partials</a>, <a href="#formatters">formatters</a>, <a href="#extensions">extensions</a>, and <a href="#nesting-views">nested views</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
   object :category, CategoryBlueprint
@@ -311,7 +326,7 @@ end
   end
 </code></pre>
 <h3 id="excluding-fields"><a class="header" href="#excluding-fields">Excluding fields</a></h3>
-<p>Views can exclude select fields from parents, views they've included, or from <a href="dsl/./partials.html">partials</a>.</p>
+<p>Views can exclude select fields from parents, views they’ve included, or from <a href="#partials">partials</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   fields :name, :description, :price
 
@@ -343,8 +358,9 @@ collection :widgets, WidgetBlueprint[:extended][:with_price]
   # ...
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="partials"><a class="header" href="#partials">Partials</a></h1>
-<p>Partials allow you to compose views from reusable components. Just like views, partials can define <a href="dsl/./fields.html">fields</a>, <a href="dsl/./options.html">options</a>, <a href="dsl/./views.html">views</a>, other <a href="dsl/./partials.html">partials</a>, <a href="dsl/./formatters.html">formatters</a>, and <a href="dsl/./extensions.html">extensions</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="partials"><a class="header" href="#partials">Partials</a></h1>
+<p>Partials allow you to compose views from reusable components. Just like views, partials can define <a href="#fields">fields</a>, <a href="#options-1">options</a>, <a href="#views">views</a>, other <a href="#partials">partials</a>, <a href="#formatters">formatters</a>, and <a href="#extensions">extensions</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
 
@@ -368,15 +384,15 @@ end
   end
 end
 </code></pre>
-<p>There are two ways of including partials: <a href="dsl/partials.html#append-with-use">appending with 'use'</a> and <a href="dsl/partials.html#inserting-with-use">inserting with 'use!'</a> (see <a href="dsl/partials.html#examples-of-use-and-use">examples</a>).</p>
-<h3 id="append-with-use"><a class="header" href="#append-with-use">Append with 'use'</a></h3>
-<p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view's fields, options, etc. Precedence (highest to lowest) is:</p>
+<p>There are two ways of including partials: <a href="#append-with-use">appending with ‘use’</a> and <a href="#inserting-with-use">inserting with ‘use!’</a> (see <a href="#examples-of-use-and-use">examples</a>).</p>
+<h3 id="append-with-use"><a class="header" href="#append-with-use">Append with ‘use’</a></h3>
+<p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view’s fields, options, etc. Precedence (highest to lowest) is:</p>
 <ol>
 <li>Definitions in the partial</li>
 <li>Definitions in the view</li>
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
-<h3 id="insert-with-use"><a class="header" href="#insert-with-use">Insert with 'use!'</a></h3>
+<h3 id="insert-with-use"><a class="header" href="#insert-with-use">Insert with ‘use!’</a></h3>
 <p>Partials are embedded immediately, <em>on that line</em>, allowing subsequent lines to override the partial. Precedence (highest to lowest) is:</p>
 <ol>
 <li>Definitions in the view <em>after</em> <code>use!</code></li>
@@ -384,7 +400,7 @@ end
 <li>Definitions in the view <em>before</em> <code>use!</code></li>
 <li>Definitions inherited from the blueprint/parent views</li>
 </ol>
-<h3 id="examples-of-use-and-use"><a class="header" href="#examples-of-use-and-use">Examples of 'use' and 'use!'</a></h3>
+<h3 id="examples-of-use-and-use"><a class="header" href="#examples-of-use-and-use">Examples of ‘use’ and ‘use!’</a></h3>
 <pre><code class="language-ruby">partial :no_empty_fields do
   options[:field_if] = :og_field_logic
   # other stuff
@@ -402,8 +418,9 @@ view :bar do
   options[:field_if] = :other_field_logic
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
-<p>Declaratively format field values by class. You can define formatters anywhere in your blueprints: top level, <a href="dsl/./views.html">views</a>, and <a href="dsl/./partials.html">partials</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
+<p>Declaratively format field values by class. You can define formatters anywhere in your blueprints: top level, <a href="#views">views</a>, and <a href="#partials">partials</a>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   # Strip whitespace from all strings
   format(String) { |val| val.strip }
@@ -417,7 +434,8 @@ end
   end
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="options-1"><a class="header" href="#options-1">Options</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="options-1"><a class="header" href="#options-1">Options</a></h1>
 <p>Numerous options can be defined on Blueprints, views, partials, or individual fields. Some can also be passed to <code>render</code>.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   # Blueprint options apply to all fields, associations, views, and partials in
@@ -456,20 +474,19 @@ WidgetBlueprint.render(widget, exclude_if_empty: false).to_json
 </code></pre>
 <p>For easier reference, options are grouped into the following categories:</p>
 <ul>
-<li><a href="dsl/options.html#default-values">Default values</a>: Provide defaults for empty fields</li>
-<li><a href="dsl/options.html#conditional-fields">Conditional fields</a>: Exclude fields based on conditions</li>
-<li><a href="dsl/options.html#field-mapping">Field mapping</a>: Change how field values are extracted from objects</li>
-<li><a href="dsl/options.html#other">Metadata</a>: Wrap or add metadata to the output</li>
+<li><a href="#default-values">Default values</a>: Provide defaults for empty fields</li>
+<li><a href="#conditional-fields">Conditional fields</a>: Exclude fields based on conditions</li>
+<li><a href="#field-mapping">Field mapping</a>: Change how field values are extracted from objects</li>
+<li><a href="#other">Metadata</a>: Wrap or add metadata to the output</li>
 </ul>
 <h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
-<p>Options that accept Procs, lambdas, or method names are usually passed a <a href="dsl/../api/context-objects.html#field-context">Field context</a> argument. It contains the object being rendered as well as other useful information.</p>
+<p>Options that accept Procs, lambdas, or method names are usually passed a <a href="#field-context">Field context</a> argument. It contains the object being rendered as well as other useful information.</p>
 <h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
-<p>These options allow you to set default values for fields and associations, and customize when they're used.</p>
+<p>These options allow you to set default values for fields and associations, and customize when they’re used.</p>
 <h4 id="default"><a class="header" href="#default">default</a></h4>
 <p>A default value used when the field or assocation is nil.</p>
 <blockquote>
-<p><em>Available in field, object, collection</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">field :foo, default: "Foo"
 field :foo, default: -&gt;(ctx) { "Foo" }
@@ -480,8 +497,7 @@ def foo(ctx) = "Foo"
 <h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
 <p>Default value for any nil non-association field in its scope.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:field_default] = "Foo"
 options[:field_default] = -&gt;(ctx) { "Foo" }
@@ -494,8 +510,7 @@ WidgetBluerpint.render(widget, field_default: "Foo").to_json
 <h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
 <p>Default value for any nil object field in its scope.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
 options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
@@ -508,8 +523,7 @@ WidgetBluerpint.render(widget, object_default: { name: "Foo" }).to_json
 <h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
 <p>Default value for any nil collection field.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
 options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
@@ -522,8 +536,7 @@ WidgetBluerpint.render(widget, collection_default: [{ name: "Foo" }]).to_json
 <h4 id="default_if"><a class="header" href="#default_if">default_if</a></h4>
 <p>Use the default value if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><em>Available in field, object, collection</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">field :foo, default: "Foo", default_if: -&gt;(ctx) { ctx.object.disabled? }
 field :foo, default: "Foo", default_if: :disabled?
@@ -531,10 +544,9 @@ field :foo, default: "Foo", default_if: :disabled?
 def disabled?(ctx) = ctx.object.disabled?
 </code></pre>
 <h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
-<p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any non-association field in scope.</p>
+<p>Same as <a href="#default_if">default_if</a>, but applies to any non-association field in scope.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:field_default_if] = :disabled?
@@ -544,10 +556,9 @@ def disabled?(ctx) = ctx.object.disabled?
 WidgetBluerpint.render(widget, field_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
-<p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any object field in scope.</p>
+<p>Same as <a href="#default_if">default_if</a>, but applies to any object field in scope.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:object_default_if] = :disabled?
@@ -557,10 +568,9 @@ def disabled?(ctx) = ctx.object.disabled?
 WidgetBluerpint.render(widget, object_default_if: :disabled?).to_json
 </code></pre>
 <h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
-<p>Same as <a href="dsl/options.html#default_if">default_if</a>, but applies to any collection field in scope.</p>
+<p>Same as <a href="#default_if">default_if</a>, but applies to any collection field in scope.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
 options[:collection_default_if] = :disabled?
@@ -572,7 +582,7 @@ WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
 <h2 id="conditional-fields"><a class="header" href="#conditional-fields">Conditional Fields</a></h2>
 <p>These options allow you to exclude fields from the output.</p>
 <h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
-<p>Exclude fields if they're nil.</p>
+<p>Exclude fields if they’re nil.</p>
 <blockquote>
 <p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
 </blockquote>
@@ -583,7 +593,7 @@ field :description, exclude_if_nil: true
 WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
 </code></pre>
 <h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
-<p>Exclude fields if they're nil, or if they respond to <code>empty?</code> and it returns true.</p>
+<p>Exclude fields if they’re nil, or if they respond to <code>empty?</code> and it returns true.</p>
 <blockquote>
 <p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
 </blockquote>
@@ -596,8 +606,7 @@ WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
 <h4 id="if"><a class="header" href="#if">if</a></h4>
 <p>Only include the field if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><em>Available in field, object, collection</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">field :foo, if: -&gt;(ctx) { ctx.object.enabled? }
 field :foo, if: :enabled?
@@ -607,8 +616,7 @@ def enabled?(ctx) = ctx.object.enabled?
 <h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
 <p>Only include non-association fields if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:field_if] = :enabled?
@@ -620,8 +628,7 @@ WidgetBluerpint.render(widget, field_if: :enabled?).to_json
 <h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
 <p>Only include object fields if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:object_if] = :enabled?
@@ -633,8 +640,7 @@ WidgetBluerpint.render(widget, object_if: :enabled?).to_json
 <h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
 <p>Only include collection fields if the given Proc or method name returns truthy.</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#field-context">Field context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
 options[:collection_if] = :enabled?
@@ -644,13 +650,13 @@ def enabled?(ctx) = ctx.object.enabled?
 WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 </code></pre>
 <h4 id="unless"><a class="header" href="#unless">unless</a></h4>
-<p>Inverse of <a href="dsl/options.html#if">if</a>.</p>
+<p>Inverse of <a href="#if">if</a>.</p>
 <h4 id="field_unless"><a class="header" href="#field_unless">field_unless</a></h4>
-<p>Inverse of <a href="dsl/options.html#field_if">field_if</a>.</p>
+<p>Inverse of <a href="#field_if">field_if</a>.</p>
 <h4 id="object_unless"><a class="header" href="#object_unless">object_unless</a></h4>
-<p>Inverse of <a href="dsl/options.html#object_if">object_if</a>.</p>
+<p>Inverse of <a href="#object_if">object_if</a>.</p>
 <h4 id="collection_unless"><a class="header" href="#collection_unless">collection_unless</a></h4>
-<p>Inverse of <a href="dsl/options.html#collection_if">collection_if</a>.</p>
+<p>Inverse of <a href="#collection_if">collection_if</a>.</p>
 <h2 id="field-mapping"><a class="header" href="#field-mapping">Field mapping</a></h2>
 <p>These options let you change how fields values are extracted from your objects.</p>
 <h4 id="from"><a class="header" href="#from">from</a></h4>
@@ -660,17 +666,6 @@ WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
 </blockquote>
 <pre><code class="language-ruby">field :desc, from: :description
 </code></pre>
-<h4 id="extractor"><a class="header" href="#extractor">extractor</a></h4>
-<p>Pass a <a href="dsl/../api/extractors.html">custom extractor</a> class or instance.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em></p>
-</blockquote>
-<pre><code class="language-ruby"># Pass as a class
-object :category, CategoryBlueprint, extractor: MyCategoryExtractor
-# or an instance
-object :category, CategoryBlueprint, extractor: MyCategoryExtractor.new(args)
-</code></pre>
-<p>Note that when you pass a class, it will be initialized <em>once per render</em>.</p>
 <h2 id="metadata"><a class="header" href="#metadata">Metadata</a></h2>
 <p>These options allow you to add metadata to the rendered output.</p>
 <h4 id="root"><a class="header" href="#root">root</a></h4>
@@ -685,8 +680,7 @@ WidgetBlueprint.render(widget, root: :data).to_json
 <h4 id="meta"><a class="header" href="#meta">meta</a></h4>
 <p>Add a <code>meta</code> key and data to the wrapped output (requires the <code>root</code> option).</p>
 <blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br />
-<strong>@param</strong> <a href="dsl/../api/context-objects.html#result-context">Result context</a></p>
+<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#result-context">Result context</a></p>
 </blockquote>
 <pre><code class="language-ruby">options[:root] = :data
 options[:meta] = { page: 1 }
@@ -698,10 +692,11 @@ WidgetBlueprint
   .render(widget, root: :data, meta: { page: params[:page] })
   .to_json
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
-<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. Some are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="dsl/../api/extensions.html">Extension API</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
+<p>Blueprinter has a powerful extension system that permits middleware throughout the entire serialization lifecycle. Some extensions are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="#extensions-2">Extension API</a>.</p>
 <h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
-<p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They're inherited from parent classes and views, but can be overridden.</p>
+<p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They’re inherited from parent classes and views, but can be overridden.</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
   # This extension instance will exist for the duration of your program
   extensions &lt;&lt; FooExtension.new
@@ -712,7 +707,10 @@ WidgetBlueprint
 
   # Inline extensions are also initialized once per render
   extension do
-    def blueprint_output(ctx) = ctx.result.merge({ foo: "Foo" })
+    def around_blueprint(ctx)
+      result = yield ctx
+      result.merge({ foo: "Foo" })
+    end
   end
 
   view :minimal do
@@ -727,11 +725,11 @@ end
 <h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
 <p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
 <h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
-<p>Control the order of fields in your output. See <a href="dsl/../api/fields.html">Fields API</a> for more information about the block parameters.</p>
+<p>Control the order of fields in your output. See <a href="#fields-3">Fields API</a> for more information about the block parameters.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
 </code></pre>
 <h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>
-<p>The MultiJson extension switches Blueprinter from Ruby's built-in JSON library to the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. Just install the <code>multi_json</code> gem, your serialization library of choice, and enable the extension.</p>
+<p>The MultiJson extension switches Blueprinter from Ruby’s built-in JSON library to the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. Just install the <code>multi_json</code> gem, your serialization library of choice, and enable the extension.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new
 
 # Any options you pass will be forwarded to MultiJson.dump
@@ -740,14 +738,14 @@ extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new(pretty: true)
 # You can also pass MultiJson.dump options during render
 WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
 </code></pre>
-<p>If <code>multi_json</code> doesn't support your preferred JSON library, you can use Blueprinter's <a href="dsl/../api/extensions.html#json">json extension hook</a> to render JSON however you like.</p>
+<p>If <code>multi_json</code> doesn’t support your preferred JSON library, you can use Blueprinter’s <a href="#around_result">around_result</a> extension hook to render JSON however you like.</p>
 <h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>
-<p>Enable the OpenTelemetry extension to see what's happening while you render your blueprints. One outer <code>blueprinter.render</code> span will nest various <code>blueprinter.object</code> and <code>blueprinter.collection</code> spans. Each span will include the blueprint/view name that triggered it.</p>
+<p>Enable the OpenTelemetry extension to see what’s happening while you render your blueprints. One outer <code>blueprinter.render</code> span will nest various <code>blueprinter.object</code> and <code>blueprinter.collection</code> spans. Each span will include the blueprint/view name that triggered it.</p>
 <p>Extension hooks will be wrapped in <code>blueprinter.extension</code> spans and annotated with the current extension and hook name.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
 </code></pre>
 <h3 id="viewoption"><a class="header" href="#viewoption">ViewOption</a></h3>
-<p>The ViewOption extension uses the <a href="dsl/../api/extensions.html#blueprint">blueprint</a> extension hook to add a <code>view</code> option to <code>render</code>, <code>render_object</code>, and <code>render_collection</code>. It allows V1-compatible rendering of views.</p>
+<p>The ViewOption extension uses the <a href="#around_result">around_result</a> extension hook to add a <code>view</code> option to <code>render</code>, <code>render_object</code>, and <code>render_collection</code>. It allows V1-compatible rendering of views.</p>
 <pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::ViewOption.new
 </code></pre>
 <p>Now you can render a view either way:</p>
@@ -757,17 +755,18 @@ MyBlueprint[:foo].render(obj)
 MyBlueprint.render(obj, view: :foo)
 </code></pre>
 <h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
-<p><em>Have an extension you'd like to share? Let us know and we may add it to the list!</em></p>
+<p><em>Have an extension you’d like to share? Let us know and we may add it to the list!</em></p>
 <h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
 <p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> is an official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
 <h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
 </code></pre>
-<p>If you're using Rails, you may omit <code>.to_json</code> when calling <code>render json:</code></p>
+<p>If you’re using Rails, you may omit <code>.to_json</code> when calling <code>render json:</code></p>
 <pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
 </code></pre>
-<p>Ruby's built-in <code>JSON</code> library is used by default. Alternatively, you can use the built-in <a href="./dsl/extensions.html#multijson">MultiJson extension</a>. Or for total control, implement the <a href="./api/extensions.html#json">json extension hook</a> and call any serializer you like.</p>
+<p>Ruby’s built-in <code>JSON</code> library is used by default. Alternatively, you can use the built-in <a href="#multijson">MultiJson extension</a>. Or for total control, implement the <a href="#around_result">around_result</a> and call any serializer you like.</p>
 <h3 id="rendering-to-a-hash"><a class="header" href="#rendering-to-a-hash">Rendering to a Hash</a></h3>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
 </code></pre>
@@ -783,7 +782,7 @@ WidgetBlueprint.render(widget).to_json
 WidgetBlueprint[:default].render(widget).to_json
 </code></pre>
 <h3 id="passing-options"><a class="header" href="#passing-options">Passing options</a></h3>
-<p>An options hash can be passed to <code>render</code>. Read more about <a href="./dsl/options.html">options</a>.</p>
+<p>An options hash can be passed to <code>render</code>. Read more about <a href="#options-1">options</a>.</p>
 <pre><code class="language-ruby">WidgetBlueprint.render(Widget.all, exclude_if_nil: true).to_json
 </code></pre>
 <h3 id="rendering-collections"><a class="header" href="#rendering-collections">Rendering collections</a></h3>
@@ -796,365 +795,204 @@ WidgetBlueprint[:default].render(widget).to_json
 WidgetBlueprint.render_collection(Widget.all).to_json
 </code></pre>
 <p>Whatever you pass to <code>render_collection</code> must respond to <code>map</code>, yielding zero or more serializable objects, and returning an <code>Enumerable</code> with the mapped results.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
 <p>Blueprinter has a rich API for extending the serialization process and reflecting on your blueprints.</p>
 <h2 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h2>
-<p>The extensions API offers deep hooks into the serialization process. <a href="api/./extensions.html">Read more</a>.</p>
+<p>The extensions API offers middleware for various parts of the serialization process. <a href="#extensions-2">Read more</a>.</p>
 <h2 id="reflection"><a class="header" href="#reflection">Reflection</a></h2>
-<p>The reflection API allows your application, or Blueprinter extensions, to introspect on your blueprints' options, fields, and views. <a href="api/./reflection.html">Read more</a>.</p>
-<h2 id="extractors"><a class="header" href="#extractors">Extractors</a></h2>
-<p>By creating and using custom extractors, you can change the way field values are extracted from objects. <a href="api/./extractors.html">Read more</a>.</p>
+<p>The reflection API allows your application, or Blueprinter extensions, to introspect on your blueprints’ options, fields, and views. <a href="#reflection-1">Read more</a>.</p>
 <h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
-<p>Context objects are the arguments you'll receive in most of the above APIs. <a href="api/./context-objects.html">Read more</a>.</p>
+<p>Context objects are the arguments you’ll receive in most of the above APIs. <a href="#context-objects-1">Read more</a>.</p>
 <h2 id="fields-1"><a class="header" href="#fields-1">Fields</a></h2>
-<p>Several APIs provide access to structs describing field definitions. <a href="api/./fields.html">Read more</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-2"><a class="header" href="#extensions-2">Extensions</a></h1>
-<p>Blueprinter has a powerful extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter's features are implemented as built-in extensions!</p>
-<p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="api/../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
-<pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
-  # Use the exclude_field? hook to exclude certain fields on Tuesdays
-  def exclude_field?(ctx) = ctx.field.options[:tues] == false &amp;&amp; Date.today.tuesday?
-end
-
-class MyBlueprint &lt; ApplicationBlueprint
-  extensions &lt;&lt; MyExtension.new
-end
-</code></pre>
-<p>Alternatively, you can define an extension direclty in your blueprint:</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  extension do
-    def exclude_field?(ctx) = ctx.field.options[:tues] == false &amp;&amp; Date.today.tuesday?
-  end
-end
-</code></pre>
+<p>Several APIs provide access to structs describing field definitions. <a href="#fields-3">Read more</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="extensions-2"><a class="header" href="#extensions-2">Extensions</a></h1>
+<p>Blueprinter has a powerful middleware-based extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter’s features are implemented using the extension API!</p>
+<p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="#using-extensions">add it to your configuration</a>.</p>
 <h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
-<p>Hooks are called in the following order. They are passed a <a href="api/./context-objects.html">context object</a> as an argument.</p>
-<ul>
-<li><a href="api/extensions.html#blueprint">blueprint</a></li>
-<li><a href="api/extensions.html#blueprint_fields">blueprint_fields</a></li>
-<li><a href="api/extensions.html#blueprint_setup">blueprint_setup</a></li>
-<li><a href="api/extensions.html#around_serialize_object">around_serialize_object</a> | <a href="api/extensions.html#around_serialize_collection">around_serialize_collection</a>
-<ul>
-<li><a href="api/extensions.html#object_input">object_input</a> | <a href="api/extensions.html#collection_input">collection_input</a></li>
-<li><a href="api/extensions.html#blueprint_input">blueprint_input</a>
-<ul>
-<li><a href="api/extensions.html#extract_value">extract_value</a></li>
-<li><a href="api/extensions.html#field_value">field_value</a> | <a href="api/extensions.html#object_field_value">object_field_value</a> | <a href="api/extensions.html#collection_field_value">collection_field_value</a></li>
-<li><a href="api/extensions.html#exclude_field">exclude_field?</a> | <a href="api/extensions.html#exclude_object_field">exclude_object_field?</a> | <a href="api/extensions.html#exclude_collection_field">exclude_collection_field?</a>
-<ul>
-<li><em>blueprint_fields …</em></li>
-</ul>
-</li>
-<li><a href="api/extensions.html#field_result">field_result</a> | <a href="api/extensions.html#object_field_result">object_field_result</a> | <a href="api/extensions.html#collection_field_result">collection_field_result</a></li>
-</ul>
-</li>
-<li><a href="api/extensions.html#blueprint_output">blueprint_output</a></li>
-<li><a href="api/extensions.html#object_output">object_output</a> | <a href="api/extensions.html#collection_output">collection_output</a></li>
-</ul>
-</li>
-<li><a href="api/extensions.html#json">json</a></li>
-</ul>
-<p>Additionally, the <a href="api/extensions.html#around_hook">around_hook</a> hook runs around all other hooks.</p>
-<h4 id="chain-vs-override-hooks"><a class="header" href="#chain-vs-override-hooks">Chain vs override hooks</a></h4>
-<p>Most hooks are <em>chained</em>; if you have N of the same hook, they run one after the other, using the output of one as input for the next. However, a few hooks are <em>override</em> hooks: only the last one runs. Override hooks are used to replace built-in functionality, like the JSON serializer.</p>
-<h2 id="blueprint"><a class="header" href="#blueprint">blueprint</a></h2>
+<p>Hooks are called in the following order. They are passed a <a href="#context-objects-1">context object</a> as an argument.</p>
+<div class="hooks"><a href="#around_result">around_result</a>
+  <a href="#around_blueprint_init">around_blueprint_init</a>
+    <a href="#around_serialize_object">around_serialize_object</a> | <a href="#around_serialize_collection">around_serialize_collection</a>
+      <a href="#around_blueprint">around_blueprint</a>
+        <a href="#around_field_value">around_field_value</a> | <a href="#around_object_value">around_object_value</a> | <a href="#around_collection_value">around_collection_value</a>
+          <a href="#around_blueprint_init">around_blueprint_init...</a>
+</div>
+
+<p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
+<h3 id="around_result"><a class="header" href="#around_result">around_result</a></h3>
 <blockquote>
-<p><em>Override hook</em><br />
-<strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong> NOTE <code>fields</code> will be empty<br />
-<strong>@return <a href="api/./fields.html">Class</a></strong> The Blueprint class to use<br />
-<strong>@cost</strong> Low - run once during render</p>
+<p><strong>param</strong> <a href="#result-context">Result Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Low - run once during render</p>
 </blockquote>
-<p>Return a different blueprint class to render with. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#viewoption">View Option extension</a> uses this hook.</p>
-<p>The following example looks for a <code>view</code> option passed in to <code>render</code>. If present, it attempts to return a child view.</p>
-<pre><code class="language-ruby">def blueprint(ctx)
-  view = ctx.options[:view]
-  view ? ctx.blueprint.class[view] : ctx.blueprint.class
-end
-</code></pre>
-<h2 id="blueprint_fields"><a class="header" href="#blueprint_fields">blueprint_fields</a></h2>
-<blockquote>
-<p><em>Override hook</em><br />
-<strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
-<strong>@return <a href="api/./fields.html">Array&lt;Field&gt;</a></strong> The fields to serialize<br />
-<strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
-</blockquote>
-<p>Customize the order fields are rendered in - or strip out certain fields entirely. If multiple extensions define this hook, <em>only the last one</em> will be used. The included, optional <a href="api/../dsl/extensions.html#field-order">Field Order extension</a> uses this hook.</p>
-<p>In this hook, <code>context.fields</code> will contain all of the view's fields in the order in which they were defined. (Fields from <code>use</code>d partials are appended.) The fields this hook returns are used as <code>context.fields</code> in all subsequent hooks:</p>
-<p>The following example removes all collection fields and sorts the rest by name:</p>
-<pre><code class="language-ruby">def blueprint_fields(ctx)
-  ctx.fields.
-    reject { |f| f.type == :collection }.
-    sort_by(&amp;:name)
-end
-</code></pre>
-<p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="blueprint_setup"><a class="header" href="#blueprint_setup">blueprint_setup</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#render-context">Render Context</a></strong><br />
-<strong>@cost</strong> Low - run once for <em>every blueprint class</em> during render</p>
-</blockquote>
-<p>Allows an extension to perform setup operations for the render of the current blueprint.</p>
-<pre><code class="language-ruby">def blueprint_setup(ctx)
-  # do setup for ctx.blueprint
-end
-</code></pre>
-<p>It's run once <em>per blueprint class</em> during a render. So if you're rendering an array of widgets with <code>WidgetBlueprint</code>, which contains <code>PartBlueprint</code>s and <code>CategoryBlueprint</code>s, this hook will be called <strong>three</strong> times: one for each of those blueprints.</p>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="around_serialize_object"><a class="header" href="#around_serialize_object">around_serialize_object</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
-<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>Wraps the rendering of every object (<code>context.object</code>). This could be the top-level object or one from an association N levels deep (check <code>context.depth</code>).</p>
-<p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_serialize_object(ctx)
-  # do something before render
-  yield # render
-  # do something after render
-end
-</code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="around_serialize_collection"><a class="header" href="#around_serialize_collection">around_serialize_collection</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current collection being rendered<br />
-<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>Wraps the rendering of every collection (<code>context.object</code>). This could be the top-level collection or one from an association N levels deep (check <code>context.depth</code>).</p>
-<p>Rendering happens during <code>yield</code>, allowing the hook to run code before and after the render. If <code>yield</code> is not called exactly one time, a <code>BlueprinterError</code> is thrown.</p>
-<pre><code class="language-ruby">def around_serialize_collection(ctx)
-  # do something before render
-  yield # render
-  # do something after render
-end
-</code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="object_input"><a class="header" href="#object_input">object_input</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
-<strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
-<strong>@cost</strong> Medium - run every time an object is rendered</p>
-</blockquote>
-<p>Runs before serialization of any object from <code>render</code>, <code>render_object</code>, or a blueprint's <code>object</code> field. You may modify and return <code>context.object</code> or return a different object entirely. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
-<p>If you want to target only the root object, check <code>context.depth == 1</code>.</p>
-<pre><code class="language-ruby">def object_input(ctx)
-  ctx.object
-end
-</code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="collection_input"><a class="header" href="#collection_input">collection_input</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current collection being rendered<br />
-<strong>@return Object</strong> A new or modified version of <code>context.object</code>, which will be array-like<br />
-<strong>@cost</strong> Medium - run every time a collection is rendered</p>
-</blockquote>
-<p>Runs before serialization of any collection from <code>render</code>, <code>render_collection</code>, or a blueprint's <code>collection</code> field. You may modify and return <code>context.object</code> or return a different collection entirely. <strong>Whatever collection is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
-<p>If you want to target only the root collection, check <code>context.depth == 1</code>.</p>
-<pre><code class="language-ruby">def collection_input(ctx)
-  ctx.object
-end
-</code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="blueprint_input"><a class="header" href="#blueprint_input">blueprint_input</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#object-context">Object Context</a></strong> <code>context.object</code> will contain the current object being rendered<br />
-<strong>@return Object</strong> A new or modified version of <code>context.object</code><br />
-<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>Run each time a blueprint renders, allowing you to modify or return a new object (<code>context.object</code>) used for the render. For collections of size N, it will be called N times. <strong>Whatever object is returned will be used as context.object in subsequent hooks, then rendered.</strong></p>
-<pre><code class="language-ruby">def blueprint_input(ctx)
-  ctx.object
-end
-</code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="extract_value"><a class="header" href="#extract_value">extract_value</a></h2>
-<blockquote>
-<p><em>Override hook</em><br />
-<strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The value for the field<br />
-<strong>@cost</strong> High - run for every field, object, and collection</p>
-</blockquote>
-<p>Called on each field, object, and collection to extract a field's value from an object. The return value is used as <code>context.value</code> in subsequent hooks. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
-<pre><code class="language-ruby">def extract_value(ctx)
-  ctx.object.public_send(ctx.field.from)
-end
-</code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="field_value"><a class="header" href="#field_value">field_value</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The value to be rendered<br />
-<strong>@cost</strong> High - run for every field (not object or collection fields)</p>
-</blockquote>
-<p>Run after a field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent field_value hooks, then run through any formatters and rendered.</strong></p>
-<pre><code class="language-ruby">def field_value(ctx)
-  case ctx.value
-  when String then ctx.value.strip
-  else ctx.value
+<p>The <code>around_result</code> hook runs around the entire serialization process, allowing you to modify the initial input and final output.</p>
+<p>The following example hook caches an entire result for five minutes.</p>
+<pre><code class="language-ruby">def around_result(ctx)
+  cache(ctx.blueprint.class, ctx.object, ctx.format, ttl: 300) do
+    yield ctx
   end
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="object_field_value"><a class="header" href="#object_field_value">object_field_value</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The object to be rendered for this field<br />
-<strong>@cost</strong> High - run for every object field</p>
-</blockquote>
-<p>Run after an object field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent object_field_value hooks, then rendered.</strong></p>
-<pre><code class="language-ruby">def object_field_value(ctx)
-  ctx.value
+<h4 id="finalizing"><a class="header" href="#finalizing">Finalizing</a></h4>
+<p>The <code>final</code> and <code>final?</code> helpers allow middleware to declare, and check if, a result is “finalized” and should no longer be altered. These helpers should <strong>only</strong> be used in <code>around_result</code>.</p>
+<pre><code class="language-ruby">def around_result(ctx)
+  result = yield ctx
+  return result if final? result
+
+  result = somehow_modify result
+  final result
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="collection_field_value"><a class="header" href="#collection_field_value">collection_field_value</a></h2>
+<h3 id="around_blueprint_init"><a class="header" href="#around_blueprint_init">around_blueprint_init</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The array-like collection to be rendered for this field<br />
-<strong>@cost</strong> High - run for every collection field</p>
+<p><strong>param</strong> <a href="#render-context">Render Context</a> <br><strong>cost</strong> Low - run once per used blueprint during render</p>
 </blockquote>
-<p>Run after a collection field value is extracted from <code>context.object</code>. The extracted value is available in <code>context.value</code>. <strong>Whatever value you return is used as context.value in subsequent collection_field_value hooks, then rendered.</strong></p>
-<pre><code class="language-ruby">def collection_field_value(ctx)
-  ctx.value.compact
+<p>The <code>around_blueprint_init</code> hook runs the first time a new Blueprint is used during a render cycle. It can be used by extensions to perform time-saving setup before a render.</p>
+<pre><code class="language-ruby">def around_blueprint_init(ctx)
+  perform_setup ctx.blueprint, ctx.options
+  yield ctx
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="exclude_field"><a class="header" href="#exclude_field">exclude_field?</a></h2>
+<p><code>around_blueprint_init</code> MUST yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
+<h3 id="around_serialize_object"><a class="header" href="#around_serialize_object">around_serialize_object</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
-<strong>@cost</strong> High - run for every field (not object or collection fields)</p>
+<p><strong>param</strong> <a href="#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>If any extension with this hook returns truthy, the field will be excluded from the output. The formatted field value is available in <code>context.value</code>.</p>
-<pre><code class="language-ruby">def exclude_field?(ctx)
-  ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
+<p>The <code>around_serialize_object</code> hook runs around every object (as opposed to collection) that’s serialized. The following example would see it called <strong>four</strong> times: once for the category itself and once for each item.</p>
+<pre><code class="language-ruby">CategoryBlueprint.render({
+  name: "Foo",
+  items: [item1, item2, item3],
+}).to_json
+</code></pre>
+<p>The following example hook modifies both the input object and the output result.</p>
+<pre><code class="language-ruby">def around_serialize_object(ctx)
+  # modify the object before it's serialized
+  ctx.object = modify ctx.object
+
+  result = yield ctx
+
+  # modify the result
+  result.merge({ foo: "Bar" })
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="exclude_object_field"><a class="header" href="#exclude_object_field">exclude_object_field?</a></h2>
+<h3 id="around_serialize_collection"><a class="header" href="#around_serialize_collection">around_serialize_collection</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
-<strong>@cost</strong> High - run for every object field</p>
+<p><strong>param</strong> <a href="#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>If any extension with this hook returns truthy, the object field will be excluded from the output. The field object value is available in <code>context.value</code>.</p>
-<pre><code class="language-ruby">def exclude_object_field?(ctx)
-  ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
+<p>The <code>around_serialize_collection</code> hook runs around every collection that’s serialized. The following example would see it called three times: once for the array of categories and once for each set of items.</p>
+<pre><code class="language-ruby">CategoryBlueprint.render([
+  { name: "Foo", items: [item1] },
+  { name: "Bar", items: [item2, item3] },
+]).to_json
+</code></pre>
+<p>The following example hook modifies both the input collection and the output results.</p>
+<pre><code class="language-ruby">def around_serialize_collection(ctx)
+  # modify the collection before it's serialized
+  ctx.object = modify ctx.object
+
+  result = yield ctx
+
+  # modify the result
+  result.reject { |obj| some_logic obj }
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="exclude_collection_field"><a class="header" href="#exclude_collection_field">exclude_collection_field?</a></h2>
+<h3 id="around_blueprint"><a class="header" href="#around_blueprint">around_blueprint</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Boolean</strong> Truthy to exclude the field from the output<br />
-<strong>@cost</strong> High - run for every collection field</p>
+<p><strong>param</strong> <a href="#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
 </blockquote>
-<p>If any extension with this hook returns truthy, the collection field will be excluded from the output. The field collection value is available in <code>context.value</code>.</p>
-<pre><code class="language-ruby">def exclude_collection_field?(ctx)
-  ctx.field.options[:tuesday] == false &amp;&amp; Date.today.tuesday?
+<p>The <code>around_blueprint</code> hook runs every time an object, including members of collections, are serialized. The following example would see it called three times: once for the category and once for each item.</p>
+<pre><code class="language-ruby">CategoryBlueprint.render({ name: "Foo", items: [item1, item] }).to_json
+</code></pre>
+<p>The following example hook modifies both the input object and the output result.</p>
+<pre><code class="language-ruby">def around_blueprint(ctx)
+  # modify the object before it's serialized
+  ctx.object = modify ctx.object
+
+  result = yield ctx
+
+  # modify the result
+  result.merge({ foo: "Bar" })
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="field_result"><a class="header" href="#field_result">field_result</a></h2>
+<h3 id="around_field_value"><a class="header" href="#around_field_value">around_field_value</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The value to be rendered for this field<br />
-<strong>@cost</strong> High - run for every field</p>
+<p><strong>param</strong> <a href="#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every (non-object, non-collection) field</p>
 </blockquote>
-<p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="api/extensions.html#exclude_field">exclude_field?</a> returned <code>true</code>.</p>
-<pre><code class="language-ruby">def field_result(ctx)
-  ctx.value
+<p>The <code>around_field_value</code> hook runs around every non-object, non-collection field that’s extracted. The following example trims leading and trailing whitespace from string values.</p>
+<pre><code class="language-ruby">def around_field_value(ctx)
+  val = yield ctx
+  case val
+  when String then val.strip
+  else val
+  end
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="object_field_result"><a class="header" href="#object_field_result">object_field_result</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The value to be rendered for this field<br />
-<strong>@cost</strong> High - run for every field</p>
-</blockquote>
-<p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="api/extensions.html#exclude_object_field">exclude_object_field?</a> returned <code>true</code>.</p>
-<pre><code class="language-ruby">def object_field_result(ctx)
-  ctx.value
+<h4 id="skipping-fields"><a class="header" href="#skipping-fields">Skipping fields</a></h4>
+<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
+<pre><code class="language-ruby">def around_field_value(ctx)
+  val = yield ctx
+  skip if ctx.field.options[:skip_on] == val
+  val
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="collection_field_result"><a class="header" href="#collection_field_result">collection_field_result</a></h2>
+<h3 id="around_object_value"><a class="header" href="#around_object_value">around_object_value</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#field-context">Field Context</a></strong> <code>context.field</code> will contain the current field being serialized, and <code>context.object</code> the current object<br />
-<strong>@return Object</strong> The value to be rendered for this field<br />
-<strong>@cost</strong> High - run for every field</p>
+<p><strong>param</strong> <a href="#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every object field</p>
 </blockquote>
-<p>The final value to be used for the field, available in <code>context.value</code>. You may modify or replace it. <strong>Whatever value you return is used as context.value in subsequent hooks, then rendered.</strong> Not called if <a href="api/extensions.html#exclude_collection_field">exclude_collection_field?</a> returned <code>true</code>.</p>
-<pre><code class="language-ruby">def collection_field_result(ctx)
-  ctx.value
+<p>The <code>around_object_value</code> hook runs around every object field that’s extracted (before it’s serialized with a Blueprint). The following example adds a <code>foo</code> attribute to each object Hash.</p>
+<pre><code class="language-ruby">def around_object_value(ctx)
+  val = yield ctx
+  case val
+  when Hash then val.merge({ foo: "bar" })
+  else val
+  end
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="blueprint_output"><a class="header" href="#blueprint_output">blueprint_output</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the current blueprint, and <code>context.object</code> the current object<br />
-<strong>@return Hash</strong> The Hash to use as this blueprint's serialized output<br />
-<strong>@cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>Run after a blueprint serializes an object to a Hash, allowing you to modify the output. The Hash is available in <code>context.result</code>. For collections of size N, it will be called N times. <strong>Whatever Hash is returned will be used as context.result in subsequent hooks and used as the serialized output for this blueprint.</strong></p>
-<pre><code class="language-ruby">def blueprint_output(ctx)
-  ctx.result.merge(ctx.object.extra_fields)
+<h4 id="skipping-fields-1"><a class="header" href="#skipping-fields-1">Skipping fields</a></h4>
+<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
+<pre><code class="language-ruby">def around_object_value(ctx)
+  val = yield ctx
+  skip if ctx.field.options[:skip_on] == val
+  val
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="object_output"><a class="header" href="#object_output">object_output</a></h2>
+<h3 id="around_collection_value"><a class="header" href="#around_collection_value">around_collection_value</a></h3>
 <blockquote>
-<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash from the current blueprint, and <code>context.object</code> the current object<br />
-<strong>@return [Object]</strong> The value to use for the fully serialized object<br />
-<strong>@cost</strong> High - run for every object field</p>
+<p><strong>param</strong> <a href="#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every collection field</p>
 </blockquote>
-<p>Run after an object is fully serialized. This may be the root object from <code>render</code> or an <code>object</code> field from a blueprint (check <code>context.depth</code>). This example wraps the result in a metadata block:</p>
-<pre><code class="language-ruby">def object_output(ctx)
-  { data: ctx.value, metadata: {...} }
+<p>The <code>around_collection_value</code> hook runs around every collection field that’s extracted (before it’s serialized with a Blueprint). The following example removes deleted widgets from a collection.</p>
+<pre><code class="language-ruby">def around_collection_value(ctx)
+  val = yield ctx
+  case ctx.field.blueprint
+  when WidgetBlueprint
+    val.reject { |widget| widget.deleted? }
+  else
+    val
+  end
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="collection_output"><a class="header" href="#collection_output">collection_output</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the array of serialized Hashes from the current blueprint, and <code>context.object</code> the current collection<br />
-<strong>@return Object</strong> The value to use for the fully serialized collection<br />
-<strong>@cost</strong> High - run for every collection field</p>
-</blockquote>
-<p>Run after a collection is fully serialized. This may be the root collection from <code>render</code> or a <code>collection</code> field from a blueprint (check <code>context.depth</code>). This example wraps the result in a metadata block:</p>
-<pre><code class="language-ruby">def collection_output(ctx)
-  { data: ctx.value, metadata: {...} }
+<h4 id="skipping-fields-2"><a class="header" href="#skipping-fields-2">Skipping fields</a></h4>
+<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
+<pre><code class="language-ruby">def around_collection_value(ctx)
+  val = yield ctx
+  skip if ctx.field.options[:skip_on] == val
+  val
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="json"><a class="header" href="#json">json</a></h2>
+<h3 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h3>
 <blockquote>
-<p><em>Override hook</em><br />
-<strong>@param <a href="api/./context-objects.html#result-context">Result Context</a></strong> <code>context.result</code> will contain the serialized Hash or array from the top-level blueprint, and <code>context.object</code> the top-level object or collection<br />
-<strong>@return String</strong> The JSON output<br />
-<strong>@cost</strong> Low - run once per JSON render</p>
+<p><strong>param</strong> <a href="#hook-context">Hook Context</a> <br><strong>cost</strong> Variable - runs around all your extensions</p>
 </blockquote>
-<p>Serializes the final output to JSON. Only called on the top-level blueprint. If multiple extensions define this hook, <em>only the last one</em> will be used.</p>
-<p>The default behavior looks like:</p>
-<pre><code class="language-ruby">def json(ctx)
-  JSON.dump ctx.result
+<p>The <code>around_hook</code> hook runs around all other extension hooks. It <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised. The return value from <code>yield</code> is <strong>not</strong> used, nor is the return value of <code>around_hook</code>.</p>
+<pre><code class="language-ruby">def around_hook(ctx)
+  # do something
+  yield
+  # do something else
 end
 </code></pre>
-<p><a href="api/extensions.html#hooks">↑ Back to Hooks</a></p>
-<h2 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h2>
-<blockquote>
-<p><strong>@param <a href="api/./context-objects.html#hook-context">Hook Context</a></strong><br />
-<strong>@cost</strong> Variable - Depends on what hooks your extensions implement</p>
-</blockquote>
-<p>A special hook that runs around all other extension hooks. Useful for instrumenting. You can exclude an extension's hooks from this hook by putting <code>def hidden? = true</code> in the extension.</p>
-<pre><code class="language-ruby">def around_hook(ext, hook)
-  # Do something before extension hook runs
-  yield # hook runs here
-  # Do something after extension hook runs
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="reflection-1"><a class="header" href="#reflection-1">Reflection</a></h1>
-<p>Blueprints may be reflected on to inspect their views, fields, and options. This is useful for building <a href="api/./extensions.html">extensions</a>, and possibly even for some applications.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="reflection-1"><a class="header" href="#reflection-1">Reflection</a></h1>
+<p>Blueprints may be reflected on to inspect their views, fields, and options. This is useful for building <a href="#extensions-2">extensions</a>, and possibly even for some applications.</p>
 <p>We will use the following blueprint in the examples below:</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
@@ -1264,194 +1102,140 @@ field.blueprint.to_s
 field.blueprint.reflections[:default].fields
 =&gt; # array of fields on the :full view of CompanyBlueprint
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extractors-1"><a class="header" href="#extractors-1">Extractors</a></h1>
-<p>Extractors are <a href="api/./extensions.html#extract_value">extensions</a> that pull field values from the objects you're serializing. The default extraction logic is smart enough for most use cases, but you can create custom extractors if needed. (Note that passing a block to a field completely <a href="api/../dsl/fields.html#extracting-field-values">bypasses extractors</a>.)</p>
-<h2 id="default-extractor"><a class="header" href="#default-extractor">Default Extractor</a></h2>
-<p>The default extractor is a built-in extension. If <code>context.object</code> is a Hash, it tries symbol, then string keys. Otherwise, it calls <code>public_send</code> on the object.</p>
-<pre><code class="language-ruby">class Blueprinter::Extensions::Core::Extractor &lt; Blueprinter::Extension
-  def extract_value(ctx)
-    if ctx.object.is_a? Hash
-      ctx.object[ctx.field.from] || ctx.object[ctx.field.from_str]
-    else
-      ctx.object.public_send(ctx.field.from)
-    end
-  end
-end
-</code></pre>
-<h2 id="custom-extractors-1"><a class="header" href="#custom-extractors-1">Custom Extractors</a></h2>
-<p>Your <a href="api/./extensions.html#extract_value">extract_value</a> hook will be passed a <a href="api/./context-objects.html#field-context">Field context object</a>.</p>
-<pre><code class="language-ruby">class WeirdObjectExtractor &lt; Blueprinter::Extension
-  def extract_value(ctx)
-    # my extraction logic
-  end
-end
-</code></pre>
-<p>There are several ways to use your extractor:</p>
-<ul>
-<li>Add it to your blueprint(s) or view(s) like any other <a href="api/../dsl/extensions.html">extension</a>.</li>
-<li>Add it to specific fields using the <a href="api/../dsl/options.html#extractor">extractor option</a>.</li>
-</ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="context-objects-1"><a class="header" href="#context-objects-1">Context Objects</a></h1>
-<p>Context objects are the arguments passed to APIs like <a href="api/../dsl/fields.html#field-blocks">field blocks</a>, <a href="api/../dsl/options.html">option procs</a> and <a href="api/./extensions.html">extension hooks</a>. There are several kinds of context objects, each with its own set of fields.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="context-objects-1"><a class="header" href="#context-objects-1">Context Objects</a></h1>
+<p>Context objects are the arguments passed to APIs like <a href="#field-blocks">field blocks</a>, <a href="#options-1">option procs</a> and <a href="#extensions-2">extension hooks</a>. There are several kinds of context objects, each with its own set of fields.</p>
 <h2 id="render-context"><a class="header" href="#render-context">Render Context</a></h2>
+<p><em>* Field can be assigned.</em></p>
 <blockquote>
-<p><strong>blueprint</strong><br />
-The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
-<p><strong>fields</strong><br />
-A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+<p><strong>fields</strong> * <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a>.</p>
 </blockquote>
 <blockquote>
-<p><strong>options</strong><br />
-The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+<p><strong>options</strong> * <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
 <blockquote>
-<p><strong>depth</strong><br />
-The current blueprint depth (1-indexed).</p>
+<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
+</blockquote>
+<blockquote>
+<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
 </blockquote>
 <h2 id="object-context"><a class="header" href="#object-context">Object Context</a></h2>
+<p><em>* Field can be assigned.</em></p>
 <blockquote>
-<p><strong>blueprint</strong><br />
-The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
-<p><strong>fields</strong><br />
-A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+<p><strong>fields</strong> <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#blueprint_fields">blueprint_fields</a> hook.</p>
 </blockquote>
 <blockquote>
-<p><strong>options</strong><br />
-The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+<p><strong>options</strong> <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
 <blockquote>
-<p><strong>object</strong><br />
-The object or collection currently being serialized.</p>
+<p><strong>object</strong> * <br>The object or collection currently being serialized.</p>
 </blockquote>
 <blockquote>
-<p><strong>depth</strong><br />
-The current blueprint depth (1-indexed).</p>
+<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
+</blockquote>
+<blockquote>
+<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
 </blockquote>
 <h2 id="field-context"><a class="header" href="#field-context">Field Context</a></h2>
 <blockquote>
-<p><strong>blueprint</strong><br />
-The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
-<p><strong>fields</strong><br />
-A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+<p><strong>fields</strong> <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#blueprint_fields">blueprint_fields</a> hook.</p>
 </blockquote>
 <blockquote>
-<p><strong>options</strong><br />
-The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+<p><strong>options</strong> <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
 <blockquote>
-<p><strong>object</strong><br />
-The object currently being serialized.</p>
+<p><strong>object</strong> <br>The object currently being serialized.</p>
 </blockquote>
 <blockquote>
-<p><strong>field</strong><br />
-A struct of the field, object, or collection currently being rendered. You can use this to access the field's name and options. See <a href="api/./fields.html">Fields API</a>.</p>
+<p><strong>field</strong> <br>A struct of the field, object, or collection currently being rendered. You can use this to access the field’s name and options. See <a href="#fields-3">Fields API</a>.</p>
 </blockquote>
 <blockquote>
-<p><strong>value</strong><br />
-The extracted field value. (In certain situations, like the extractor API and field blocks, it will always be <code>nil</code> since nothing has been extracted yet.)</p>
+<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
 </blockquote>
 <blockquote>
-<p><strong>depth</strong><br />
-The current blueprint depth (1-indexed).</p>
+<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
 </blockquote>
 <h2 id="result-context"><a class="header" href="#result-context">Result Context</a></h2>
+<p><em>* Field can be assigned.</em></p>
 <blockquote>
-<p><strong>blueprint</strong><br />
-The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+<p><strong>blueprint</strong> * <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
-<p><strong>fields</strong><br />
-A frozen array of field definitions that were serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+<p><strong>fields</strong> <br>A frozen array of field definitions that were serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#around_blueprint_init">around_blueprint_init</a> hook.</p>
 </blockquote>
 <blockquote>
-<p><strong>options</strong><br />
-The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+<p><strong>options</strong> * <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
 <blockquote>
-<p><strong>object</strong><br />
-The object or collection that was just serialized.</p>
+<p><strong>object</strong> * <br>The object or collection that was just serialized.</p>
 </blockquote>
 <blockquote>
-<p><strong>result</strong><br />
-A serialized result. Depending on the situation this will be a Hash or an array of Hashes.</p>
+<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
 </blockquote>
 <blockquote>
-<p><strong>depth</strong><br />
-The current blueprint depth (1-indexed).</p>
+<p><strong>format</strong> * <br>The requested serialization format (e.g. <code>:json</code>, <code>:hash</code>).</p>
 </blockquote>
 <h2 id="hook-context"><a class="header" href="#hook-context">Hook Context</a></h2>
 <blockquote>
-<p><strong>blueprint</strong><br />
-The current Blueprint instance. You can use this to access the Blueprint's name, options, reflections, and instance methods.</p>
+<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
 </blockquote>
 <blockquote>
-<p><strong>fields</strong><br />
-A frozen array of field definitions that will be serialized, in order. See <a href="api/./fields.html">Fields API</a> and the <a href="api/./extensions.html#blueprint_fields">blueprint_fields</a> hook.</p>
+<p><strong>fields</strong> <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#around_blueprint_init">around_blueprint_init</a> hook.</p>
 </blockquote>
 <blockquote>
-<p><strong>options</strong><br />
-The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
+<p><strong>options</strong> <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
 </blockquote>
 <blockquote>
-<p><strong>extension</strong><br />
-Instance of the current extension</p>
+<p><strong>extension</strong> <br>Instance of the current extension</p>
 </blockquote>
 <blockquote>
-<p><strong>hook</strong><br />
-Name of the current hook</p>
+<p><strong>hook</strong> <br>Name of the current hook</p>
 </blockquote>
 <blockquote>
-<p><strong>depth</strong><br />
-The current blueprint depth (1-indexed).</p>
+<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="fields-3"><a class="header" href="#fields-3">Fields</a></h1>
+<blockquote>
+<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="fields-3"><a class="header" href="#fields-3">Fields</a></h1>
 <p>Extensions, reflection, and other APIs allow access to structs that describe fields.</p>
 <blockquote>
-<p><strong>type</strong><br />
-<em>Symbol</em> <code>:field | :object | :collection</code><br />
-The type of field.</p>
+<p><strong>type</strong><br><em>Symbol</em> <code>:field | :object | :collection</code><br>The type of field.</p>
 </blockquote>
 <blockquote>
-<p><strong>name</strong><br />
-<em>Symbol</em><br />
-Name of the field as it will appear in the JSON or Hash output.</p>
+<p><strong>name</strong><br><em>Symbol</em><br>Name of the field as it will appear in the JSON or Hash output.</p>
 </blockquote>
 <blockquote>
-<p><strong>from</strong><br />
-<em>Symbol</em><br />
-Name of the field in the source object (usually the same as <code>name</code>).</p>
+<p><strong>from</strong><br><em>Symbol</em><br>Name of the field in the source object (usually the same as <code>name</code>).</p>
 </blockquote>
 <blockquote>
-<p><strong>from_str</strong><br />
-<em>String</em><br />
-Same as <code>from</code>, but as a frozen string.</p>
+<p><strong>from_str</strong><br><em>String</em><br>Same as <code>from</code>, but as a frozen string.</p>
 </blockquote>
 <blockquote>
-<p><strong>value_proc</strong><br />
-<em>nil | Proc</em><br />
-The block passed to the field definition (if given). Expects a <a href="api/./context-objects.html#field-context">Field Context</a> argument and returns the field value.</p>
+<p><strong>value_proc</strong><br><em>nil | Proc</em><br>The block passed to the field definition (if given). Expects a <a href="#field-context">Field Context</a> argument and returns the field value.</p>
 </blockquote>
 <blockquote>
-<p><strong>options</strong><br />
-<em>Hash</em><br />
-A frozen Hash of any additional options passed to the field.</p>
+<p><strong>options</strong><br><em>Hash</em><br>A frozen Hash of any additional options passed to the field.</p>
 </blockquote>
 <blockquote>
-<p><strong>blueprint</strong> (object and collection only)<br />
-<em>Class</em><br />
-The blueprint to use for serializaing the object or collection.</p>
+<p><strong>blueprint</strong> (object and collection only)<br><em>Class</em><br>The blueprint to use for serializaing the object or collection.</p>
 </blockquote>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
-<p>You have two options when updating from the legacy/V1 API: <a href="upgrading/index.html#full-update">full update</a> or <a href="upgrading/index.html#incremental-update">incremental update</a>.</p>
-<p>Regardless which you choose, you'll need to familiarize yourself with the <a href="upgrading/../dsl/index.html">new DSL</a> and <a href="upgrading/../api/index.html">API</a>. The rest of this section will focus on the differences between V1 and V2.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
+<p>You have two options when updating from the legacy/V1 API: <a href="#full-update">full update</a> or <a href="#incremental-update">incremental update</a>.</p>
+<p>Regardless which you choose, you’ll need to familiarize yourself with the <a href="#blueprinter-dsl">new DSL</a> and <a href="#blueprinter-api">API</a>. The rest of this section will focus on the differences between V1 and V2.</p>
 <h2 id="full-update"><a class="header" href="#full-update">Full update</a></h2>
-<p>Update <code>blueprinter</code> to 2.x. All of your blueprints will need updated to use the <a href="upgrading/../dsl/index.html">new DSL</a>. If you're making use of extensions, custom extractors, or transformers, they'll also need updated to the <a href="upgrading/../api/index.html">new API</a>.</p>
+<p>Update <code>blueprinter</code> to 2.x. All of your blueprints will need updated to use the <a href="#blueprinter-dsl">new DSL</a>. If you’re making use of extensions, custom extractors, or transformers, they’ll also need updated to the <a href="#blueprinter-api">new API</a>.</p>
 <h2 id="incremental-update"><a class="header" href="#incremental-update">Incremental update</a></h2>
 <p>Larger applications may find it easier to update incrementally. Update <code>blueprinter</code> to 1.2.x, which contains both the legacy/V1 and V2 APIs. They can be used side-by-side.</p>
 <pre><code class="language-ruby"># A legacy/V1 blueprint
@@ -1478,16 +1262,17 @@ class CategoryBlueprint &lt; ApplicationBlueprint
   end
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<p>Blueprinter V2 has no concept of global configruation like V1's <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into <code>ApplicationBlueprint</code>, all your application's blueprints and views will inherit it.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<p>Blueprinter V2 has no concept of global configruation like V1’s <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your “global” configuration into <code>ApplicationBlueprint</code>, all your application’s blueprints and views will inherit it.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   options[:exclude_if_nil] = true
   extensions &lt;&lt; MyExtension.new
 end
 </code></pre>
-<p>Read more about <a href="upgrading/../dsl/options.html">options</a> and <a href="upgrading/../dsl/extensions.html">extensions</a>.</p>
+<p>Read more about <a href="#options-1">options</a> and <a href="#extensions">extensions</a>.</p>
 <h2 id="overrides"><a class="header" href="#overrides">Overrides</a></h2>
-<p>Child classes, <a href="upgrading/../dsl/views.html">views</a>, and <a href="upgrading/../dsl/partials.html">partials</a> can override their inherited configuration.</p>
+<p>Child classes, <a href="#views">views</a>, and <a href="#partials">partials</a> can override their inherited configuration.</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
   options[:exclude_if_nil] = false
 
@@ -1497,19 +1282,19 @@ end
   end
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="customization"><a class="header" href="#customization">Customization</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="customization"><a class="header" href="#customization">Customization</a></h1>
 <h2 id="formatting"><a class="header" href="#formatting">Formatting</a></h2>
-<p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="upgrading/../dsl/formatters.html">Learn more</a>.</p>
+<p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="#formatters">Learn more</a>.</p>
 <pre><code class="language-ruby">format(Date) { |date| date.iso8601 }
 </code></pre>
-<p>The <a href="upgrading/../api/extensions.html#field_value">field_value</a>, <a href="upgrading/../api/extensions.html#object_field_value">object_field_value</a>, and <a href="upgrading/../api/extensions.html#collection_field_value">collection_field_value</a> extension hooks can also be used.</p>
-<h2 id="custom-extractors-2"><a class="header" href="#custom-extractors-2">Custom extractors</a></h2>
-<p>Custom extraction in V2 is accomplished using the <a href="upgrading/../api/extensions.html#extract_value">extract_value</a> extension hook.</p>
-<p>Fields, objects, and collections continue to have an <a href="upgrading/../dsl/options.html#extractor">extractor</a> option. Simply pass your extension class to it. <a href="upgrading/../api/extractors.html">Learn more</a>.</p>
-<p>Unlike Legacy/V1, custom extractors <em>do not override blocks</em> passed to fields, objects, and collections. If a field has a block, that's how it's extracted.</p>
+<p>The <a href="#around_field_value">around_field_value</a>, <a href="#around_object_value">around_object_value</a>, and <a href="#around_collection_value">around_collection_value</a> extension hooks can also be used.</p>
+<h2 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h2>
+<p>Custom extraction in V2 can also be accomplished with the <a href="#around_field_value">around_field_value</a>, <a href="#around_object_value">around_object_value</a>, and <a href="#around_collection_value">around_collection_value</a> hooks. <a href="#extracting-with-extensions">Read more</a>.</p>
 <h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
-<p>Blueprinter V2's <a href="upgrading/../api/extensions.html">extension hooks</a> offer many ways to transform your inputs and outputs. The <a href="upgrading/../api/extensions.html#blueprint_output">blueprint_output</a> hook offers equivalent functionality to Legacy/V1 transformers.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="fields-4"><a class="header" href="#fields-4">Fields</a></h1>
+<p>Blueprinter V2’s <a href="#extensions-2">extension hooks</a> offer many ways to transform your inputs and outputs. The <a href="#around_blueprint">around_blueprint</a> hook offers equivalent functionality to Legacy/V1 transformers.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="fields-4"><a class="header" href="#fields-4">Fields</a></h1>
 <h2 id="identifier-field-and-view"><a class="header" href="#identifier-field-and-view">Identifier field and view</a></h2>
 <p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it in your <code>ApplicationBlueprint</code>.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
@@ -1544,8 +1329,8 @@ field :description, from: :desc
 end
 </code></pre>
 <h2 id="field-order-1"><a class="header" href="#field-order-1">Field order</a></h2>
-<p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="upgrading/../api/extensions.html#blueprint_fields">blueprint_fields</a> extension hook or the built-in <a href="upgrading/../dsl/extensions.html#field-order">FieldOrder</a> extension.</p>
-<p>The following replicates Legacy/V1's default field order using the built-in <a href="upgrading/../dsl/extensions.html#field-order">FieldOrder</a> extension.</p>
+<p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="#around_blueprint_init">around_blueprint_init</a> extension hook or the built-in <a href="#field-order">FieldOrder</a> extension.</p>
+<p>The following replicates Legacy/V1’s default field order using the built-in <a href="#field-order">FieldOrder</a> extension.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
   extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
     if a.name == :id
@@ -1558,10 +1343,11 @@ end
   end
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="rendering-1"><a class="header" href="#rendering-1">Rendering</a></h1>
-<p>You can read the full <a href="upgrading/../rendering.html">rendering documentation here</a>. This page highlights the main differences between V1 and V2.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rendering-1"><a class="header" href="#rendering-1">Rendering</a></h1>
+<p>You can read the full <a href="#rendering">rendering documentation here</a>. This page highlights the main differences between V1 and V2.</p>
 <h3 id="rendering-to-json-1"><a class="header" href="#rendering-to-json-1">Rendering to JSON</a></h3>
-<p>If you're using Rails's <code>render json:</code>, V2 blueprints should continue to work like Legacy/V1:</p>
+<p>If you’re using Rails’s <code>render json:</code>, V2 blueprints should continue to work like Legacy/V1:</p>
 <pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
 </code></pre>
 <p>Otherwise, it now looks like this:</p>
@@ -1571,14 +1357,15 @@ end
 <pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
 </code></pre>
 <h3 id="views-2"><a class="header" href="#views-2">Views</a></h3>
-<p>V2's preferred method of rendering views is:</p>
+<p>V2’s preferred method of rendering views is:</p>
 <pre><code class="language-ruby">WidgetBlueprint[:extended].render(widget).to_json
 </code></pre>
-<p>However, the <a href="upgrading/../dsl/extensions.html#viewoption">ViewOption</a> extension can be enabled to allow V1-style view rendering:</p>
+<p>However, the <a href="#viewoption">ViewOption</a> extension can be enabled to allow V1-style view rendering:</p>
 <pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :extended).to_json
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="reflection-2"><a class="header" href="#reflection-2">Reflection</a></h1>
-<p>The <a href="upgrading/../api/reflection.html">V2 Reflection API</a> has very few changes from Legacy/V1.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="reflection-2"><a class="header" href="#reflection-2">Reflection</a></h1>
+<p>The <a href="#reflection-1">V2 Reflection API</a> has very few changes from Legacy/V1.</p>
 <h2 id="reflecting-on-fields"><a class="header" href="#reflecting-on-fields">Reflecting on fields</a></h2>
 <p>Regular fields (no change):</p>
 <pre><code class="language-ruby">MyBlueprint.reflections[:default].fields
@@ -1592,7 +1379,7 @@ MyV2Blueprint.reflections[:default].objects
 MyV2Blueprint.reflections[:default].collections
 </code></pre>
 <h2 id="field-names"><a class="header" href="#field-names">Field names</a></h2>
-<p><a href="upgrading/../api/reflection.html#field-metadata">V2's field metadata</a> is similar, but there's an important different in <code>name</code>.</p>
+<p><a href="#field-metadata">V2’s field metadata</a> is similar, but there’s an important different in <code>name</code>.</p>
 <h4 id="legacyv1"><a class="header" href="#legacyv1">Legacy/V1</a></h4>
 <p>In Legacy/V1, <code>name</code> refers to what the field is called in the <em>input</em>.</p>
 <pre><code class="language-ruby">class MyV1Blueprint &lt; Blueprinter::Base
@@ -1625,16 +1412,19 @@ ref.fields[:bar].name
 ref.fields[:bar].from
 =&gt; :foo
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="extensions-3"><a class="header" href="#extensions-3">Extensions</a></h1>
-<p>The <a href="upgrading/../api/extensions.html">V2 Extension API</a>, as well as the DSL for <a href="upgrading/../dsl/extensions.html">enabling V2 extensions</a>, are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: <code>pre_render</code>. V2 has <a href="upgrading/../api/extensions.html#hooks">over a dozen</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="extensions-3"><a class="header" href="#extensions-3">Extensions</a></h1>
+<p>The <a href="#extensions-2">V2 Extension API</a>, as well as the DSL for <a href="#extensions">enabling V2 extensions</a>, are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: <code>pre_render</code>. V2 has <a href="#hooks">over a dozen</a>.</p>
 <h2 id="porting-pre_render"><a class="header" href="#porting-pre_render">Porting pre_render</a></h2>
-<p>Legacy/V1's <code>pre_render</code> hook does not exist in V2, but it has three possible replacements:</p>
+<p>Legacy/V1’s <code>pre_render</code> hook does not exist in V2, but it has several possible replacements:</p>
 <ul>
-<li><a href="upgrading/../api/extensions.html#object_input">object_input</a> intercept an object before it's serialized</li>
-<li><a href="upgrading/../api/extensions.html#collection_input">collection_input</a> intercept a collection before it's serialized</li>
-<li><a href="upgrading/../api/extensions.html#blueprint_input">blueprint_input</a> runs each time a blueprint serializes an object</li>
+<li><a href="#around_result">around_result</a> runs once around each entire result</li>
+<li><a href="#around_serialize_object">around_serialize_object</a> runs around each object’s serialization</li>
+<li><a href="#around_serialize_collection">around_serialize_collection</a> runs around each collection’s serialization</li>
+<li><a href="#around_blueprint">around_blueprint</a> runs each time a blueprint serializes an object</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>
 
                     </main>
@@ -1654,6 +1444,11 @@ ref.fields[:bar].from
 
         </div>
 
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
 
 
 
@@ -1662,13 +1457,13 @@ ref.fields[:bar].from
         </script>
 
 
-        <script src="elasticlunr.min.js"></script>
-        <script src="mark.min.js"></script>
-        <script src="searcher.js"></script>
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
 
-        <script src="clipboard.min.js"></script>
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-cacfe08c.js"></script>
+        <script src="book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

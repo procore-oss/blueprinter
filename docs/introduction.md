@@ -1,6 +1,7 @@
 # Blueprinter
 
-### NOTE This is a WIP for API V2!
+> [!WARNING]
+This is a WIP for API V2!
 
 Blueprinter is a JSON serializer for your business objects. It is designed to be simple, flexible, and performant.
 

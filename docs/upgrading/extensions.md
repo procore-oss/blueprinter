@@ -1,6 +1,6 @@
 # Extensions
 
-The [V2 Extension API](../api/extensions.md), as well as the DSL for [enabling V2 extensions](../dsl/extensions.md), are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: `pre_render`. V2 has [over a dozen](../api/extensions.md#hooks).
+The [V2 Extension API](../api/extensions.md), as well as the DSL for [enabling V2 extensions](../dsl/extensions.md), are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: `pre_render`. V2 [has eight](../api/extensions.md#hooks).
 
 ## Porting pre_render
 

@@ -11,7 +11,7 @@ module Blueprinter
       end
       @hooks.freeze
       @reversed_hooks ||= @hooks.transform_values(&:reverse).freeze
-      @around_hook_registered = registered? :around_hook
+      @hook_around_hook = registered? :around_hook
     end
 
     #
@@ -24,126 +24,59 @@ module Blueprinter
       @hooks.fetch(hook).any?
     end
 
+    # Return all hooks of name `hook`. NOTE: Only needed for V1
+    def [](hook) = @hooks.fetch(hook)
+
     #
-    # Runs each hook.
+    # Runs nested hooks that may yield to further hooks/Blueprinter core. A block MUST be passed,
+    # and will run at the innermost yield (if reached).
+    #
+    # Each hook must yield a context object for the next hook to use.
     #
     # @param hook [Symbol] Name of hook to call
     # @param ctx [Blueprinter::V2::Context] The argument to the hooks
+    # @param require_yield [Boolean] Throw an exception if a hook doesn't yield
+    # @return [Object] Object returned from the outer hook (or from the given block, if there are no hooks)
     #
-    def run(hook, ctx)
-      @hooks.fetch(hook).each { |ext| call(ext, hook, ctx) }
-    end
-
-    #
-    # Return true if any of "hook" returns truthy.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @return [Boolean]
-    #
-    def any?(hook, ctx)
-      @hooks.fetch(hook).any? { |ext| call(ext, hook, ctx) }
-    end
-
-    #
-    # Run only the first-added instance of the hook.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @return The hook return value, or nil if there was no hook
-    #
-    def first(hook, ctx)
-      ext = @hooks.fetch(hook).first
-      ext ? call(ext, hook, ctx) : nil
-    end
-
-    #
-    # Run only the last-added instance of the hook.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @return The hook return value, or nil if there was no hook
-    #
-    def last(hook, ctx)
-      ext = @hooks.fetch(hook).last
-      ext ? call(ext, hook, ctx) : nil
-    end
-
-    #
-    # Returns the last-added extension that implements the given hook.
-    #
-    # @param hook [Symbol] Name of hook to search for
-    # @return [Blueprinter::Extension]
-    #
-    def last_with(hook) = @hooks.fetch(hook).last
-
-    #
-    # DEPRECATED - do not use in V2!
-    #
-    # Call the hooks in series, passing the output of one to the block, which returns the args for the next.
-    #
-    # If the hook requires multiple arguments, the block should return an array.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param initial_value [Object] The starting value for the block
-    # @return [Object] The last hook's return value
-    #
-    def reduce_hook(hook, initial_value)
-      @hooks.fetch(hook).reduce(initial_value) do |val, ext|
-        args = yield val
-        args.is_a?(Array) ? ext.public_send(hook, *args) : ext.public_send(hook, args)
+    def around(hook, ctx, require_yield: false, &inner)
+      hooks = @hooks.fetch(hook)
+      catch V2::Serializer::SIGNAL do
+        _around(hooks, hook, 0, ctx, ctx.class, inner, require_yield:)
       end
     end
 
-    #
-    # An optimized version of reduce for hooks that are in the hot path. It accepts a
-    # Blueprinter::V2::Context and returns an attribute from it.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks (usually a Blueprinter::V2::Context)
-    # @param attr [Symbol] The attribute on target_obj to update with the hook return value
-    # @return [Object] The last hook's return value
-    #
-    def reduce_into(hook, ctx, attr)
-      @hooks.fetch(hook).each do |ext|
-        ctx[attr] = call(ext, hook, ctx)
-      end
-      ctx[attr]
-    end
+    private
 
-    #
-    # Runs nested hooks that yield. A block MUST be passed, and it will be run at the "apex" of
-    # the nested hooks. It's return value will be used as this method's return value.
-    #
-    # @param hook [Symbol] Name of hook to call
-    # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @return [Object] The return value from the block passed to this method
-    #
-    def around(hook, ctx)
+    def call(ext, hook, ctx, &)
+      return ext.public_send(hook, ctx, &) if !@hook_around_hook || ext.hidden? || hook == :around_hook
+
       result = nil
-      @reversed_hooks.fetch(hook).reduce(-> { result = yield }) do |f, ext|
-        proc do
-          yields = 0
-          call(ext, hook, ctx) do
-            yields += 1
-            f.call
-          end
-          if yields != 1
-            msg = "Extension hook '#{ext.class.name}##{hook}' should have yielded 1 time, but yielded #{yields} times"
-            raise Errors::ExtensionHook.new(ext, hook, msg)
-          end
-        end
-      end.call
+      hooks = @hooks.fetch(:around_hook)
+      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
+      _around(hooks, :around_hook, 0, hook_ctx, NilClass, lambda do |_|
+        result = ext.public_send(hook, ctx, &)
+      end, require_yield: true)
       result
     end
 
-    def call(ext, hook, ctx, &)
-      return ext.public_send(hook, ctx, &) if !@around_hook_registered || ext.hidden? || hook == :around_hook
+    def _around(hooks, hook, idx, ctx, expected_yield, inner, require_yield: false)
+      ext = hooks[idx]
+      return inner.call(ctx) if ext.nil?
 
-      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
-      around(:around_hook, hook_ctx) do
-        ext.public_send(hook, ctx, &)
+      yielded = false
+      result = call(ext, hook, ctx) do |yielded_ctx|
+        yielded = true
+        unless yielded_ctx.is_a? expected_yield
+          msg = "should yield `#{expected_yield.name}` but yielded `#{yielded_ctx.inspect}`"
+          raise Errors::ExtensionHook.new(ext, hook, msg)
+        end
+
+        ctx = yielded_ctx.dup if yielded_ctx
+        _around(hooks, hook, idx + 1, ctx, expected_yield, inner, require_yield:)
       end
+      raise Errors::ExtensionHook.new(ext, hook, 'did not yield') if require_yield && !yielded
+
+      result
     end
   end
 end

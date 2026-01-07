@@ -14,7 +14,12 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       #
-      Render = Struct.new(:blueprint, :fields, :options, :depth)
+      Render = Struct.new(:blueprint, :fields, :options, :store, :depth) do
+        (members - %i[fields options]).each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
+        end
+      end
 
       #
       # The extension hook currently being called.
@@ -32,7 +37,12 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :depth)
+      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth) do
+        members.each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
+        end
+      end
 
       #
       # The object or collection currently being serialized.
@@ -45,13 +55,27 @@ module Blueprinter
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
+      # @!attribute [r] parent
+      #   @return [Blueprinter::V2::Context::Parent] Information about the parent, if any
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Object = Struct.new(:blueprint, :fields, :options, :object, :depth)
+      Object = Struct.new(:blueprint, :fields, :options, :object, :parent, :store, :depth) do
+        (members - %i[object]).each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
+        end
+      end
+
+      Parent = Struct.new(:blueprint, :field, :object) do
+        members.each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Parent field `#{attr}` is immutable" }
+        end
+      end
 
       #
-      # The current field and its extracted value.
+      # The current field.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
@@ -64,12 +88,15 @@ module Blueprinter
       # @!attribute [r] field
       #   @return [Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection] The
       # field that's currently being evaluated
-      # @!attribute [r] value
-      #   @return [Object] The extracted field value
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :value, :depth)
+      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :store, :depth) do
+        (members - %i[field]).each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
+        end
+      end
 
       #
       # A serialized object/collection. This may be the outer object/collection or a nested one.
@@ -82,12 +109,18 @@ module Blueprinter
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
-      # @!attribute [r] result
-      #   @return [Hash|Array<Hash>] A serialized result
-      # @!attribute [r] depth
-      #   @return [Integer] Blueprint depth (1-indexed)
+      # @!attribute [r] format
+      #   @return [Symbol] Requested format of result, e.g. :json
       #
-      Result = Struct.new(:blueprint, :fields, :options, :object, :result, :depth)
+      Result = Struct.new(:blueprint, :fields, :options, :object, :format, :store) do
+        (members - %i[blueprint options object format]).each do |attr|
+          remove_method("#{attr}=")
+          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
+        end
+      end
+
+      # Represents the final result of a render call that shouldn't be further modified by extensions
+      Final = Struct.new(:value)
     end
   end
 end

@@ -6,6 +6,7 @@ on:
       - release-2.0 # TODO: remove after V2 is merged to main
     paths:
       - docs/**
+      - book.toml
 
 jobs:
   deploy:

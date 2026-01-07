@@ -57,14 +57,15 @@ end
 
 The `around_blueprint_init` hook runs the first time a new Blueprint is used during a render cycle. It can be used by extensions to perform time-saving setup before a render.
 
+> [!IMPORTANT]
+> `around_blueprint_init` **must** yield, otherwise a `Blueprinter::Errors::ExtensionHook` will be raised.
+
 ```ruby
 def around_blueprint_init(ctx)
   perform_setup ctx.blueprint, ctx.options
   yield ctx
 end
 ```
-
-`around_blueprint_init` MUST yield, otherwise a `Blueprinter::Errors::ExtensionHook` will be raised.
 
 ### around_serialize_object
 
@@ -247,7 +248,10 @@ end
 > **param** [Hook Context](./context-objects.md#hook-context) \
 > **cost** Variable - runs around all your extensions
 
-The `around_hook` hook runs around all other extension hooks. It **must** yield, otherwise a `Blueprinter::Errors::ExtensionHook` will be raised. The return value from `yield` is **not** used, nor is the return value of `around_hook`.
+The `around_hook` hook runs around all other extension hooks. Unlike other hooks, the return value **not** used.
+
+> [!IMPORTANT]
+> `around_hook` **must** yield, otherwise a `Blueprinter::Errors::ExtensionHook` will be raised.
 
 ```ruby
 def around_hook(ctx)

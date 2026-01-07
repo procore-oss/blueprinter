@@ -2,9 +2,8 @@ name: Docs - Github Pages
 on:
   push:
     branches:
-      # - main
-      - release-2.0
-      - jh/2.0-docs
+      - main
+      - release-2.0 # TODO: remove after V2 is merged to main
     paths:
       - docs/**
 
@@ -17,7 +16,7 @@ jobs:
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v2
         with:
-          mdbook-version: "latest"
+          mdbook-version: "0.5.2"
 
       - run: mdbook build
 

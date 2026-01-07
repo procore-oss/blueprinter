@@ -13,4 +13,5 @@ additional-css = ["theme/hljs-overrides.css", "theme/custom.css"]
 default-theme = "light"
 preferred-dark-theme = "navy"
 no-section-label = true
+sidebar-header-nav = false
 git-repository-url = "https://github.com/procore-oss/blueprinter"

@@ -20,13 +20,13 @@ module Blueprinter
       BlueprintValidator.validate!(blueprint)
 
       super(
-        method,
-        name,
-        extractor,
-        parent_blueprint,
-        options.merge(
-          blueprint: blueprint,
-          view: view,
+        method:,
+        name:,
+        extractor:,
+        blueprint: parent_blueprint,
+        options: options.merge(
+          blueprint:,
+          view:,
           association: true
         )
       )

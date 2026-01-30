@@ -13,19 +13,80 @@ module Blueprinter
         default: View.new(:default)
       }
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
+      @cache_mutex = Mutex.new
     end
 
     def inherit(view_collection)
       view_collection.views.each do |view_name, view|
         self[view_name].inherit(view)
       end
+
+      # Reset the cache since the structure of the views has changed.
+      clear_cache!
     end
 
     def view?(view_name)
       views.key? view_name
     end
 
+    # Returns an array of Field objects for the provided View.
+    # @param [String] view_name
+    # @return [Array<Field>]
     def fields_for(view_name)
+      cache = @cached_fields_for
+      return cache[view_name] if cache&.key?(view_name)
+
+      @cache_mutex.synchronize do
+        @cached_fields_for ||= {}
+        @cached_fields_for[view_name] ||= build_fields_for(view_name)
+      end
+    end
+
+    # Returns an array of Transformer objects for the provided View.
+    # @param [String] view_name
+    # @return [Array<Transformer>]
+    def transformers(view_name)
+      cache = @cached_transformers
+      return cache[view_name] if cache&.key?(view_name)
+
+      @cache_mutex.synchronize do
+        @cached_transformers ||= {}
+        @cached_transformers[view_name] ||= build_transformers(view_name)
+      end
+    end
+
+    # @param [String] view_name
+    # @return [View]
+    def [](view_name)
+      return @views[view_name] if @views.key?(view_name)
+
+      @cache_mutex.synchronize do
+        unless @views.key?(view_name)
+          @views[view_name] = View.new(view_name)
+
+          @cached_transformers = nil
+          @cached_fields_for = nil
+        end
+        @views[view_name]
+      end
+    end
+
+    private
+
+    attr_reader :cache_mutex
+
+    def identifier_fields
+      views[:identifier].fields.values
+    end
+
+    def clear_cache!
+      @cache_mutex.synchronize do
+        @cached_transformers = {}
+        @cached_fields_for = {}
+      end
+    end
+
+    def build_fields_for(view_name)
       return identifier_fields if view_name == :identifier
 
       fields, excluded_fields = sortable_fields(view_name)
@@ -36,20 +97,10 @@ module Blueprinter
       end
     end
 
-    def transformers(view_name)
+    def build_transformers(view_name)
       included_transformers = gather_transformers_from_included_views(view_name).reverse
       all_transformers = [*views[:default].view_transformers, *included_transformers].uniq
       all_transformers.empty? ? Blueprinter.configuration.default_transformers : all_transformers
-    end
-
-    def [](view_name)
-      @views[view_name] ||= View.new(view_name)
-    end
-
-    private
-
-    def identifier_fields
-      views[:identifier].fields.values
     end
 
     # @param [String] view_name

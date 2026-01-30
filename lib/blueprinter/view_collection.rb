@@ -4,6 +4,16 @@ require 'blueprinter/view'
 
 module Blueprinter
   # @api private
+  #
+  # ViewCollection manages the views defined in a Blueprint, along with their fields and transformers.
+  #
+  # To improve performance, the "structure" of each view is cached. Once the first view is accessed, we prewarm the
+  # cache for _all_ views (while this isn't the _most_ optimal approach, the overhead is negligible, and allows the
+  # caching logic to be quite simple).
+  #
+  # To ensure thread safety, we build out the cache within a mutex. As an additional safeguard, we implement a
+  # double-check lock pattern using the finalized boolean. This prevents duplicate attempts to build out the cache if
+  # multiple threads attempt to build out the cache at the same time.
   class ViewCollection
     attr_reader :views, :sort_by_definition
 
@@ -14,6 +24,7 @@ module Blueprinter
       }
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
       @cache_mutex = Mutex.new
+      @finalized = false
     end
 
     def inherit(view_collection)
@@ -21,10 +32,12 @@ module Blueprinter
         self[view_name].inherit(view)
       end
 
-      # Reset the cache since the structure of the views has changed.
-      clear_cache!
+      # Reset finalization just in case since the structure of the views has changed.
+      @finalized = false
     end
 
+    # @param [String] view_name
+    # @return [Boolean] true if the view exists, false otherwise
     def view?(view_name)
       views.key? view_name
     end
@@ -33,26 +46,18 @@ module Blueprinter
     # @param [String] view_name
     # @return [Array<Field>]
     def fields_for(view_name)
-      cache = @cached_fields_for
-      return cache[view_name] if cache&.key?(view_name)
+      ensure_finalized!
 
-      @cache_mutex.synchronize do
-        @cached_fields_for ||= {}
-        @cached_fields_for[view_name] ||= build_fields_for(view_name)
-      end
+      @cached_fields_for[view_name]
     end
 
     # Returns an array of Transformer objects for the provided View.
     # @param [String] view_name
     # @return [Array<Transformer>]
     def transformers(view_name)
-      cache = @cached_transformers
-      return cache[view_name] if cache&.key?(view_name)
+      ensure_finalized!
 
-      @cache_mutex.synchronize do
-        @cached_transformers ||= {}
-        @cached_transformers[view_name] ||= build_transformers(view_name)
-      end
+      @cached_transformers[view_name]
     end
 
     # @param [String] view_name
@@ -63,9 +68,7 @@ module Blueprinter
       @cache_mutex.synchronize do
         unless @views.key?(view_name)
           @views[view_name] = View.new(view_name)
-
-          @cached_transformers = nil
-          @cached_fields_for = nil
+          @finalized = false
         end
         @views[view_name]
       end
@@ -79,10 +82,21 @@ module Blueprinter
       views[:identifier].fields.values
     end
 
-    def clear_cache!
+    def ensure_finalized!
+      return if @finalized
+
       @cache_mutex.synchronize do
-        @cached_transformers = {}
+        return if @finalized
+
         @cached_fields_for = {}
+        @cached_transformers = {}
+
+        views.each_key do |view_name|
+          @cached_fields_for[view_name] = build_fields_for(view_name).freeze
+          @cached_transformers[view_name] = build_transformers(view_name).freeze
+        end
+
+        @finalized = true
       end
     end
 

@@ -150,8 +150,8 @@ RSpec.describe 'ViewCollection Caching and Thread Safety' do
       # that multiple threads initializing cache simultaneously don't crash
       view_collection = TestPost.view_collection
 
-      # Clear any existing cache
-      view_collection.send(:clear_cache!)
+      # Reset finalization to force cache rebuild
+      view_collection.instance_variable_set(:@finalized, false)
 
       threads = []
       results = []

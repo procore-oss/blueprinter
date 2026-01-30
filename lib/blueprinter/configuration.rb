@@ -59,5 +59,21 @@ module Blueprinter
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
     end
+
+    # @param extractor [Class<Blueprinter::AutoExtractor>]
+    def extractor_default=(extractor)
+      reset_default_extractor!
+
+      @extractor_default = extractor
+    end
+
+    # @return [Blueprinter::AutoExtractor]
+    def default_extractor
+      @_default_extractor ||= extractor_default.new
+    end
+
+    def reset_default_extractor!
+      @_default_extractor = nil
+    end
   end
 end

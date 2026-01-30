@@ -30,7 +30,7 @@ module Blueprinter
     #
     # @return [String] JSON formatted String
     def render(object, options = {})
-      jsonify(build_result(object: object, options: options))
+      jsonify(build_result(object:, options:))
     end
 
     # Generates a Hash representation of the provided object.
@@ -55,7 +55,7 @@ module Blueprinter
     #
     # @return [Hash]
     def render_as_hash(object, options = {})
-      build_result(object: object, options: options)
+      build_result(object:, options:)
     end
 
     # Generates a JSONified hash.
@@ -80,7 +80,7 @@ module Blueprinter
     #
     # @return [Hash]
     def render_as_json(object, options = {})
-      build_result(object: object, options: options).as_json
+      build_result(object:, options:).as_json
     end
 
     # Converts an object into a Hash representation based on provided view.
@@ -122,31 +122,34 @@ module Blueprinter
     attr_reader :blueprint, :options
 
     def prepare_data(object, view_name, local_options)
+      # Since we're currently providing the current view in the local_options hash when we extract fields, we can merge
+      # it in ahead of time to avoid allocating a new hash for every field extraction.
+      local_options_with_view = local_options.merge(view: view_name)
+
       if array_like?(object)
         object.map do |obj|
           object_to_hash(
             obj,
-            view_name: view_name,
-            local_options: local_options
+            view_name:,
+            local_options: local_options_with_view
           )
         end
       else
         object_to_hash(
           object,
-          view_name: view_name,
-          local_options: local_options
+          view_name:,
+          local_options: local_options_with_view
         )
       end
     end
 
     def object_to_hash(object, view_name:, local_options:)
-      field_options = local_options.merge(view: view_name)
       result_hash = {}
 
       view_collection.fields_for(view_name).each do |field|
         next if field.skip?(field.name, object, local_options)
 
-        value = field.extract(object, field_options)
+        value = field.extract(object, local_options)
         next if value.nil? && field.options[:exclude_if_nil]
 
         result_hash[field.name] = value
@@ -182,7 +185,7 @@ module Blueprinter
 
       prepared_object = hashify(
         object,
-        view_name: view_name,
+        view_name:,
         local_options: options.except(:view, :root, :meta)
       )
       object_with_root = apply_root_key(

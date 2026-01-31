@@ -181,7 +181,7 @@ module Blueprinter
     end
 
     def build_result(object:, options:)
-      view_name = options.fetch(:view, :default) || :default
+      view_name = options[:view] || :default
 
       prepared_object = hashify(
         object,

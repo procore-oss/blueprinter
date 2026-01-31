@@ -12,7 +12,6 @@ module Blueprinter
       :datetime_format,
       :default_transformers,
       :deprecations,
-      :extractor_default,
       :field_default,
       :generator,
       :if,
@@ -20,7 +19,7 @@ module Blueprinter
       :sort_fields_by,
       :unless
     )
-    attr_reader :extensions
+    attr_reader :extensions, :extractor_default
 
     VALID_CALLABLES = %i[if unless].freeze
 

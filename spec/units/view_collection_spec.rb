@@ -60,8 +60,12 @@ describe 'ViewCollection' do
   end
 
   describe '#fields_for' do
-    it 'should return the fields for the view' do
+    it 'returns the fields for the view' do
       expect(view_collection.fields_for(:view)).to eq([default_field, view_field])
+    end
+
+    it 'returns a frozen array' do
+      expect(view_collection.fields_for(:view)).to be_frozen
     end
   end
 
@@ -72,11 +76,15 @@ describe 'ViewCollection' do
       view.add_transformer(transformer)
     end
 
-    it 'should return the transformers for the view' do
+    it 'returns the transformers for the view' do
       expect(view_collection.transformers(:view)).to eq([transformer])
     end
 
-    it 'should not return any transformers for another view' do
+    it 'returns a frozen array' do
+      expect(view_collection.transformers(:view)).to be_frozen
+    end
+
+    it 'does not return any transformers for another view' do
       view_collection[:foo]
       expect(view_collection.transformers(:foo)).to eq([])
     end

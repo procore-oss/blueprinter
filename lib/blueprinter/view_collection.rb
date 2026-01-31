@@ -11,9 +11,7 @@ module Blueprinter
   # cache for _all_ views (while this isn't the _most_ optimal approach, the overhead is negligible, and allows the
   # caching logic to be quite simple).
   #
-  # To ensure thread safety, we build out the cache within a mutex. As an additional safeguard, we implement a
-  # double-check lock pattern using the finalized boolean. This prevents duplicate attempts to build out the cache if
-  # multiple threads attempt to build out the cache at the same time.
+  # To ensure thread safety, we build out the cache within a double-checked mutex.
   class ViewCollection
     attr_reader :views, :sort_by_definition
 

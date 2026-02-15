@@ -116,21 +116,21 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'are allowed with field options set' do
-      blueprint.object :foo_obj, sub_blueprint, exclude_if_empty: true
+      blueprint.association :foo_obj, sub_blueprint, exclude_if_empty: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { { name: 'Foo' } } }
       expect(value).to eq({ name: 'Foo' })
     end
 
     it 'are excluded with field options set if nil' do
-      blueprint.object :foo_obj, sub_blueprint, exclude_if_empty: true
+      blueprint.association :foo_obj, sub_blueprint, exclude_if_empty: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { nil } }
       expect(value).to eq skip_field
     end
 
     it 'are excluded with field options set if empty' do
-      blueprint.object :foo_obj, sub_blueprint, exclude_if_empty: true
+      blueprint.association :foo_obj, sub_blueprint, exclude_if_empty: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { {} } }
       expect(value).to eq skip_field
@@ -192,21 +192,21 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'are allowed with field options set' do
-      blueprint.collection :foos, sub_blueprint, exclude_if_empty: true
+      blueprint.association :foos, [sub_blueprint], exclude_if_empty: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { [{ name: 'Foo' }] } }
       expect(value).to eq([{ name: 'Foo' }])
     end
 
     it 'are excluded with field options set if nil' do
-      blueprint.collection :foos, sub_blueprint, exclude_if_empty: true
+      blueprint.association :foos, [sub_blueprint], exclude_if_empty: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { nil } }
       expect(value).to eq skip_field
     end
 
     it 'are excluded with field options set if empty' do
-      blueprint.collection :foos, sub_blueprint, exclude_if_empty: true
+      blueprint.association :foos, [sub_blueprint], exclude_if_empty: true
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { [] } }
       expect(value).to eq skip_field

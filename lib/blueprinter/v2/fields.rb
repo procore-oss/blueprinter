@@ -3,6 +3,17 @@
 module Blueprinter
   module V2
     module Fields
+      module Helpers
+        # @return [True|False] Returns true if this is a regular field
+        def field? = type == :field
+
+        # @return [True|False] Returns true if this is an object field
+        def object? = type == :object
+
+        # @return [True|False] Returns true if this is a collection field
+        def collection? = type == :collection
+      end
+
       Field = Struct.new(
         :name,
         :from,
@@ -11,6 +22,9 @@ module Blueprinter
         :options,
         keyword_init: true
       ) do
+        include Helpers
+
+        # @return [Symbol] :field
         def type = :field
       end
 
@@ -23,6 +37,9 @@ module Blueprinter
         :options,
         keyword_init: true
       ) do
+        include Helpers
+
+        # @return [Symbol] :object
         def type = :object
       end
 
@@ -35,6 +52,9 @@ module Blueprinter
         :options,
         keyword_init: true
       ) do
+        include Helpers
+
+        # @return [Symbol] :collection
         def type = :collection
       end
     end

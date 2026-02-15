@@ -39,6 +39,9 @@ module Blueprinter
         attr_reader :objects
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Collection>] Associations to collections defined on the view
         attr_reader :collections
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Object | Blueprint::V2::Fields::Collection>] All associations
+        # defined on the view
+        attr_reader :associations
         # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>]
         # All fields, objects, and collections in the order they were defined
         attr_reader :ordered
@@ -49,9 +52,10 @@ module Blueprinter
         def initialize(blueprint, name)
           @name = name
           @ordered = blueprint.schema.values.freeze
-          @fields = blueprint.schema.select { |_, f| f.type == :field }.freeze
-          @objects = blueprint.schema.select { |_, f| f.type == :object }.freeze
-          @collections = blueprint.schema.select { |_, f| f.type == :collection }.freeze
+          @fields = blueprint.schema.select { |_, f| f.field? }.freeze
+          @objects = blueprint.schema.select { |_, f| f.object? }.freeze
+          @collections = blueprint.schema.select { |_, f| f.collection? }.freeze
+          @associations = objects.merge(collections).freeze
         end
       end
     end

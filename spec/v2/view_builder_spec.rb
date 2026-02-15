@@ -113,13 +113,13 @@ describe Blueprinter::V2::ViewBuilder do
     category_blueprint = Class.new(Blueprinter::V2::Base) do
       self.blueprint_name = "CategoryBlueprint"
       view :cyclic do
-        collection :widgets, widget_blueprint[:cyclic]
+        association :widgets, [widget_blueprint[:cyclic]]
       end
     end
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       self.blueprint_name = "WidgetBlueprint"
       view :cyclic do
-        object :category, category_blueprint[:cyclic]
+        association :category, category_blueprint[:cyclic]
       end
     end
     expect do

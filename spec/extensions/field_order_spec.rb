@@ -8,7 +8,7 @@ describe Blueprinter::Extensions::FieldOrder do
     Class.new(Blueprinter::V2::Base) do
       field :foo
       field :id
-      object :bar, self
+      association :bar, self
     end
   end
 

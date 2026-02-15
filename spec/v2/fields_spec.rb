@@ -50,9 +50,9 @@ describe "Blueprinter::V2 Fields" do
       category_blueprint = Class.new(Blueprinter::V2::Base)
       widget_blueprint = Class.new(Blueprinter::V2::Base)
       blueprint = Class.new(Blueprinter::V2::Base) do
-        object :category, category_blueprint
-        collection :widgets, widget_blueprint, from: :foo, if: -> { true }
-        object(:foo, widget_blueprint) { {foo: "bar"} }
+        association :category, category_blueprint
+        association :widgets, [widget_blueprint], from: :foo, if: -> { true }
+        association(:foo, widget_blueprint) { {foo: "bar"} }
       end
 
       ref = blueprint.reflections[:default]
@@ -121,8 +121,8 @@ describe "Blueprinter::V2 Fields" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :id
       field :name
-      object :category, category_blueprint
-      collection :widgets, widget_blueprint
+      association :category, category_blueprint
+      association :widgets, [widget_blueprint]
 
       view :foo do
         exclude :name, :category

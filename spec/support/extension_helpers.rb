@@ -19,12 +19,12 @@ module ExtensionHelpers
         Class.new(Blueprinter::V2::Base) do
           self.blueprint_name = 'TestBlueprint'
           fields :foo, :bar
-          object :foo_obj, test.sub_blueprint
-          collection :foos, test.sub_blueprint
+          association :foo_obj, test.sub_blueprint
+          association :foos, [test.sub_blueprint]
 
           field(:foo2) { |obj, _ctx| "value: #{obj[:foo]}" }
-          object(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj[:foo_obj][:name]}" } }
-          collection(:foos2, test.sub_blueprint) { |obj, _ctx| [{ name: "nums: #{obj[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
+          association(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj[:foo_obj][:name]}" } }
+          association(:foos2, [test.sub_blueprint]) { |obj, _ctx| [{ name: "nums: #{obj[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
 
           def was(val, _ctx)
             "was #{val.inspect}"

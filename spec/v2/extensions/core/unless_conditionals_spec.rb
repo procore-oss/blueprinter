@@ -93,7 +93,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options unless (Proc)' do
-      blueprint.object :foo_obj, sub_blueprint, unless: ->(val, ctx) { name_foo? val, ctx }
+      blueprint.association :foo_obj, sub_blueprint, unless: ->(val, ctx) { name_foo? val, ctx }
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { { name: 'Foo' } } }
       expect(value).to eq skip_field
@@ -122,7 +122,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options unless (Symbol)' do
-      blueprint.object :foo_obj, sub_blueprint, unless: :name_foo?
+      blueprint.association :foo_obj, sub_blueprint, unless: :name_foo?
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { { name: 'Foo' } } }
       expect(value).to eq skip_field
@@ -161,7 +161,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options unless (Proc)' do
-      blueprint.collection :foos, sub_blueprint, unless: ->(val, ctx) { names_foo? val, ctx }
+      blueprint.association :foos, [sub_blueprint], unless: ->(val, ctx) { names_foo? val, ctx }
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { [{ name: 'Foo' }] } }
       expect(value).to eq skip_field
@@ -190,7 +190,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options unless (Symbol)' do
-      blueprint.collection :foos, sub_blueprint, unless: :names_foo?
+      blueprint.association :foos, [sub_blueprint], unless: :names_foo?
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_field_value(ctx) { [{ name: 'Foo' }] } }
       expect(value).to eq skip_field

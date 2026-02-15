@@ -4,6 +4,9 @@ module Blueprinter
   module V2
     # Methods for defining Blueprint fields and views
     module DSL
+      # @api private
+      BLUEPRINT_ARRAY_OR_CLASS_ERR = 'Blueprint must be a Blueprint class or an Array containing a Blueprint class'
+
       #
       # Define a new child view, which is a subclass of self. If a view with this name already exists, the definition will be
       # appended.
@@ -119,10 +122,11 @@ module Blueprinter
       end
 
       #
-      # Define an association to a single object.
+      # Defines an association to an object or collection.
       #
       # @param name [Symbol] Name of the association
-      # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
+      # @param blueprint [Class|Array<Class>] Blueprint class to use (object). For a collection, wrap the blueprint in an
+      # array.
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
       # @param extractor [Class] Extractor class to use for this field
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
@@ -132,41 +136,14 @@ module Blueprinter
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::Fields::Object]
       #
-      def object(name, blueprint, from: name, **options, &definition)
+      def association(name, blueprint, from: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Fields::Object.new(
+        is_collection, blueprint_class = parse_blueprint(blueprint)
+        type = is_collection ? Fields::Collection : Fields::Object
+        schema[name] = type.new(
           name: name,
-          blueprint: blueprint,
-          from: from.to_sym,
-          from_str: from.to_s,
-          value_proc: definition,
-          options: options.dup
-        )
-      end
-
-      #
-      # Define an association to a collection of objects.
-      #
-      # @param name [Symbol] Name of the association
-      # @param blueprint [Class|Proc] Blueprint class to use, or one defined with a Proc
-      # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param extractor [Class] Extractor class to use for this field
-      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
-      # @param default_if [Symbol | Proc] Return true to use the value in `default`
-      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
-      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
-      # @param if [Symbol | Proc] Only include the field if it returns true
-      # @param unless [Symbol | Proc] Include the field unless it returns true
-      # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::Fields::Collection]
-      #
-      def collection(name, blueprint, from: name, **options, &definition)
-        name = name.to_sym
-        schema[name] = Fields::Collection.new(
-          name: name,
-          blueprint: blueprint,
+          blueprint: blueprint_class,
           from: from.to_sym,
           from_str: from.to_s,
           value_proc: definition,
@@ -181,6 +158,24 @@ module Blueprinter
       #
       def exclude(*names)
         self.excludes += names.map(&:to_sym)
+      end
+
+      private
+
+      def parse_blueprint(blueprint)
+        is_collection, assoc_arg =
+          if blueprint.is_a? Array
+            raise ArgumentError, BLUEPRINT_ARRAY_OR_CLASS_ERR unless blueprint.size == 1
+
+            [true, blueprint[0]]
+          else
+            [false, blueprint]
+          end
+
+        is_bp_class = assoc_arg.is_a?(Class) && (assoc_arg < V2::Base || assoc_arg < Blueprinter::Base)
+        raise ArgumentError, BLUEPRINT_ARRAY_OR_CLASS_ERR unless is_bp_class || assoc_arg.is_a?(ViewWrapper)
+
+        [is_collection, assoc_arg]
       end
     end
   end

@@ -71,10 +71,10 @@ describe "Blueprinter::V2::Reflection" do
       test = self
       Class.new(Blueprinter::V2::Base) do
         field :name
-        object :category, test.category_blueprint
+        association :category, test.category_blueprint
 
         view :extended do
-          collection :widgets, test.widget_blueprint
+          association :widgets, [test.widget_blueprint]
           field :description
         end
       end

@@ -32,11 +32,11 @@ Blueprinter is pretty smart about extracting field values from objects and Hashe
 
 - For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.
 - For anything else, Blueprinter will look for a public method matching the field name.
-- The [from](./options.md#from) field option can be used to specify a different method or Hash key name.
+- The [from](./options.md#from) field option can be used to specify a different method name or Hash key.
 
 ### Field blocks
 
-If you pass a block to your field, the default behavior will be bypassed and the block's return value will be used. It will be passed a [Field context](../api/context-objects.md#field-context) argument containing the object being rendered, among other things.
+If you pass a block to your field, the default behavior will be bypassed and the block's return value will be used. It will be passed the current object and a [Field context](../api/context-objects.md#field-context) object.
 
 ```ruby
 field :description do |object, ctx|

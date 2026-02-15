@@ -93,7 +93,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options if (Proc)' do
-      blueprint.object :foo_obj, sub_blueprint, if: ->(val, ctx) { name_foo? val, ctx }
+      blueprint.association :foo_obj, sub_blueprint, if: ->(val, ctx) { name_foo? val, ctx }
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_object_value(ctx) { { name: 'Foo' } } }
       expect(value).to eq({ name: 'Foo' })
@@ -122,7 +122,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options if (Symbol)' do
-      blueprint.object :foo_obj, sub_blueprint, if: :name_foo?
+      blueprint.association :foo_obj, sub_blueprint, if: :name_foo?
       ctx = prepare(blueprint, { object_if: :name_foo? }, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_object_value(ctx) { { name: 'Foo' } } }
       expect(value).to eq({ name: 'Foo' })
@@ -161,7 +161,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options if (Proc)' do
-      blueprint.collection :foos, sub_blueprint, if: ->(val, ctx) { names_foo? val, ctx }
+      blueprint.association :foos, [sub_blueprint], if: ->(val, ctx) { names_foo? val, ctx }
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_object_value(ctx) { [{ name: 'Foo' }] } }
       expect(value).to eq [{ name: 'Foo' }]
@@ -190,7 +190,7 @@ describe Blueprinter::V2::Extensions::Core::Conditionals do
     end
 
     it 'checks field options if (Symbol)' do
-      blueprint.collection :foos, sub_blueprint, if: :names_foo?
+      blueprint.association :foos, [sub_blueprint], if: :names_foo?
       ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field)
       value = catch(sig) { subject.around_object_value(ctx) { [{ name: 'Foo' }] } }
       expect(value).to eq [{ name: 'Foo' }]

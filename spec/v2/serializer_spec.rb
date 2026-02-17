@@ -25,8 +25,8 @@ describe Blueprinter::V2::Serializer do
     Class.new(application_blueprint) do
       self.blueprint_name = "WidgetBlueprint"
       field :name
-      object :category, test.category_blueprint
-      collection :parts, test.part_blueprint
+      association :category, test.category_blueprint
+      association :parts, [test.part_blueprint]
 
       view :extended do
         format(Date) { |date| date.strftime('%a %b %e, %Y') }
@@ -99,8 +99,8 @@ describe Blueprinter::V2::Serializer do
       block_blueprint = Class.new(application_blueprint) do
         self.blueprint_name = 'BlockBlueprint'
         field(:name) { |obj, _ctx| "Name of #{obj[:name]}" }
-        object(:category, test.category_blueprint) { |obj, _ctx| { name: "Name of #{obj.dig(:category, :name)}" } }
-        collection(:parts, test.part_blueprint) { |obj, _ctx| obj[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
+        association(:category, test.category_blueprint) { |obj, _ctx| { name: "Name of #{obj.dig(:category, :name)}" } }
+        association(:parts, [test.part_blueprint]) { |obj, _ctx| obj[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
       end
 
       result = described_class.new(block_blueprint, {}, instances, store: {}, initial_depth: 1).object(widget, depth: 1)
@@ -117,8 +117,8 @@ describe Blueprinter::V2::Serializer do
         self.blueprint_name = "BlockBlueprint"
         extensions << test.name_of_extractor.new(prefix: 'X')
         field :name
-        object :category, test.category_blueprint
-        collection :parts, test.part_blueprint
+        association :category, test.category_blueprint
+        association :parts, [test.part_blueprint]
       end
 
       result = described_class.new(blueprint, {}, instances, store: {}, initial_depth: 1).object(widget, depth: 1)
@@ -453,7 +453,7 @@ describe Blueprinter::V2::Serializer do
     blueprint = Class.new(Blueprinter::V2::Base) do
       self.blueprint_name = 'Foo'
       field :name
-      object :child, self
+      association :child, self
     end
     instances = Blueprinter::V2::InstanceCache.new
     def instances.serializers = @serializers

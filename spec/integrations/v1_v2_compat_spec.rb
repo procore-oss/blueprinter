@@ -102,12 +102,12 @@ describe 'V1/V2 Compatibility' do
       test = self
       Class.new(Blueprinter::V2::Base) do
         field :name
-        object :category, test.v1_blueprint
-        collection :parts, test.v1_blueprint
+        association :category, test.v1_blueprint
+        association :parts, [test.v1_blueprint]
 
         view :extra do
-          object :category, test.v1_blueprint[:extended]
-          collection :parts, test.v1_blueprint[:extended]
+          association :category, test.v1_blueprint[:extended]
+          association :parts, [test.v1_blueprint[:extended]]
         end
       end
     end
@@ -183,7 +183,7 @@ describe 'V1/V2 Compatibility' do
           "#{obj[:name]} - #{ctx.options[:tag]}"
         end
         view :extended do
-          object :foo, bp[:fooprint][:extended]
+          association :foo, bp[:fooprint][:extended]
         end
       end
       blueprints[:fooprint] = Class.new(Blueprinter::Base) do

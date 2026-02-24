@@ -21,7 +21,7 @@ module Blueprinter
 
       view = options[:view] || :default
       blueprint = association_blueprint(options[:blueprint], value)
-      blueprint.hashify(value, view_name: view, local_options: local_options)
+      blueprint.hashify(value, view_name: view, local_options:)
     end
 
     private

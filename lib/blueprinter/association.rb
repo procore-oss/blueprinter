@@ -25,8 +25,8 @@ module Blueprinter
         extractor,
         parent_blueprint,
         options.merge(
-          blueprint: blueprint,
-          view: view,
+          blueprint:,
+          view:,
           association: true
         )
       )

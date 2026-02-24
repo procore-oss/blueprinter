@@ -2,7 +2,7 @@
 
 module Blueprinter
   class DateTimeFormatter
-    InvalidDateTimeFormatterError = Class.new(BlueprinterError)
+    class InvalidDateTimeFormatterError < BlueprinterError; end
 
     def format(value, options)
       return value if value.nil?

@@ -516,6 +516,20 @@ shared_examples 'Base::render' do
     it('returns json with values derived from options') { should eq(result) }
   end
 
+  context 'Given ::render with options with keyword field option' do
+    subject { blueprint.render(obj, vehicle: vehicle) }
+    let(:result) { '{"id":' + obj_id + ',"vehicle_make":"Super Car"}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :vehicle_make do |_obj, vehicle:, **|
+          "#{vehicle[:make]}"
+        end
+      end
+    end
+    it('returns json with values derived from options') { should eq(result) }
+  end
+
   context 'Given ::render in a nested included view, original view is accessible in options' do
     let(:blueprint) do
       Class.new(Blueprinter::Base) do

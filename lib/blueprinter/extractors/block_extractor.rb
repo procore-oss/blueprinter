@@ -19,7 +19,7 @@ module Blueprinter
       if symbol_to_proc?(block)
         block.call(object)
       else
-        block.call(object, local_options)
+        block.call(object, **local_options)
       end
     end
 

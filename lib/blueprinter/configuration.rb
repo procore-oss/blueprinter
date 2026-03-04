@@ -12,7 +12,6 @@ module Blueprinter
       :datetime_format,
       :default_transformers,
       :deprecations,
-      :extractor_default,
       :field_default,
       :generator,
       :if,
@@ -20,7 +19,7 @@ module Blueprinter
       :sort_fields_by,
       :unless
     )
-    attr_reader :extensions
+    attr_reader :extensions, :extractor_default
 
     VALID_CALLABLES = %i[if unless].freeze
 
@@ -58,6 +57,22 @@ module Blueprinter
 
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
+    end
+
+    # @param extractor [Class<Blueprinter::AutoExtractor>]
+    def extractor_default=(extractor)
+      reset_default_extractor!
+
+      @extractor_default = extractor
+    end
+
+    # @return [Blueprinter::AutoExtractor]
+    def default_extractor
+      @_default_extractor ||= extractor_default.new
+    end
+
+    def reset_default_extractor!
+      @_default_extractor = nil
     end
   end
 end

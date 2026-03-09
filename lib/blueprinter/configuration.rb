@@ -71,6 +71,8 @@ module Blueprinter
       @_default_extractor ||= extractor_default.new
     end
 
+    private
+
     def reset_default_extractor!
       @_default_extractor = nil
     end

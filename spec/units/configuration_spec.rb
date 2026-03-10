@@ -3,7 +3,7 @@
 require 'oj'
 require 'yajl'
 
-describe 'Blueprinter' do
+describe 'Blueprinter::Configuration' do
   describe '#configure' do
     before { Blueprinter.configure { |config| config.generator = JSON } }
     after { reset_blueprinter_config! }
@@ -88,19 +88,26 @@ describe 'Blueprinter' do
     end
   end
 
-  describe "::Configuration" do
-    describe '#valid_callable?' do
-      it 'should return true for valid callables' do
-        [:if, :unless].each do |option|
-          actual = Blueprinter.configuration.valid_callable?(option)
-          expect(actual).to be(true)
-        end
-      end
+  describe '#default_extractor' do
+    it 'returns an instance of the default extractor' do
+      expect(Blueprinter.configuration.default_extractor).to be_an_instance_of(Blueprinter::AutoExtractor)
+    end
 
-      it 'should return false for invalid callable' do
-        actual = Blueprinter.configuration.valid_callable?(:invalid_option)
-        expect(actual).to be(false)
+    it 'does not create a new instance on subsequent calls' do
+      expect(Blueprinter.configuration.default_extractor).to eq(Blueprinter.configuration.default_extractor)
+    end
+  end
+  describe '#valid_callable?' do
+    it 'should return true for valid callables' do
+      [:if, :unless].each do |option|
+        actual = Blueprinter.configuration.valid_callable?(option)
+        expect(actual).to be(true)
       end
+    end
+
+    it 'should return false for invalid callable' do
+      actual = Blueprinter.configuration.valid_callable?(:invalid_option)
+      expect(actual).to be(false)
     end
   end
 end

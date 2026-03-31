@@ -124,7 +124,7 @@ module Blueprinter
     def prepare_data(object, view_name, local_options)
       # Since we're currently providing the current view in the local_options hash when we extract fields, we can merge
       # it in ahead of time to avoid allocating a new hash for every field extraction.
-      local_options_with_view = local_options.merge(view: view_name)
+      local_options_with_view = local_options.merge(view: view_name).freeze
 
       if array_like?(object)
         object.map do |obj|

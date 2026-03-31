@@ -11,7 +11,12 @@ module Blueprinter
   # cache for _all_ views (while this isn't the _most_ optimal approach, the overhead is negligible, and allows the
   # caching logic to be quite simple).
   #
-  # To ensure thread safety, we build out the cache within a double-checked mutex.
+  # Thread Safety: view data is lazily compiled into a frozen snapshot on first access, and is assigned atomically. A
+  # mutex serializes the compilation itself to prevent duplicate work. After compilation, reads bypass the mutex entirely.
+  #
+  # Future optimization: a public compile! method could allow eager compilation at boot time
+  # (e.g. in a Rails after_initialize hook) to move the first-render compilation cost (~10µs per
+  # blueprint) out of the request path entirely.
   #
   # rubocop:disable Metrics/ClassLength
   class ViewCollection
@@ -24,7 +29,7 @@ module Blueprinter
       }
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
       @cache_mutex = Mutex.new
-      @finalized = false
+      @cache = nil
     end
 
     def inherit(view_collection)
@@ -32,8 +37,7 @@ module Blueprinter
         self[view_name].inherit(view)
       end
 
-      # Reset finalization just in case since the structure of the views has changed.
-      @finalized = false
+      @cache = nil
     end
 
     # @param [String] view_name
@@ -46,18 +50,18 @@ module Blueprinter
     # @param [String] view_name
     # @return [Array<Field>]
     def fields_for(view_name)
-      ensure_finalized!
+      ensure_cached!
 
-      @cached_fields_for[view_name]
+      @cache[:fields][view_name]
     end
 
     # Returns an array of Transformer objects for the provided View.
     # @param [String] view_name
     # @return [Array<Transformer>]
     def transformers(view_name)
-      ensure_finalized!
+      ensure_cached!
 
-      @cached_transformers[view_name]
+      @cache[:transformers][view_name]
     end
 
     # @param [String] view_name
@@ -68,7 +72,7 @@ module Blueprinter
       @cache_mutex.synchronize do
         unless @views.key?(view_name)
           @views[view_name] = View.new(view_name)
-          @finalized = false
+          @cache = nil
         end
         @views[view_name]
       end
@@ -76,27 +80,27 @@ module Blueprinter
 
     private
 
-    attr_reader :cache_mutex
-
     def identifier_fields
       views[:identifier].fields.values
     end
 
-    def ensure_finalized!
-      return if @finalized
+    def ensure_cached!
+      # Fast path: no lock needed once the cache is populated (atomic reference read).
+      return if @cache
 
       @cache_mutex.synchronize do
-        return if @finalized
+        # Re-check after acquiring the lock; another thread may have built the cache first.
+        return if @cache
 
-        @cached_fields_for = {}
-        @cached_transformers = {}
+        fields = {}
+        transformers = {}
 
         views.each_key do |view_name|
-          @cached_fields_for[view_name] = build_fields_for(view_name).freeze
-          @cached_transformers[view_name] = build_transformers(view_name).freeze
+          fields[view_name] = build_fields_for(view_name).freeze
+          transformers[view_name] = build_transformers(view_name).freeze
         end
 
-        @finalized = true
+        @cache = { fields: fields.freeze, transformers: transformers.freeze }.freeze
       end
     end
 

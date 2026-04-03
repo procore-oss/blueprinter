@@ -166,4 +166,58 @@ describe 'ViewCollection' do
       end
     end
   end
+
+  describe 'cache lifecycle' do
+    it 'caches fields_for results across calls' do
+      first_call = view_collection.fields_for(:view)
+      second_call = view_collection.fields_for(:view)
+
+      expect(first_call).to equal(second_call)
+    end
+
+    it 'invalidates cache when inherit is called' do
+      child = Blueprinter::ViewCollection.new
+      child[:default] << default_field
+
+      # Build the cache
+      fields_before = child.fields_for(:default)
+
+      # Inherit new fields — cache should be invalidated
+      parent = Blueprinter::ViewCollection.new
+      parent[:default] << new_field
+      child.inherit(parent)
+
+      fields_after = child.fields_for(:default)
+      expect(fields_after).not_to equal(fields_before)
+      expect(fields_after).to include(new_field)
+    end
+
+    it 'child inherits parent fields without mutating the parent' do
+      parent = Blueprinter::ViewCollection.new
+      parent[:default] << default_field
+      parent_fields = parent.fields_for(:default)
+
+      child = Blueprinter::ViewCollection.new
+      child.inherit(parent)
+      child[:default] << view_field
+
+      # Parent cache is untouched
+      expect(parent.fields_for(:default)).to equal(parent_fields)
+      expect(parent.fields_for(:default)).not_to include(view_field)
+
+      # Child has both parent and its own fields
+      expect(child.fields_for(:default)).to include(default_field)
+      expect(child.fields_for(:default)).to include(view_field)
+    end
+
+    it 'invalidates cache when a new view is created via []' do
+      fields_before = view_collection.fields_for(:view)
+
+      view_collection[:brand_new_view]
+
+      fields_after = view_collection.fields_for(:view)
+      expect(fields_after).not_to equal(fields_before)
+      expect(fields_after).to eq(fields_before)
+    end
+  end
 end

@@ -1,6 +1,12 @@
 ## Unreleased
 --
 
+## 1.3.0.pre1 - 2026/04/10
+- 🚀 [FEATURE] Adds support for `Symbol#to_proc` syntax in fields and identifiers. See [#546](https://github.com/procore-oss/blueprinter/pull/546). Thanks to [@tob1k](https://github.com/tob1k).
+- 🐛 [BUGFIX] Passes options as keywords during block extraction. See [#521](https://github.com/procore-oss/blueprinter/pull/521). Thanks to [@tylerhunt](https://github.com/tylerhunt).
+- 🐛 [BUGFIX] Ensures `Deprecation` module gets loaded before it's used. See [#549](https://github.com/procore-oss/blueprinter/pull/549). Thanks to [@jhollinger](https://github.com/jhollinger).
+- 🚜 [REFACTOR] Caches `ViewCollection` and transformers to reduce object allocations and improve rendering performance. See [#566](https://github.com/procore-oss/blueprinter/pull/566). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+
 ## 1.2.1 - 2025/09/11
 - 🐛 [BUGFIX] Adds back `Blueprinter.prepare` method with a deprecated warning. This method was previously public, but was removed as part of **1.2.0**.
 

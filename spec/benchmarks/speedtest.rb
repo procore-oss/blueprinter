@@ -34,8 +34,8 @@ end
 
 class WidgetBlueprintV2 < ApplicationBlueprintV2
   NUM_FIELDS.times { |i| field :"name_#{i}" }
-  NUM_OBJECTS.times { |i| object :"category_#{i}", CategoryBlueprintV2 }
-  NUM_COLLECTIONS.times { |i| collection :"parts_#{i}", PartBlueprintV2 }
+  NUM_OBJECTS.times { |i| association :"category_#{i}", CategoryBlueprintV2 }
+  NUM_COLLECTIONS.times { |i| association :"parts_#{i}", [PartBlueprintV2] }
 end
 
 puts "#{NUM_FIELDS} fields, #{NUM_OBJECTS} objects, #{NUM_COLLECTIONS} collections"

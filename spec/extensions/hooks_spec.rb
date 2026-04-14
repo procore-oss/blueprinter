@@ -158,8 +158,10 @@ describe Blueprinter::Hooks do
       extensions = [ext_a.new(log), ext_b.new(log), ext.new, ext_c.new(log)]
       ctx = object_ctx.new(serializer.blueprint, serializer.fields, {}, { n: 0 })
       hooks = described_class.new extensions
-      res = hooks.around(:around_serialize_object, ctx) do |ctx|
-        log << 'INNER'
+      res = catch Blueprinter::V2::Serializer::SIGNAL do
+        hooks.around(:around_serialize_object, ctx) do |ctx|
+          log << 'INNER'
+        end
       end
       expect(log).to eq ['A: 0', 'B: 1']
       expect(res).to be skip_field
@@ -170,9 +172,11 @@ describe Blueprinter::Hooks do
       extensions = [ext_a.new(log), ext_b.new(log), ext_c.new(log)]
       ctx = object_ctx.new(serializer.blueprint, serializer.fields, {}, { n: 0 })
       hooks = described_class.new extensions
-      res = hooks.around(:around_serialize_object, ctx) do |ctx|
-        log << 'INNER'
-        throw sig, skip_field
+      res = catch Blueprinter::V2::Serializer::SIGNAL do
+        hooks.around(:around_serialize_object, ctx) do |ctx|
+          log << 'INNER'
+          throw sig, skip_field
+        end
       end
       expect(log).to eq ['A: 0', 'B: 1', 'C: 2', 'INNER']
       expect(res).to be skip_field

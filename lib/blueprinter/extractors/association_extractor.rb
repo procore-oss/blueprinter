@@ -12,6 +12,7 @@ module Blueprinter
       @extractor = Blueprinter.configuration.default_extractor
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity
     def extract(association_name, object, local_options, options = {})
       options_without_default = if options.key?(:default) || options.key?(:default_if)
                                   options.except(:default, :default_if)
@@ -29,10 +30,10 @@ module Blueprinter
       if blueprint <= V2::Base
         extract_v2(value, blueprint, local_options, options)
       else
-       #blueprint.hashify(value, view_name: view, local_options: local_options)
         blueprint.hashify(value, view_name: view, local_options:)
       end
     end
+    # rubocop:enable Metrics/PerceivedComplexity
 
     private
 

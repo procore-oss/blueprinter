@@ -20,7 +20,7 @@ describe Blueprinter::V2::Render do
       self.blueprint_name = 'WidgetBlueprint'
       field :name
       field :desc, from: :description
-      object :category, test.category_blueprint
+      association :category, test.category_blueprint
 
       view :extended do
         field :long_desc do |_ctx|
@@ -29,7 +29,7 @@ describe Blueprinter::V2::Render do
       end
 
       view :with_parts do
-        collection :parts, test.part_blueprint
+        association :parts, [test.part_blueprint]
       end
     end
   end

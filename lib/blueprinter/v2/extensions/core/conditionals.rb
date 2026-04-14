@@ -16,7 +16,7 @@ module Blueprinter
           end
 
           # @param ctx [Blueprinter::V2::Context::Field]
-          # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/MethodLength,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
+          # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
           def around_field_value(ctx)
             value = yield ctx
             if value.nil? && @skip_nil[ctx.field]
@@ -39,7 +39,7 @@ module Blueprinter
             end
             value
           end
-          # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Metrics/MethodLength,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
+          # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
 
           alias around_object_value around_field_value
           alias around_collection_value around_field_value

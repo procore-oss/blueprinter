@@ -5,25 +5,21 @@ module Blueprinter
     module FieldSerializers
       # Serializesr for object fields
       class Object < Base
-        def serialize(ctx, result)
-          value = catch Serializer::SIGNAL do
-            # perf boost from "unrolled" built-in hooks
-            @conditionals.around_object_value(ctx) do |ctx|
-              @defaults.around_object_value(ctx) do |ctx|
-                # perf boost by skipping `around` when no extensions use it
-                if @hook_around_object_value
-                  @hooks.around(:around_object_value, ctx) do |ctx|
-                    extract ctx
-                  end
-                else
+        def serialize(ctx)
+          # perf boost from "unrolled" built-in hooks
+          value = @conditionals.around_object_value(ctx) do |ctx|
+            @defaults.around_object_value(ctx) do |ctx|
+              # perf boost by skipping `around` when no extensions use it
+              if @hook_around_object_value
+                @hooks.around(:around_object_value, ctx) do |ctx|
                   extract ctx
                 end
+              else
+                extract ctx
               end
             end
           end
-          return if value == Serializer::SIG_SKIP
-
-          result[ctx.field.name] = value.nil? ? nil : blueprint_value(value, ctx)
+          value.nil? ? nil : blueprint_value(value, ctx)
         end
 
         private

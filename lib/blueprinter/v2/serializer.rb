@@ -92,9 +92,10 @@ module Blueprinter
 
       def serialize(object, depth:)
         ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, store, depth)
-        @field_serializers.each_with_object({}) do |field_conf, acc|
+        @field_serializers.each_with_object({}) do |field_conf, result|
           ctx.field = field_conf.field
-          field_conf.serialize(ctx, acc)
+          value = catch(SIGNAL) { field_conf.serialize ctx }
+          result[ctx.field.name] = value unless value == SIG_SKIP
         end
       end
 

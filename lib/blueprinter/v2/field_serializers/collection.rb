@@ -5,25 +5,21 @@ module Blueprinter
     module FieldSerializers
       # Serializesr for collection fields
       class Collection < Base
-        def serialize(ctx, result)
-          value = catch Serializer::SIGNAL do
-            # perf boost from "unrolled" built-in hooks
-            @conditionals.around_collection_value(ctx) do |ctx|
-              @defaults.around_collection_value(ctx) do |ctx|
-                # perf boost by skipping `around` when no extensions use it
-                if @hook_around_collection_value
-                  @hooks.around(:around_collection_value, ctx) do |ctx|
-                    extract ctx
-                  end
-                else
+        def serialize(ctx)
+          # perf boost from "unrolled" built-in hooks
+          value = @conditionals.around_collection_value(ctx) do |ctx|
+            @defaults.around_collection_value(ctx) do |ctx|
+              # perf boost by skipping `around` when no extensions use it
+              if @hook_around_collection_value
+                @hooks.around(:around_collection_value, ctx) do |ctx|
                   extract ctx
                 end
+              else
+                extract ctx
               end
             end
           end
-          return if value == Serializer::SIG_SKIP
-
-          result[ctx.field.name] = value.nil? ? nil : blueprint_value(value, ctx)
+          value.nil? ? nil : blueprint_value(value, ctx)
         end
 
         private

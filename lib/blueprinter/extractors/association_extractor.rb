@@ -30,7 +30,6 @@ module Blueprinter
       if blueprint <= V2::Base
         extract_v2(value, blueprint, local_options, options)
       else
-       #blueprint.hashify(value, view_name: view, local_options: local_options)
         blueprint.hashify(value, view_name: view, local_options:)
       end
     end

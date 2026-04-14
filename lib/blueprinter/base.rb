@@ -45,7 +45,7 @@ module Blueprinter
       #   end
       #
       # @return [Field] A Field object
-      def identifier(method, name: method, extractor: Blueprinter.configuration.extractor_default.new, &block)
+      def identifier(method, name: method, extractor: Blueprinter.configuration.default_extractor, &block)
         view_collection[:identifier] << Field.new(
           method,
           name,
@@ -116,7 +116,7 @@ module Blueprinter
         current_view << Field.new(
           method,
           options.fetch(:name) { method },
-          options.fetch(:extractor) { Blueprinter.configuration.extractor_default.new },
+          options.fetch(:extractor) { Blueprinter.configuration.default_extractor },
           self,
           options.merge(block:)
         )
@@ -159,7 +159,7 @@ module Blueprinter
         current_view << Association.new(
           method:,
           name: options.fetch(:name) { method },
-          extractor: options.fetch(:extractor) { AssociationExtractor.new },
+          extractor: options.fetch(:extractor) { association_extractor },
           blueprint: options.fetch(:blueprint),
           parent_blueprint: self,
           view: options.fetch(:view, :default),
@@ -368,6 +368,10 @@ module Blueprinter
 
       def inherited(subclass)
         subclass.send(:view_collection).inherit(view_collection)
+      end
+
+      def association_extractor
+        @_association_extractor ||= AssociationExtractor.new
       end
     end
   end

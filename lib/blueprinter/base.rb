@@ -329,6 +329,7 @@ module Blueprinter
         self.view_scope = view_collection[view_name]
         view_collection[:default].track_definition_order(view_name)
         yield
+        view_collection.invalidate_cache!
         self.view_scope = view_collection[:default]
       end
 

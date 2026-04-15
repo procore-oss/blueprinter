@@ -37,6 +37,12 @@ module Blueprinter
         self[view_name].inherit(view)
       end
 
+      invalidate_cache!
+    end
+
+    # Clears the compiled field/transformer cache. This should be called after any mutation to a view's fields,
+    # exclusions, or transformers to ensure the cache reflects the current state.
+    def invalidate_cache!
       @cache = nil
     end
 
@@ -72,7 +78,7 @@ module Blueprinter
       @cache_mutex.synchronize do
         unless @views.key?(view_name)
           @views[view_name] = View.new(view_name)
-          @cache = nil
+          invalidate_cache!
         end
         @views[view_name]
       end

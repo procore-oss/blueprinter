@@ -791,4 +791,30 @@ describe '::Base' do
       end
     end
   end
+
+  describe 'view block using reflections to dynamically exclude fields' do
+    let(:obj) { OpenStruct.new(id: 1, name: 'Widget', description: 'A widget', status: 'active') }
+
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        fields :name, :description, :status
+
+        view :ids_only do
+          all_fields = reflections[:default].fields.keys.reject { |f| f == :id }
+          excludes(*all_fields)
+        end
+      end
+    end
+
+    it 'renders only the identifier for the ids_only view' do
+      result = blueprint.render_as_hash(obj, view: :ids_only)
+      expect(result.keys).to eq([:id])
+    end
+
+    it 'still renders all fields for the default view' do
+      result = blueprint.render_as_hash(obj)
+      expect(result.keys).to match_array([:id, :name, :description, :status])
+    end
+  end
 end

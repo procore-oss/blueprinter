@@ -3,7 +3,7 @@
 require 'benchmark'
 require 'blueprinter'
 
-NUM_FIELDS = 10
+NUM_FIELDS = 20
 NUM_OBJECTS = 5
 NUM_COLLECTIONS = 2
 
@@ -40,6 +40,7 @@ end
 
 puts "#{NUM_FIELDS} fields, #{NUM_OBJECTS} objects, #{NUM_COLLECTIONS} collections"
 
+M = 100
 results = Benchmark.bmbm do |x|
   widgets = 100_000.times.map do |n|
     {}.merge(
@@ -49,24 +50,17 @@ results = Benchmark.bmbm do |x|
     )
   end
 
-  [
-    [10_000, 10],
-    [1000, 100],
-    [500, 100],
-    [250, 100],
-    [100, 250],
-    [25, 500],
-    [5, 1000],
-    [1, 1000],
-  ].each do |(n, m)|
+  [1000, 500, 250, 100, 25, 5, 1].each do |n|
     fmt_n = n.to_s.chars.reverse.each_slice(3).map(&:join).join(',').reverse
     list = widgets[0,n]
-    x.report "#{fmt_n} widgets #{m}x: V1" do
-      m.times { WidgetBlueprintV1.render_as_hash(list) }
+    x.report "#{fmt_n} widgets #{M}x: V1" do
+      M.times { WidgetBlueprintV1.render_as_hash(list) }
+      # M.times { list.each { |w| WidgetBlueprintV1.render_as_hash(w) } }
     end
 
-    x.report "#{fmt_n} widgets #{m}x: V2" do
-      m.times { WidgetBlueprintV2.render(list).to_hash }
+    x.report "#{fmt_n} widgets #{M}x: V2" do
+      M.times { WidgetBlueprintV2.render(list).to_hash }
+      # M.times { list.each { |w| WidgetBlueprintV2.render(w).to_hash } }
     end
   end
 end
@@ -78,13 +72,9 @@ results.
     v1 = (a.label =~ /V1/ ? a : b).real
     v2 = (a.label =~ /V2/ ? a : b).real
 
-    if v2 < v1
-      n = (100 - (v2 / v1) * 100).round(2)
-      pcnt = ('%0.2f' % n).rjust(5, '0')
-      puts "#{label} V2 #{pcnt}% faster (#{'%.4f' % (v1 - v2)} sec)"
-    else
-      n = (100 - (v1 / v2) * 100).round(2)
-      pcnt = ('%0.2f' % n).rjust(5, '0')
-      puts "#{label} V2 #{pcnt}% slower (#{'%.4f' % (v2 - v1)} sec)"
-    end
+    n = ((v2 - v1) / v1) * 100
+    pct = ('%0.2f' % n.abs).rjust(5, '0')
+    sign = n < 0 ? "-" : "+"
+
+    puts "#{label} V2 change: #{sign}#{pct}%"
   end

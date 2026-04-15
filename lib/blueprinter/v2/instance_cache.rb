@@ -24,8 +24,9 @@ module Blueprinter
         end
       end
 
-      def serializer(blueprint_class, options, store, initial_depth)
-        @serializers[blueprint_class] ||= Serializer.new(blueprint_class, options, self, store:, initial_depth:)
+      # TODO remove
+      def serializer(blueprint_class, options=nil, store=nil, initial_depth=nil)
+        @serializers[blueprint_class] ||= Serializer2.new(blueprint_class)
       end
 
       def extension(ext)

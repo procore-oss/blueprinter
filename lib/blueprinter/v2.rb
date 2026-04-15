@@ -6,7 +6,9 @@ require 'blueprinter/v2/context'
 module Blueprinter
   module V2
     autoload :Base, 'blueprinter/v2/base'
+    autoload :Conditionals, 'blueprinter/v2/conditionals'
     autoload :Context, 'blueprinter/v2/context'
+    autoload :Defaults, 'blueprinter/v2/defaults'
     autoload :DSL, 'blueprinter/v2/dsl'
     autoload :Extensions, 'blueprinter/v2/extensions'
     autoload :Extractor, 'blueprinter/v2/extractor'
@@ -17,6 +19,7 @@ module Blueprinter
     autoload :Reflection, 'blueprinter/v2/reflection'
     autoload :Render, 'blueprinter/v2/render'
     autoload :Serializer, 'blueprinter/v2/serializer'
+    autoload :Serializer2, 'blueprinter/v2/serializer2'
     autoload :ViewBuilder, 'blueprinter/v2/view_builder'
   end
 end

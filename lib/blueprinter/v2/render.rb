@@ -10,7 +10,7 @@ module Blueprinter
       def initialize(object, options, blueprint:, collection:, instances:)
         @object = object
         @options = options.dup.freeze
-        @blueprint = blueprint
+        @blueprint_class = blueprint
         @instances = instances
         @collection = collection
         @store = {}
@@ -30,17 +30,19 @@ module Blueprinter
       # or change the way :json and :hash behave.
       # @return [Object]
       def to(format)
-        serializer = @instances.serializer(@blueprint, @options, store, 1)
-        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, format, store)
+        serializer = @blueprint_class.serializer
+        blueprint = @instances.blueprint(@blueprint_class)
+        ctx = Context::Result.new(blueprint, serializer.fields, @options, @object, format, store)
+
         result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
-          if new_ctx.blueprint != serializer.blueprint
+          if new_ctx.blueprint != blueprint
             blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class
             render = Render.new(new_ctx.object, new_ctx.options, blueprint:, collection: @collection, instances: @instances)
             return render.to new_ctx.format
           end
 
           @object = new_ctx.object
-          serializer.options = new_ctx.options
+          @options = new_ctx.options
           serialize serializer
         end
         result.is_a?(Context::Final) ? result.value : result
@@ -52,9 +54,9 @@ module Blueprinter
 
       def serialize(serializer)
         if @collection
-          serializer.collection(@object, depth: 1)
+          serializer.collection(@object, @options, store:, instances: @instances, depth: 1)
         else
-          serializer.object(@object, depth: 1)
+          serializer.object(@object, @options, store:, instances: @instances, depth: 1)
         end
       end
     end

@@ -5,8 +5,6 @@ module Blueprinter
     module Extensions
       # Core functionality built with extensions
       module Core
-        autoload :Conditionals, 'blueprinter/v2/extensions/core/conditionals'
-        autoload :Defaults, 'blueprinter/v2/extensions/core/defaults'
         autoload :Json, 'blueprinter/v2/extensions/core/json'
         autoload :Wrapper, 'blueprinter/v2/extensions/core/wrapper'
       end

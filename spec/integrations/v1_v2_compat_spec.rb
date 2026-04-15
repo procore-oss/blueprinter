@@ -201,23 +201,21 @@ describe 'V1/V2 Compatibility' do
 
     let(:instances) do
       Blueprinter::V2::InstanceCache.new.tap do |instances|
-        def instances.serializers = @serializers
-        def instances.blueprints = @blueprints
+        def instances.blueprints = @instances
       end
     end
 
-    it 'should use the same V2 Serializer and Blueprint instances through V1' do
+    it 'should use the same V2 Blueprint instances through V1' do
       barprint = blueprints[:barprint][:extended]
-      bar_serializer = instances.serializer(barprint, { tag: 'X' }, {}, 1)
-
-      res = bar_serializer.object({
+      res = barprint.serializer.object({
         name: 'Bar 1',
         foo: {
           name: 'Foo 1',
           bar1: { name: 'Bar 2' },
           bar2: { name: 'Bar 2' }
         }
-      }, depth: 1)
+      }, { tag: 'X' }, instances:, store: {}, depth: 1)
+
       expect(res).to eq({
         name: 'Bar 1 - X',
         foo: {
@@ -226,14 +224,11 @@ describe 'V1/V2 Compatibility' do
           bar2: { name: 'Bar 2 - X' }
         }
       })
-
-      expect(instances.serializers[barprint]).to be_a Blueprinter::V2::Serializer
       expect(instances.blueprints[barprint]).to be_a barprint
     end
 
-    it 'should use the same V2 Serializer and Blueprint instances from V1' do
-      def instances.serializers = @serializers
-      def instances.blueprints = @blueprints
+    it 'should use the same V2 Blueprint instances from V1' do
+      def instances.blueprints = @instances
       def instances.blueprint_calls = @blueprint_calls ||= {}
       def instances.blueprint(klass)
         blueprint_calls[klass] ||= 0
@@ -266,7 +261,6 @@ describe 'V1/V2 Compatibility' do
       })
 
       barprint = blueprints[:barprint][:extended]
-      expect(instances.serializers[barprint]).to be_a Blueprinter::V2::Serializer
       expect(instances.blueprints[barprint]).to be_a barprint
       expect(instances.blueprint_calls[barprint].size).to eq 8
     end

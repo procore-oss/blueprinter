@@ -9,7 +9,6 @@ module Blueprinter
     class Base
       extend DSL
       extend Reflection
-      include Helpers
 
       class << self
         # @return [Hash] Options set on this Blueprint
@@ -51,6 +50,11 @@ module Blueprinter
         subclass.eval_mutex = Mutex.new
       end
 
+      def self.serializer
+        eval! unless @serializer
+        @serializer
+      end
+
       # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
       def self.inspect = blueprint_name
 
@@ -74,7 +78,7 @@ module Blueprinter
       # @return [Class] A descendent of Blueprinter::V2::Base
       #
       def self.[](name)
-        eval! unless @evaled
+        eval! unless @serializer
         child, children = name.to_s.split('.', 2)
         view = views[child.to_sym] || raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{self}'")
         children ? view[children] : view
@@ -101,10 +105,10 @@ module Blueprinter
       # Apply partials and field exclusions
       # @api private
       def self.eval!(lock: true)
-        return if @evaled
+        return if @serializer
 
         if lock
-          eval_mutex.synchronize { run_eval! unless @evaled }
+          eval_mutex.synchronize { run_eval! unless @serializer }
         else
           run_eval!
         end
@@ -118,11 +122,12 @@ module Blueprinter
         options.freeze
         formatters.freeze
         schema.freeze
+        serializer = Serializer.new(self)
         schema.each_value do |f|
-          f.options&.freeze
+          f.options.freeze
           f.freeze
         end
-        @evaled = true
+        @serializer = serializer
       end
 
       # @api private

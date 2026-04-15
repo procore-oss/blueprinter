@@ -69,7 +69,7 @@ module Blueprinter
       #   class WidgetBlueprint < ApplicationBlueprint
       #     extension do
       #       # modify every object before serialization
-      #       def around_blueprint(ctx)
+      #       def around_serialize_object(ctx)
       #         object = modify ctx.object
       #         yield object
       #       end
@@ -90,11 +90,9 @@ module Blueprinter
       #
       # @param name [Symbol] Name of the field
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param extractor [Class] Extractor class to use for this field
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
-      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
@@ -128,11 +126,9 @@ module Blueprinter
       # @param blueprint [Class|Array<Class>] Blueprint class to use (object). For a collection, wrap the blueprint in an
       # array.
       # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param extractor [Class] Extractor class to use for this field
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
-      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
@@ -141,13 +137,20 @@ module Blueprinter
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
         type = is_collection ? Fields::Collection : Fields::Object
+        serializer =
+          if blueprint_class.is_a?(ViewWrapper) || blueprint_class < ::Blueprinter::Base
+            FieldSerializers::V1Association
+          else
+            is_collection ? FieldSerializers::Collection : FieldSerializers::Object
+          end
         schema[name] = type.new(
           name: name,
           blueprint: blueprint_class,
           from: from.to_sym,
           from_str: from.to_s,
           value_proc: definition,
-          options: options.dup
+          options: options.dup,
+          serializer:
         )
       end
 

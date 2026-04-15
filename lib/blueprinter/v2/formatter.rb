@@ -8,9 +8,11 @@ module Blueprinter
         @formatters = blueprint.formatters
       end
 
-      # @param value
+      def any? = @formatters.any?
+
       # @param ctx [Blueprinter::V2::Context::Field]
-      def call(value, ctx)
+      # @param value
+      def call(ctx, value)
         fmt = @formatters[value.class]
         case fmt
         when nil

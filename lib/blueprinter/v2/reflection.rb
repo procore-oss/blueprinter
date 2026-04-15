@@ -10,7 +10,7 @@ module Blueprinter
       # @return [Hash<Symbol, Blueprinter::V2::Reflection::View>]
       #
       def reflections
-        eval! unless @evaled
+        eval! unless @serializer
         @_reflections ||= flatten_children(self, :default).freeze
       end
 

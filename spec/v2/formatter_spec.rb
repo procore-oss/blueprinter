@@ -21,20 +21,20 @@ describe Blueprinter::V2::Formatter do
     formatter = described_class.new(blueprint)
     value = Date.new(2024, 10, 1)
     ctx = context.new(blueprint.new, [], {}, object, field)
-    expect(formatter.call(value, ctx)).to eq '2024-10-01'
+    expect(formatter.call(ctx, value)).to eq '2024-10-01'
   end
 
   it 'calls instance method formatters' do
     formatter = described_class.new(blueprint)
     value = true
     ctx = context.new(blueprint.new, [], {}, object, field)
-    expect(formatter.call(value, ctx)).to eq "Yes"
+    expect(formatter.call(ctx, value)).to eq "Yes"
   end
 
   it "passes through values it doesn't know about" do
     formatter = described_class.new(blueprint)
     value = "foo"
     ctx = context.new(blueprint.new, [], {}, object, field)
-    expect(formatter.call(value, ctx)).to eq "foo"
+    expect(formatter.call(ctx, value)).to eq "foo"
   end
 end

@@ -153,7 +153,7 @@ describe Blueprinter::Hooks do
     it 'bypasses parent hooks with a skip in a nested hook' do
       log = []
       ext = Class.new(Blueprinter::Extension) do
-        def around_serialize_object(_ctx) = skip
+        def around_serialize_object(_ctx) = skip!
       end
       extensions = [ext_a.new(log), ext_b.new(log), ext.new, ext_c.new(log)]
       ctx = object_ctx.new(serializer.blueprint, serializer.fields, {}, { n: 0 })

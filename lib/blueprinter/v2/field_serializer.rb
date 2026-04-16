@@ -5,6 +5,8 @@ require 'blueprinter/v2/formatter'
 module Blueprinter
   module V2
     class FieldSerializer
+      include ExtensionHelpers
+
       def initialize(blueprint_class, hooks)
         @blueprint_class = blueprint_class
         @hooks = hooks
@@ -20,12 +22,13 @@ module Blueprinter
         # rubocop:disable Metrics/BlockLength
         config.fields.each_with_object({}) do |field, result|
           ctx.field = field
+          # extract value
           value =
             if (field_hook = @field_hooks[field.type])
               value = catch Serializer::SIGNAL do
                 @hooks.around(field_hook, ctx) do
                   value = extract(config, field, object, ctx)
-                  config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
+                  config.conditionals.include?(ctx, value) ? value : skip!
                 end
               end
               value == Serializer::SIG_SKIP ? next : value
@@ -34,6 +37,7 @@ module Blueprinter
               config.conditionals.include?(ctx, value) ? value : next
             end
 
+          # format/serialize value and add to result
           result[field.name] =
             case field.type
             when :field

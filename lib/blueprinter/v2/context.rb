@@ -68,7 +68,7 @@ module Blueprinter
       end
 
       Parent = Struct.new(:blueprint, :field, :object) do
-        members.each do |attr|
+        (members - %i[field object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Parent field `#{attr}` is immutable" }
         end

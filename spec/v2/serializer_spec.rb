@@ -36,11 +36,12 @@ describe Blueprinter::V2::Serializer do
   end
 
   let(:instances) { Blueprinter::V2::InstanceCache.new }
+  let(:store) { {} }
 
   it 'works with nil values' do
     widget = { name: nil, category: nil }
 
-    result = described_class.new(widget_blueprint, {}, instances, store: {}, initial_depth: 1).object(widget, depth: 1)
+    result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
     expect(result).to eq({
       name: nil,
       category: nil,
@@ -86,7 +87,7 @@ describe Blueprinter::V2::Serializer do
     end
 
     it 'extracts values and serialize nested Blueprints' do
-      result = described_class.new(widget_blueprint, {}, instances, store: {}, initial_depth: 1).object(widget, depth: 1)
+      result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
       expect(result).to eq({
         name: 'Foo',
         category: { name: 'Bar' },
@@ -103,7 +104,7 @@ describe Blueprinter::V2::Serializer do
         association(:parts, [test.part_blueprint]) { |obj, _ctx| obj[:parts].each_with_index.map { |_, i| { num: i + 1 } } }
       end
 
-      result = described_class.new(block_blueprint, {}, instances, store: {}, initial_depth: 1).object(widget, depth: 1)
+      result = block_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
       expect(result).to eq({
         name: 'Name of Foo',
         category: { name: 'Name of Bar' },

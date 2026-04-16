@@ -133,6 +133,9 @@ module Blueprinter
       #   JSON output.
       # @option options [Symbol] :view Specify the view to use or fall back to
       #   to the :default view.
+      # @option options [Hash, Proc] :options Additional options to merge into the
+      #   options hash passed to the nested blueprint. Can be a static Hash or a Proc
+      #   that receives the parent object and returns a Hash.
       # @yield [object, options] The object and the options passed to render are
       #   also yielded to the block.
       #
@@ -148,6 +151,16 @@ module Blueprinter
       #     association :vehicles, blueprint: VehiclesBlueprint do |user, opts|
       #       user.vehicles + opts[:additional_vehicles]
       #     end
+      #   end
+      #
+      # @example Passing static options to the nested blueprint.
+      #   class UserBlueprint < Blueprinter::Base
+      #     association :vehicles, blueprint: VehiclesBlueprint, options: { show_owner: true }
+      #   end
+      #
+      # @example Passing dynamic options based on the parent object.
+      #   class UserBlueprint < Blueprinter::Base
+      #     association :vehicles, blueprint: VehiclesBlueprint, options: ->(user) { { owner_name: user.name } }
       #   end
       #
       # @return [Association] An object
@@ -329,6 +342,7 @@ module Blueprinter
         self.view_scope = view_collection[view_name]
         view_collection[:default].track_definition_order(view_name)
         yield
+        view_collection.invalidate_cache!
         self.view_scope = view_collection[:default]
       end
 

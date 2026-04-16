@@ -15,7 +15,7 @@ module Blueprinter
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_skip
-      Config = Struct.new(:blueprint, :fields, :options, :obj_ctx, :parent_ctx, :conditionals, :defaults, keyword_init: true)
+      Config = Struct.new(:blueprint, :fields, :options, :conditionals, :defaults, keyword_init: true)
 
       attr_reader :blueprint_class, :hooks
 
@@ -29,10 +29,8 @@ module Blueprinter
       def object(object, options, instances:, store:, depth:, parent: nil)
         config = store[@blueprint_class.object_id] ||= blueprint_init(options, instances:, store:, depth:)
         if @hook_around_serialize_object
-          config.obj_ctx.object = object
-          config.obj_ctx.parent = parent
-          config.obj_ctx.depth = depth
-          @hooks.around(:around_serialize_object, config.obj_ctx) do |ctx|
+          ctx = Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
+          @hooks.around(:around_serialize_object, ctx) do |ctx|
             serialize(config, ctx.object, parent:, instances:, store:, depth:)
           end
         else
@@ -43,10 +41,8 @@ module Blueprinter
       def collection(objects, options, instances:, store:, depth:, parent: nil)
         config = store[@blueprint_class.object_id] ||= blueprint_init(options, instances:, store:, depth:)
         if @hook_around_serialize_collection
-          config.obj_ctx.object = objects
-          config.obj_ctx.parent = parent
-          config.obj_ctx.depth = depth
-          @hooks.around(:around_serialize_collection, config.obj_ctx) do |ctx|
+          ctx = Context::Object.new(config.blueprint, config.fields, config.options, objects, parent, store, depth)
+          @hooks.around(:around_serialize_collection, ctx) do |ctx|
             ctx.object.map { |object| serialize(config, object, parent:, instances:, store:, depth:) }
           end
         else
@@ -62,10 +58,8 @@ module Blueprinter
 
       def serialize(config, object, parent:, instances:, store:, depth:)
         if @hook_around_blueprint
-          config.obj_ctx.object = object
-          config.obj_ctx.parent = parent
-          config.obj_ctx.depth = depth
-          @hooks.around(:around_blueprint, config.obj_ctx) do |ctx|
+          ctx = Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
+          @hooks.around(:around_blueprint, ctx) do |ctx|
             @field_serializer.serialize(config, ctx.object, instances:, store:, depth:)
           end
         else
@@ -83,9 +77,6 @@ module Blueprinter
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           config.options = ctx.options.freeze
           config.fields = ctx.fields.freeze
-          # cheaper to create these once per render and re-use
-          config.obj_ctx = Context::Object.new(blueprint, config.fields, config.options, nil, nil, store)
-          config.parent_ctx = Context::Parent.new(@blueprint_class)
         end
         config
       end
@@ -94,6 +85,7 @@ module Blueprinter
         extensions = @blueprint_class.extensions.map do |ext|
           case ext
           when Extension then ext
+          when Class then ext.new
           when Proc then ext.call
           else raise BlueprinterError, 'Extensions must be an instance of Blueprinter::Extension or a Proc that returns one'
           end

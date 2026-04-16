@@ -32,7 +32,7 @@ module Blueprinter
       def to(format)
         serializer = @blueprint_class.serializer
         blueprint = @instances.blueprint(@blueprint_class)
-        ctx = Context::Result.new(blueprint, serializer.fields, @options, @object, format, store)
+        ctx = Context::Result.new(blueprint, serializer.default_fields, @options, @object, format, store)
 
         result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
           if new_ctx.blueprint != blueprint

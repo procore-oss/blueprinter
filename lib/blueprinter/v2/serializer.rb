@@ -13,7 +13,7 @@ module Blueprinter
     # NOTE: The instance lives for the duration of your application.
     #
     class Serializer
-      Config = Struct.new(:blueprint, :fields, :options, :obj_ctx, :conditionals, :defaults, keyword_init: true)
+      Config = Struct.new(:blueprint, :fields, :options, :obj_ctx, :parent_ctx, :conditionals, :defaults, keyword_init: true)
       attr_reader :blueprint_class, :hooks
 
       def initialize(blueprint_class)
@@ -80,8 +80,9 @@ module Blueprinter
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           config.options = ctx.options.freeze
           config.fields = ctx.fields.freeze
-          # cheaper to create this once per render and re-use
+          # cheaper to create these once per render and re-use
           config.obj_ctx = Context::Object.new(blueprint, config.fields, config.options, nil, nil, store)
+          config.parent_ctx = Context::Parent.new(@blueprint_class)
         end
         config
       end

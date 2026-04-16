@@ -5,6 +5,8 @@ require 'blueprinter/v2/formatter'
 module Blueprinter
   module V2
     class FieldSerializer
+      SKIP = :_blueprinter_skip
+
       def initialize(blueprint_class, hooks)
         @hooks = hooks
         @formatter = Formatter.new(blueprint_class)
@@ -18,36 +20,44 @@ module Blueprinter
         # rubocop:disable Metrics/BlockLength
         config.fields.each_with_object({}) do |field, result|
           ctx.field = field
-          value = extract(config.blueprint, field, object, ctx)
-          next unless config.conditionals.include?(ctx, value)
-
-          value = config.defaults.value_or_default(ctx, value)
           result[field.name] =
             case field.type
             when :field
-              if @hook_around_field_value
-                @hooks.around(:around_field_value, ctx) do |ctx|
-                  @formatter.call(value, ctx)
+              value =
+                if @hook_around_field_value
+                  @hooks.around(:around_field_value, ctx) do
+                    extract(config, field, object, ctx)
+                  end
+                else
+                  extract(config, field, object, ctx)
                 end
-              else
-                @formatter.call(value, ctx)
-              end
+              next if value == SKIP
+
+              @formatter.call(value, ctx)
             when :object
-              if @hook_around_object_value
-                @hooks.around(:around_object_value, ctx) do
-                  serialize_object(field, config.options, object, value, instances:, store:, depth:)
+              value =
+                if @hook_around_object_value
+                  @hooks.around(:around_object_value, ctx) do
+                    extract(config, field, object, ctx)
+                  end
+                else
+                  extract(config, field, object, ctx)
                 end
-              else
-                serialize_object(field, config.options, object, value, instances:, store:, depth:)
-              end
+              next if value == SKIP
+
+              value ? serialize_object(config, field, object, value, instances:, store:, depth:) : nil
             when :collection
-              if @hook_around_collection_value
-                @hooks.around(:around_collection_value, ctx) do
-                  serialize_collection(field, config.options, ctx.object, value, instances:, store:, depth:)
+              value =
+                if @hook_around_collection_value
+                  @hooks.around(:around_collection_value, ctx) do
+                    extract(config, field, object, ctx)
+                  end
+                else
+                  extract(config, field, object, ctx)
                 end
-              else
-                serialize_collection(field, config.options, object, value, instances:, store:, depth:)
-              end
+              next if value == SKIP
+
+              value ? serialize_collection(config, field, object, value, instances:, store:, depth:) : nil
             end
         end
         # rubocop:enable Metrics/BlockLength
@@ -56,35 +66,41 @@ module Blueprinter
 
       private
 
-      def extract(blueprint, field, object, ctx)
-        if field.value_proc
-          blueprint.instance_exec(object, ctx, &field.value_proc)
-        elsif object.is_a? Hash
-          object[field.from] || object[field.from_str]
+      def extract(config, field, object, ctx)
+        value =
+          if field.value_proc
+            config.blueprint.instance_exec(object, ctx, &field.value_proc)
+          elsif object.is_a? Hash
+            object[field.from] || object[field.from_str]
+          else
+            object.public_send(field.from)
+          end
+        return SKIP unless config.conditionals.include?(ctx, value)
+
+        config.defaults.value_or_default(ctx, value)
+      end
+
+      def serialize_object(config, field, object, value, instances:, store:, depth:)
+        if field.blueprint < V2::Base
+          config.parent_ctx.field = field
+          config.parent_ctx.object = object
+          field.blueprint.serializer
+               .object(value, config.options, parent: config.parent_ctx, instances:, store:, depth: depth + 1)
         else
-          object.public_send(field.from)
+          opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
+          field.blueprint.hashify(value, view_name: :default, local_options: config.options.dup.merge(opts))
         end
       end
 
-      def serialize_object(field, options, object, value, instances:, store:, depth:)
+      def serialize_collection(config, field, object, value, instances:, store:, depth:)
         if field.blueprint < V2::Base
-          # TODO: can we re-use this object?
-          parent = Context::Parent.new(@blueprint_class, field, object)
-          field.blueprint.serializer.object(value, options, parent:, instances:, store:, depth: depth + 1)
+          config.parent_ctx.field = field
+          config.parent_ctx.object = object
+          field.blueprint.serializer
+               .collection(value, config.options, parent: config.parent_ctx, instances:, store:, depth: depth + 1)
         else
           opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
-          field.blueprint.hashify(value, view_name: :default, local_options: options.dup.merge(opts))
-        end
-      end
-
-      def serialize_collection(field, options, object, value, instances:, store:, depth:)
-        if field.blueprint < V2::Base
-          # TODO: can we re-use this object?
-          parent = Context::Parent.new(@blueprint_class, field, object)
-          field.blueprint.serializer.collection(value, options, parent:, instances:, store:, depth: depth + 1)
-        else
-          opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
-          field.blueprint.hashify(value, view_name: :default, local_options: options.dup.merge(opts))
+          field.blueprint.hashify(value, view_name: :default, local_options: config.options.dup.merge(opts))
         end
       end
 

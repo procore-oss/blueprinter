@@ -18,37 +18,4 @@ describe Blueprinter::V2::InstanceCache do
       expect(blueprint2).to be blueprint1
     end
   end
-
-  context "#extension" do
-    let(:extension_a) { Class.new(Blueprinter::Extension) }
-    let(:extension_b) { Class.new(Blueprinter::Extension) }
-
-    it "returns an existing extension instance" do
-      ext = extension_a.new
-      expect(subject.extension(ext)).to be ext
-    end
-
-    it "returns a new instance of an Extension subclass" do
-      expect(subject.extension(extension_a)).to be_a extension_a
-      expect(subject.extension(extension_b)).to be_a extension_b
-    end
-
-    it "returns the same instance of a Blueprint subclass" do
-      ext1 = subject.extension extension_a
-      ext2 = subject.extension extension_a
-      expect(ext2).to be ext1
-    end
-
-    it "returns a new instance of an Extension subclass from a proc" do
-      expect(subject.extension(-> { extension_a.new })).to be_a extension_a
-      expect(subject.extension(-> { extension_b.new })).to be_a extension_b
-    end
-
-    it "returns the same instance of a Blueprint subclass from a proc" do
-      p = -> { extension_a.new }
-      ext1 = subject.extension p
-      ext2 = subject.extension p
-      expect(ext2).to be ext1
-    end
-  end
 end

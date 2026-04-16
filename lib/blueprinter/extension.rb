@@ -18,7 +18,7 @@ module Blueprinter
   #  - pre_render
   #
   class Extension
-    include V2::Helpers
+    include V2::ExtensionHelpers
 
     HOOKS = %i[
       around_hook

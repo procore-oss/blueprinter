@@ -9,7 +9,6 @@ module Blueprinter
     class Base
       extend DSL
       extend Reflection
-      include Helpers
 
       class << self
         # @return [Hash] Options set on this Blueprint

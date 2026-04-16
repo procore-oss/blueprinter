@@ -217,7 +217,7 @@ describe Blueprinter::V2::Serializer do
     ext1 = Class.new(Blueprinter::Extension) do
       def around_field_value(ctx)
         value = yield ctx
-        value == '?' ? skip : value
+        value == '?' ? skip! : value
       end
     end
     ext2 = Class.new(Blueprinter::Extension) do
@@ -241,7 +241,7 @@ describe Blueprinter::V2::Serializer do
     ext1 = Class.new(Blueprinter::Extension) do
       def around_object_value(ctx)
         value = yield ctx
-        value[:name] == 'Bar' ? skip : value
+        value[:name] == 'Bar' ? skip! : value
       end
     end
     ext2 = Class.new(Blueprinter::Extension) do
@@ -263,7 +263,7 @@ describe Blueprinter::V2::Serializer do
     ext2 = Class.new(Blueprinter::Extension) do
       def around_collection_value(ctx)
         value = yield ctx
-        value.empty? ? skip : value
+        value.empty? ? skip! : value
       end
     end
     ext3 = Class.new(Blueprinter::Extension) do

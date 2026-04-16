@@ -13,7 +13,10 @@ module Blueprinter
     # NOTE: The instance lives for the duration of your application.
     #
     class Serializer
+      SIGNAL = :_blueprinter_signal
+      SIG_SKIP = :_blueprinter_skip
       Config = Struct.new(:blueprint, :fields, :options, :obj_ctx, :parent_ctx, :conditionals, :defaults, keyword_init: true)
+
       attr_reader :blueprint_class, :hooks
 
       def initialize(blueprint_class)

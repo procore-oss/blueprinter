@@ -27,11 +27,13 @@ module Blueprinter
                 if @hook_around_field_value
                   catch Serializer::SIGNAL do
                     @hooks.around(:around_field_value, ctx) do
-                      extract(config, field, object, ctx)
+                      value = extract(config, field, object, ctx)
+                      config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
                     end
                   end
                 else
-                  extract(config, field, object, ctx)
+                  value = extract(config, field, object, ctx)
+                  config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
                 end
               next if value == Serializer::SIG_SKIP
 
@@ -41,11 +43,13 @@ module Blueprinter
                 if @hook_around_object_value
                   catch Serializer::SIGNAL do
                     @hooks.around(:around_object_value, ctx) do
-                      extract(config, field, object, ctx)
+                      value = extract(config, field, object, ctx)
+                      config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
                     end
                   end
                 else
-                  extract(config, field, object, ctx)
+                  value = extract(config, field, object, ctx)
+                  config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
                 end
               next if value == Serializer::SIG_SKIP
 
@@ -55,11 +59,13 @@ module Blueprinter
                 if @hook_around_collection_value
                   catch Serializer::SIGNAL do
                     @hooks.around(:around_collection_value, ctx) do
-                      extract(config, field, object, ctx)
+                      value = extract(config, field, object, ctx)
+                      config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
                     end
                   end
                 else
-                  extract(config, field, object, ctx)
+                  value = extract(config, field, object, ctx)
+                  config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
                 end
               next if value == Serializer::SIG_SKIP
 
@@ -81,8 +87,7 @@ module Blueprinter
           else
             object.public_send(field.from)
           end
-        value = config.defaults.value_or_default(ctx, value)
-        config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
+        config.defaults.value_or_default(ctx, value)
       end
 
       def serialize_object(config, field, object, value, parent:, instances:, store:, depth:)

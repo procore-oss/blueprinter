@@ -9,10 +9,10 @@ module Blueprinter
         @blueprint_class = blueprint_class
         @hooks = hooks
         @formatter = Formatter.new(blueprint_class)
-        find_used_hooks!
+        @field_hooks = used_field_hooks
       end
 
-      # NOTE: This method is ugly and non-compliant b/c it's in the hot path
+      # NOTE: This method is long, ugly, and non-compliant b/c it's in the hot path
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       def serialize(config, object, instances:, store:, depth:)
         parent = Context::Parent.new(@blueprint_class)
@@ -20,39 +20,25 @@ module Blueprinter
         # rubocop:disable Metrics/BlockLength
         config.fields.each_with_object({}) do |field, result|
           ctx.field = field
+          value =
+            if (field_hook = @field_hooks[field.type])
+              value = catch Serializer::SIGNAL do
+                @hooks.around(field_hook, ctx) do
+                  value = extract(config, field, object, ctx)
+                  config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
+                end
+              end
+              value == Serializer::SIG_SKIP ? next : value
+            else
+              value = extract(config, field, object, ctx)
+              config.conditionals.include?(ctx, value) ? value : next
+            end
+
           result[field.name] =
             case field.type
             when :field
-              value =
-                if @hook_around_field_value
-                  catch Serializer::SIGNAL do
-                    @hooks.around(:around_field_value, ctx) do
-                      value = extract(config, field, object, ctx)
-                      config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
-                    end
-                  end
-                else
-                  value = extract(config, field, object, ctx)
-                  config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
-                end
-              next if value == Serializer::SIG_SKIP
-
               @formatter.call(value, ctx)
             when :object
-              value =
-                if @hook_around_object_value
-                  catch Serializer::SIGNAL do
-                    @hooks.around(:around_object_value, ctx) do
-                      value = extract(config, field, object, ctx)
-                      config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
-                    end
-                  end
-                else
-                  value = extract(config, field, object, ctx)
-                  config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
-                end
-              next if value == Serializer::SIG_SKIP
-
               if value
                 if field.blueprint < V2::Base
                   parent.field = field
@@ -64,20 +50,6 @@ module Blueprinter
                 end
               end
             when :collection
-              value =
-                if @hook_around_collection_value
-                  catch Serializer::SIGNAL do
-                    @hooks.around(:around_collection_value, ctx) do
-                      value = extract(config, field, object, ctx)
-                      config.conditionals.include?(ctx, value) ? value : throw(Serializer::SIGNAL, Serializer::SIG_SKIP)
-                    end
-                  end
-                else
-                  value = extract(config, field, object, ctx)
-                  config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
-                end
-              next if value == Serializer::SIG_SKIP
-
               if value
                 if field.blueprint < V2::Base
                   parent.field = field
@@ -109,10 +81,12 @@ module Blueprinter
       end
 
       # We save a lot of time by skipping hooks that aren't used
-      def find_used_hooks!
-        @hook_around_field_value = @hooks.registered? :around_field_value
-        @hook_around_object_value = @hooks.registered? :around_object_value
-        @hook_around_collection_value = @hooks.registered? :around_collection_value
+      def used_field_hooks
+        {
+          field: @hooks.registered?(:around_field_value) ? :around_field_value : nil,
+          object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,
+          collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
+        }.freeze
       end
     end
   end

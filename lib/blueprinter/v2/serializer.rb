@@ -50,8 +50,8 @@ module Blueprinter
         end
       end
 
-      def fields
-        @_fields ||= blueprint_class.reflections[:default].ordered
+      def default_fields
+        @_default_fields ||= blueprint_class.reflections[:default].ordered
       end
 
       private
@@ -90,8 +90,8 @@ module Blueprinter
         conditionals = Conditionals.new(blueprint, options)
         defaults = Defaults.new(blueprint, options)
 
-        config = Config.new(blueprint:, fields:, options:, conditionals:, defaults:)
-        ctx = Context::Render.new(blueprint, fields, options, store, depth)
+        config = Config.new(blueprint:, fields: default_fields, options:, conditionals:, defaults:)
+        ctx = Context::Render.new(blueprint, default_fields, options, store, depth)
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           config.options = ctx.options.freeze
           config.fields = ctx.fields.freeze

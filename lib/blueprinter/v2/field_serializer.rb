@@ -80,9 +80,8 @@ module Blueprinter
           else
             object.public_send(field.from)
           end
-        return Serializer::SIG_SKIP unless config.conditionals.include?(ctx, value)
-
-        config.defaults.value_or_default(ctx, value)
+        value = config.defaults.value_or_default(ctx, value)
+        config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
       end
 
       def serialize_object(config, field, object, value, instances:, store:, depth:)

@@ -5,8 +5,6 @@ require 'blueprinter/v2/formatter'
 module Blueprinter
   module V2
     class FieldSerializer
-      SKIP = :_blueprinter_skip
-
       def initialize(blueprint_class, hooks)
         @hooks = hooks
         @formatter = Formatter.new(blueprint_class)
@@ -25,37 +23,43 @@ module Blueprinter
             when :field
               value =
                 if @hook_around_field_value
-                  @hooks.around(:around_field_value, ctx) do
-                    extract(config, field, object, ctx)
+                  catch Serializer::SIGNAL do
+                    @hooks.around(:around_field_value, ctx) do
+                      extract(config, field, object, ctx)
+                    end
                   end
                 else
                   extract(config, field, object, ctx)
                 end
-              next if value == SKIP
+              next if value == Serializer::SIG_SKIP
 
               @formatter.call(value, ctx)
             when :object
               value =
                 if @hook_around_object_value
-                  @hooks.around(:around_object_value, ctx) do
-                    extract(config, field, object, ctx)
+                  catch Serializer::SIGNAL do
+                    @hooks.around(:around_object_value, ctx) do
+                      extract(config, field, object, ctx)
+                    end
                   end
                 else
                   extract(config, field, object, ctx)
                 end
-              next if value == SKIP
+              next if value == Serializer::SIG_SKIP
 
               value ? serialize_object(config, field, object, value, instances:, store:, depth:) : nil
             when :collection
               value =
                 if @hook_around_collection_value
-                  @hooks.around(:around_collection_value, ctx) do
-                    extract(config, field, object, ctx)
+                  catch Serializer::SIGNAL do
+                    @hooks.around(:around_collection_value, ctx) do
+                      extract(config, field, object, ctx)
+                    end
                   end
                 else
                   extract(config, field, object, ctx)
                 end
-              next if value == SKIP
+              next if value == Serializer::SIG_SKIP
 
               value ? serialize_collection(config, field, object, value, instances:, store:, depth:) : nil
             end
@@ -75,7 +79,7 @@ module Blueprinter
           else
             object.public_send(field.from)
           end
-        return SKIP unless config.conditionals.include?(ctx, value)
+        return Serializer::SIG_SKIP unless config.conditionals.include?(ctx, value)
 
         config.defaults.value_or_default(ctx, value)
       end

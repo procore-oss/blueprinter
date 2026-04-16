@@ -91,7 +91,6 @@ module Blueprinter
         extensions = @blueprint_class.extensions.map do |ext|
           case ext
           when Extension then ext
-          when Class then InstanceCache.global.extension ext
           when Proc then ext.call
           else raise BlueprinterError, 'Extensions must be an instance of Blueprinter::Extension or a Proc that returns one'
           end

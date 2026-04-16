@@ -10,15 +10,7 @@ module Blueprinter
     #
     class InstanceCache
       def initialize
-        @blueprints = {}.compare_by_identity
-        @serializers = {}.compare_by_identity
-        @extensions = {}.compare_by_identity
-      end
-
-      # TODO: worry about thread-safety?
-      @global = new
-      class << self
-        attr_reader :global
+        @instances = {}.compare_by_identity
       end
 
       def blueprint(blueprint_class)
@@ -26,20 +18,7 @@ module Blueprinter
         when ViewWrapper
           blueprint_class
         else
-          @blueprints[blueprint_class] ||= blueprint_class.new
-        end
-      end
-
-      def extension(ext)
-        case ext
-        when Extension
-          ext
-        when Class
-          @extensions[ext] ||= ext.new
-        when Proc
-          @extensions[ext] ||= ext.call
-        else
-          raise ArgumentError, "Unsupported extension type '#{ext.class.name}'"
+          @instances[blueprint_class] ||= blueprint_class.new
         end
       end
     end

@@ -15,6 +15,7 @@ module Blueprinter
       # NOTE: This method is ugly and non-compliant b/c it's in the hot path
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/MethodLength,Metrics/PerceivedComplexity
       def serialize(config, object, instances:, store:, depth:)
+        parent = Context::Parent.new(@blueprint_class)
         ctx = Context::Field.new(config.blueprint, config.fields, config.options, object, nil, store, depth)
         # rubocop:disable Metrics/BlockLength
         config.fields.each_with_object({}) do |field, result|
@@ -48,7 +49,7 @@ module Blueprinter
                 end
               next if value == Serializer::SIG_SKIP
 
-              value ? serialize_object(config, field, object, value, instances:, store:, depth:) : nil
+              value ? serialize_object(config, field, object, value, parent:, instances:, store:, depth:) : nil
             when :collection
               value =
                 if @hook_around_collection_value
@@ -62,7 +63,7 @@ module Blueprinter
                 end
               next if value == Serializer::SIG_SKIP
 
-              value ? serialize_collection(config, field, object, value, instances:, store:, depth:) : nil
+              value ? serialize_collection(config, field, object, value, parent:, instances:, store:, depth:) : nil
             end
         end
         # rubocop:enable Metrics/BlockLength
@@ -84,9 +85,10 @@ module Blueprinter
         config.conditionals.include?(ctx, value) ? value : Serializer::SIG_SKIP
       end
 
-      def serialize_object(config, field, object, value, instances:, store:, depth:)
+      def serialize_object(config, field, object, value, parent:, instances:, store:, depth:)
         if field.blueprint < V2::Base
-          parent = Context::Parent.new(@blueprint_class, field, object)
+          parent.field = field
+          parent.object = object
           field.blueprint.serializer
                .object(value, config.options, parent:, instances:, store:, depth: depth + 1)
         else
@@ -95,9 +97,10 @@ module Blueprinter
         end
       end
 
-      def serialize_collection(config, field, object, value, instances:, store:, depth:)
+      def serialize_collection(config, field, object, value, parent:, instances:, store:, depth:)
         if field.blueprint < V2::Base
-          parent = Context::Parent.new(@blueprint_class, field, object)
+          parent.field = field
+          parent.object = object
           field.blueprint.serializer
                .collection(value, config.options, parent:, instances:, store:, depth: depth + 1)
         else

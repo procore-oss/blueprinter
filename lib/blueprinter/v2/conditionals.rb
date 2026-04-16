@@ -12,6 +12,8 @@ module Blueprinter
         setup(blueprint.class, options)
       end
 
+      # NOTE: ugly, non-compliant method for performance reasons
+      #
       # @param ctx [Blueprinter::V2::Context::Field]
       # @param value The extracted field value
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
@@ -52,12 +54,12 @@ module Blueprinter
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       def setup_field(bp_class, ref, options)
         ref.fields.each_value do |field|
-        @if[field] = options[:field_if] || field.options[:if] || bp_class.options[:field_if]
-        @unless[field] = options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
-        @skip_nil[field] =
-          options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-        @skip_empty[field] =
-          options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
+          @if[field] = options[:field_if] || field.options[:if] || bp_class.options[:field_if]
+          @unless[field] = options[:field_unless] || field.options[:unless] || bp_class.options[:field_unless]
+          @skip_nil[field] =
+            options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
+          @skip_empty[field] =
+            options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
@@ -65,12 +67,12 @@ module Blueprinter
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       def setup_object(bp_class, ref, options)
         ref.objects.each_value do |field|
-        @if[field] = options[:object_if] || field.options[:if] || bp_class.options[:object_if]
-        @unless[field] = options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
-        @skip_nil[field] =
-          options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-        @skip_empty[field] =
-          options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
+          @if[field] = options[:object_if] || field.options[:if] || bp_class.options[:object_if]
+          @unless[field] = options[:object_unless] || field.options[:unless] || bp_class.options[:object_unless]
+          @skip_nil[field] =
+            options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
+          @skip_empty[field] =
+            options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
@@ -78,13 +80,13 @@ module Blueprinter
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity
       def setup_collection(bp_class, ref, options)
         ref.collections.each_value do |field|
-        @if[field] = options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
-        @unless[field] =
-          options[:collection_unless] || field.options[:unless] || bp_class.options[:collection_unless]
-        @skip_nil[field] =
-          options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
-        @skip_empty[field] =
-          options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
+          @if[field] = options[:collection_if] || field.options[:if] || bp_class.options[:collection_if]
+          @unless[field] =
+            options[:collection_unless] || field.options[:unless] || bp_class.options[:collection_unless]
+          @skip_nil[field] =
+            options[:exclude_if_nil] || field.options[:exclude_if_nil] || bp_class.options[:exclude_if_nil]
+          @skip_empty[field] =
+            options[:exclude_if_empty] || field.options[:exclude_if_empty] || bp_class.options[:exclude_if_empty]
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity

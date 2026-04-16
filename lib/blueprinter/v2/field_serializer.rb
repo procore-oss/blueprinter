@@ -53,7 +53,16 @@ module Blueprinter
                 end
               next if value == Serializer::SIG_SKIP
 
-              value ? serialize_object(config, field, object, value, parent:, instances:, store:, depth:) : nil
+              if value
+                if field.blueprint < V2::Base
+                  parent.field = field
+                  parent.object = object
+                  field.blueprint.serializer.object(value, config.options, parent:, instances:, store:, depth: depth + 1)
+                else
+                  opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
+                  field.blueprint.hashify(value, view_name: :default, local_options: config.options.dup.merge(opts))
+                end
+              end
             when :collection
               value =
                 if @hook_around_collection_value
@@ -69,7 +78,16 @@ module Blueprinter
                 end
               next if value == Serializer::SIG_SKIP
 
-              value ? serialize_collection(config, field, object, value, parent:, instances:, store:, depth:) : nil
+              if value
+                if field.blueprint < V2::Base
+                  parent.field = field
+                  parent.object = object
+                  field.blueprint.serializer.collection(value, config.options, parent:, instances:, store:, depth: depth + 1)
+                else
+                  opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
+                  field.blueprint.hashify(value, view_name: :default, local_options: config.options.dup.merge(opts))
+                end
+              end
             end
         end
         # rubocop:enable Metrics/BlockLength
@@ -88,30 +106,6 @@ module Blueprinter
             object.public_send(field.from)
           end
         config.defaults.value_or_default(ctx, value)
-      end
-
-      def serialize_object(config, field, object, value, parent:, instances:, store:, depth:)
-        if field.blueprint < V2::Base
-          parent.field = field
-          parent.object = object
-          field.blueprint.serializer
-               .object(value, config.options, parent:, instances:, store:, depth: depth + 1)
-        else
-          opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
-          field.blueprint.hashify(value, view_name: :default, local_options: config.options.dup.merge(opts))
-        end
-      end
-
-      def serialize_collection(config, field, object, value, parent:, instances:, store:, depth:)
-        if field.blueprint < V2::Base
-          parent.field = field
-          parent.object = object
-          field.blueprint.serializer
-               .collection(value, config.options, parent:, instances:, store:, depth: depth + 1)
-        else
-          opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
-          field.blueprint.hashify(value, view_name: :default, local_options: config.options.dup.merge(opts))
-        end
       end
 
       # We save a lot of time by skipping hooks that aren't used

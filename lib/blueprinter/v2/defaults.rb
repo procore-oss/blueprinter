@@ -39,29 +39,29 @@ module Blueprinter
 
       def setup_field(bp_class, ref, options)
         ref.fields.each_value do |field|
-        config = (@config[field] ||= {})
-        config[:default] = options[:field_default] || field.options[:default] || bp_class.options[:field_default]
-        config[:default_if] =
-          options[:field_default_if] || field.options[:default_if] || bp_class.options[:field_default_if]
+          config = (@config[field] ||= {})
+          config[:default] = options[:field_default] || field.options[:default] || bp_class.options[:field_default]
+          config[:default_if] =
+            options[:field_default_if] || field.options[:default_if] || bp_class.options[:field_default_if]
         end
       end
 
       def setup_object(bp_class, ref, options)
         ref.objects.each_value do |field|
-        config = (@config[field] ||= {})
-        config[:default] = options[:object_default] || field.options[:default] || bp_class.options[:object_default]
-        config[:default_if] =
-          options[:object_default_if] || field.options[:default_if] || bp_class.options[:object_default_if]
+          config = (@config[field] ||= {})
+          config[:default] = options[:object_default] || field.options[:default] || bp_class.options[:object_default]
+          config[:default_if] =
+            options[:object_default_if] || field.options[:default_if] || bp_class.options[:object_default_if]
         end
       end
 
       def setup_collection(bp_class, ref, options)
         ref.collections.each_value do |field|
-        config = (@config[field] ||= {})
-        config[:default] =
-          options[:collection_default] || field.options[:default] || bp_class.options[:collection_default]
-        config[:default_if] =
-          options[:collection_default_if] || field.options[:default_if] || bp_class.options[:collection_default_if]
+          config = (@config[field] ||= {})
+          config[:default] =
+            options[:collection_default] || field.options[:default] || bp_class.options[:collection_default]
+          config[:default_if] =
+            options[:collection_default_if] || field.options[:default_if] || bp_class.options[:collection_default_if]
         end
       end
     end

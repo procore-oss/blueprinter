@@ -11,15 +11,13 @@ module Blueprinter
     autoload :Defaults, 'blueprinter/v2/defaults'
     autoload :DSL, 'blueprinter/v2/dsl'
     autoload :Extensions, 'blueprinter/v2/extensions'
-    autoload :Extractor, 'blueprinter/v2/extractor'
-    autoload :FieldSerializers, 'blueprinter/v2/field_serializers'
+    autoload :FieldSerializer, 'blueprinter/v2/field_serializer'
     autoload :Formatter, 'blueprinter/v2/formatter'
     autoload :Helpers, 'blueprinter/v2/helpers'
     autoload :InstanceCache, 'blueprinter/v2/instance_cache'
     autoload :Reflection, 'blueprinter/v2/reflection'
     autoload :Render, 'blueprinter/v2/render'
     autoload :Serializer, 'blueprinter/v2/serializer'
-    autoload :Serializer2, 'blueprinter/v2/serializer2'
     autoload :ViewBuilder, 'blueprinter/v2/view_builder'
   end
 end

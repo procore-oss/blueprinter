@@ -127,7 +127,7 @@ module Blueprinter
           f.options&.freeze
           f.freeze
         end
-        @serializer = Serializer2.new(self)
+        @serializer = Serializer.new(self)
       end
 
       # @api private

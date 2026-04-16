@@ -1,130 +1,101 @@
 # frozen_string_literal: true
 
 require 'blueprinter/hooks'
-require 'blueprinter/v2/formatter'
-require 'blueprinter/v2/field_serializers/field'
-require 'blueprinter/v2/field_serializers/object'
-require 'blueprinter/v2/field_serializers/collection'
-require 'blueprinter/v2/extensions/core/defaults'
-require 'blueprinter/v2/extensions/core/conditionals'
-require 'blueprinter/v2/extensions/core/json'
-require 'blueprinter/v2/extensions/core/wrapper'
+require 'blueprinter/v2/conditionals'
+require 'blueprinter/v2/defaults'
+require 'blueprinter/v2/field_serializer'
 
 module Blueprinter
   module V2
     #
     # The serializer for a given Blueprint. Takes in an object with options and serializes it to a Hash.
     #
-    # NOTE: The instance is re-used for the duration of the render.
+    # NOTE: The instance lives for the duration of your application.
     #
     class Serializer
-      SIGNAL = :_blueprinter_signal
-      SIG_SKIP = :_blueprinter_skip_field_sig
+      Config = Struct.new(:blueprint, :fields, :options, :obj_ctx, :conditionals, :defaults, keyword_init: true)
+      attr_reader :blueprint_class, :hooks
 
-      attr_reader :blueprint, :fields, :instances, :store, :formatter, :hooks, :defaults, :conditionals
-      attr_accessor :options
-
-      # @param options [Hash] Options passed from the callsite
-      def initialize(blueprint_class, options, instances, store:, initial_depth:)
-        @blueprint = instances.blueprint(blueprint_class)
-        @options = options
-        @instances = instances
-        @formatter = Formatter.new(blueprint.class)
+      def initialize(blueprint_class)
+        @blueprint_class = blueprint_class
         @hooks = Hooks.new(extensions)
-        @defaults = Extensions::Core::Defaults.new
-        @conditionals = Extensions::Core::Conditionals.new
-        @fields = @blueprint.class.reflections[:default].ordered
-        @store = store
-        @field_serializers = blueprint_init initial_depth
+        @field_serializer = FieldSerializer.new(blueprint_class, @hooks)
         find_used_hooks!
       end
 
-      #
-      # Serialize a single object to a Hash.
-      #
-      # @param object [Object] The object to serialize
-      # @param depth [Object] Depth of this object in the serialization tree
-      # @param parent [Blueprinter::V2::Context::Parent] Information about the container object (if any)
-      # @return [Hash] The serialized object
-      #
-      def object(object, depth:, parent: nil)
+      def object(object, options, instances:, store:, depth:, parent: nil)
+        config = store[@blueprint_class.object_id] ||= blueprint_init(options, instances:, store:, depth:)
         if @hook_around_serialize_object
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, store, depth)
-          @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize_object(ctx.object, depth:, parent:)
+          config.obj_ctx.object = object
+          config.obj_ctx.parent = parent
+          config.obj_ctx.depth = depth
+          @hooks.around(:around_serialize_object, config.obj_ctx) do |ctx|
+            serialize(config, ctx.object, parent:, instances:, store:, depth:)
           end
         else
-          serialize_object(object, depth:, parent:)
+          serialize(config, object, parent:, instances:, store:, depth:)
         end
       end
 
-      #
-      # Serialize a collection of objects to a Hash.
-      #
-      # @param collection [Enumerable] The collection to serialize
-      # @param depth [Object] Depth of this object in the serialization tree
-      # @param parent [Blueprinter::V2::Context::Parent] Information about the container object (if any)
-      # @return [Enumerable] The serialized hashes
-      #
-      def collection(collection, depth:, parent: nil)
+      def collection(objects, options, instances:, store:, depth:, parent: nil)
+        config = store[@blueprint_class.object_id] ||= blueprint_init(options, instances:, store:, depth:)
         if @hook_around_serialize_collection
-          ctx = Context::Object.new(@blueprint, @fields, @options, collection, parent, store, depth)
-          @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            ctx.object.map { |object| serialize_object(object, depth:, parent:) }.to_a
+          config.obj_ctx.object = objects
+          config.obj_ctx.parent = parent
+          config.obj_ctx.depth = depth
+          @hooks.around(:around_serialize_collection, config.obj_ctx) do |ctx|
+            ctx.object.map { |object| serialize(config, object, parent:, instances:, store:, depth:) }
           end
         else
-          collection.map { |object| serialize_object(object, depth:, parent:) }.to_a
+          objects.map { |object| serialize(config, object, parent:, instances:, store:, depth:) }
         end
+      end
+
+      def fields
+        @_fields ||= blueprint_class.reflections[:default].ordered
       end
 
       private
 
-      def serialize_object(object, depth:, parent: nil)
+      def serialize(config, object, parent:, instances:, store:, depth:)
         if @hook_around_blueprint
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, store, depth)
-          @hooks.around(:around_blueprint, ctx) do |ctx|
-            serialize(ctx.object, depth:)
+          config.obj_ctx.object = object
+          config.obj_ctx.parent = parent
+          config.obj_ctx.depth = depth
+          @hooks.around(:around_blueprint, config.obj_ctx) do |ctx|
+            @field_serializer.serialize(config, ctx.object, instances:, store:, depth:)
           end
         else
-          serialize(object, depth:)
+          @field_serializer.serialize(config, object, instances:, store:, depth:)
         end
       end
 
-      def serialize(object, depth:)
-        ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, store, depth)
-        @field_serializers.each_with_object({}) do |field_conf, result|
-          ctx.field = field_conf.field
-          value = catch(SIGNAL) { field_conf.serialize ctx }
-          result[ctx.field.name] = value unless value == SIG_SKIP
+      def blueprint_init(options, instances:, store:, depth:)
+        blueprint = instances.blueprint(blueprint_class)
+        conditionals = Conditionals.new(blueprint, options)
+        defaults = Defaults.new(blueprint, options)
+
+        config = Config.new(blueprint:, fields:, options:, conditionals:, defaults:)
+        ctx = Context::Render.new(blueprint, fields, options, store, depth)
+        @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
+          config.options = ctx.options.freeze
+          config.fields = ctx.fields.freeze
+          # cheaper to create this once per render and re-use
+          config.obj_ctx = Context::Object.new(blueprint, config.fields, config.options, nil, nil, store)
         end
+        config
       end
 
       def extensions
-        extensions = @blueprint.class.extensions.map { |ext| @instances.extension ext }
+        extensions = @blueprint_class.extensions.map do |ext|
+          case ext
+          when Extension then ext
+          when Class then InstanceCache.global.extension ext
+          when Proc then ext.call
+          else raise BlueprinterError, 'Extensions must be an instance of Blueprinter::Extension or a Proc that returns one'
+          end
+        end
         [*extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new]
-      end
-
-      # Allow extensions to do time-saving prep work on the current context
-      def blueprint_init(depth)
-        ctx = Context::Render.new(@blueprint, fields, @options, store, depth)
-        @conditionals.around_blueprint_init ctx
-        @defaults.around_blueprint_init ctx
-        @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-          @options = ctx.options
-          @fields = ctx.fields
-        end
-        @fields.map { |field| field_serializer field }.freeze
-      end
-
-      def field_serializer(field)
-        case field.type
-        when :field
-          FieldSerializers::Field.new(field, self)
-        when :object
-          FieldSerializers::Object.new(field, self)
-        when :collection
-          FieldSerializers::Collection.new(field, self)
-        end
       end
 
       # We save a lot of time by skipping hooks that aren't used

@@ -15,6 +15,12 @@ module Blueprinter
         @extensions = {}.compare_by_identity
       end
 
+      # TODO: worry about thread-safety?
+      @global = new
+      class << self
+        attr_reader :global
+      end
+
       def blueprint(blueprint_class)
         case blueprint_class
         when ViewWrapper
@@ -22,11 +28,6 @@ module Blueprinter
         else
           @blueprints[blueprint_class] ||= blueprint_class.new
         end
-      end
-
-      # TODO remove
-      def serializer(blueprint_class, options=nil, store=nil, initial_depth=nil)
-        @serializers[blueprint_class] ||= Serializer2.new(blueprint_class)
       end
 
       def extension(ext)

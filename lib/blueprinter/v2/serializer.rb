@@ -31,10 +31,10 @@ module Blueprinter
         if @hook_around_serialize_object
           ctx = Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize(config, ctx.object, parent:, instances:, store:, depth:)
+            serialize_object(config, ctx.object, parent:, instances:, store:, depth:)
           end
         else
-          serialize(config, object, parent:, instances:, store:, depth:)
+          serialize_object(config, object, parent:, instances:, store:, depth:)
         end
       end
 
@@ -43,10 +43,10 @@ module Blueprinter
         if @hook_around_serialize_collection
           ctx = Context::Object.new(config.blueprint, config.fields, config.options, objects, parent, store, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            ctx.object.map { |object| serialize(config, object, parent:, instances:, store:, depth:) }
+            serialize_collection(config, ctx.object, parent:, instances:, store:, depth:)
           end
         else
-          objects.map { |object| serialize(config, object, parent:, instances:, store:, depth:) }
+          serialize_collection(config, objects, parent:, instances:, store:, depth:)
         end
       end
 
@@ -56,7 +56,7 @@ module Blueprinter
 
       private
 
-      def serialize(config, object, parent:, instances:, store:, depth:)
+      def serialize_object(config, object, parent:, instances:, store:, depth:)
         if @hook_around_blueprint
           ctx = Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
           @hooks.around(:around_blueprint, ctx) do |ctx|
@@ -64,6 +64,24 @@ module Blueprinter
           end
         else
           @field_serializer.serialize(config, object, instances:, store:, depth:)
+        end
+      end
+
+      # Calling `objects.map` inside here is faster than calling this method N times inside of `objects.map`
+      def serialize_collection(config, objects, parent:, instances:, store:, depth:)
+        ctx =
+          if @hook_around_blueprint
+            Context::Object.new(config.blueprint, config.fields, config.options, nil, parent, store, depth)
+          end
+        objects.map do |object|
+          if @hook_around_blueprint
+            ctx.object = object
+            @hooks.around(:around_blueprint, ctx) do |ctx|
+              @field_serializer.serialize(config, ctx.object, instances:, store:, depth:)
+            end
+          else
+            @field_serializer.serialize(config, object, instances:, store:, depth:)
+          end
         end
       end
 

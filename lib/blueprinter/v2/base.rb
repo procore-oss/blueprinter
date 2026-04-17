@@ -123,10 +123,16 @@ module Blueprinter
         formatters.freeze
         schema.freeze
         schema.each_value do |f|
-          f.options&.freeze
+          # copy blueprint options down to each field (so the serializer has a single place to check)
+          f.options[:if] ||= options[:if] if options.key? :if
+          f.options[:unless] ||= options[:unless] if options.key? :unless
+          f.options[:default_if] ||= options[:default_if] if options.key? :default_if
+          f.options[:default] = options[:default] if options.key?(:default) && !f.options.key?(:default)
+          f.options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) && !f.options.key?(:exclude_if_nil)
+          f.options.freeze
           f.freeze
         end
-        @serializer = Serializer.new(self)
+        @serializer = Serializer3.new(self)
       end
 
       # @api private

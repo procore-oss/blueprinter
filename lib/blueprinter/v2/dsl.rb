@@ -107,7 +107,9 @@ module Blueprinter
           from: from.to_sym,
           from_str: from.to_s,
           value_proc: definition,
-          options: options.dup
+          options: options.dup,
+          has_conditional: options.key?(:if) || options.key?(:unless),
+          extractor: definition ? FieldLogic::ProcExtractor : FieldLogic::PropertyExtractor
         )
       end
 
@@ -141,13 +143,23 @@ module Blueprinter
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
         type = is_collection ? Fields::Collection : Fields::Object
+        serializer =
+          if blueprint_class < V2::Base
+            is_collection ? FieldLogic::CollectionSerializer : FieldLogic::ObjectSerializer
+          else
+            FieldLogic::V1AssociationSerializer
+          end
         schema[name] = type.new(
           name: name,
           blueprint: blueprint_class,
           from: from.to_sym,
           from_str: from.to_s,
           value_proc: definition,
-          options: options.dup
+          options: options.dup,
+          has_conditional: options.key?(:if) || options.key?(:unless),
+          has_default: options.key?(:default) || options.key?(:default_if),
+          extractor: definition ? FieldLogic::ProcExtractor : FieldLogic::PropertyExtractor,
+          serializer:
         )
       end
 

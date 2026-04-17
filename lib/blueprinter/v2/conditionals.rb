@@ -12,10 +12,27 @@ module Blueprinter
         setup(blueprint.class, options)
       end
 
+      def skip?(ctx)
+        if (cond = @if[ctx.field])
+          result = cond.is_a?(Proc) \
+            ? ctx.blueprint.instance_exec(ctx, &cond) \
+            : ctx.blueprint.public_send(cond, ctx)
+          return true unless result
+        end
+
+        if (cond = @unless[ctx.field])
+          result = cond.is_a?(Proc) \
+            ? ctx.blueprint.instance_exec(ctx, &cond) \
+            : ctx.blueprint.public_send(cond, ctx)
+          return true if result
+        end
+
+        false
+      end
+
       # NOTE: ugly, non-compliant method for performance reasons
       #
       # @param ctx [Blueprinter::V2::Context::Field]
-      # @param value The extracted field value
       # rubocop:disable Metrics/CyclomaticComplexity,Metrics/PerceivedComplexity,Style/MultilineTernaryOperator,Style/RedundantLineContinuation
       def include?(ctx, value)
         if value.nil? && @skip_nil[ctx.field]

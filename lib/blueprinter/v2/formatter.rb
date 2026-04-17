@@ -8,6 +8,8 @@ module Blueprinter
         @formatters = blueprint.formatters
       end
 
+      def any? = @formatters.any?
+
       # @param value
       # @param ctx [Blueprinter::V2::Context::Field]
       def call(value, ctx)

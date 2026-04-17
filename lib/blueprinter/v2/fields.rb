@@ -20,6 +20,7 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
+        :extractor,
         keyword_init: true
       ) do
         include Helpers
@@ -35,6 +36,8 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
+        :extractor,
+        :serializer,
         keyword_init: true
       ) do
         include Helpers
@@ -50,6 +53,8 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
+        :extractor,
+        :serializer,
         keyword_init: true
       ) do
         include Helpers

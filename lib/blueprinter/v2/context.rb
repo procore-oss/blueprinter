@@ -92,7 +92,7 @@ module Blueprinter
       #   @return [Integer] Blueprint depth (1-indexed)
       #
       Field = Struct.new(:blueprint, :fields, :options, :object, :field, :store, :depth) do
-        (members - %i[field]).each do |attr|
+        (members - %i[field object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
         end

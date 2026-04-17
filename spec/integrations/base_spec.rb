@@ -355,6 +355,22 @@ describe '::Base' do
           end
           it('returns json using the association options') { should eq(result) }
         end
+        context 'Given an association :options option with a Proc' do
+          let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"Super Car (user_' + obj_id + ')"}]}' }
+          let(:blueprint) do
+            vehicle_blueprint = Class.new(Blueprinter::Base) do
+              field :make do |vehicle, options|
+                "#{vehicle.make} (#{options[:owner_id]})"
+              end
+            end
+
+            Class.new(Blueprinter::Base) do
+              field :id
+              association :vehicles, blueprint: vehicle_blueprint, options: ->(obj) { { owner_id: "user_#{obj.id}" } }
+            end
+          end
+          it('returns json using the dynamic association options') { should eq(result) }
+        end
         context 'Given an association :extractor option' do
           let(:result) { '{"id":' + obj_id + ',"vehicles":[{"make":"SUPER CAR"}]}' }
           let(:blueprint) do
@@ -789,6 +805,32 @@ describe '::Base' do
         it('includes include_view fields') { expect(subject[:age]).to eq(obj.age) }
         it('excludes excluded fields') { expect(subject).not_to have_key(:first_name) }
       end
+    end
+  end
+
+  describe 'view block using reflections to dynamically exclude fields' do
+    let(:obj) { OpenStruct.new(id: 1, name: 'Widget', description: 'A widget', status: 'active') }
+
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        fields :name, :description, :status
+
+        view :ids_only do
+          all_fields = reflections[:default].fields.keys.reject { |f| f == :id }
+          excludes(*all_fields)
+        end
+      end
+    end
+
+    it 'renders only the identifier for the ids_only view' do
+      result = blueprint.render_as_hash(obj, view: :ids_only)
+      expect(result.keys).to eq([:id])
+    end
+
+    it 'still renders all fields for the default view' do
+      result = blueprint.render_as_hash(obj)
+      expect(result.keys).to match_array([:id, :name, :description, :status])
     end
   end
 end

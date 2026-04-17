@@ -219,5 +219,20 @@ describe 'ViewCollection' do
       expect(fields_after).not_to equal(fields_before)
       expect(fields_after).to eq(fields_before)
     end
+
+    it 'invalidates cache when invalidate_cache! is called after view mutation' do
+      # Build the cache by accessing fields
+      fields_before = view_collection.fields_for(:view)
+      expect(fields_before).to include(default_field, view_field)
+
+      # Mutate the view after cache is built (simulates excludes inside a view block)
+      view.exclude_field(:default_field)
+      view_collection.invalidate_cache!
+
+      # Cache should rebuild with the exclusion applied
+      fields_after = view_collection.fields_for(:view)
+      expect(fields_after).not_to include(default_field)
+      expect(fields_after).to include(view_field)
+    end
   end
 end

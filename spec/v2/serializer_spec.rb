@@ -134,7 +134,7 @@ describe Blueprinter::V2::Serializer do
   it 'enables the if conditionals extension' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
-      field :desc, if: ->(_val, ctx) { ctx.options[:n] > 42 }
+      field :desc, if: ->(ctx) { ctx.options[:n] > 42 }
     end
 
     result = widget_blueprint.serializer.object({ name: 'Foo', desc: 'Bar' }, { n: 42 }, instances:, store:, depth: 1)
@@ -144,7 +144,7 @@ describe Blueprinter::V2::Serializer do
   it 'enables the unless conditionals extension' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
-      field :desc, unless: ->(_val, ctx) { ctx.options[:n] > 42 }
+      field :desc, unless: ->(ctx) { ctx.options[:n] > 42 }
     end
 
     result = widget_blueprint.serializer.object({ name: 'Foo', desc: 'Bar' }, { n: 43 }, instances:, store:, depth: 1)
@@ -164,17 +164,7 @@ describe Blueprinter::V2::Serializer do
     })
   end
 
-  it 'enables the exclude if empty extension' do
-    widget_blueprint = Class.new(Blueprinter::V2::Base) do
-      field :name, exclude_if_empty: true
-      field :desc, exclude_if_empty: true
-    end
-
-    result = widget_blueprint.serializer.object({ name: 'Foo', desc: "" }, {}, instances:, store:, depth: 1)
-    expect(result).to eq({ name: 'Foo' })
-  end
-
-  it 'enables the exclude if nil extension' do
+  it 'respects the exclude_if_nil option' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name, exclude_if_nil: true
       field :desc, exclude_if_nil: true
@@ -191,15 +181,11 @@ describe Blueprinter::V2::Serializer do
     ext2 = Class.new(Blueprinter::Extension) do
       def around_serialize_collection(ctx) = yield ctx
     end
-    ext3 = Class.new(Blueprinter::Extension) do
-      def around_blueprint(ctx) = yield ctx
-    end
-    category_blueprint.extensions << ext1 << ext2.new << -> { ext3.new }
+    category_blueprint.extensions << ext1 << -> { ext2.new }
     serializer = category_blueprint.serializer
 
     expect(serializer.hooks.registered? :around_serialize_object).to be true
     expect(serializer.hooks.registered? :around_serialize_collection).to be true
-    expect(serializer.hooks.registered? :around_blueprint).to be true
   end
 
   it 'formats fields' do
@@ -280,10 +266,10 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo', category: nil, parts: [{ num: 42 }, { num: 43 }] })
   end
 
-  it 'evaluates default values before conditionals' do
+  it 'evaluates default before exclude_if_nil' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
-      field :desc, default: 'Bar', if: ->(val, _ctx) { !val.nil? }
+      field :desc, default: 'Bar', exclude_if_nil: true
     end
     widget = { name: 'Foo', desc: nil }
 
@@ -293,11 +279,11 @@ describe Blueprinter::V2::Serializer do
 
   it 'evaluates both ifs and unlesses' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
-      field :name, if: ->(_val, ctx) { ctx.options[:n] > 42 }
-      field :desc, unless: ->(_val, ctx) { ctx.options[:n] < 43 }
+      field :name, if: ->(ctx) { ctx.options[:n] > 42 }
+      field :desc, unless: ->(ctx) { ctx.options[:n] < 43 }
       field :zorp,
-        if: ->(_val, ctx) { ctx.options[:n] > 40 },
-        unless: ->(_val, ctx) { ctx.options[:m] == 42 }
+        if: ->(ctx) { ctx.options[:n] > 40 },
+        unless: ->(ctx) { ctx.options[:m] == 42 }
     end
 
     result = widget_blueprint.serializer.object(
@@ -310,7 +296,7 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({})
   end
 
-  it 'runs around_serialize_object and around_blueprint' do
+  it 'runs around_serialize_object' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
@@ -328,13 +314,6 @@ describe Blueprinter::V2::Serializer do
         @log << "around_serialize_object (#{ctx.object[:name]}): b"
         res
       end
-
-      def around_blueprint(ctx)
-        @log << "around_blueprint (#{ctx.object[:name]}): a"
-        res = yield ctx
-        @log << "around_blueprint (#{ctx.object[:name]}): b"
-        res
-      end
     end
     log = []
     widget_blueprint.extensions << ext.new(log)
@@ -346,13 +325,11 @@ describe Blueprinter::V2::Serializer do
       'around_blueprint_init: a',
       'around_blueprint_init: b',
       'around_serialize_object (Foo): a',
-      'around_blueprint (Foo): a',
-      'around_blueprint (Foo): b',
       'around_serialize_object (Foo): b',
     ]
   end
 
-  it 'runs around_serialize_collection and around_blueprint' do
+  it 'runs around_serialize_collection' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
@@ -370,13 +347,6 @@ describe Blueprinter::V2::Serializer do
         @log << "around_serialize_collection (#{ctx.object.map { |x| x[:name] }.join(',')}): b"
         res
       end
-
-      def around_blueprint(ctx)
-        @log << "around_blueprint (#{ctx.object[:name]}): a"
-        res = yield ctx
-        @log << "around_blueprint (#{ctx.object[:name]}): b"
-        res
-      end
     end
     log = []
     widget_blueprint.extensions << ext.new(log)
@@ -391,10 +361,6 @@ describe Blueprinter::V2::Serializer do
       'around_blueprint_init: a',
       'around_blueprint_init: b',
       'around_serialize_collection (Foo,Bar): a',
-      'around_blueprint (Foo): a',
-      'around_blueprint (Foo): b',
-      'around_blueprint (Bar): a',
-      'around_blueprint (Bar): b',
       'around_serialize_collection (Foo,Bar): b',
     ]
   end

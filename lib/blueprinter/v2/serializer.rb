@@ -6,6 +6,8 @@ require 'blueprinter/hooks'
 module Blueprinter
   module V2
     class Serializer
+      SIGNAL = :_blueprinter_signal
+      SIG_SKIP = :_blueprinter_signal_skip
       Config = Struct.new(:blueprint, :fields, :options, keyword_init: true)
 
       attr_reader :hooks, :formatter
@@ -39,7 +41,7 @@ module Blueprinter
         if @hook_around_serialize_collection
           ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            serialize(blueprint, config.fields, config.options, ctx.object, instances:, store:, depth:)[0]
+            serialize(blueprint, config.fields, config.options, ctx.object, instances:, store:, depth:)
           end
         else
           serialize(blueprint, config.fields, config.options, objects, instances:, store:, depth:)
@@ -83,11 +85,11 @@ module Blueprinter
             # format/serialize and set value
             result[field.name] =
               if field.type == :field
-                @format ? @formatter.call(value, ctx) : value
+                @format && value ? @formatter.call(value, ctx) : value
               else
                 parent.field = field
                 parent.object = object
-                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
+                value ? field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:) : nil
               end
           end
           # rubocop:enable Metrics/BlockLength

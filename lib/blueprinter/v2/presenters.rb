@@ -16,8 +16,8 @@ module Blueprinter
         # @param ctx [Blueprinter::V2::Context::Field]
         # @param value [Object]
         def self.present(ctx, value, parent:, instances:, store:, depth:)
-          # parent.field = field
-          # parent.object = object
+          parent.field = field
+          parent.object = object
           ctx.field.blueprint.serializer.object(value, ctx.options, parent:, instances:, store:, depth: depth + 1)
         end
       end
@@ -26,8 +26,8 @@ module Blueprinter
         # @param ctx [Blueprinter::V2::Context::Field]
         # @param value [Object]
         def self.present(ctx, value, parent:, instances:, store:, depth:)
-          # parent.field = field
-          # parent.object = object
+          parent.field = field
+          parent.object = object
           ctx.field.blueprint.serializer.collection(value, ctx.options, parent:, instances:, store:, depth: depth + 1)
         end
       end

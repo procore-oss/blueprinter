@@ -13,6 +13,7 @@ module Blueprinter
       def initialize(blueprint_class)
         @blueprint_class = blueprint_class
         @formatter = Formatter.new(blueprint_class)
+        @format = @formatter.any?
         @hooks = Hooks.new(extensions)
         find_used_hooks!
       end
@@ -51,13 +52,17 @@ module Blueprinter
 
       private
 
+      # Long and ugly for performance
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       def serialize(blueprint, fields, options, objects, instances:, store:, depth:)
         ctx = Context::Field.new(blueprint, fields, options, nil, nil, store, depth)
         parent = Context::Parent.new(@blueprint_class)
+        # rubocop:disable Metrics/BlockLength
         objects.map do |object|
           ctx.object = object
           fields.each_with_object({}) do |field, result|
             ctx.field = field
+            # TODO: slow point
             next if FieldLogic.skip?(ctx, blueprint, field)
 
             # extract value
@@ -72,6 +77,7 @@ module Blueprinter
                 value == Serializer::SIG_SKIP ? next : value
               else
                 value = field.extractor.extract(ctx, blueprint, field, object)
+                # TODO: slow point
                 FieldLogic.value_or_default(ctx, blueprint, field, value)
               end
             next if value.nil? && ctx.field.options[:exclude_if_nil]
@@ -79,19 +85,21 @@ module Blueprinter
             # format/serialize and set value
             result[field.name] =
               if field.type == :field
-                @formatter.call(value, ctx)
+                @format ? @formatter.call(value, ctx) : value
               else
                 parent.field = field
                 parent.object = object
                 field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
               end
           end
+          # rubocop:enable Metrics/BlockLength
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
       def blueprint_init(options, instances:, store:, depth:)
         blueprint = instances.blueprint(@blueprint_class)
-        config = Config.new(blueprint:, fields: default_fields, options:,)
+        config = Config.new(blueprint:, fields: default_fields, options:)
         ctx = Context::Render.new(blueprint, default_fields, options, store, depth)
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           config.options = ctx.options.freeze

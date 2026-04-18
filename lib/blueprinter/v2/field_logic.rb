@@ -34,6 +34,7 @@ module Blueprinter
         end
       end
 
+      # @param ctx [Blueprinter::V2::Context::Field]
       def self.use_default?(cond, value, ctx)
         case cond
         when Proc then ctx.blueprint.instance_exec(value, ctx, &cond)

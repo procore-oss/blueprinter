@@ -3,7 +3,7 @@
 require 'benchmark'
 require 'blueprinter'
 
-NUM_FIELDS = 10
+NUM_FIELDS = 20
 NUM_OBJECTS = 5
 NUM_COLLECTIONS = 2
 
@@ -54,13 +54,13 @@ results = Benchmark.bmbm do |x|
     fmt_n = n.to_s.chars.reverse.each_slice(3).map(&:join).join(',').reverse
     list = widgets[0,n]
     x.report "#{fmt_n} widgets #{M}x: V1" do
-      M.times { WidgetBlueprintV1.render_as_hash(list) }
-      # M.times { list.each { |w| WidgetBlueprintV1.render_as_hash(w) } }
+      # M.times { WidgetBlueprintV1.render_as_hash(list) }
+      M.times { list.each { |w| WidgetBlueprintV1.render_as_hash(w) } }
     end
 
     x.report "#{fmt_n} widgets #{M}x: V2" do
-      M.times { WidgetBlueprintV2.render(list).to_hash }
-      # M.times { list.each { |w| WidgetBlueprintV2.render(w).to_hash } }
+      # M.times { WidgetBlueprintV2.render(list).to_hash }
+      M.times { list.each { |w| WidgetBlueprintV2.render(w).to_hash } }
     end
   end
 end

@@ -6,16 +6,12 @@ module Blueprinter
       # @param ctx [Blueprinter::V2::Context::Field]
       def self.skip?(ctx, blueprint, field)
         if (cond = field.options[:if])
-          result = cond.is_a?(Proc) \
-            ? blueprint.instance_exec(ctx, &cond) \
-            : blueprint.public_send(cond, ctx)
+          result = cond.is_a?(Proc) ? blueprint.instance_exec(ctx, &cond) : blueprint.public_send(cond, ctx)
           return true unless result
         end
 
         if (cond = field.options[:unless])
-          result = cond.is_a?(Proc) \
-            ? blueprint.instance_exec(ctx, &cond) \
-            : blueprint.public_send(cond, ctx)
+          result = cond.is_a?(Proc) ? blueprint.instance_exec(ctx, &cond) : blueprint.public_send(cond, ctx)
           return true if result
         end
 

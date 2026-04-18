@@ -10,9 +10,8 @@ module Blueprinter
   # - around_result
   #   - around_blueprint_init
   #     - around_serialize_object | around_serialize_collection
-  #       - around_blueprint
-  #         - around_field_value | around_object_value | around_collection_value
-  #           - around_blueprint_init …
+  #       - around_field_value | around_object_value | around_collection_value
+  #         - around_blueprint_init …
   #
   # V1 hook call order:
   #  - pre_render
@@ -26,7 +25,6 @@ module Blueprinter
       around_blueprint_init
       around_serialize_object
       around_serialize_collection
-      around_blueprint
       around_field_value
       around_object_value
       around_collection_value
@@ -48,9 +46,6 @@ module Blueprinter
     # @param context [Blueprinter::V2::Context::Object]
 
     # around_serialize_collection: Runs around serialization of a Blueprint collection.
-    # @param context [Blueprinter::V2::Context::Object]
-
-    # around_blueprint: Runs around serialization of every Blueprint.
     # @param context [Blueprinter::V2::Context::Object]
 
     # around_field_value TODO

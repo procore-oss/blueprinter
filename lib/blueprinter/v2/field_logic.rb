@@ -41,43 +41,6 @@ module Blueprinter
         else ctx.blueprint.public_send(cond, value, ctx)
         end
       end
-
-      module ProcExtractor
-        # @param ctx [Blueprinter::V2::Context::Field]
-        def self.extract(ctx, blueprint, field, object)
-          blueprint.instance_exec(object, ctx, &field.value_proc)
-        end
-      end
-
-      module PropertyExtractor
-        # @param ctx [Blueprinter::V2::Context::Field]
-        def self.extract(_ctx, _blueprint, field, object)
-          if object.is_a? Hash
-            object[field.from] || object[field.from_str]
-          else
-            object.public_send(field.from)
-          end
-        end
-      end
-
-      module ObjectSerializer
-        def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
-          blueprint_class.serializer.object(value, options, parent:, instances:, store:, depth: depth + 1)
-        end
-      end
-
-      module CollectionSerializer
-        def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
-          blueprint_class.serializer.collection(value, options, parent:, instances:, store:, depth: depth + 1)
-        end
-      end
-
-      module V1AssociationSerializer
-        def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
-          opts = { v2_instances: instances, v2_depth: depth + 1, v2_store: store }
-          blueprint.hashify(value, view_name: :default, local_options: options.dup.merge(opts))
-        end
-      end
     end
   end
 end

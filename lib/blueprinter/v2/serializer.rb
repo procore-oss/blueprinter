@@ -1,96 +1,103 @@
 # frozen_string_literal: true
 
+require 'blueprinter/v2/formatter'
 require 'blueprinter/hooks'
-require 'blueprinter/v2/conditionals'
-require 'blueprinter/v2/defaults'
-require 'blueprinter/v2/field_serializer'
 
 module Blueprinter
   module V2
-    #
-    # The serializer for a given Blueprint. Takes in an object with options and serializes it to a Hash.
-    #
-    # NOTE: The instance lives for the duration of your application.
-    #
     class Serializer
-      SIGNAL = :_blueprinter_signal
-      SIG_SKIP = :_blueprinter_skip
-      Config = Struct.new(:blueprint, :fields, :options, :conditionals, :defaults, keyword_init: true)
+      Config = Struct.new(:blueprint, :fields, :options, keyword_init: true)
 
-      attr_reader :blueprint_class, :hooks
+      attr_reader :hooks, :formatter
 
       def initialize(blueprint_class)
         @blueprint_class = blueprint_class
+        @formatter = Formatter.new(blueprint_class)
+        @format = @formatter.any?
         @hooks = Hooks.new(extensions)
-        @field_serializer = FieldSerializer.new(blueprint_class, @hooks)
         find_used_hooks!
       end
 
       def object(object, options, instances:, store:, depth:, parent: nil)
-        config = store[@blueprint_class.object_id] ||= blueprint_init(options, instances:, store:, depth:)
+        blueprint = instances.blueprint(@blueprint_class)
+        config = store[blueprint.object_id] ||= blueprint_init(options, instances:, store:, depth:)
+
         if @hook_around_serialize_object
-          ctx = Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
+          ctx = Context::Object.new(blueprint, config.fields, config.options, object, parent, store, depth)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize_object(config, ctx.object, parent:, instances:, store:, depth:)
+            serialize(blueprint, config.fields, config.options, [ctx.object], instances:, store:, depth:)[0]
           end
         else
-          serialize_object(config, object, parent:, instances:, store:, depth:)
+          serialize(blueprint, config.fields, config.options, [object], instances:, store:, depth:)[0]
         end
       end
 
       def collection(objects, options, instances:, store:, depth:, parent: nil)
-        config = store[@blueprint_class.object_id] ||= blueprint_init(options, instances:, store:, depth:)
+        blueprint = instances.blueprint(@blueprint_class)
+        config = store[blueprint.object_id] ||= blueprint_init(options, instances:, store:, depth:)
+
         if @hook_around_serialize_collection
-          ctx = Context::Object.new(config.blueprint, config.fields, config.options, objects, parent, store, depth)
+          ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            serialize_collection(config, ctx.object, parent:, instances:, store:, depth:)
+            serialize(blueprint, config.fields, config.options, ctx.object, instances:, store:, depth:)[0]
           end
         else
-          serialize_collection(config, objects, parent:, instances:, store:, depth:)
+          serialize(blueprint, config.fields, config.options, objects, instances:, store:, depth:)
         end
       end
 
       def default_fields
-        @_default_fields ||= blueprint_class.reflections[:default].ordered
+        @_default_fields ||= @blueprint_class.reflections[:default].ordered
       end
 
       private
 
-      def serialize_object(config, object, parent:, instances:, store:, depth:)
-        if @hook_around_blueprint
-          ctx = Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
-          @hooks.around(:around_blueprint, ctx) do |ctx|
-            @field_serializer.serialize(config, ctx.object, instances:, store:, depth:)
-          end
-        else
-          @field_serializer.serialize(config, object, instances:, store:, depth:)
-        end
-      end
-
-      # Calling `objects.map` inside here is faster than calling this method N times inside of `objects.map`
-      def serialize_collection(config, objects, parent:, instances:, store:, depth:)
-        ctx =
-          if @hook_around_blueprint
-            Context::Object.new(config.blueprint, config.fields, config.options, nil, parent, store, depth)
-          end
+      # Long and ugly for performance
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+      def serialize(blueprint, fields, options, objects, instances:, store:, depth:)
+        ctx = Context::Field.new(blueprint, fields, options, nil, nil, store, depth)
+        parent = Context::Parent.new(@blueprint_class)
+        # rubocop:disable Metrics/BlockLength
         objects.map do |object|
-          if @hook_around_blueprint
-            ctx.object = object
-            @hooks.around(:around_blueprint, ctx) do |ctx|
-              @field_serializer.serialize(config, ctx.object, instances:, store:, depth:)
-            end
-          else
-            @field_serializer.serialize(config, object, instances:, store:, depth:)
+          ctx.object = object
+          fields.each_with_object({}) do |field, result|
+            ctx.field = field
+            next if field.has_conditional && FieldLogic.skip?(ctx, blueprint, field)
+
+            # extract value
+            value =
+              if (field_hook = @field_hooks[field.type])
+                value = catch Serializer::SIGNAL do
+                  @hooks.around(field_hook, ctx) do
+                    value = field.extractor.extract(ctx, blueprint, field, object)
+                    field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
+                  end
+                end
+                value == Serializer::SIG_SKIP ? next : value
+              else
+                value = field.extractor.extract(ctx, blueprint, field, object)
+                field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
+              end
+            next if value.nil? && ctx.field.options[:exclude_if_nil]
+
+            # format/serialize and set value
+            result[field.name] =
+              if field.type == :field
+                @format ? @formatter.call(value, ctx) : value
+              else
+                parent.field = field
+                parent.object = object
+                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
+              end
           end
+          # rubocop:enable Metrics/BlockLength
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
       def blueprint_init(options, instances:, store:, depth:)
-        blueprint = instances.blueprint(blueprint_class)
-        conditionals = Conditionals.new(blueprint, options)
-        defaults = Defaults.new(blueprint, options)
-
-        config = Config.new(blueprint:, fields: default_fields, options:, conditionals:, defaults:)
+        blueprint = instances.blueprint(@blueprint_class)
+        config = Config.new(blueprint:, fields: default_fields, options:)
         ctx = Context::Render.new(blueprint, default_fields, options, store, depth)
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           config.options = ctx.options.freeze
@@ -111,11 +118,15 @@ module Blueprinter
         [*extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new]
       end
 
-      # We save a lot of time by skipping hooks that aren't used
+      # Save time by skipping hooks that aren't used
       def find_used_hooks!
         @hook_around_serialize_object = @hooks.registered? :around_serialize_object
         @hook_around_serialize_collection = @hooks.registered? :around_serialize_collection
-        @hook_around_blueprint = @hooks.registered? :around_blueprint
+        @field_hooks = {
+          field: @hooks.registered?(:around_field_value) ? :around_field_value : nil,
+          object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,
+          collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
+        }.freeze
       end
     end
   end

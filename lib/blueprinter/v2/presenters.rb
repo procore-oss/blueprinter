@@ -2,6 +2,7 @@
 
 module Blueprinter
   module V2
+    # rubocop:disable Lint/UnusedMethodArgument
     module Presenters
       module Object
         def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
@@ -22,5 +23,6 @@ module Blueprinter
         end
       end
     end
+    # rubocop:enable Lint/UnusedMethodArgument
   end
 end

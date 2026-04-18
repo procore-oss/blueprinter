@@ -105,7 +105,7 @@ module Blueprinter
           from: from.to_sym,
           from_str: from.to_s,
           value_proc: definition,
-          options: options.dup,
+          options: options.dup
         )
       end
 

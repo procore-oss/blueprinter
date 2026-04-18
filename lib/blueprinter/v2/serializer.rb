@@ -20,7 +20,7 @@ module Blueprinter
 
       def object(object, options, instances:, store:, depth:, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
-        config = store[blueprint.object_id] ||= blueprint_init(options, instances:, store:, depth:)
+        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, instances:, store:, depth:)
 
         if @hook_around_serialize_object
           ctx = Context::Object.new(blueprint, config.fields, config.options, object, parent, store, depth)
@@ -34,7 +34,7 @@ module Blueprinter
 
       def collection(objects, options, instances:, store:, depth:, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
-        config = store[blueprint.object_id] ||= blueprint_init(options, instances:, store:, depth:)
+        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, instances:, store:, depth:)
 
         if @hook_around_serialize_collection
           ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
@@ -95,8 +95,7 @@ module Blueprinter
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
-      def blueprint_init(options, instances:, store:, depth:)
-        blueprint = instances.blueprint(@blueprint_class)
+      def blueprint_init(blueprint, options, instances:, store:, depth:)
         config = Config.new(blueprint:, fields: default_fields, options:)
         ctx = Context::Render.new(blueprint, default_fields, options, store, depth)
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|

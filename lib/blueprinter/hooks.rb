@@ -10,7 +10,6 @@ module Blueprinter
         ext.class.hooks.each { |hook| @hooks[hook] << ext }
       end
       @hooks.freeze
-      @reversed_hooks ||= @hooks.transform_values(&:reverse).freeze
       @hook_around_hook = registered? :around_hook
     end
 

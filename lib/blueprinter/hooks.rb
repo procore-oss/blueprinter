@@ -62,7 +62,7 @@ module Blueprinter
 
       yielded = false
       result = call(ext, hook, ctx) do |yielded_ctx|
-        yielded = true
+        yielded ||= true
         unless yielded_ctx.is_a? expected_yield
           msg = "should yield `#{expected_yield.name}` but yielded `#{yielded_ctx.inspect}`"
           raise Errors::ExtensionHook.new(ext, hook, msg)

@@ -108,6 +108,7 @@ module Blueprinter
           from_str: from.to_s,
           value_proc: definition,
           options: options.dup,
+          has_conditional: options.key?(:if) || options.key?(:unless),
           extractor: definition ? FieldLogic::ProcExtractor : FieldLogic::PropertyExtractor
         )
       end
@@ -155,6 +156,8 @@ module Blueprinter
           from_str: from.to_s,
           value_proc: definition,
           options: options.dup,
+          has_conditional: options.key?(:if) || options.key?(:unless),
+          has_default: options.key?(:default) || options.key?(:default_if),
           extractor: definition ? FieldLogic::ProcExtractor : FieldLogic::PropertyExtractor,
           serializer:
         )

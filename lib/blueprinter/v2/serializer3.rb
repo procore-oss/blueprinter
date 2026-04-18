@@ -62,8 +62,7 @@ module Blueprinter
           ctx.object = object
           fields.each_with_object({}) do |field, result|
             ctx.field = field
-            # TODO: slow point
-            next if FieldLogic.skip?(ctx, blueprint, field)
+            next if field.has_conditional && FieldLogic.skip?(ctx, blueprint, field)
 
             # extract value
             value =
@@ -71,14 +70,13 @@ module Blueprinter
                 value = catch Serializer::SIGNAL do
                   @hooks.around(field_hook, ctx) do
                     value = field.extractor.extract(ctx, blueprint, field, object)
-                    FieldLogic.value_or_default(ctx, value)
+                    field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
                   end
                 end
                 value == Serializer::SIG_SKIP ? next : value
               else
                 value = field.extractor.extract(ctx, blueprint, field, object)
-                # TODO: slow point
-                FieldLogic.value_or_default(ctx, blueprint, field, value)
+                field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
               end
             next if value.nil? && ctx.field.options[:exclude_if_nil]
 

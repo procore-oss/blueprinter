@@ -20,6 +20,8 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
+        :has_conditional,
+        :has_default,
         :extractor,
         keyword_init: true
       ) do
@@ -36,6 +38,8 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
+        :has_conditional,
+        :has_default,
         :extractor,
         :serializer,
         keyword_init: true
@@ -53,6 +57,8 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
+        :has_conditional,
+        :has_default,
         :extractor,
         :serializer,
         keyword_init: true

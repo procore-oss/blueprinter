@@ -138,10 +138,10 @@ module Blueprinter
         is_collection, blueprint_class = parse_blueprint(blueprint)
         type = is_collection ? Fields::Collection : Fields::Object
         serializer =
-          if blueprint_class < V2::Base
-            is_collection ? Presenters::Collection : Presenters::Object
+          if blueprint_class.is_a?(ViewWrapper) || blueprint_class < ::Blueprinter::Base
+            FieldSerializers::V1Association
           else
-            Presenters::V1Association
+            is_collection ? FieldSerializers::Collection : FieldSerializers::Object
           end
         schema[name] = type.new(
           name: name,

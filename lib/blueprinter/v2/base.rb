@@ -122,30 +122,13 @@ module Blueprinter
         options.freeze
         formatters.freeze
         schema.freeze
+        serializer = Serializer.new(self)
         schema.each_value do |f|
-          finalize_field f
           f.options.freeze
           f.freeze
         end
-        @serializer = Serializer.new(self)
+        @serializer = serializer
       end
-
-      # @api private
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      def self.finalize_field(field)
-        # precompute some checks
-        field.extractor = field.value_proc ? Extractors::Proc : Extractors::Property
-        field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
-        field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
-        # copy blueprint options down to each field (so the serializer has a single place to check)
-        field.options[:if] ||= options[:if] if options.key? :if
-        field.options[:unless] ||= options[:unless] if options.key? :unless
-        field.options[:default_if] ||= options[:default_if] if options.key? :default_if
-        field.options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
-        field.options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
-                                                                     !field.options.key?(:exclude_if_nil)
-      end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       # @api private
       def self.apply_partial!(name)

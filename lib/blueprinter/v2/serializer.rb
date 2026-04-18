@@ -5,6 +5,7 @@ require 'blueprinter/hooks'
 
 module Blueprinter
   module V2
+    # @api private
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
@@ -18,11 +19,12 @@ module Blueprinter
         @format = @formatter.any?
         @hooks = Hooks.new(extensions)
         find_used_hooks!
+        finalize_fields!
       end
 
       def object(object, options, instances:, store:, depth:, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
-        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, instances:, store:, depth:)
+        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
 
         if @hook_around_serialize_object
           ctx = Context::Object.new(blueprint, config.fields, config.options, object, parent, store, depth)
@@ -36,7 +38,7 @@ module Blueprinter
 
       def collection(objects, options, instances:, store:, depth:, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
-        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, instances:, store:, depth:)
+        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
 
         if @hook_around_serialize_collection
           ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
@@ -80,24 +82,27 @@ module Blueprinter
                 value = field.extractor.extract(ctx, blueprint, field, object)
                 field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
               end
-            next if value.nil? && ctx.field.options[:exclude_if_nil]
 
             # format/serialize and set value
             result[field.name] =
-              if field.type == :field
-                @format && value ? @formatter.call(value, ctx) : value
+              if value.nil?
+                next if field.options[:exclude_if_nil]
+
+                nil
+              elsif field.type == :field
+                @format ? @formatter.call(value, ctx) : value
               else
                 parent.field = field
                 parent.object = object
-                value ? field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:) : nil
+                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
               end
           end
           # rubocop:enable Metrics/BlockLength
-        end
+        end.to_a
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
-      def blueprint_init(blueprint, options, instances:, store:, depth:)
+      def blueprint_init(blueprint, options, store:, depth:)
         config = Config.new(blueprint:, fields: default_fields, options:)
         ctx = Context::Render.new(blueprint, default_fields, options, store, depth)
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
@@ -129,6 +134,25 @@ module Blueprinter
           collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
         }.freeze
       end
+
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      def finalize_fields!
+        options = @blueprint_class.options
+        @blueprint_class.schema.each_value do |field|
+          # precompute some checks
+          field.extractor = field.value_proc ? Extractors::Proc : Extractors::Property
+          field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
+          field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
+          # copy blueprint options down to each field (so the serializer has a single place to check)
+          field.options[:if] ||= options[:if] if options.key? :if
+          field.options[:unless] ||= options[:unless] if options.key? :unless
+          field.options[:default_if] ||= options[:default_if] if options.key? :default_if
+          field.options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
+          field.options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
+                                                                       !field.options.key?(:exclude_if_nil)
+        end
+      end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     end
   end
 end

@@ -104,12 +104,12 @@ module Blueprinter
 
       def blueprint_init(blueprint, options, store:, depth:)
         config = Config.new(blueprint:, fields: default_fields, options:)
-        ctx = Context::Render.new(blueprint, default_fields, options, store, depth)
+        ctx = Context::Render.new(blueprint, config.fields, options, store, depth)
         @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
           config.options = ctx.options.freeze
           config.fields = ctx.fields.freeze
         end
-        config
+        config.freeze
       end
 
       def extensions

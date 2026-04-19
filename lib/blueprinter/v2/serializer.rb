@@ -104,10 +104,12 @@ module Blueprinter
 
       def blueprint_init(blueprint, options, store:, depth:)
         config = Config.new(blueprint:, fields: default_fields, options:)
-        ctx = Context::Render.new(blueprint, config.fields, options, store, depth)
-        @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-          config.options = ctx.options.freeze
-          config.fields = ctx.fields.freeze
+        if @hook_around_blueprint_init
+          ctx = Context::Render.new(blueprint, config.fields, options, store, depth)
+          @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
+            config.options = ctx.options.freeze
+            config.fields = ctx.fields.freeze
+          end
         end
         config.freeze
       end
@@ -128,6 +130,7 @@ module Blueprinter
       def find_used_hooks!
         @hook_around_serialize_object = @hooks.registered? :around_serialize_object
         @hook_around_serialize_collection = @hooks.registered? :around_serialize_collection
+        @hook_around_blueprint_init = @hooks.registered? :around_blueprint_init
         @field_hooks = {
           field: @hooks.registered?(:around_field_value) ? :around_field_value : nil,
           object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,

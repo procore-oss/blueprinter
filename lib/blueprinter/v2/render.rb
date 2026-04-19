@@ -32,19 +32,23 @@ module Blueprinter
       def to(format)
         serializer = @blueprint_class.serializer
         blueprint = @instances.blueprint(@blueprint_class)
-        ctx = Context::Result.new(blueprint, serializer.default_fields, @options, @object, format, store)
+        result =
+          if serializer.hooks.registered? :around_result
+            ctx = Context::Result.new(blueprint, serializer.default_fields, @options, @object, format, store)
+            serializer.hooks.around(:around_result, ctx) do |new_ctx|
+              if new_ctx.blueprint != blueprint
+                blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class
+                render = Render.new(new_ctx.object, new_ctx.options, blueprint:, collection: @collection, instances: @instances)
+                return render.to new_ctx.format
+              end
 
-        result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
-          if new_ctx.blueprint != blueprint
-            blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class
-            render = Render.new(new_ctx.object, new_ctx.options, blueprint:, collection: @collection, instances: @instances)
-            return render.to new_ctx.format
+              @object = new_ctx.object
+              @options = new_ctx.options
+              serialize serializer
+            end
+          else
+            serialize serializer
           end
-
-          @object = new_ctx.object
-          @options = new_ctx.options
-          serialize serializer
-        end
         result.is_a?(Context::Final) ? result.value : result
       end
 

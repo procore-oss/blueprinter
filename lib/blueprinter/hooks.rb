@@ -44,18 +44,7 @@ module Blueprinter
 
     private
 
-    def call(ext, hook, ctx, &)
-      return ext.public_send(hook, ctx, &) if !@hook_around_hook || ext.hidden? || hook == :around_hook
-
-      result = nil
-      hooks = @hooks.fetch(:around_hook)
-      hook_ctx = V2::Context::Hook.new(ctx.blueprint, ctx.fields, ctx.options, ext, hook)
-      _around(hooks, :around_hook, 0, hook_ctx, NilClass, require_yield: true) do
-        result = ext.public_send(hook, ctx, &)
-      end
-      result
-    end
-
+    # Runs hooks recursively
     def _around(hooks, hook, idx, ctx, expected_yield, require_yield: false, &)
       ext = hooks[idx]
       return yield ctx if ext.nil?
@@ -73,6 +62,28 @@ module Blueprinter
       end
       raise Errors::ExtensionHook.new(ext, hook, 'did not yield') if require_yield && !yielded
 
+      result
+    end
+
+    # Calls a hook on an extension. If the `around_hook` hook is registered it's wrapped around the call.
+    def call(ext, hook, ctx, &)
+      return ext.public_send(hook, ctx, &) if !@hook_around_hook || ext.hidden? || hook == :around_hook
+
+      hooks = @hooks.fetch(:around_hook)
+      # Hacky, but re-using this context object saves tons of time
+      hook_ctx = Thread.current[:_blueprinter_hook_ctx] ||= V2::Context::Hook.new
+      hook_ctx.blueprint = ctx.blueprint
+      hook_ctx.fields = ctx.fields
+      hook_ctx.options = ctx.options
+      hook_ctx.extension = ext
+      hook_ctx.hook = hook
+      hook_ctx.store = ctx.store
+      hook_ctx.depth = ctx.depth
+      result = nil
+      _around(hooks, :around_hook, 0, hook_ctx, NilClass, require_yield: true) do
+        # return the inner hook's value, not around_hook's
+        result = ext.public_send(hook, ctx, &)
+      end
       result
     end
   end

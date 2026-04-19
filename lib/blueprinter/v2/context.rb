@@ -37,12 +37,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth) do
-        members.each do |attr|
-          remove_method("#{attr}=")
-          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
-        end
-      end
+      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth)
 
       #
       # The object or collection currently being serialized.

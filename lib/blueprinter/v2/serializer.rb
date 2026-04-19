@@ -86,9 +86,7 @@ module Blueprinter
             # format/serialize and set value
             result[field.name] =
               if value.nil?
-                next if field.options[:exclude_if_nil]
-
-                nil
+                field.options[:exclude_if_nil] ? next : nil
               elsif field.type == :field
                 @format ? @formatter.call(value, ctx) : value
               else

@@ -107,7 +107,7 @@ module Blueprinter
         if @hook_around_blueprint_init
           ctx = Context::Render.new(blueprint, config.fields, options, store, depth)
           @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-            config.options = ctx.options.freeze
+            config.options = ctx.options.dup.freeze unless ctx.options == config.options
             config.fields = ctx.fields.freeze
           end
         end

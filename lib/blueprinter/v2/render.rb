@@ -43,7 +43,7 @@ module Blueprinter
               end
 
               @object = new_ctx.object
-              @options = new_ctx.options
+              @options = new_ctx.options.dup.freeze unless new_ctx.options == @options
               serialize serializer
             end
           else

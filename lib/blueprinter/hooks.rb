@@ -68,7 +68,7 @@ module Blueprinter
           raise Errors::ExtensionHook.new(ext, hook, msg)
         end
 
-        ctx = yielded_ctx.dup if yielded_ctx
+        ctx = yielded_ctx if yielded_ctx
         _around(hooks, hook, idx + 1, ctx, expected_yield, inner, require_yield:)
       end
       raise Errors::ExtensionHook.new(ext, hook, 'did not yield') if require_yield && !yielded

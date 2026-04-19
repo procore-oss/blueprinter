@@ -72,13 +72,9 @@ results.
     v1 = (a.label =~ /V1/ ? a : b).real
     v2 = (a.label =~ /V2/ ? a : b).real
 
-    if v2 < v1
-      n = (100 - (v2 / v1) * 100).round(2)
-      pcnt = ('%0.2f' % n).rjust(5, '0')
-      puts "#{label} V2 #{pcnt}% faster (#{'%.4f' % (v1 - v2)} sec)"
-    else
-      n = (100 - (v1 / v2) * 100).round(2)
-      pcnt = ('%0.2f' % n).rjust(5, '0')
-      puts "#{label} V2 #{pcnt}% slower (#{'%.4f' % (v2 - v1)} sec)"
-    end
+    n = ((v2 - v1) / v1) * 100
+    pct = ('%0.2f' % n.abs).rjust(5, '0')
+    sign = n < 0 ? "-" : "+"
+
+    puts "#{label} V2 change: #{sign}#{pct}%"
   end

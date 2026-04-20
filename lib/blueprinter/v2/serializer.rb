@@ -1,138 +1,159 @@
 # frozen_string_literal: true
 
-require 'blueprinter/hooks'
 require 'blueprinter/v2/formatter'
-require 'blueprinter/v2/field_serializers/field'
-require 'blueprinter/v2/field_serializers/object'
-require 'blueprinter/v2/field_serializers/collection'
-require 'blueprinter/v2/extensions/core/defaults'
-require 'blueprinter/v2/extensions/core/conditionals'
-require 'blueprinter/v2/extensions/core/json'
-require 'blueprinter/v2/extensions/core/wrapper'
+require 'blueprinter/hooks'
 
 module Blueprinter
   module V2
-    #
-    # The serializer for a given Blueprint. Takes in an object with options and serializes it to a Hash.
-    #
-    # NOTE: The instance is re-used for the duration of the render.
-    #
+    # @api private
     class Serializer
       SIGNAL = :_blueprinter_signal
-      SIG_SKIP = :_blueprinter_skip_field_sig
+      SIG_SKIP = :_blueprinter_signal_skip
+      Config = Struct.new(:blueprint, :fields, :options, keyword_init: true)
 
-      attr_reader :blueprint, :fields, :instances, :store, :formatter, :hooks, :defaults, :conditionals
-      attr_accessor :options
+      attr_reader :hooks, :formatter
 
-      # @param options [Hash] Options passed from the callsite
-      def initialize(blueprint_class, options, instances, store:, initial_depth:)
-        @blueprint = instances.blueprint(blueprint_class)
-        @options = options
-        @instances = instances
-        @formatter = Formatter.new(blueprint.class)
+      def initialize(blueprint_class)
+        @blueprint_class = blueprint_class
+        @formatter = Formatter.new(blueprint_class)
+        @format = @formatter.any?
         @hooks = Hooks.new(extensions)
-        @defaults = Extensions::Core::Defaults.new
-        @conditionals = Extensions::Core::Conditionals.new
-        @fields = @blueprint.class.reflections[:default].ordered
-        @store = store
-        @field_serializers = blueprint_init initial_depth
         find_used_hooks!
+        finalize_fields!
       end
 
-      #
-      # Serialize a single object to a Hash.
-      #
-      # @param object [Object] The object to serialize
-      # @param depth [Object] Depth of this object in the serialization tree
-      # @param parent [Blueprinter::V2::Context::Parent] Information about the container object (if any)
-      # @return [Hash] The serialized object
-      #
-      def object(object, depth:, parent: nil)
+      def object(object, options, instances:, store:, depth:, parent: nil)
+        blueprint = instances.blueprint(@blueprint_class)
+        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
+
         if @hook_around_serialize_object
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, store, depth)
+          ctx = Context::Object.new(blueprint, config.fields, config.options, object, parent, store, depth)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize_object(ctx.object, depth:, parent:)
+            serialize(blueprint, config.fields, config.options, [ctx.object], instances:, store:, depth:)[0]
           end
         else
-          serialize_object(object, depth:, parent:)
+          serialize(blueprint, config.fields, config.options, [object], instances:, store:, depth:)[0]
         end
       end
 
-      #
-      # Serialize a collection of objects to a Hash.
-      #
-      # @param collection [Enumerable] The collection to serialize
-      # @param depth [Object] Depth of this object in the serialization tree
-      # @param parent [Blueprinter::V2::Context::Parent] Information about the container object (if any)
-      # @return [Enumerable] The serialized hashes
-      #
-      def collection(collection, depth:, parent: nil)
+      def collection(objects, options, instances:, store:, depth:, parent: nil)
+        blueprint = instances.blueprint(@blueprint_class)
+        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
+
         if @hook_around_serialize_collection
-          ctx = Context::Object.new(@blueprint, @fields, @options, collection, parent, store, depth)
+          ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            ctx.object.map { |object| serialize_object(object, depth:, parent:) }.to_a
+            serialize(blueprint, config.fields, config.options, ctx.object, instances:, store:, depth:)
           end
         else
-          collection.map { |object| serialize_object(object, depth:, parent:) }.to_a
+          serialize(blueprint, config.fields, config.options, objects, instances:, store:, depth:)
         end
+      end
+
+      def default_fields
+        @_default_fields ||= @blueprint_class.reflections[:default].ordered
       end
 
       private
 
-      def serialize_object(object, depth:, parent: nil)
-        if @hook_around_blueprint
-          ctx = Context::Object.new(@blueprint, @fields, @options, object, parent, store, depth)
-          @hooks.around(:around_blueprint, ctx) do |ctx|
-            serialize(ctx.object, depth:)
-          end
-        else
-          serialize(object, depth:)
-        end
-      end
+      # Long and ugly for performance
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+      def serialize(blueprint, fields, options, objects, instances:, store:, depth:)
+        ctx = Context::Field.new(blueprint, fields, options, nil, nil, store, depth)
+        parent = Context::Parent.new(@blueprint_class)
+        # rubocop:disable Metrics/BlockLength
+        objects.map do |object|
+          ctx.object = object
+          fields.each_with_object({}) do |field, result|
+            ctx.field = field
+            next if field.has_conditional && FieldLogic.skip?(ctx, blueprint, field)
 
-      def serialize(object, depth:)
-        ctx = Context::Field.new(@blueprint, @fields, @options, object, nil, store, depth)
-        @field_serializers.each_with_object({}) do |field_conf, result|
-          ctx.field = field_conf.field
-          value = catch(SIGNAL) { field_conf.serialize ctx }
-          result[ctx.field.name] = value unless value == SIG_SKIP
+            # extract value
+            value =
+              if (field_hook = @field_hooks[field.type])
+                value = catch Serializer::SIGNAL do
+                  @hooks.around(field_hook, ctx) do
+                    value = field.extractor.extract(ctx, blueprint, field, object)
+                    field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
+                  end
+                end
+                value == Serializer::SIG_SKIP ? next : value
+              else
+                value = field.extractor.extract(ctx, blueprint, field, object)
+                field.has_default ? FieldLogic.value_or_default(ctx, blueprint, field, value) : value
+              end
+
+            # format/serialize and set value
+            result[field.name] =
+              if value.nil?
+                field.options[:exclude_if_nil] ? next : nil
+              elsif field.type == :field
+                @format ? @formatter.call(value, ctx) : value
+              else
+                parent.field = field
+                parent.object = object
+                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
+              end
+          end
+          # rubocop:enable Metrics/BlockLength
+        end.to_a
+      end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+
+      def blueprint_init(blueprint, options, store:, depth:)
+        config = Config.new(blueprint:, fields: default_fields, options:)
+        if @hook_around_blueprint_init
+          ctx = Context::Render.new(blueprint, config.fields, options, store, depth)
+          @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
+            config.options = ctx.options.dup.freeze unless ctx.options == config.options
+            config.fields = ctx.fields.freeze
+          end
         end
+        config.freeze
       end
 
       def extensions
-        extensions = @blueprint.class.extensions.map { |ext| @instances.extension ext }
+        extensions = @blueprint_class.extensions.map do |ext|
+          case ext
+          when Extension then ext
+          when Class then ext.new
+          when Proc then ext.call
+          else raise BlueprinterError, 'Extensions must be an instance of Blueprinter::Extension or a Proc that returns one'
+          end
+        end
         [*extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new]
       end
 
-      # Allow extensions to do time-saving prep work on the current context
-      def blueprint_init(depth)
-        ctx = Context::Render.new(@blueprint, fields, @options, store, depth)
-        @conditionals.around_blueprint_init ctx
-        @defaults.around_blueprint_init ctx
-        @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-          @options = ctx.options
-          @fields = ctx.fields
-        end
-        @fields.map { |field| field_serializer field }.freeze
-      end
-
-      def field_serializer(field)
-        case field.type
-        when :field
-          FieldSerializers::Field.new(field, self)
-        when :object
-          FieldSerializers::Object.new(field, self)
-        when :collection
-          FieldSerializers::Collection.new(field, self)
-        end
-      end
-
-      # We save a lot of time by skipping hooks that aren't used
+      # Save time by skipping hooks that aren't used
       def find_used_hooks!
         @hook_around_serialize_object = @hooks.registered? :around_serialize_object
         @hook_around_serialize_collection = @hooks.registered? :around_serialize_collection
-        @hook_around_blueprint = @hooks.registered? :around_blueprint
+        @hook_around_blueprint_init = @hooks.registered? :around_blueprint_init
+        @field_hooks = {
+          field: @hooks.registered?(:around_field_value) ? :around_field_value : nil,
+          object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,
+          collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
+        }.freeze
       end
+
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      def finalize_fields!
+        options = @blueprint_class.options
+        @blueprint_class.schema.each_value do |field|
+          # precompute some checks
+          field.extractor = field.value_proc ? Extractors::Proc : Extractors::Property
+          field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
+          field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
+          # copy blueprint options down to each field (so the serializer has a single place to check)
+          field.options[:if] ||= options[:if] if options.key? :if
+          field.options[:unless] ||= options[:unless] if options.key? :unless
+          field.options[:default_if] ||= options[:default_if] if options.key? :default_if
+          field.options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
+          field.options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
+                                                                       !field.options.key?(:exclude_if_nil)
+        end
+      end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     end
   end
 end

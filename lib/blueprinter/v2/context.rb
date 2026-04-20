@@ -37,12 +37,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth) do
-        members.each do |attr|
-          remove_method("#{attr}=")
-          define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
-        end
-      end
+      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth)
 
       #
       # The object or collection currently being serialized.
@@ -68,7 +63,7 @@ module Blueprinter
       end
 
       Parent = Struct.new(:blueprint, :field, :object) do
-        members.each do |attr|
+        (members - %i[field object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Parent field `#{attr}` is immutable" }
         end
@@ -92,7 +87,7 @@ module Blueprinter
       #   @return [Integer] Blueprint depth (1-indexed)
       #
       Field = Struct.new(:blueprint, :fields, :options, :object, :field, :store, :depth) do
-        (members - %i[field]).each do |attr|
+        (members - %i[field object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
         end

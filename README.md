@@ -1,4 +1,4 @@
-[![Test](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml)
+[![Test](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/procore-oss/blueprinter/actions/workflows/test.yaml)
 [![Gem Version](https://badge.fury.io/rb/blueprinter.svg)](https://badge.fury.io/rb/blueprinter)
 [![Discord](https://img.shields.io/badge/Chat-EDEDED?logo=discord)](https://discord.gg/PbntEMmWws)
 
@@ -428,6 +428,21 @@ class DriverBlueprint < Blueprinter::Base
 end
 ```
 
+The `options` parameter also accepts a `Proc` (or any callable) for cases where the options need to be derived from the parent object at render time. The callable is invoked with the parent object and must return a Hash, which is then merged into the options passed to the associated Blueprint.
+
+```ruby
+class DriverBlueprint < Blueprinter::Base
+  identifier :uuid
+
+  view :normal do
+    fields :first_name, :last_name
+    association :vehicles,
+                blueprint: VehicleBlueprint,
+                options: ->(driver) { { trim: driver.preferred_trim } }
+  end
+end
+```
+
 </details>
 
 <details>
@@ -559,6 +574,25 @@ Output:
 }
 ```
 
+When a field block just delegates to a single method on the object, `Symbol#to_proc` (`&:method_name`) can be used as a terser form of the block syntax:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :uuid
+  field :display_name, &:formatted_full_name
+end
+```
+
+This is equivalent to:
+
+```ruby
+field :display_name do |user|
+  user.formatted_full_name
+end
+```
+
+_NOTE:_ When using `Symbol#to_proc`, the block is invoked with only the object — `options` are not available, and the configured extractor is bypassed. For simple renames of an existing attribute, prefer the `name:` option instead (see [Renaming](#renaming)), which routes through the configured extractor and keeps the DSL consistent.
+
 </details>
 
 <details>
@@ -626,6 +660,16 @@ Output:
   "uuid": "733f0758-8f21-4719-875f-262c3ec743af",
 }
 ```
+
+Identifiers also accept `Symbol#to_proc` shorthand as a terser form of the block syntax when the value is a single method call on the object:
+
+```ruby
+class UserBlueprint < Blueprinter::Base
+  identifier :anonymized_id, &:obfuscated_uuid
+end
+```
+
+_NOTE:_ As with fields, this bypasses the configured extractor and does not have access to `options`. To use a different key name than the underlying method (without a block), use `identifier :method_name, name: :key_name`.
 
 </details>
 

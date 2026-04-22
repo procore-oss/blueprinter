@@ -70,11 +70,12 @@ describe "Blueprinter::V2::Reflection" do
     let(:blueprint) do
       test = self
       Class.new(Blueprinter::V2::Base) do
-        field :name
-        association :category, test.category_blueprint
+        options[:if] = ->(_ctx) { true }
+        field :name, default: 'None'
+        association :category, test.category_blueprint, default: { name: 'None' }
 
         view :extended do
-          association :widgets, [test.widget_blueprint]
+          association :widgets, [test.widget_blueprint], default: []
           field :description
         end
       end
@@ -96,6 +97,17 @@ describe "Blueprinter::V2::Reflection" do
 
       names = blueprint.reflections[:extended].ordered.map(&:name)
       expect(names).to eq %i(name category widgets description)
+    end
+
+    it 'retain their original options' do
+      name = blueprint.reflections[:default].fields[:name]
+      expect(name.options).to eq({ default: 'None' })
+
+      category = blueprint.reflections[:default].objects[:category]
+      expect(category.options).to eq({ default: { name: 'None' } })
+
+      widgets = blueprint.reflections[:extended].collections[:widgets]
+      expect(widgets.options).to eq({ default: [] })
     end
   end
 end

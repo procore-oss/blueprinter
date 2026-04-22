@@ -5,7 +5,10 @@ describe "Blueprinter::V2::Reflection" do
     Class.new(Blueprinter::V2::Base) do
       view :foo
       view :bar do
+        options[:foo] = 'foo'
         view :foo do
+          options[:foo] = 'bar'
+          options[:exclude_if_nil] = true
           view :borp
         end
       end
@@ -62,6 +65,13 @@ describe "Blueprinter::V2::Reflection" do
       default
       borp
     ).sort
+  end
+
+  it 'has options' do
+    expect(blueprint.reflections[:default].options).to eq({})
+    expect(blueprint.reflections[:bar].options).to eq({ foo: 'foo' })
+    expect(blueprint.reflections[:"bar.foo"].options).to eq({ foo: 'bar', exclude_if_nil: true })
+    expect(blueprint.reflections[:"bar.foo.borp"].options).to eq({ foo: 'bar', exclude_if_nil: true })
   end
 
   context 'fields and associations' do

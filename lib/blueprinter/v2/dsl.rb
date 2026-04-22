@@ -89,7 +89,7 @@ module Blueprinter
       # Define a field.
       #
       # @param name [Symbol] Name of the field
-      # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param from [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
@@ -125,7 +125,7 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Array<Class>] Blueprint class to use (object). For a collection, wrap the blueprint in an
       # array.
-      # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
+      # @param from [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil

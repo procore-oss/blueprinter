@@ -6,6 +6,7 @@ require 'blueprinter/hooks'
 module Blueprinter
   module V2
     # @api private
+    # rubocop:disable Metrics/ClassLength
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
@@ -51,7 +52,7 @@ module Blueprinter
       end
 
       def default_fields
-        @_default_fields ||= @blueprint_class.reflections[:default].ordered
+        @_default_fields ||= @blueprint_class.schema.values.freeze
       end
 
       private
@@ -66,7 +67,7 @@ module Blueprinter
           ctx.object = object
           fields.each_with_object({}) do |field, result|
             ctx.field = field
-            next if field.has_conditional && FieldLogic.skip?(ctx)
+            next if field.has_conditional && FieldLogic.skip?(ctx, field)
 
             # extract value
             value =
@@ -74,13 +75,13 @@ module Blueprinter
                 value = catch SIGNAL do
                   @hooks.around(field_hook, ctx) do
                     value = field.extractor.extract(ctx)
-                    field.has_default ? FieldLogic.value_or_default(ctx, value) : value
+                    field.has_default ? FieldLogic.value_or_default(ctx, field, value) : value
                   end
                 end
                 value == SIG_SKIP ? next : value
               else
                 value = field.extractor.extract(ctx)
-                field.has_default ? FieldLogic.value_or_default(ctx, value) : value
+                field.has_default ? FieldLogic.value_or_default(ctx, field, value) : value
               end
 
             # format/serialize and set value
@@ -153,6 +154,7 @@ module Blueprinter
           field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
           field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
           # copy blueprint options down to each field (so the serializer has a single place to check)
+          field.original_options = field.options.dup
           field.options[:if] ||= options[:if] if options.key? :if
           field.options[:unless] ||= options[:unless] if options.key? :unless
           field.options[:default_if] ||= options[:default_if] if options.key? :default_if
@@ -163,5 +165,6 @@ module Blueprinter
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

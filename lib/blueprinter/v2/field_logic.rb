@@ -7,14 +7,15 @@ module Blueprinter
       # "if" and "unless" options.
       #
       # @param ctx [Blueprinter::V2::Context::Field]
+      # @param field [Blueprinter::V2::Fields] Internal field definition (has extra, private, attrs)
       # @return [True|False]
-      def self.skip?(ctx)
-        if (cond = ctx.field.options[:if])
+      def self.skip?(ctx, field)
+        if (cond = field.options[:if])
           result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
           return true unless result
         end
 
-        if (cond = ctx.field.options[:unless])
+        if (cond = field.options[:unless])
           result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
           return true if result
         end
@@ -26,13 +27,14 @@ module Blueprinter
       # "default" option. It will be used if the given value is nil or if the "default_if" option evaluates truthy.
       #
       # @param ctx [Blueprinter::V2::Context::Field]
+      # @param field [Blueprinter::V2::Fields] Internal field definition (has extra, private, attrs)
       # @param value [Object] The current field value
       # @return [Object] The final field value
-      def self.value_or_default(ctx, value)
-        default_if = ctx.field.options[:default_if]
+      def self.value_or_default(ctx, field, value)
+        default_if = field.options[:default_if]
         return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
 
-        case (default_value = ctx.field.options[:default])
+        case (default_value = field.options[:default])
         when Proc then ctx.blueprint.instance_exec(value, ctx, &default_value)
         when Symbol then ctx.blueprint.public_send(default_value, value, ctx)
         else default_value

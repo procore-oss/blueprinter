@@ -24,6 +24,18 @@ module Blueprinter
             ctx.object.public_send(ctx.field.from)
           end
         end
+
+        # Fast-path extraction that avoids a Context::Field allocation.
+        # @param object [Object] The object or hash being serialized
+        # @param field [Blueprinter::V2::Fields::Field|Object|Collection]
+        # @return [Object] The field value
+        def self.extract_simple(object, field)
+          if object.is_a? Hash
+            object[field.from] || object[field.from_str]
+          else
+            object.public_send(field.from)
+          end
+        end
       end
     end
   end

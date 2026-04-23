@@ -19,8 +19,8 @@ module Blueprinter
         @formatter = Formatter.new(blueprint_class)
         @format = @formatter.any?
         @hooks = Hooks.new(extensions)
+        finalize_fields!   # must run before find_used_hooks! so field flags are set
         find_used_hooks!
-        finalize_fields!
       end
 
       def object(object, options, instances:, store:, depth:, parent: nil)
@@ -60,8 +60,10 @@ module Blueprinter
       # Long and ugly for performance
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       def serialize(blueprint, fields, options, objects, instances:, store:, depth:)
+        return serialize_fast(fields, options, objects, instances:, store:, depth:) unless @needs_field_ctx
+
         ctx = Context::Field.new(blueprint, fields, options, nil, nil, store, depth)
-        parent = Context::Parent.new(@blueprint_class)
+        parent = nil
         # rubocop:disable Metrics/BlockLength
         objects.map do |object|
           ctx.object = object
@@ -91,12 +93,37 @@ module Blueprinter
               elsif field.type == :field
                 @format ? @formatter.call(ctx, value) : value
               else
+                parent ||= Context::Parent.new(@blueprint_class)
                 parent.field = field
                 parent.object = object
                 field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
               end
           end
           # rubocop:enable Metrics/BlockLength
+        end
+      end
+
+      # Fast path: no Context::Field allocation.
+      # Only used when there are no hooks, conditionals, defaults, formatters, or Proc extractors.
+      # Context::Parent is still created lazily for association fields so child blueprints
+      # with around_serialize_object hooks still receive valid parent context.
+      def serialize_fast(fields, options, objects, instances:, store:, depth:)
+        parent = nil
+        objects.map do |object|
+          fields.each_with_object({}) do |field, result|
+            value = field.extractor.extract_simple(object, field)
+            result[field.name] =
+              if value.nil?
+                field.options[:exclude_if_nil] ? next : nil
+              elsif field.type == :field
+                value
+              else
+                parent ||= Context::Parent.new(@blueprint_class)
+                parent.field = field
+                parent.object = object
+                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
+              end
+          end
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
@@ -143,6 +170,13 @@ module Blueprinter
           object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,
           collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
         }.freeze
+        # Fast path: skip Context::Field/Parent allocation when no hooks, conditionals,
+        # defaults, formatters, or Proc extractors are in play.
+        @needs_field_ctx = @format ||
+                           @field_hooks.values.any? ||
+                           default_fields.any? { |f|
+                             f.has_conditional || f.has_default || f.extractor == Extractors::Proc
+                           }
       end
 
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity

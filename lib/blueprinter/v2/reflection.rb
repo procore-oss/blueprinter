@@ -10,7 +10,7 @@ module Blueprinter
       # @return [Hash<Symbol, Blueprinter::V2::Reflection::View>]
       #
       def reflections
-        eval! unless @evaled
+        eval! unless @serializer
         @_reflections ||= flatten_children(self, :default).freeze
       end
 
@@ -33,6 +33,8 @@ module Blueprinter
       class View
         # @return [Symbol] Name of the view
         attr_reader :name
+        # @return [Hash] Options defined on the view or inherited from the parent
+        attr_reader :options
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Fields defined on the view
         attr_reader :fields
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Object>] Associations to single objects defined on the view
@@ -51,12 +53,87 @@ module Blueprinter
         # @api private
         def initialize(blueprint, name)
           @name = name
-          @ordered = blueprint.schema.values.freeze
-          @fields = blueprint.schema.select { |_, f| f.field? }.freeze
-          @objects = blueprint.schema.select { |_, f| f.object? }.freeze
-          @collections = blueprint.schema.select { |_, f| f.collection? }.freeze
+          @options = blueprint.options
+          @ordered = reflected_fields(blueprint)
+          @fields = ordered.select(&:field?).to_h { |f| [f.name, f] }.freeze
+          @objects = ordered.select(&:object?).to_h { |f| [f.name, f] }.freeze
+          @collections = ordered.select(&:collection?).to_h { |f| [f.name, f] }.freeze
           @associations = objects.merge(collections).freeze
         end
+
+        private
+
+        def reflected_fields(blueprint)
+          blueprint.schema.values.map do |f|
+            attrs = [f.name, f.from, f.from_str, f.value_proc, f.original_options]
+            case f.type
+            when :collection then Collection.new(*attrs, f.blueprint)
+            when :object then Object.new(*attrs, f.blueprint)
+            else Field.new(*attrs)
+            end.freeze
+          end.freeze
+        end
+      end
+
+      # A non-object, non-collection field definition.
+      #
+      # @!attribute [r] name
+      #   @return [Symbol] Name of field in result
+      # @!attribute [r] from
+      #   @return [Symbol] Method name/Hash key to pull the field value from
+      # @!attribute [r] from_str
+      #   @return [String] Same as `from` but a string
+      # @!attribute [r] value_proc
+      #   @return [Proc|NilClass] A proc to extract the value
+      # @!attribute [r] options
+      #   @return [Hash] Options defined on the field
+      Field = Struct.new(:name, :from, :from_str, :value_proc, :options) do
+        include Fields::Helpers
+
+        # @return [Symbol] :field
+        def type = :field
+      end
+
+      # An object field definition.
+      #
+      # @!attribute [r] name
+      #   @return [Symbol] Name of field in result
+      # @!attribute [r] from
+      #   @return [Symbol] Method name/Hash key to pull the field value from
+      # @!attribute [r] from_str
+      #   @return [String] Same as `from` but a string
+      # @!attribute [r] value_proc
+      #   @return [Proc|NilClass] A proc to extract the value
+      # @!attribute [r] options
+      #   @return [Hash] Options defined on the field
+      # @!attribute [r] blueprint
+      #   @return [Class] Blueprint to serialize with
+      Object = Struct.new(:name, :from, :from_str, :value_proc, :options, :blueprint) do
+        include Fields::Helpers
+
+        # @return [Symbol] :object
+        def type = :object
+      end
+
+      # A collection field definition.
+      #
+      # @!attribute [r] name
+      #   @return [Symbol] Name of field in result
+      # @!attribute [r] from
+      #   @return [Symbol] Method name/Hash key to pull the field value from
+      # @!attribute [r] from_str
+      #   @return [String] Same as `from` but a string
+      # @!attribute [r] value_proc
+      #   @return [Proc|NilClass] A proc to extract the value
+      # @!attribute [r] options
+      #   @return [Hash] Options defined on the field
+      # @!attribute [r] blueprint
+      #   @return [Class] Blueprint to serialize with
+      Collection = Struct.new(:name, :from, :from_str, :value_proc, :options, :blueprint) do
+        include Fields::Helpers
+
+        # @return [Symbol] :collection
+        def type = :collection
       end
     end
   end

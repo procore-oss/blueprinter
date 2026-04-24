@@ -87,13 +87,7 @@ module Blueprinter
       #   @return [Proc|NilClass] A proc to extract the value
       # @!attribute [r] options
       #   @return [Hash] Options defined on the field
-      Field = Struct.new(
-        :name,
-        :from,
-        :from_str,
-        :value_proc,
-        :options
-      ) do
+      Field = Struct.new(:name, :from, :from_str, :value_proc, :options) do
         include Fields::Helpers
 
         # @return [Symbol] :field
@@ -114,14 +108,7 @@ module Blueprinter
       #   @return [Hash] Options defined on the field
       # @!attribute [r] blueprint
       #   @return [Class] Blueprint to serialize with
-      Object = Struct.new(
-        :name,
-        :from,
-        :from_str,
-        :value_proc,
-        :options,
-        :blueprint
-      ) do
+      Object = Struct.new(:name, :from, :from_str, :value_proc, :options, :blueprint) do
         include Fields::Helpers
 
         # @return [Symbol] :object
@@ -142,14 +129,7 @@ module Blueprinter
       #   @return [Hash] Options defined on the field
       # @!attribute [r] blueprint
       #   @return [Class] Blueprint to serialize with
-      Collection = Struct.new(
-        :name,
-        :from,
-        :from_str,
-        :value_proc,
-        :options,
-        :blueprint
-      ) do
+      Collection = Struct.new(:name, :from, :from_str, :value_proc, :options, :blueprint) do
         include Fields::Helpers
 
         # @return [Symbol] :collection

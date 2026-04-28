@@ -68,34 +68,34 @@ module Blueprinter
           ctx&.object = object
           fields.each_with_object({}) do |field, result|
             ctx&.field = field
-            next if field.has_conditional && FieldLogic.skip?(ctx, field)
+            next if field._has_conditional && FieldLogic.skip?(ctx, field)
 
             # extract value
             value =
               if (field_hook = @field_hooks[field.type])
                 value = catch SIGNAL do
                   @hooks.around(field_hook, ctx) do
-                    value = field.extractor.extract(blueprint, field, object, ctx:)
-                    field.has_default ? FieldLogic.value_or_default(ctx, field, value) : value
+                    value = field._extractor.extract(blueprint, field, object, ctx:)
+                    field._has_default ? FieldLogic.value_or_default(ctx, field, value) : value
                   end
                 end
                 value == SIG_SKIP ? next : value
               else
-                value = field.extractor.extract(blueprint, field, object, ctx:)
-                field.has_default ? FieldLogic.value_or_default(ctx, field, value) : value
+                value = field._extractor.extract(blueprint, field, object, ctx:)
+                field._has_default ? FieldLogic.value_or_default(ctx, field, value) : value
               end
 
             # format/serialize and set value
             result[field.name] =
               if value.nil?
-                field.options[:exclude_if_nil] ? next : nil
+                field._merged_options[:exclude_if_nil] ? next : nil
               elsif field.type == :field
                 @format ? @formatter.call(ctx, value) : value
               else
                 parent ||= Context::Parent.new(@blueprint_class)
                 parent.field = field
                 parent.object = object
-                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
+                field._serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
               end
           end
           # rubocop:enable Metrics/BlockLength
@@ -150,7 +150,7 @@ module Blueprinter
       # Skip Context::Field allocation when no hooks, conditionals, defaults, formatters, or Proc extractors are in play
       def needs_field_ctx?
         @format || @field_hooks.values.any? || default_fields.any? do |f|
-          f.has_conditional || f.has_default || f.value_proc
+          f._has_conditional || f._has_default || f.value_proc
         end
       end
 
@@ -158,19 +158,20 @@ module Blueprinter
       def finalize_fields!
         options = @blueprint_class.options
         @blueprint_class.schema.each_value do |field|
-          # copy blueprint options down to each field (so the serializer has a single place to check)
-          field.original_options = field.options.dup
-          field.options[:if] ||= options[:if] if options.key? :if
-          field.options[:unless] ||= options[:unless] if options.key? :unless
-          field.options[:default_if] ||= options[:default_if] if options.key? :default_if
-          field.options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
-          field.options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
-                                                                       !field.options.key?(:exclude_if_nil)
+          # copy blueprint options down to each field (faster b/c we can check exactly one Hash)
+          field._merged_options = field.options.dup
+          field._merged_options[:if] ||= options[:if] if options.key? :if
+          field._merged_options[:unless] ||= options[:unless] if options.key? :unless
+          field._merged_options[:default_if] ||= options[:default_if] if options.key? :default_if
+          field._merged_options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
+          field._merged_options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
+                                                                               !field.options.key?(:exclude_if_nil)
+          field._merged_options.freeze
 
           # precompute some checks
-          field.extractor = field.value_proc ? Extractors::Proc : Extractors::Property
-          field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
-          field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
+          field._extractor = field.value_proc ? Extractors::Proc : Extractors::Property
+          field._has_conditional = field._merged_options.key?(:if) || field._merged_options.key?(:unless)
+          field._has_default = field._merged_options.key?(:default) || field._merged_options.key?(:default_if)
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity

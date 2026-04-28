@@ -14,16 +14,28 @@ module Blueprinter
         def collection? = type == :collection
       end
 
+      # A non-object, non-collection field definition.
+      #
+      # @!attribute [r] name
+      #   @return [Symbol] Name of field in result
+      # @!attribute [r] from
+      #   @return [Symbol] Method name/Hash key to pull the field value from
+      # @!attribute [r] from_str
+      #   @return [String] Same as `from` but a string
+      # @!attribute [r] value_proc
+      #   @return [Proc|NilClass] A proc to extract the value
+      # @!attribute [r] options
+      #   @return [Hash] Options defined on the field
       Field = Struct.new(
         :name,
         :from,
         :from_str,
         :value_proc,
         :options,
-        :original_options,
-        :has_conditional,
-        :has_default,
-        :extractor,
+        :_merged_options,
+        :_has_conditional,
+        :_has_default,
+        :_extractor,
         keyword_init: true
       ) do
         include Helpers
@@ -32,6 +44,20 @@ module Blueprinter
         def type = :field
       end
 
+      # An object field definition.
+      #
+      # @!attribute [r] name
+      #   @return [Symbol] Name of field in result
+      # @!attribute [r] from
+      #   @return [Symbol] Method name/Hash key to pull the field value from
+      # @!attribute [r] from_str
+      #   @return [String] Same as `from` but a string
+      # @!attribute [r] value_proc
+      #   @return [Proc|NilClass] A proc to extract the value
+      # @!attribute [r] options
+      #   @return [Hash] Options defined on the field
+      # @!attribute [r] blueprint
+      #   @return [Class] Blueprint to serialize with
       Object = Struct.new(
         :name,
         :blueprint,
@@ -39,11 +65,11 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
-        :original_options,
-        :has_conditional,
-        :has_default,
-        :extractor,
-        :serializer,
+        :_merged_options,
+        :_has_conditional,
+        :_has_default,
+        :_extractor,
+        :_serializer,
         keyword_init: true
       ) do
         include Helpers
@@ -52,6 +78,20 @@ module Blueprinter
         def type = :object
       end
 
+      # A collection field definition.
+      #
+      # @!attribute [r] name
+      #   @return [Symbol] Name of field in result
+      # @!attribute [r] from
+      #   @return [Symbol] Method name/Hash key to pull the field value from
+      # @!attribute [r] from_str
+      #   @return [String] Same as `from` but a string
+      # @!attribute [r] value_proc
+      #   @return [Proc|NilClass] A proc to extract the value
+      # @!attribute [r] options
+      #   @return [Hash] Options defined on the field
+      # @!attribute [r] blueprint
+      #   @return [Class] Blueprint to serialize with
       Collection = Struct.new(
         :name,
         :blueprint,
@@ -59,11 +99,11 @@ module Blueprinter
         :from_str,
         :value_proc,
         :options,
-        :original_options,
-        :has_conditional,
-        :has_default,
-        :extractor,
-        :serializer,
+        :_merged_options,
+        :_has_conditional,
+        :_has_default,
+        :_extractor,
+        :_serializer,
         keyword_init: true
       ) do
         include Helpers

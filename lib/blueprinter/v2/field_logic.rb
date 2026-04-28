@@ -10,12 +10,12 @@ module Blueprinter
       # @param field [Blueprinter::V2::Fields] Internal field definition (has extra, private, attrs)
       # @return [True|False]
       def self.skip?(ctx, field)
-        if (cond = field.options[:if])
+        if (cond = field._merged_options[:if])
           result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
           return true unless result
         end
 
-        if (cond = field.options[:unless])
+        if (cond = field._merged_options[:unless])
           result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
           return true if result
         end
@@ -31,10 +31,10 @@ module Blueprinter
       # @param value [Object] The current field value
       # @return [Object] The final field value
       def self.value_or_default(ctx, field, value)
-        default_if = field.options[:default_if]
+        default_if = field._merged_options[:default_if]
         return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
 
-        case (default_value = field.options[:default])
+        case (default_value = field._merged_options[:default])
         when Proc then ctx.blueprint.instance_exec(value, ctx, &default_value)
         when Symbol then ctx.blueprint.public_send(default_value, value, ctx)
         else default_value

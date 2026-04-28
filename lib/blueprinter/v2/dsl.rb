@@ -150,7 +150,7 @@ module Blueprinter
           from_str: from.to_s,
           value_proc: definition,
           options: options.dup,
-          serializer:
+          _serializer: serializer
         )
       end
 

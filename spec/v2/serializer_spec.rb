@@ -131,7 +131,7 @@ describe Blueprinter::V2::Serializer do
     end
   end
 
-  it 'respects if conditionals' do
+  it 'respects if conditionals on fields' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       field :desc, if: ->(ctx) { ctx.options[:n] > 42 }
@@ -141,7 +141,7 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo' })
   end
 
-  it 'respects unless conditionals' do
+  it 'respects unless conditionals on fields' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       field :desc, unless: ->(ctx) { ctx.options[:n] > 42 }
@@ -151,10 +151,35 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo' })
   end
 
+  it 'respects conditionals copied down from blueprints options' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      options[:if] = ->(ctx) { ctx.options[:n] > 42 }
+      field :name, if: ->(_ctx) { true }
+      field :desc
+    end
+
+    result = widget_blueprint.serializer.object({ name: 'Foo', desc: 'Bar' }, { n: 42 }, instances:, store:, depth: 1)
+    expect(result).to eq({ name: 'Foo' })
+  end
+
   it 'respects default values' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       field :desc, default: 'Description!'
+    end
+
+    result = widget_blueprint.serializer.object({ name: 'Foo' }, {}, instances:, store:, depth: 1)
+    expect(result).to eq({
+      name: 'Foo',
+      desc: 'Description!'
+    })
+  end
+
+  it 'respects default values copied down from blueprint options' do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      options[:default] = 'Description!'
+      field :name
+      field :desc
     end
 
     result = widget_blueprint.serializer.object({ name: 'Foo' }, {}, instances:, store:, depth: 1)

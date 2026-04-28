@@ -19,8 +19,9 @@ module Blueprinter
         @formatter = Formatter.new(blueprint_class)
         @format = @formatter.any?
         @hooks = Hooks.new(extensions)
-        finalize_fields!   # must run before find_used_hooks! so field flags are set
+        finalize_fields!
         find_used_hooks!
+        @needs_field_ctx = needs_field_ctx?
       end
 
       def object(object, options, instances:, store:, depth:, parent: nil)
@@ -60,15 +61,13 @@ module Blueprinter
       # Long and ugly for performance
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       def serialize(blueprint, fields, options, objects, instances:, store:, depth:)
-        return serialize_fast(fields, options, objects, instances:, store:, depth:) unless @needs_field_ctx
-
-        ctx = Context::Field.new(blueprint, fields, options, nil, nil, store, depth)
+        ctx = @needs_field_ctx ? Context::Field.new(blueprint, fields, options, nil, nil, store, depth) : nil
         parent = nil
         # rubocop:disable Metrics/BlockLength
         objects.map do |object|
-          ctx.object = object
+          ctx&.object = object
           fields.each_with_object({}) do |field, result|
-            ctx.field = field
+            ctx&.field = field
             next if field.has_conditional && FieldLogic.skip?(ctx, field)
 
             # extract value
@@ -76,13 +75,13 @@ module Blueprinter
               if (field_hook = @field_hooks[field.type])
                 value = catch SIGNAL do
                   @hooks.around(field_hook, ctx) do
-                    value = field.extractor.extract(ctx)
+                    value = field.extractor.extract(blueprint, field, object, ctx:)
                     field.has_default ? FieldLogic.value_or_default(ctx, field, value) : value
                   end
                 end
                 value == SIG_SKIP ? next : value
               else
-                value = field.extractor.extract(ctx)
+                value = field.extractor.extract(blueprint, field, object, ctx:)
                 field.has_default ? FieldLogic.value_or_default(ctx, field, value) : value
               end
 
@@ -100,30 +99,6 @@ module Blueprinter
               end
           end
           # rubocop:enable Metrics/BlockLength
-        end
-      end
-
-      # Fast path: no Context::Field allocation.
-      # Only used when there are no hooks, conditionals, defaults, formatters, or Proc extractors.
-      # Context::Parent is still created lazily for association fields so child blueprints
-      # with around_serialize_object hooks still receive valid parent context.
-      def serialize_fast(fields, options, objects, instances:, store:, depth:)
-        parent = nil
-        objects.map do |object|
-          fields.each_with_object({}) do |field, result|
-            value = field.extractor.extract_simple(object, field)
-            result[field.name] =
-              if value.nil?
-                field.options[:exclude_if_nil] ? next : nil
-              elsif field.type == :field
-                value
-              else
-                parent ||= Context::Parent.new(@blueprint_class)
-                parent.field = field
-                parent.object = object
-                field.serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
-              end
-          end
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
@@ -170,23 +145,19 @@ module Blueprinter
           object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,
           collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
         }.freeze
-        # Fast path: skip Context::Field/Parent allocation when no hooks, conditionals,
-        # defaults, formatters, or Proc extractors are in play.
-        @needs_field_ctx = @format ||
-                           @field_hooks.values.any? ||
-                           default_fields.any? { |f|
-                             f.has_conditional || f.has_default || f.extractor == Extractors::Proc
-                           }
+      end
+
+      # Skip Context::Field allocation when no hooks, conditionals, defaults, formatters, or Proc extractors are in play
+      def needs_field_ctx?
+        @format || @field_hooks.values.any? || default_fields.any? do |f|
+          f.has_conditional || f.has_default || f.value_proc
+        end
       end
 
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def finalize_fields!
         options = @blueprint_class.options
         @blueprint_class.schema.each_value do |field|
-          # precompute some checks
-          field.extractor = field.value_proc ? Extractors::Proc : Extractors::Property
-          field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
-          field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
           # copy blueprint options down to each field (so the serializer has a single place to check)
           field.original_options = field.options.dup
           field.options[:if] ||= options[:if] if options.key? :if
@@ -195,6 +166,11 @@ module Blueprinter
           field.options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
           field.options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
                                                                        !field.options.key?(:exclude_if_nil)
+
+          # precompute some checks
+          field.extractor = field.value_proc ? Extractors::Proc : Extractors::Property
+          field.has_conditional = field.options.key?(:if) || field.options.key?(:unless)
+          field.has_default = field.options.key?(:default) || field.options.key?(:default_if)
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity

@@ -131,7 +131,7 @@ describe Blueprinter::V2::Serializer do
     end
   end
 
-  it 'enables the if conditionals extension' do
+  it 'respects if conditionals' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       field :desc, if: ->(ctx) { ctx.options[:n] > 42 }
@@ -141,7 +141,7 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo' })
   end
 
-  it 'enables the unless conditionals extension' do
+  it 'respects unless conditionals' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       field :desc, unless: ->(ctx) { ctx.options[:n] > 42 }
@@ -151,7 +151,7 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({ name: 'Foo' })
   end
 
-  it 'enables the default values extension' do
+  it 'respects default values' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
       field :desc, default: 'Description!'

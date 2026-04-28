@@ -2,34 +2,29 @@
 
 module Blueprinter
   module V2
-    # Field value extractors
+    # Field value extractors. They must all conform to the same "interface".
+    # rubocop:disable Lint/UnusedMethodArgument
     module Extractors
       # Extracts field value from a Proc
       module Proc
+        # @param blueprint [Blueprinter::V2::Base] Blueprint instance
+        # @param field [Blueprinter::V2::Fields] The field to extract
+        # @param object [Object] The object to extract the field from
         # @param ctx [Blueprinter::V2::Context::Field]
         # @return [Object] The field value
-        def self.extract(ctx)
-          ctx.blueprint.instance_exec(ctx.object, ctx, &ctx.field.value_proc)
+        def self.extract(blueprint, field, object, ctx:)
+          blueprint.instance_exec(object, ctx, &field.value_proc)
         end
       end
 
       # Extracts field value from a Hash or object
       module Property
-        # @param ctx [Blueprinter::V2::Context::Field]
+        # @param blueprint [Blueprinter::V2::Base] Blueprint instance
+        # @param field [Blueprinter::V2::Fields] The field to extract
+        # @param object [Object] The object to extract the field from
+        # @param ctx [Blueprinter::V2::Context::Field] Unused
         # @return [Object] The field value
-        def self.extract(ctx)
-          if ctx.object.is_a? Hash
-            ctx.object[ctx.field.from] || ctx.object[ctx.field.from_str]
-          else
-            ctx.object.public_send(ctx.field.from)
-          end
-        end
-
-        # Fast-path extraction that avoids a Context::Field allocation.
-        # @param object [Object] The object or hash being serialized
-        # @param field [Blueprinter::V2::Fields::Field|Object|Collection]
-        # @return [Object] The field value
-        def self.extract_simple(object, field)
+        def self.extract(blueprint, field, object, ctx: nil)
           if object.is_a? Hash
             object[field.from] || object[field.from_str]
           else
@@ -38,5 +33,6 @@ module Blueprinter
         end
       end
     end
+    # rubocop:enable Lint/UnusedMethodArgument
   end
 end

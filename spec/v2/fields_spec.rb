@@ -7,7 +7,7 @@ describe "Blueprinter::V2 Fields" do
     it "adds fields with options" do
       blueprint = Class.new(Blueprinter::V2::Base) do
         field :name
-        field :description, from: :desc, if: -> { true }
+        field :description, from: :desc, if: ->(_ctx) { true }
         field(:foo) { "foo" }
       end
 
@@ -22,26 +22,28 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.fields[:foo].value_proc.class.name).to eq "Proc"
     end
 
-    it 'adds multiple fields' do
+    it 'adds multiple fields with options' do
       blueprint = Class.new(Blueprinter::V2::Base) do
-        fields :name, :description, :status
+        fields :name, :description, exclude_if_nil: true
+        fields(:status) { "foo" }
       end
 
       ref = blueprint.reflections[:default]
       expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Fields::Field"
       expect(ref.fields[:name].name).to eq :name
       expect(ref.fields[:name].from).to eq :name
-      expect(ref.fields[:name].options).to eq({})
+      expect(ref.fields[:name].options).to eq({ exclude_if_nil: true })
 
       expect(ref.fields[:description].class.name).to eq "Blueprinter::V2::Fields::Field"
       expect(ref.fields[:description].name).to eq :description
       expect(ref.fields[:description].from).to eq :description
-      expect(ref.fields[:description].options).to eq({})
+      expect(ref.fields[:description].options).to eq({ exclude_if_nil: true })
 
       expect(ref.fields[:status].class.name).to eq "Blueprinter::V2::Fields::Field"
       expect(ref.fields[:status].name).to eq :status
       expect(ref.fields[:status].from).to eq :status
       expect(ref.fields[:status].options).to eq({})
+      expect(ref.fields[:status].value_proc).to_not be nil
     end
   end
 

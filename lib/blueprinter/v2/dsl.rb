@@ -112,10 +112,24 @@ module Blueprinter
       #
       # Add multiple fields at once.
       #
-      def fields(*names)
+      # @param name [Symbol] Name of the field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
+      #
+      def fields(*names, **options, &definition)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Fields::Field.new(name: name, from: name, from_str: name.to_s, options: {})
+          schema[name] = Fields::Field.new(
+            name: name,
+            from: name,
+            from_str: name.to_s,
+            options: options,
+            value_proc: definition
+          )
         end
       end
 

@@ -59,9 +59,9 @@ module Blueprinter
 
       def serialize
         if @collection
-          @serializer.collection(@object, @options, store:, instances: @instances, depth: 1)
+          @serializer.collection(@object, @options, store:, instances: @instances)
         else
-          @serializer.object(@object, @options, store:, instances: @instances, depth: 1)
+          @serializer.object(@object, @options, store:, instances: @instances)
         end
       end
     end

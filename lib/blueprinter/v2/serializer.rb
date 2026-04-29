@@ -24,7 +24,7 @@ module Blueprinter
         @needs_field_ctx = needs_field_ctx?
       end
 
-      def object(object, options, instances:, store:, depth:, parent: nil)
+      def object(object, options, instances:, store:, depth: 1, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
         config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
 
@@ -38,7 +38,7 @@ module Blueprinter
         end
       end
 
-      def collection(objects, options, instances:, store:, depth:, parent: nil)
+      def collection(objects, options, instances:, store:, depth: 1, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
         config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
 
@@ -95,7 +95,7 @@ module Blueprinter
                 parent ||= Context::Parent.new(@blueprint_class)
                 parent.field = field
                 parent.object = object
-                field._serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth:)
+                field._serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth: depth + 1)
               end
           end
           # rubocop:enable Metrics/BlockLength

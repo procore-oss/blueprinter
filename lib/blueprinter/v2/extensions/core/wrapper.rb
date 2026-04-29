@@ -6,6 +6,7 @@ module Blueprinter
       module Core
         #
         # A core extension for wrapping the result with metadata.
+        # @!visibility private
         #
         class Wrapper < Extension
           # @param ctx [Blueprinter::V2::Context::Result]

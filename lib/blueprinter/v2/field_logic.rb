@@ -2,13 +2,14 @@
 
 module Blueprinter
   module V2
+    # @!visibility private
     module FieldLogic
       # Returns true if the field should be skipped. Based on the return value of field-level or Blueprint-level
       # "if" and "unless" options.
       #
       # @param ctx [Blueprinter::V2::Context::Field]
       # @param field [Blueprinter::V2::Fields] Internal field definition (has extra, private, attrs)
-      # @return [True|False]
+      # @return [true | false]
       def self.skip?(ctx, field)
         if (cond = field._merged_options[:if])
           result = cond.is_a?(Proc) ? cond.call(ctx) : ctx.blueprint.public_send(cond, ctx)
@@ -46,7 +47,7 @@ module Blueprinter
       # @param cond [Proc|Symbol]
       # @param value [Object] The current field value
       # @param ctx [Blueprinter::V2::Context::Field]
-      # @return [True|False]
+      # @return [true | false]
       def self.use_default?(cond, value, ctx)
         case cond
         when Proc then cond.call(value, ctx)

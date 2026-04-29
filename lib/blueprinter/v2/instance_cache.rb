@@ -8,6 +8,8 @@ module Blueprinter
     # A simple cache for instances of classes. Allows us to re-use Blueprint, Extension, and Serializer
     # instances during a given render.
     #
+    # @!visibility private
+    #
     class InstanceCache
       def initialize
         @instances = {}.compare_by_identity

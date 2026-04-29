@@ -6,13 +6,26 @@ require 'blueprinter/hooks'
 module Blueprinter
   module V2
     # rubocop:disable Metrics/ClassLength
-    # @api private
+    # @!visibility private
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
+
+      # Blueprint instance & config for a given render. Fields and options may be modified by around_blueprint_init hooks.
+      #
+      # @!attribute [r] blueprint
+      #   @return [Blueprinter::V2::Base] Instance of Blueprint to use during a render
+      # @!attribute [r] blueprint_options
+      #   @return [Hash] Blueprint options that may be modified by the around_blueprint_init extension hook
+      # @!attribute [r] fields
+      #   @return [Array<Blueprinter::V2::Fields>] Fields to use
+      # @!attribute [r] options
+      #   @return [Hash] Options Hash given to `render`
+      # @!attribute [r] needs_field_ctx
+      #   @return [true | false] True if we'll need to allocate a field context for this render
       Config = Struct.new(:blueprint, :blueprint_options, :fields, :options, :needs_field_ctx, keyword_init: true)
 
-      attr_reader :hooks, :formatter
+      attr_reader :hooks
 
       def initialize(blueprint_class)
         @blueprint_class = blueprint_class
@@ -24,6 +37,15 @@ module Blueprinter
         @needs_field_ctx = needs_field_ctx? default_fields
       end
 
+      # Serialize a single object.
+      #
+      # @param object [Object] The object to serialize
+      # @param options [Hash] Options passed to `render`
+      # @param instances [Blueprinter::V2::InstanceCache] Instance cache for this render
+      # @param store [Hash] The store for this render
+      # @param depth [Integer] Current serialization depth
+      # @param parent [Blueprinter::V2::Context::Parent] Reference to the parent object (if depth > 1)
+      # @return [Hash] The serialized value for `object`
       def object(object, options, instances:, store:, depth: 1, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
         config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
@@ -38,6 +60,15 @@ module Blueprinter
         end
       end
 
+      # Serialize a collection of objects.
+      #
+      # @param objects [Enumerable<Object>] The objects to serialize
+      # @param options [Hash] Options passed to `render`
+      # @param instances [Blueprinter::V2::InstanceCache] Instance cache for this render
+      # @param store [Hash] The store for this render
+      # @param depth [Integer] Current serialization depth
+      # @param parent [Blueprinter::V2::Context::Parent] Reference to the parent object (if depth > 1)
+      # @return [Array<Hash>] The serialized value for `objects`
       def collection(objects, options, instances:, store:, depth: 1, parent: nil)
         blueprint = instances.blueprint(@blueprint_class)
         config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
@@ -52,6 +83,9 @@ module Blueprinter
         end
       end
 
+      # The fields defined on this Blueprint/view in the order they were defined.
+      #
+      # @return [Array<Blueprinter::V2::Fields>]
       def default_fields
         @_default_fields ||= @blueprint_class.schema.values.freeze
       end

@@ -3,6 +3,7 @@
 module Blueprinter
   module V2
     # Field value extractors. They must all conform to the same "interface".
+    # @!visibility private
     # rubocop:disable Lint/UnusedMethodArgument
     module Extractors
       # Extracts field value from a Proc

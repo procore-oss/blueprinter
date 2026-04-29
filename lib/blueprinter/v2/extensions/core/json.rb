@@ -8,6 +8,7 @@ module Blueprinter
       module Core
         #
         # A core extension for serializing results to JSON.
+        # @!visibility private
         #
         class Json < Extension
           # @param ctx [Blueprinter::V2::Context::Result]

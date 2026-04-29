@@ -2,7 +2,30 @@
 
 module Blueprinter
   module V2
-    # API for reflecting on Blueprints
+    # API for reflecting on V2 Blueprints. See {Blueprinter::V2::Reflection::View} to see what you can do with each view.
+    #
+    #   # The default view
+    #   view = WidgetBlueprint.reflections[:default]
+    #
+    #   # A custom view called :extended
+    #   view = WidgetBlueprint.reflections[:extended]
+    #
+    #   # A nested view
+    #   view = WidgetBlueprint.reflections[:extended][:plus]
+    #
+    # Alternatively you can first access the view you want, then it's reflections. The following two lines below access
+    # the same view:
+    #
+    #   view1 = WidgetBlueprint.reflections[:extended][:plus]
+    #   view2 = WidgetBlueprint[:extended].reflections[:plus]
+    #   view1 == view2
+    #
+    # The :default view always refers to the "base" that `reflections` was called on.
+    #
+    #   view1 = WidgetBlueprint.reflections[:extended]
+    #   view2 = WidgetBlueprint[:extended].reflections[:default]
+    #   view1 == view2
+    #
     module Reflection
       #
       # Returns a Hash of views keyed by name.
@@ -15,7 +38,7 @@ module Blueprinter
       end
 
       # Builds a flat Hash of nested views
-      # @api private
+      # @!visibility private
       def flatten_children(parent, child_name, path = [])
         ref_key = path.empty? ? child_name : path.join('.').to_sym
         child_view = parent.views.fetch(child_name)
@@ -37,11 +60,11 @@ module Blueprinter
         attr_reader :options
         # @return [Hash<Symbol, Blueprinter::V2::Field>] Fields defined on the view
         attr_reader :fields
-        # @return [Hash<Symbol, Blueprinter::V2::Object>] Associations to single objects defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Field>] Associations to single objects defined on the view
         attr_reader :objects
-        # @return [Hash<Symbol, Blueprinter::V2::Collection>] Associations to collections defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Field>] Associations to collections defined on the view
         attr_reader :collections
-        # @return [Hash<Symbol, Blueprinter::V2::Object>] All associations defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Field>] All associations defined on the view
         attr_reader :associations
         # @return [Array<Blueprinter::V2::Field>]
         # All fields, objects, and collections in the order they were defined
@@ -49,7 +72,7 @@ module Blueprinter
 
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base
         # @param name [Symbol] Name of the view
-        # @api private
+        # @!visibility private
         def initialize(blueprint, name)
           @name = name
           @options = blueprint.options

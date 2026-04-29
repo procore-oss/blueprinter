@@ -1,8 +1,8 @@
 # Reflection
 
-The [V2 Reflection API](../api/reflection.md) has very few changes from Legacy/V1.
+V2's reflection API has very few changes from Legacy/V1.
 
-## Reflecting on fields
+## Reflecting on views and fields
 
 Regular fields (no change):
 
@@ -10,20 +10,19 @@ Regular fields (no change):
 MyBlueprint.reflections[:default].fields
 ```
 
-Objects and collections:
+Objects and collections (no required change):
 
 ```ruby
-# Legacy/V1 does not differentiate between objects and collections
-MyV1Blueprint.reflections[:default].associations
+MyBlueprint.reflections[:default].associations
 
-# V2 does
-MyV2Blueprint.reflections[:default].objects
-MyV2Blueprint.reflections[:default].collections
+# V2 also provides special access methods to split out objects and collections
+MyBlueprint.reflections[:default].objects
+MyBlueprint.reflections[:default].collections
 ```
 
 ## Field names
 
-[V2's field metadata](../api/reflection.md#field-metadata) is similar, but there's an important different in `name`.
+V2's field metadata is similar, but there's an important different in `name`.
 
 #### Legacy/V1
 
@@ -50,8 +49,8 @@ ref.fields[:foo].display_name
 In V2, `name` refers to what the field is called in the *output*. Note that this change is also reflected in the Hash key.
 
 ```ruby
-class MyV2Blueprint < Blueprinter::Blueprint
-  field :bar, from: :foo
+class MyV2Blueprint < Blueprinter::V2::Base
+  field :bar, source: :foo
 end
 
 ref = MyV1Blueprint.reflections[:default]
@@ -61,6 +60,6 @@ ref.fields[:bar].name
 => :bar
 
 # What the field is called in the source object
-ref.fields[:bar].from
+ref.fields[:bar].source
 => :foo
 ```

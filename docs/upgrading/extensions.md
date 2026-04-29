@@ -1,12 +1,16 @@
 # Extensions
 
-The [V2 Extension API](../api/extensions.md), as well as the DSL for [enabling V2 extensions](../dsl/extensions.md), are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: `pre_render`. V2 [has eight](../api/extensions.md#hooks).
+The V2 extension API is vastly more powerful than V1's single experimental extension hook. See the documentation for `Blueprinter::Extension`.
 
 ## Porting pre_render
 
-Legacy/V1's `pre_render` hook does not exist in V2, but it has several possible replacements:
+V1's `pre_render` hook allowed you to modify the input object. The closest analog in V2 is `around_render` which can be used modify the input object or collection, the options passed to render, and the final output.
 
-* [around_result](../api/extensions.md#around_result) runs once around each entire result
-* [around_serialize_object](../api/extensions.md#around_serialize_object) runs around each object's serialization
-* [around_serialize_collection](../api/extensions.md#around_serialize_collection) runs around each collection's serialization
-* [around_blueprint](../api/extensions.md#around_blueprint) runs each time a blueprint serializes an object
+```ruby
+class MyExtension < Blueprinter::Extension
+  def around_result(ctx)
+    ctx.object = modify object
+    yield ctx
+  end
+end
+```

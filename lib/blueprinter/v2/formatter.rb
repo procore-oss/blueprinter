@@ -3,6 +3,7 @@
 module Blueprinter
   module V2
     # An interface for formatting values
+    # @!visibility private
     class Formatter
       def initialize(blueprint)
         @formatters = blueprint.formatters

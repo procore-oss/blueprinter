@@ -17,7 +17,7 @@ module Blueprinter
       def association? = object? || collection?
     end
 
-    # The internal representation of a field or association. Also exposed via reflections.
+    # A field or association definition.
     #
     # @!attribute [r] type
     #   @return [:field | :object | :collection] The type of field
@@ -27,12 +27,22 @@ module Blueprinter
     #   @return [Symbol] Method name/Hash key to pull the field value from
     # @!attribute [r] source_str
     #   @return [String] Same as `source` but a string
-    # @!attribute [r] options
-    #   @return [Hash] Options defined on the field
     # @!attribute [r] value_proc
     #   @return [Proc | nil] A proc to extract the value
+    # @!attribute [r] options
+    #   @return [Hash] Options defined on the field
     # @!attribute [r] blueprint
     #   @return [Class | nil] Blueprint to serialize with (objects and collections only)
+    # @!attribute [r] _merged_options
+    #   @return Internal - DO NOT USE
+    # @!attribute [r] _has_conditional
+    #   @return Internal - DO NOT USE
+    # @!attribute [r] _has_default
+    #   @return Internal - DO NOT USE
+    # @!attribute [r] _extractor
+    #   @return Internal - DO NOT USE
+    # @!attribute [r] _serializer
+    #   @return Internal - DO NOT USE
     Field = Struct.new(
       :type,
       :name,

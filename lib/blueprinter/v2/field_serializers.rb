@@ -2,6 +2,7 @@
 
 module Blueprinter
   module V2
+    # @!visibility private
     # rubocop:disable Lint/UnusedMethodArgument
     module FieldSerializers
       # Serializer for V2 objects

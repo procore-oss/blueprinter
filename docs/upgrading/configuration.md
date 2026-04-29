@@ -1,19 +1,23 @@
 # Configuration
 
-Blueprinter V2 has no concept of global configruation like V1's `Blueprinter.configure`. Instead, blueprints and views inherit configuration from their parent classes. By putting your "global" configuration into `ApplicationBlueprint`, all your application's blueprints and views will inherit it.
+Blueprinter Legacy/V1 had a single source of configuration: the global `Blueprinter.configure` block. V2 takes a very different approach with _zero
+global configuration_.
+
+In V2, all configuration is handled by the Blueprinter classes themselves, or by their views. Global configuration can be replicated by defining
+a base Blueprint for your application and putting anything "global" into it:
 
 ```ruby
-class ApplicationBlueprint < Blueprinter::Blueprint
+class ApplicationBlueprint < Blueprinter::V2::Base
   options[:exclude_if_nil] = true
   extensions << MyExtension.new
+  format Date, :iso8601
+  format Time, :iso8601
+
+  def iso8601(t) = t.iso8601
 end
 ```
 
-Read more about [options](../dsl/options.md) and [extensions](../dsl/extensions.md).
-
-## Overrides
-
-Child classes, [views](../dsl/views.md), and [partials](../dsl/partials.md) can override their inherited configuration.
+This has the advantage of allowing overrides in child Blueprints, views, or even partials.
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint
@@ -21,7 +25,9 @@ class MyBlueprint < ApplicationBlueprint
 
   view :foo do
     options.clear
-    extensions.clear
+    
+    # Ensure this view always represents time in UTC
+    format(Time) { |t| iso8601 t.utc }
   end
 end
 ```

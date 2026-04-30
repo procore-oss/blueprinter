@@ -75,13 +75,13 @@ module Blueprinter
               if (field_hook = @field_hooks[field.type])
                 value = catch SIGNAL do
                   @hooks.around(field_hook, ctx) do
-                    value = field._extractor.extract(blueprint, field, object, ctx:)
+                    value = field._extractor.extract(field, object, ctx:)
                     field._has_default ? FieldLogic.value_or_default(ctx, field, value) : value
                   end
                 end
                 value == SIG_SKIP ? next : value
               else
-                value = field._extractor.extract(blueprint, field, object, ctx:)
+                value = field._extractor.extract(field, object, ctx:)
                 field._has_default ? FieldLogic.value_or_default(ctx, field, value) : value
               end
 

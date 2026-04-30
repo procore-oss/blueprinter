@@ -31,12 +31,8 @@ module ExtensionHelpers
             "was #{val.inspect}"
           end
 
-          def is?(val, expected_val)
-            val == expected_val
-          end
-
           def foo?(ctx)
-            is? ctx.object[ctx.field.from], 'Foo'
+            ctx.object[ctx.field.from] == 'Foo'
           end
 
           def name_foo?(val, _ctx)

@@ -56,20 +56,20 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks with field options default_if (Proc) (default = field options default)' do
-      blueprint.field :foo, default: 'Bar', default_if: ->(val, _ctx) { is? val, 'Foo' }
+      blueprint.field :foo, default: 'Bar', default_if: ->(val, _ctx) { val == 'Foo' }
       value = subject.value_or_default(ctx, field, 'Foo')
       expect(value).to eq 'Bar'
     end
 
     it 'checks with field options default_if (Symbol) (default = blueprint options default)' do
       blueprint.options[:default] = 'Bar'
-      blueprint.field :foo, default_if: ->(val, _ctx) { is? val, 'Foo' }
+      blueprint.field :foo, default_if: ->(val, _ctx) { val == 'Foo' }
       value = subject.value_or_default(ctx, field, 'Foo')
       expect(value).to eq 'Bar'
     end
 
     it 'checks with blueprint options default_if (Proc) (default = field options default)' do
-      blueprint.options[:default_if] = ->(val, _ctx) { is? val, 'Foo' }
+      blueprint.options[:default_if] = ->(val, _ctx) { val == 'Foo' }
       blueprint.field :foo, default: 'Bar'
       value = subject.value_or_default(ctx, field, 'Foo')
       expect(value).to eq 'Bar'
@@ -77,7 +77,7 @@ describe Blueprinter::V2::FieldLogic do
 
     it 'checks with blueprint options default_if (Symbol) (default = blueprint options default)' do
       blueprint.options[:default] = 'Bar'
-      blueprint.options[:default_if] = ->(val, _ctx) { is? val, 'Foo' }
+      blueprint.options[:default_if] = ->(val, _ctx) { val == 'Foo' }
       blueprint.field :foo
       value = subject.value_or_default(ctx, field, 'Foo')
       expect(value).to eq 'Bar'

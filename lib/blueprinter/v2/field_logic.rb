@@ -11,12 +11,12 @@ module Blueprinter
       # @return [True|False]
       def self.skip?(ctx, field)
         if (cond = field._merged_options[:if])
-          result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
+          result = cond.is_a?(Proc) ? cond.call(ctx) : ctx.blueprint.public_send(cond, ctx)
           return true unless result
         end
 
         if (cond = field._merged_options[:unless])
-          result = cond.is_a?(Proc) ? ctx.blueprint.instance_exec(ctx, &cond) : ctx.blueprint.public_send(cond, ctx)
+          result = cond.is_a?(Proc) ? cond.call(ctx) : ctx.blueprint.public_send(cond, ctx)
           return true if result
         end
 
@@ -35,7 +35,7 @@ module Blueprinter
         return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
 
         case (default_value = field._merged_options[:default])
-        when Proc then ctx.blueprint.instance_exec(value, ctx, &default_value)
+        when Proc then default_value.call(value, ctx)
         when Symbol then ctx.blueprint.public_send(default_value, value, ctx)
         else default_value
         end
@@ -49,7 +49,7 @@ module Blueprinter
       # @return [True|False]
       def self.use_default?(cond, value, ctx)
         case cond
-        when Proc then ctx.blueprint.instance_exec(value, ctx, &cond)
+        when Proc then cond.call(value, ctx)
         else ctx.blueprint.public_send(cond, value, ctx)
         end
       end

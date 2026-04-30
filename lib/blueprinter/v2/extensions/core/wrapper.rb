@@ -26,7 +26,7 @@ module Blueprinter
           def wrap(result, root_name, ctx)
             root = { root_name => result }
             if (meta = ctx.options[:meta] || ctx.blueprint.class.options[:meta])
-              meta = ctx.blueprint.instance_exec(ctx, &meta) if meta.is_a? Proc
+              meta = meta.call(ctx) if meta.is_a? Proc
               root[:meta] = meta
             end
             root

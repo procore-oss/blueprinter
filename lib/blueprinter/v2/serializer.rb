@@ -71,19 +71,18 @@ module Blueprinter
             next if field._has_conditional && FieldLogic.skip?(ctx, field)
 
             # extract value
-            value =
-              if (field_hook = @field_hooks[field.type])
-                value = catch SIGNAL do
-                  @hooks.around(field_hook, ctx) do
-                    value = field._extractor.extract(field, object, ctx:)
-                    field._has_default ? FieldLogic.value_or_default(ctx, field, value) : value
-                  end
+            if (field_hook = @field_hooks[field.type])
+              value = catch SIGNAL do
+                @hooks.around(field_hook, ctx) do
+                  val = field._extractor.extract(field, object, ctx:)
+                  field._has_default ? FieldLogic.value_or_default(ctx, field, val) : val
                 end
-                value == SIG_SKIP ? next : value
-              else
-                value = field._extractor.extract(field, object, ctx:)
-                field._has_default ? FieldLogic.value_or_default(ctx, field, value) : value
               end
+              next if value == SIG_SKIP
+            else
+              value = field._extractor.extract(field, object, ctx:)
+              value = FieldLogic.value_or_default(ctx, field, value) if field._has_default
+            end
 
             # format/serialize and set value
             result[field.name] =

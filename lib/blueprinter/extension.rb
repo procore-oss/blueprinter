@@ -58,12 +58,12 @@ module Blueprinter
     # in which they were defined.
     # NOTE If there are multiple blueprint_fields hooks, only the last one is called.
     # NOTE Only runs once per Blueprint per render.
-    # @param context [Blueprinter::V2::Context::Render]
+    # @param context [Blueprinter::V2::Context::Init]
     # @return [Array<Blueprinter::V2::Fields::Field|Blueprinter::V2::Fields::Object|Blueprinter::V2::Fields::Collection>]
 
     # blueprint_setup: Called once per blueprint per render. A common use is to pre-calculate certain options
     # and cache them in context.data, so we don't have to recalculate them for every field.
-    # @param context [Blueprinter::V2::Context::Render]
+    # @param context [Blueprinter::V2::Context::Init]
 
     # around_hook: Instrument extension hook calls. MUST yield!
     # @param extension [Blueprinter::Extension] Instance of the extension

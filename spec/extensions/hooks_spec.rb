@@ -11,10 +11,8 @@ describe Blueprinter::Hooks do
   let(:serializer) { blueprint.serializer }
   let(:field) { Blueprinter::V2::Fields::Field.new(name: :foo, from: :foo) }
   let(:object) { { foo: 'Foo' } }
-  let(:render_ctx) { Blueprinter::V2::Context::Render }
   let(:object_ctx) { Blueprinter::V2::Context::Object }
   let(:field_ctx) { Blueprinter::V2::Context::Field }
-  let(:result_ctx) { Blueprinter::V2::Context::Result }
   let(:instances) { Blueprinter::V2::InstanceCache.new }
   let(:ext1) do
     Class.new(Blueprinter::Extension) do

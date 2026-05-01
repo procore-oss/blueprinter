@@ -26,10 +26,6 @@ describe "Blueprinter::V2 Extension DSL" do
     expect(serializer.hooks.registered? :around_serialize_collection).to be false
   end
 
-  it "names the extensions" do
-    expect(blueprint.extensions.map(&:name)).to eq ["NameBlueprint extension", "NameBlueprint extension"]
-  end
-
   it "runs the extensions" do
     res = blueprint.render({ name: "Foo" }).to_hash
     expect(res).to eq({ data: { name: "FOO" } })

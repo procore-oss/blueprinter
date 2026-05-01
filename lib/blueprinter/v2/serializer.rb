@@ -6,7 +6,6 @@ require 'blueprinter/hooks'
 module Blueprinter
   module V2
     # @api private
-    # rubocop:disable Metrics/ClassLength
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
@@ -18,7 +17,7 @@ module Blueprinter
         @blueprint_class = blueprint_class
         @formatter = Formatter.new(blueprint_class)
         @format = @formatter.any?
-        @hooks = Hooks.new(extensions)
+        @hooks = Hooks.new([*blueprint_class.extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new])
         finalize_fields!
         find_used_hooks!
         @needs_field_ctx = needs_field_ctx?
@@ -121,18 +120,6 @@ module Blueprinter
         config.freeze
       end
 
-      def extensions
-        extensions = @blueprint_class.extensions.map do |ext|
-          case ext
-          when Extension then ext
-          when Class then ext.new
-          when Proc then ext.call
-          else raise BlueprinterError, 'Extensions must be an instance of Blueprinter::Extension or a Proc that returns one'
-          end
-        end
-        [*extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new]
-      end
-
       # Save time by skipping hooks that aren't used
       def find_used_hooks!
         @hook_around_serialize_object = @hooks.registered? :around_serialize_object
@@ -174,6 +161,5 @@ module Blueprinter
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     end
-    # rubocop:enable Metrics/ClassLength
   end
 end

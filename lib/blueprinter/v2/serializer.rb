@@ -88,7 +88,7 @@ module Blueprinter
               if value.nil?
                 field._merged_options[:exclude_if_nil] ? next : nil
               elsif field.type == :field
-                @format ? @formatter.call(ctx, value) : value
+                @format ? @formatter.call(blueprint, value) : value
               else
                 parent ||= Context::Parent.new(@blueprint_class)
                 parent.field = field
@@ -132,10 +132,12 @@ module Blueprinter
         }.freeze
       end
 
-      # Skip Context::Field allocation when no hooks, conditionals, defaults, formatters, or Proc extractors are in play
+      # Skip Context::Field allocation when no field hooks, conditionals, callable defaults, or Proc extractors are in play
       def needs_field_ctx?
-        @format || @field_hooks.values.any? || default_fields.any? do |f|
-          f._has_conditional || f._has_default || f.value_proc
+        @field_hooks.values.any? || default_fields.any? do |f|
+          default = f._merged_options[:default]
+          callable_default = default.is_a?(Proc) || default.is_a?(Symbol)
+          f._has_conditional || !!f.value_proc || !!f._merged_options[:default_if] || callable_default
         end
       end
 

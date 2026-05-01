@@ -113,10 +113,9 @@ module Blueprinter
       def blueprint_init(blueprint, options, store:, depth:)
         config = Config.new(blueprint:, fields: default_fields, options:)
         if @hook_around_blueprint_init
-          ctx = Context::Init.new(blueprint, config.fields, options, store, depth)
+          ctx = Context::Init.new(blueprint, config.fields.dup, options, store, depth)
           @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-            config.options = ctx.options.dup.freeze unless ctx.options == config.options
-            config.fields = ctx.fields.freeze
+            config.fields = ctx.fields.dup.freeze unless ctx.fields == config.fields
           end
         end
         config.freeze

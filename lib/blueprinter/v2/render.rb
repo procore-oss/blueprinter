@@ -9,7 +9,7 @@ module Blueprinter
 
       def initialize(object, options, blueprint:, collection:, instances:)
         @object = object
-        @options = options.dup.freeze
+        @options = options.dup
         @blueprint_class = blueprint
         @serializer = blueprint.serializer
         @instances = instances
@@ -44,7 +44,7 @@ module Blueprinter
               end
 
               @object = new_ctx.object
-              @options = new_ctx.options.dup.freeze unless new_ctx.options == @options
+              @options = new_ctx.options.dup unless new_ctx.options == @options
               serialize
             end
           else
@@ -58,6 +58,7 @@ module Blueprinter
       private
 
       def serialize
+        @options.freeze
         if @collection
           @serializer.collection(@object, @options, store:, instances: @instances)
         else

@@ -8,7 +8,6 @@ module Blueprinter
     autoload :Base, 'blueprinter/v2/base'
     autoload :Context, 'blueprinter/v2/context'
     autoload :DSL, 'blueprinter/v2/dsl'
-    autoload :ExtensionHelpers, 'blueprinter/v2/extension_helpers'
     autoload :Extensions, 'blueprinter/v2/extensions'
     autoload :Extractors, 'blueprinter/v2/extractors'
     autoload :FieldLogic, 'blueprinter/v2/field_logic'

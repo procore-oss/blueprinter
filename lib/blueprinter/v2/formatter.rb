@@ -10,17 +10,17 @@ module Blueprinter
 
       def any? = @formatters.any?
 
-      # @param ctx [Blueprinter::V2::Context::Field]
+      # @param blueprint [Blueprinter::V2::Base] Blueprint instance
       # @param value
-      def call(ctx, value)
+      def call(blueprint, value)
         fmt = @formatters[value.class]
         case fmt
         when nil
           value
         when Proc
-          ctx.blueprint.instance_exec(value, &fmt)
+          blueprint.instance_exec(value, &fmt)
         when Symbol, String
-          ctx.blueprint.public_send(fmt, value)
+          blueprint.public_send(fmt, value)
         end
       end
     end

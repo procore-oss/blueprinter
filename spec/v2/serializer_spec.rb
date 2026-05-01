@@ -61,17 +61,17 @@ describe Blueprinter::V2::Serializer do
         end
 
         def around_field_value(ctx)
-          name = ctx.object.fetch(ctx.field.from)
+          name = ctx.object.fetch(ctx.field.source)
           "#{@prefix} of #{name}"
         end
 
         def around_object_value(ctx)
-          obj = ctx.object.fetch(ctx.field.from)
+          obj = ctx.object.fetch(ctx.field.source)
           { name: "#{@prefix} of #{obj[:name]}" }
         end
 
         def around_collection_value(ctx)
-          collection = ctx.object.fetch(ctx.field.from)
+          collection = ctx.object.fetch(ctx.field.source)
           collection.each_with_index.map { |_, i| { num: i + 1 } }
         end
       end

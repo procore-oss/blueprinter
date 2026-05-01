@@ -24,9 +24,9 @@ module Blueprinter
         # @return [Object] The field value
         def self.extract(field, object, ctx: nil)
           if object.is_a? Hash
-            object[field.from] || object[field.from_str]
+            object[field.source] || object[field.source_str]
           else
-            object.public_send(field.from)
+            object.public_send(field.source)
           end
         end
       end

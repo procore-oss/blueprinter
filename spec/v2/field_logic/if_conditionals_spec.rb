@@ -16,7 +16,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks field options (Proc)' do
-      blueprint.field :foo, if: ->(ctx) { ctx.object[ctx.field.from] == 'Foo' }
+      blueprint.field :foo, if: ->(ctx) { ctx.object[ctx.field.source] == 'Foo' }
       skip = subject.skip?(ctx, field)
       expect(skip).to be false
 
@@ -36,7 +36,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks blueprint options (Proc)' do
-      blueprint.options[:if] = ->(ctx) { ctx.object[ctx.field.from] == 'Foo' }
+      blueprint.options[:if] = ->(ctx) { ctx.object[ctx.field.source] == 'Foo' }
       skip = subject.skip?(ctx, field)
       expect(skip).to be false
 

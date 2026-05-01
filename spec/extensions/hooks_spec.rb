@@ -9,7 +9,7 @@ describe Blueprinter::Hooks do
     end
   end
   let(:serializer) { blueprint.serializer }
-  let(:field) { Blueprinter::V2::Fields::Field.new(name: :foo, from: :foo) }
+  let(:field) { Blueprinter::V2::Fields::Field.new(name: :foo, source: :foo) }
   let(:object) { { foo: 'Foo' } }
   let(:object_ctx) { Blueprinter::V2::Context::Object }
   let(:field_ctx) { Blueprinter::V2::Context::Field }

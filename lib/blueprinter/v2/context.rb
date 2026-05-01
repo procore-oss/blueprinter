@@ -10,16 +10,16 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
       # @!attribute [rw] fields
-      #   @return [Array<Blueprinter::V2::Fields>] The fields to serialize, in order. Frozen, but can be replaced.
-      # @!attribute [rw] options
-      #   @return [Hash] Options passed to `render`. Frozen, but can be replaced.
+      #   @return [Array<Blueprinter::V2::Fields>] The fields to serialize, in the order they'll be serialized in
+      # @!attribute [r] options
+      #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] store
       #   @return [Hash] Arbitrary store available for this render
       # @!attribute [r] depth
       #   @return [Integer] Current serialization depth
       #
       Init = Struct.new(:blueprint, :fields, :options, :store, :depth) do
-        (members - %i[fields options]).each do |attr|
+        (members - %i[fields]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
         end
@@ -33,7 +33,7 @@ module Blueprinter
       # @!attribute [r] fields
       #   @return [Array<Blueprinter::V2::Fields>]
       # @!attribute [r] options
-      #   @return [Hash] Options passed to `render`
+      #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] extension
       #   @return [Blueprinter::Extension] Instance of the extension running
       # @!attribute [r] hook
@@ -55,7 +55,7 @@ module Blueprinter
       # @!attribute [r] fields
       #   @return [Array<Blueprinter::V2::Fields>]
       # @!attribute [r] options
-      #   @return [Hash] Options passed to `render`
+      #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [rw] object
       #   @return [Object] The object or collection that's currently being rendered. Can be replaced.
       # @!attribute [r] parent
@@ -97,7 +97,7 @@ module Blueprinter
       # @!attribute [r] fields
       #   @return [Array<Blueprinter::V2::Fields>]
       # @!attribute [r] options
-      #   @return [Hash] Options passed to `render`
+      #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] field
@@ -124,7 +124,7 @@ module Blueprinter
       # @!attribute [r] fields
       #   @return [Array<Blueprinter::V2::Fields>]
       # @!attribute [rw] options
-      #   @return [Hash] Options passed to `render`. Can be replaced.
+      #   @return [Hash] Options passed to `render`. Can be modified.
       # @!attribute [rw] object
       #   @return [Object] The object or collection that's currently being rendered. Can be replaced.
       # @!attribute [rw] format

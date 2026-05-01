@@ -88,7 +88,7 @@ module Blueprinter
       # Define a field.
       #
       # @param name [Symbol] Name of the field
-      # @param from [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
+      # @param source [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
@@ -97,12 +97,12 @@ module Blueprinter
       # @yield [Blueprinter::V2::Context] Generate the value from the block
       # @return [Blueprinter::V2::Fields::Field]
       #
-      def field(name, from: name, **options, &definition)
+      def field(name, source: name, **options, &definition)
         name = name.to_sym
         schema[name] = Fields::Field.new(
           name: name,
-          from: from.to_sym,
-          from_str: from.to_s,
+          source: source.to_sym,
+          source_str: source.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -124,8 +124,8 @@ module Blueprinter
           name = name.to_sym
           schema[name] = Fields::Field.new(
             name: name,
-            from: name,
-            from_str: name.to_s,
+            source: name,
+            source_str: name.to_s,
             options: options,
             value_proc: definition
           )
@@ -138,7 +138,7 @@ module Blueprinter
       # @param name [Symbol] Name of the association
       # @param blueprint [Class|Array<Class>] Blueprint class to use (object). For a collection, wrap the blueprint in an
       # array.
-      # @param from [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
+      # @param source [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
@@ -146,7 +146,7 @@ module Blueprinter
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
       #
-      def association(name, blueprint, from: name, **options, &definition)
+      def association(name, blueprint, source: name, **options, &definition)
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
         type = is_collection ? Fields::Collection : Fields::Object
@@ -159,8 +159,8 @@ module Blueprinter
         schema[name] = type.new(
           name: name,
           blueprint: blueprint_class,
-          from: from.to_sym,
-          from_str: from.to_s,
+          source: source.to_sym,
+          source_str: source.to_s,
           value_proc: definition,
           options: options.dup,
           _serializer: serializer

@@ -10,7 +10,7 @@ describe Blueprinter::V2::Render do
   let(:category_blueprint) do
     Class.new(application_blueprint) do
       self.blueprint_name = 'CategoryBlueprint'
-      field :name, from: :n
+      field :name, source: :n
     end
   end
 
@@ -19,7 +19,7 @@ describe Blueprinter::V2::Render do
     Class.new(application_blueprint) do
       self.blueprint_name = 'WidgetBlueprint'
       field :name
-      field :desc, from: :description
+      field :desc, source: :description
       association :category, test.category_blueprint
 
       view :extended do

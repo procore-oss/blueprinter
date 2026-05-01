@@ -206,7 +206,7 @@ describe Blueprinter::V2::Serializer do
     ext2 = Class.new(Blueprinter::Extension) do
       def around_serialize_collection(ctx) = yield ctx
     end
-    category_blueprint.extensions << ext1 << -> { ext2.new }
+    category_blueprint.extensions << ext1.new << ext2.new
     serializer = category_blueprint.serializer
 
     expect(serializer.hooks.registered? :around_serialize_object).to be true

@@ -32,7 +32,7 @@ module ExtensionHelpers
           end
 
           def foo?(ctx)
-            ctx.object[ctx.field.from] == 'Foo'
+            ctx.object[ctx.field.source] == 'Foo'
           end
 
           def name_foo?(val, _ctx)

@@ -18,18 +18,18 @@ module Blueprinter
       #
       # @!attribute [r] name
       #   @return [Symbol] Name of field in result
-      # @!attribute [r] from
+      # @!attribute [r] source
       #   @return [Symbol] Method name/Hash key to pull the field value from
-      # @!attribute [r] from_str
-      #   @return [String] Same as `from` but a string
+      # @!attribute [r] source_str
+      #   @return [String] Same as `source` but a string
       # @!attribute [r] value_proc
       #   @return [Proc|NilClass] A proc to extract the value
       # @!attribute [r] options
       #   @return [Hash] Options defined on the field
       Field = Struct.new(
         :name,
-        :from,
-        :from_str,
+        :source,
+        :source_str,
         :value_proc,
         :options,
         :_merged_options,
@@ -48,10 +48,10 @@ module Blueprinter
       #
       # @!attribute [r] name
       #   @return [Symbol] Name of field in result
-      # @!attribute [r] from
+      # @!attribute [r] source
       #   @return [Symbol] Method name/Hash key to pull the field value from
-      # @!attribute [r] from_str
-      #   @return [String] Same as `from` but a string
+      # @!attribute [r] source_str
+      #   @return [String] Same as `source` but a string
       # @!attribute [r] value_proc
       #   @return [Proc|NilClass] A proc to extract the value
       # @!attribute [r] options
@@ -61,8 +61,8 @@ module Blueprinter
       Object = Struct.new(
         :name,
         :blueprint,
-        :from,
-        :from_str,
+        :source,
+        :source_str,
         :value_proc,
         :options,
         :_merged_options,
@@ -82,10 +82,10 @@ module Blueprinter
       #
       # @!attribute [r] name
       #   @return [Symbol] Name of field in result
-      # @!attribute [r] from
+      # @!attribute [r] source
       #   @return [Symbol] Method name/Hash key to pull the field value from
-      # @!attribute [r] from_str
-      #   @return [String] Same as `from` but a string
+      # @!attribute [r] source_str
+      #   @return [String] Same as `source` but a string
       # @!attribute [r] value_proc
       #   @return [Proc|NilClass] A proc to extract the value
       # @!attribute [r] options
@@ -95,8 +95,8 @@ module Blueprinter
       Collection = Struct.new(
         :name,
         :blueprint,
-        :from,
-        :from_str,
+        :source,
+        :source_str,
         :value_proc,
         :options,
         :_merged_options,

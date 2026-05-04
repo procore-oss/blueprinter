@@ -2,11 +2,30 @@
 
 module Blueprinter
   module V2
+    # rubocop:disable Lint/UnusedMethodArgument
     module FieldSerializers
-      autoload :Base, 'blueprinter/v2/field_serializers/base'
-      autoload :Collection, 'blueprinter/v2/field_serializers/collection'
-      autoload :Field, 'blueprinter/v2/field_serializers/field'
-      autoload :Object, 'blueprinter/v2/field_serializers/object'
+      # Serializer for V2 objects
+      module Object
+        def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          blueprint_class.serializer.object(value, options, parent:, instances:, store:, depth:)
+        end
+      end
+
+      # Serializer for V2 collections
+      module Collection
+        def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          blueprint_class.serializer.collection(value, options, parent:, instances:, store:, depth:)
+        end
+      end
+
+      # Serializer for V1 associations
+      module V1Association
+        def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
+          blueprint_class.hashify(value, view_name: :default, local_options: options.dup.merge(opts))
+        end
+      end
     end
+    # rubocop:enable Lint/UnusedMethodArgument
   end
 end

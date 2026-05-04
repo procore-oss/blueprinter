@@ -171,4 +171,33 @@ describe "Blueprinter::V2 Partials" do
       expect(view.fields[:name].options).to eq({})
     end
   end
+
+  context 'sharing with Ruby modules' do
+    let(:shared_partials) do
+      Module.new do
+        def self.included(klass)
+          klass.class_eval do
+            partial :external_partial do
+              field :external_field
+            end
+          end
+        end
+      end
+    end
+
+    let(:blueprint_a) do
+      tests = self
+      Class.new(Blueprinter::V2::Base) { include tests.shared_partials; use :external_partial }
+    end
+
+    let(:blueprint_b) do
+      tests = self
+      Class.new(Blueprinter::V2::Base) { include tests.shared_partials; use :external_partial }
+    end
+
+    it 'allows importing external partials' do
+      expect(blueprint_a.reflections[:default].fields.keys).to eq %i[external_field]
+      expect(blueprint_b.reflections[:default].fields.keys).to eq %i[external_field]
+    end
+  end
 end

@@ -17,7 +17,7 @@ describe "Blueprinter::V2 Rendering" do
     test = self
     Class.new(Blueprinter::V2::Base) do
       field :name
-      association :cat, test.category_blueprint, from: :category
+      association :cat, test.category_blueprint, source: :category
       association :parts, [test.part_blueprint]
     end
   end

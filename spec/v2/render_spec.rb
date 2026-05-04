@@ -10,7 +10,7 @@ describe Blueprinter::V2::Render do
   let(:category_blueprint) do
     Class.new(application_blueprint) do
       self.blueprint_name = 'CategoryBlueprint'
-      field :name, from: :n
+      field :name, source: :n
     end
   end
 
@@ -19,7 +19,7 @@ describe Blueprinter::V2::Render do
     Class.new(application_blueprint) do
       self.blueprint_name = 'WidgetBlueprint'
       field :name
-      field :desc, from: :description
+      field :desc, source: :description
       association :category, test.category_blueprint
 
       view :extended do
@@ -289,14 +289,14 @@ describe Blueprinter::V2::Render do
         ext = Class.new(Blueprinter::Extension) do
           def initialize(log) = @log = log
 
-          def around_blueprint_init(ctx)
+          def around_result(ctx)
             ctx.store[:log] = @log
-            ctx.store[:log] << "around_blueprint_init (#{ctx.blueprint})"
+            ctx.store[:log] << "around_result (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_result(ctx)
-            ctx.store[:log] << "around_result (#{ctx.blueprint})"
+          def around_blueprint_init(ctx)
+            ctx.store[:log] << "around_blueprint_init (#{ctx.blueprint})"
             yield ctx
           end
 
@@ -307,11 +307,6 @@ describe Blueprinter::V2::Render do
 
           def around_serialize_collection(ctx)
             ctx.store[:log] << "around_serialize_collection (#{ctx.blueprint})"
-            yield ctx
-          end
-
-          def around_blueprint(ctx)
-            ctx.store[:log] << "around_blueprint (#{ctx.blueprint})"
             yield ctx
           end
 
@@ -340,23 +335,19 @@ describe Blueprinter::V2::Render do
         }).to_hash
 
         expect(log).to eq [
-          'around_blueprint_init (WidgetBlueprint.with_parts)',
           'around_result (WidgetBlueprint.with_parts)',
+          'around_blueprint_init (WidgetBlueprint.with_parts)',
           'around_serialize_object (WidgetBlueprint.with_parts)',
-          'around_blueprint (WidgetBlueprint.with_parts)',
           'around_field_value (WidgetBlueprint.with_parts)',
           'around_field_value (WidgetBlueprint.with_parts)',
           'around_object_value (WidgetBlueprint.with_parts)',
           'around_blueprint_init (CategoryBlueprint)',
           'around_serialize_object (CategoryBlueprint)',
-          'around_blueprint (CategoryBlueprint)',
           'around_field_value (CategoryBlueprint)',
           'around_collection_value (WidgetBlueprint.with_parts)',
           'around_blueprint_init (PartBlueprint)',
           'around_serialize_collection (PartBlueprint)',
-          'around_blueprint (PartBlueprint)',
           'around_field_value (PartBlueprint)',
-          'around_blueprint (PartBlueprint)',
           'around_field_value (PartBlueprint)'
         ]
       end

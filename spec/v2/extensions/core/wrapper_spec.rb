@@ -8,10 +8,6 @@ describe Blueprinter::V2::Extensions::Core::Wrapper do
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       field :name
-
-      def meta_links
-        { links: [] }
-      end
     end
   end
 
@@ -60,7 +56,7 @@ describe Blueprinter::V2::Extensions::Core::Wrapper do
 
   it 'looks for a meta Proc option in the blueprint' do
     blueprint.options[:root] = :data
-    blueprint.options[:meta] = ->(ctx) { meta_links }
+    blueprint.options[:meta] = ->(ctx) { { links: [] } }
     ctx = context.new(blueprint.new, fields, {}, object, :json)
     result = subject.around_result(ctx) { |ctx| ctx.object }
     expect(result).to eq({ data: { name: 'Foo' }, meta: { links: [] } })
@@ -68,7 +64,7 @@ describe Blueprinter::V2::Extensions::Core::Wrapper do
 
   it 'looks for a meta Proc option in the options' do
     blueprint.options[:root] = :data
-    ctx = context.new(blueprint.new, fields, { root: :root, meta: ->(ctx) { meta_links } }, object, :json)
+    ctx = context.new(blueprint.new, fields, { root: :root, meta: ->(ctx) { { links: [] } } }, object, :json)
     result = subject.around_result(ctx) { |ctx| ctx.object }
     expect(result).to eq({ root: { name: 'Foo' }, meta: { links: [] } })
   end

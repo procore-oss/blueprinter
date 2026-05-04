@@ -2,8 +2,8 @@
 
 describe Blueprinter::Extensions::FieldOrder do
   let(:instances) { Blueprinter::V2::InstanceCache.new }
-  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1) }
-  let(:context) { Blueprinter::V2::Context::Render.new(serializer.blueprint, serializer.fields, {}, 1) }
+  let(:serializer) { blueprint.serializer }
+  let(:context) { Blueprinter::V2::Context::Init.new(instances.blueprint(blueprint), blueprint.options, serializer.default_fields, {}, 1) }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       field :foo

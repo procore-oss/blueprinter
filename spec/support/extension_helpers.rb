@@ -5,6 +5,7 @@ module ExtensionHelpers
     klass.class_eval do
       subject { described_class.new }
 
+      let(:store) { {} }
       let(:instances) { Blueprinter::V2::InstanceCache.new }
 
       let(:sub_blueprint) do
@@ -23,19 +24,15 @@ module ExtensionHelpers
           association :foos, [test.sub_blueprint]
 
           field(:foo2) { |obj, _ctx| "value: #{obj[:foo]}" }
-          association(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj[:foo_obj][:name]}" } }
-          association(:foos2, [test.sub_blueprint]) { |obj, _ctx| [{ name: "nums: #{obj[:foos].map { |x| x[:num] }.map(&:to_s).join(',')}" }] }
+          association(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj.dig(:foo_obj, :name)}" } }
+          association(:foos2, [test.sub_blueprint]) { |obj, _ctx| [{ name: "nums: #{obj[:foos]&.map { |x| x[:num] }&.map(&:to_s)&.join(',')}" }] }
 
           def was(val, _ctx)
             "was #{val.inspect}"
           end
 
-          def is?(val, expected_val)
-            val == expected_val
-          end
-
-          def foo?(val, _ctx)
-            is? val, 'Foo'
+          def foo?(ctx)
+            ctx.object[ctx.field.source] == 'Foo'
           end
 
           def name_foo?(val, _ctx)
@@ -50,10 +47,11 @@ module ExtensionHelpers
     end
   end
 
-  def prepare(blueprint, options, ctx_type, *args)
-    serializer = instances.serializer(blueprint, options, {}, 1)
-    ctx = Blueprinter::V2::Context::Render.new(serializer.blueprint, serializer.fields, options, 1)
+  def prepare(blueprint_class, options, ctx_type, *args)
+    serializer = blueprint_class.serializer
+    blueprint = instances.blueprint(blueprint_class)
+    ctx = Blueprinter::V2::Context::Init.new(blueprint, blueprint_class.options.dup, serializer.default_fields.map(&:to_configurable), options, 1)
     subject.around_blueprint_init(ctx) { yield ctx } if subject.respond_to?(:around_blueprint_init)
-    ctx_type.new(serializer.blueprint, serializer.fields, options, *args, 1)
+    ctx_type.new(blueprint, serializer.default_fields, options, *args, 1)
   end
 end

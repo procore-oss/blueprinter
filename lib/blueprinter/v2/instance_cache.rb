@@ -10,9 +10,7 @@ module Blueprinter
     #
     class InstanceCache
       def initialize
-        @blueprints = {}.compare_by_identity
-        @serializers = {}.compare_by_identity
-        @extensions = {}.compare_by_identity
+        @instances = {}.compare_by_identity
       end
 
       def blueprint(blueprint_class)
@@ -20,24 +18,7 @@ module Blueprinter
         when ViewWrapper
           blueprint_class
         else
-          @blueprints[blueprint_class] ||= blueprint_class.new
-        end
-      end
-
-      def serializer(blueprint_class, options, store, initial_depth)
-        @serializers[blueprint_class] ||= Serializer.new(blueprint_class, options, self, store:, initial_depth:)
-      end
-
-      def extension(ext)
-        case ext
-        when Extension
-          ext
-        when Class
-          @extensions[ext] ||= ext.new
-        when Proc
-          @extensions[ext] ||= ext.call
-        else
-          raise ArgumentError, "Unsupported extension type '#{ext.class.name}'"
+          @instances[blueprint_class] ||= blueprint_class.new
         end
       end
     end

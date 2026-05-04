@@ -7,41 +7,47 @@ describe "Blueprinter::V2 Fields" do
     it "adds fields with options" do
       blueprint = Class.new(Blueprinter::V2::Base) do
         field :name
-        field :description, from: :desc, if: -> { true }
+        field :description, source: :desc, if: ->(_ctx) { true }
         field(:foo) { "foo" }
       end
 
       ref = blueprint.reflections[:default]
-      expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Fields::Field"
+      expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Field"
+      expect(ref.fields[:name].type).to eq :field
       expect(ref.fields[:name].name).to eq :name
-      expect(ref.fields[:name].from).to eq :name
+      expect(ref.fields[:name].source).to eq :name
       expect(ref.fields[:description].name).to eq :description
-      expect(ref.fields[:description].from).to eq :desc
+      expect(ref.fields[:description].source).to eq :desc
       expect(ref.fields[:description].options[:if].class.name).to eq "Proc"
       expect(ref.fields[:foo].name).to eq :foo
       expect(ref.fields[:foo].value_proc.class.name).to eq "Proc"
     end
 
-    it 'adds multiple fields' do
+    it 'adds multiple fields with options' do
       blueprint = Class.new(Blueprinter::V2::Base) do
-        fields :name, :description, :status
+        fields :name, :description, exclude_if_nil: true
+        fields(:status) { "foo" }
       end
 
       ref = blueprint.reflections[:default]
-      expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Fields::Field"
+      expect(ref.fields[:name].class.name).to eq "Blueprinter::V2::Field"
+      expect(ref.fields[:name].type).to eq :field
       expect(ref.fields[:name].name).to eq :name
-      expect(ref.fields[:name].from).to eq :name
-      expect(ref.fields[:name].options).to eq({})
+      expect(ref.fields[:name].source).to eq :name
+      expect(ref.fields[:name].options).to eq({ exclude_if_nil: true })
 
-      expect(ref.fields[:description].class.name).to eq "Blueprinter::V2::Fields::Field"
+      expect(ref.fields[:description].class.name).to eq "Blueprinter::V2::Field"
+      expect(ref.fields[:description].type).to eq :field
       expect(ref.fields[:description].name).to eq :description
-      expect(ref.fields[:description].from).to eq :description
-      expect(ref.fields[:description].options).to eq({})
+      expect(ref.fields[:description].source).to eq :description
+      expect(ref.fields[:description].options).to eq({ exclude_if_nil: true })
 
-      expect(ref.fields[:status].class.name).to eq "Blueprinter::V2::Fields::Field"
+      expect(ref.fields[:status].class.name).to eq "Blueprinter::V2::Field"
+      expect(ref.fields[:status].type).to eq :field
       expect(ref.fields[:status].name).to eq :status
-      expect(ref.fields[:status].from).to eq :status
+      expect(ref.fields[:status].source).to eq :status
       expect(ref.fields[:status].options).to eq({})
+      expect(ref.fields[:status].value_proc).to_not be nil
     end
   end
 
@@ -51,17 +57,18 @@ describe "Blueprinter::V2 Fields" do
       widget_blueprint = Class.new(Blueprinter::V2::Base)
       blueprint = Class.new(Blueprinter::V2::Base) do
         association :category, category_blueprint
-        association :widgets, [widget_blueprint], from: :foo, if: -> { true }
+        association :widgets, [widget_blueprint], source: :foo, if: -> { true }
         association(:foo, widget_blueprint) { {foo: "bar"} }
       end
 
       ref = blueprint.reflections[:default]
-      expect(ref.objects[:category].class.name).to eq "Blueprinter::V2::Fields::Object"
+      expect(ref.objects[:category].class.name).to eq "Blueprinter::V2::Field"
+      expect(ref.objects[:category].type).to eq :object
       expect(ref.objects[:category].name).to eq :category
-      expect(ref.objects[:category].from).to eq :category
+      expect(ref.objects[:category].source).to eq :category
       expect(ref.objects[:category].blueprint).to eq category_blueprint
       expect(ref.collections[:widgets].name).to eq :widgets
-      expect(ref.collections[:widgets].from).to eq :foo
+      expect(ref.collections[:widgets].source).to eq :foo
       expect(ref.collections[:widgets].blueprint).to eq widget_blueprint
       expect(ref.collections[:widgets].options[:if].class.name).to eq "Proc"
       expect(ref.objects[:foo].name).to eq :foo

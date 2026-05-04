@@ -9,8 +9,9 @@ module Blueprinter
 
       def initialize(object, options, blueprint:, collection:, instances:)
         @object = object
-        @options = options.dup.freeze
-        @blueprint = blueprint
+        @options = options.dup
+        @blueprint_class = blueprint
+        @serializer = blueprint.serializer
         @instances = instances
         @collection = collection
         @store = {}
@@ -30,19 +31,25 @@ module Blueprinter
       # or change the way :json and :hash behave.
       # @return [Object]
       def to(format)
-        serializer = @instances.serializer(@blueprint, @options, store, 1)
-        ctx = Context::Result.new(serializer.blueprint, serializer.fields, @options, @object, format, store)
-        result = serializer.hooks.around(:around_result, ctx) do |new_ctx|
-          if new_ctx.blueprint != serializer.blueprint
-            blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class
-            render = Render.new(new_ctx.object, new_ctx.options, blueprint:, collection: @collection, instances: @instances)
-            return render.to new_ctx.format
-          end
+        blueprint = @instances.blueprint(@blueprint_class)
+        result =
+          if @serializer.hooks.registered? :around_result
+            ctx = Context::Result.new(blueprint, @serializer.default_fields, @options, @object, format, store)
+            @serializer.hooks.around(:around_result, ctx) do |new_ctx|
+              if new_ctx.blueprint != blueprint
+                blueprint = new_ctx.blueprint.is_a?(Class) ? new_ctx.blueprint : new_ctx.blueprint.class
+                render = Render.new(new_ctx.object, new_ctx.options, blueprint:, collection: @collection,
+                                                                     instances: @instances)
+                return render.to new_ctx.format
+              end
 
-          @object = new_ctx.object
-          serializer.options = new_ctx.options
-          serialize serializer
-        end
+              @object = new_ctx.object
+              @options = new_ctx.options.dup unless new_ctx.options == @options
+              serialize
+            end
+          else
+            serialize
+          end
         result.is_a?(Context::Final) ? result.value : result
       end
 
@@ -50,11 +57,12 @@ module Blueprinter
 
       private
 
-      def serialize(serializer)
+      def serialize
+        @options.freeze
         if @collection
-          serializer.collection(@object, depth: 1)
+          @serializer.collection(@object, @options, store:, instances: @instances)
         else
-          serializer.object(@object, depth: 1)
+          @serializer.object(@object, @options, store:, instances: @instances)
         end
       end
     end

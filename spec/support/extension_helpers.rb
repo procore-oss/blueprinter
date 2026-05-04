@@ -50,7 +50,7 @@ module ExtensionHelpers
   def prepare(blueprint_class, options, ctx_type, *args)
     serializer = blueprint_class.serializer
     blueprint = instances.blueprint(blueprint_class)
-    ctx = Blueprinter::V2::Context::Init.new(blueprint, serializer.default_fields, options, 1)
+    ctx = Blueprinter::V2::Context::Init.new(blueprint, blueprint_class.options.dup, serializer.default_fields.map(&:to_configurable), options, 1)
     subject.around_blueprint_init(ctx) { yield ctx } if subject.respond_to?(:around_blueprint_init)
     ctx_type.new(blueprint, serializer.default_fields, options, *args, 1)
   end

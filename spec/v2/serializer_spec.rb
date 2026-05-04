@@ -450,6 +450,32 @@ describe Blueprinter::V2::Serializer do
     end.to raise_error(Blueprinter::Errors::ExtensionHook, /did not yield/)
   end
 
+  it "allows around_blueprint_init to modify blueprint options and fields" do
+    ext = Class.new(Blueprinter::Extension) do
+      def around_blueprint_init(ctx)
+        ctx.blueprint_options[:exclude_if_nil] = true
+        ctx.fields.sort_by!(&:name)
+        ctx.fields.find { |f| f.name == :description }.options[:exclude_if_nil] = false
+        yield ctx
+      end
+    end
+
+    blueprint = Class.new(application_blueprint) do
+      extensions << ext.new
+      fields :id, :name, :summary, :description
+    end
+
+    result = blueprint.render({ id: 42, name: nil, summary: 'foo', description: nil }).to_json
+    expect(result).to eq({
+      description: nil,
+      id: 42,
+      summary: 'foo'
+    }.to_json)
+
+    expect(blueprint.options).to eq({})
+    expect(blueprint.reflections[:default].fields[:description].options).to eq({})
+  end
+
   it 'uses the same blueprint instance throughout' do
     blueprint = Class.new(Blueprinter::V2::Base) do
       self.blueprint_name = 'Foo'

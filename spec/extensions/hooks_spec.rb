@@ -9,7 +9,7 @@ describe Blueprinter::Hooks do
     end
   end
   let(:serializer) { blueprint.serializer }
-  let(:field) { Blueprinter::V2::Fields::Field.new(name: :foo, source: :foo) }
+  let(:field) { Blueprinter::V2::Field.new(name: :foo, source: :foo) }
   let(:object) { { foo: 'Foo' } }
   let(:object_ctx) { Blueprinter::V2::Context::Object }
   let(:field_ctx) { Blueprinter::V2::Context::Field }
@@ -236,7 +236,7 @@ describe Blueprinter::Hooks do
     it 'is skipped for hidden extensions' do
       ext1.class_eval { def hidden? = true }
       log = []
-      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, { foo: 'Foo' }, field, 42)
+      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, blueprint.options, { foo: 'Foo' }, field, 42)
       hooks = described_class.new [ext1.new(log)]
 
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
@@ -256,7 +256,7 @@ describe Blueprinter::Hooks do
         def around_hook(ctx) = nil
       end
       log = []
-      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, { foo: 'Foo' }, field, 42)
+      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, blueprint.options, { foo: 'Foo' }, field, 42)
       hooks = described_class.new [ext1.new(log), ext.new]
 
       expect do

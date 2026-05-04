@@ -123,10 +123,6 @@ module Blueprinter
         formatters.freeze
         schema.freeze
         serializer = Serializer.new(self)
-        schema.each_value do |f|
-          f.options.freeze
-          f.freeze
-        end
         @serializer = serializer
       end
 

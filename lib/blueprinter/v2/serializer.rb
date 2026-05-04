@@ -5,11 +5,12 @@ require 'blueprinter/hooks'
 
 module Blueprinter
   module V2
+    # rubocop:disable Metrics/ClassLength
     # @api private
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
-      Config = Struct.new(:blueprint, :fields, :options, keyword_init: true)
+      Config = Struct.new(:blueprint, :blueprint_options, :fields, :options, :needs_field_ctx, keyword_init: true)
 
       attr_reader :hooks, :formatter
 
@@ -18,9 +19,9 @@ module Blueprinter
         @formatter = Formatter.new(blueprint_class)
         @format = @formatter.any?
         @hooks = Hooks.new([*blueprint_class.extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new])
-        finalize_fields!
+        finalize_fields! @blueprint_class.schema.each_value, blueprint_class.options
         find_used_hooks!
-        @needs_field_ctx = needs_field_ctx?
+        @needs_field_ctx = needs_field_ctx? default_fields
       end
 
       def object(object, options, instances:, store:, depth: 1, parent: nil)
@@ -30,10 +31,10 @@ module Blueprinter
         if @hook_around_serialize_object
           ctx = Context::Object.new(blueprint, config.fields, config.options, object, parent, store, depth)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize(blueprint, config.fields, config.options, [ctx.object], instances:, store:, depth:)[0]
+            serialize(blueprint, config, [ctx.object], instances:, store:, depth:)[0]
           end
         else
-          serialize(blueprint, config.fields, config.options, [object], instances:, store:, depth:)[0]
+          serialize(blueprint, config, [object], instances:, store:, depth:)[0]
         end
       end
 
@@ -44,10 +45,10 @@ module Blueprinter
         if @hook_around_serialize_collection
           ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            serialize(blueprint, config.fields, config.options, ctx.object, instances:, store:, depth:).to_a
+            serialize(blueprint, config, ctx.object, instances:, store:, depth:).to_a
           end
         else
-          serialize(blueprint, config.fields, config.options, objects, instances:, store:, depth:).to_a
+          serialize(blueprint, config, objects, instances:, store:, depth:).to_a
         end
       end
 
@@ -59,13 +60,16 @@ module Blueprinter
 
       # Long and ugly for performance
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-      def serialize(blueprint, fields, options, objects, instances:, store:, depth:)
-        ctx = @needs_field_ctx ? Context::Field.new(blueprint, fields, options, nil, nil, store, depth) : nil
+      def serialize(blueprint, config, objects, instances:, store:, depth:)
+        ctx =
+          if config.needs_field_ctx
+            Context::Field.new(blueprint, config.fields, config.options, config.blueprint_options, nil, nil, store, depth)
+          end
         parent = nil
         # rubocop:disable Metrics/BlockLength
         objects.map do |object|
           ctx&.object = object
-          fields.each_with_object({}) do |field, result|
+          config.fields.each_with_object({}) do |field, result|
             ctx&.field = field
             next if field._has_conditional && FieldLogic.skip?(ctx, field)
 
@@ -93,7 +97,8 @@ module Blueprinter
                 parent ||= Context::Parent.new(@blueprint_class)
                 parent.field = field
                 parent.object = object
-                field._serializer.serialize(field.blueprint, value, options, parent:, instances:, store:, depth: depth + 1)
+                field._serializer.serialize(field.blueprint, value, config.options, parent:, instances:, store:,
+                                                                                    depth: depth + 1)
               end
           end
           # rubocop:enable Metrics/BlockLength
@@ -101,7 +106,9 @@ module Blueprinter
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
-      # Runs any around_blueprint_init hooks on this Blueprint and returns the configuration that should be used.
+      # Runs any `around_blueprint_init` hooks on this Blueprint and returns the configuration that should be used.
+      # The `around_blueprint_init` hooks may modify the blueprint's options or fields (for that render only).
+      #
       # Only runs the FIRST time a given Blueprint is used during a given render.
       #
       # @param blueprint [Blueprinter::V2::Base] The Blueprint instance
@@ -110,13 +117,19 @@ module Blueprinter
       # @param depth [Integer] Current serialization depth
       # @return [Blueprinter::V2::Serializer::Config]
       def blueprint_init(blueprint, options, store:, depth:)
-        config = Config.new(blueprint:, fields: default_fields, options:)
+        config = Config.new(blueprint:, blueprint_options: blueprint.class.options, fields: default_fields, options:,
+                            needs_field_ctx: @needs_field_ctx)
         if @hook_around_blueprint_init
-          ctx = Context::Init.new(blueprint, config.fields.dup, options, store, depth)
+          fields = config.fields.map(&:to_configurable)
+          ctx = Context::Init.new(blueprint, config.blueprint_options.dup, fields, options, store, depth)
           @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-            config.fields = ctx.fields.dup.freeze unless ctx.fields == config.fields
+            config.blueprint_options = ctx.blueprint_options.freeze
+            config.fields = ctx.fields.map(&:to_internal)
+            finalize_fields! config.fields, config.blueprint_options
+            config.needs_field_ctx = needs_field_ctx? config.fields
           end
         end
+        config.options.freeze
         config.freeze
       end
 
@@ -133,35 +146,50 @@ module Blueprinter
       end
 
       # Skip Context::Field allocation when no field hooks, conditionals, callable defaults, or Proc extractors are in play
-      def needs_field_ctx?
-        @field_hooks.values.any? || default_fields.any? do |f|
+      def needs_field_ctx?(fields)
+        @field_hooks.values.any? || fields.any? do |f|
           default = f._merged_options[:default]
           callable_default = default.is_a?(Proc) || default.is_a?(Symbol)
           f._has_conditional || !!f.value_proc || !!f._merged_options[:default_if] || callable_default
         end
       end
 
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      def finalize_fields!
-        options = @blueprint_class.options
-        @blueprint_class.schema.each_value do |field|
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
+      def finalize_fields!(fields, blueprint_opts)
+        fields.each do |field|
           # copy blueprint options down to each field (faster b/c we can check exactly one Hash)
           field._merged_options = field.options.dup
-          field._merged_options[:if] ||= options[:if] if options.key? :if
-          field._merged_options[:unless] ||= options[:unless] if options.key? :unless
-          field._merged_options[:default_if] ||= options[:default_if] if options.key? :default_if
-          field._merged_options[:default] = options[:default] if options.key?(:default) && !field.options.key?(:default)
-          field._merged_options[:exclude_if_nil] = options[:exclude_if_nil] if options.key?(:exclude_if_nil) &&
-                                                                               !field.options.key?(:exclude_if_nil)
-          field._merged_options.freeze
+          field._merged_options[:if] ||= blueprint_opts[:if] if blueprint_opts.key? :if
+          field._merged_options[:unless] ||= blueprint_opts[:unless] if blueprint_opts.key? :unless
+          field._merged_options[:default_if] ||= blueprint_opts[:default_if] if blueprint_opts.key? :default_if
+          field._merged_options[:default] = blueprint_opts[:default] if blueprint_opts.key?(:default) &&
+                                                                        !field.options.key?(:default)
+          field._merged_options[:exclude_if_nil] = blueprint_opts[:exclude_if_nil] if blueprint_opts.key?(:exclude_if_nil) &&
+                                                                                      !field.options.key?(:exclude_if_nil)
 
           # precompute some checks
           field._extractor = field.value_proc ? Extractors::Proc : Extractors::Property
           field._has_conditional = field._merged_options.key?(:if) || field._merged_options.key?(:unless)
-          field._has_default = field._merged_options.key?(:default) || field._merged_options.key?(:default_if)
-        end
+          field._has_default = field._merged_options.key?(:default)
+
+          if field.association?
+            field._serializer =
+              if field.blueprint.is_a?(ViewWrapper) || field.blueprint < ::Blueprinter::Base
+                FieldSerializers::V1Association
+              else
+                field.collection? ? FieldSerializers::Collection : FieldSerializers::Object
+              end
+          end
+
+          # freeze everything
+          field.options.freeze
+          field._merged_options.freeze
+          field.source_str.freeze
+          field.freeze
+        end.freeze
       end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
     end
+    # rubocop:enable Metrics/ClassLength
   end
 end

@@ -95,11 +95,11 @@ module Blueprinter
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::Fields::Field]
       #
       def field(name, source: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Fields::Field.new(
+        schema[name] = Field.new(
+          type: :field,
           name: name,
           source: source.to_sym,
           source_str: source.to_s,
@@ -122,7 +122,8 @@ module Blueprinter
       def fields(*names, **options, &definition)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Fields::Field.new(
+          schema[name] = Field.new(
+            type: :field,
             name: name,
             source: name,
             source_str: name.to_s,
@@ -149,21 +150,14 @@ module Blueprinter
       def association(name, blueprint, source: name, **options, &definition)
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
-        type = is_collection ? Fields::Collection : Fields::Object
-        serializer =
-          if blueprint_class.is_a?(ViewWrapper) || blueprint_class < ::Blueprinter::Base
-            FieldSerializers::V1Association
-          else
-            is_collection ? FieldSerializers::Collection : FieldSerializers::Object
-          end
-        schema[name] = type.new(
+        schema[name] = Field.new(
+          type: is_collection ? :collection : :object,
           name: name,
           blueprint: blueprint_class,
           source: source.to_sym,
           source_str: source.to_s,
           value_proc: definition,
-          options: options.dup,
-          _serializer: serializer
+          options: options.dup
         )
       end
 

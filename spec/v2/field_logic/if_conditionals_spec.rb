@@ -7,7 +7,7 @@ describe Blueprinter::V2::FieldLogic do
   let(:object) { { foo: 'Foo' } }
   let(:field_ref) { blueprint.reflections[:default].fields[:foo] }
   let(:field) { blueprint.schema.fetch(:foo) }
-  let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field_ref) }
+  let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, blueprint.options, object, field_ref) }
 
   context 'skip? (if)' do
     it 'allows by default' do

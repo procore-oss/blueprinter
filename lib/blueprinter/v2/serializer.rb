@@ -19,7 +19,7 @@ module Blueprinter
         @formatter = Formatter.new(blueprint_class)
         @format = @formatter.any?
         @hooks = Hooks.new([*blueprint_class.extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new])
-        finalize_fields! @blueprint_class.schema.each_value, blueprint_class.options
+        finalize_fields! @blueprint_class.schema.each_value.freeze, blueprint_class.options
         find_used_hooks!
         @needs_field_ctx = needs_field_ctx? default_fields
       end
@@ -145,10 +145,16 @@ module Blueprinter
           fields = config.fields.map(&:to_configurable)
           ctx = Context::Init.new(blueprint, config.blueprint_options.dup, fields, options, store, depth)
           @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
+            changed = ctx.blueprint_options != config.blueprint_options
             config.blueprint_options = ctx.blueprint_options.freeze
-            config.fields = ctx.fields.map(&:to_internal)
-            finalize_fields! config.fields, config.blueprint_options
-            config.needs_field_ctx = needs_field_ctx? config.fields
+            config.fields = ctx.fields.map do |f|
+              changed ||= f.changed?
+              changed ? f.to_internal : f._original
+            end.freeze
+            if changed
+              finalize_fields! config.fields, config.blueprint_options
+              config.needs_field_ctx = needs_field_ctx? config.fields
+            end
           end
         end
         config.options.freeze
@@ -180,6 +186,8 @@ module Blueprinter
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
       def finalize_fields!(fields, blueprint_opts)
         fields.each do |field|
+          next if field.frozen?
+
           # copy blueprint options down to each field (faster b/c we can check exactly one Hash)
           field._merged_options = field.options.dup
           field._merged_options[:if] ||= blueprint_opts[:if] if blueprint_opts.key? :if
@@ -209,7 +217,7 @@ module Blueprinter
           field._merged_options.freeze
           field.source_str.freeze
           field.freeze
-        end.freeze
+        end
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
     end

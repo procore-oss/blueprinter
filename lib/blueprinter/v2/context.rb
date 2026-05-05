@@ -12,7 +12,7 @@ module Blueprinter
       # @!attribute [rw] blueprint_options
       #   @return [Hash] Customize the Blueprint options for this render
       # @!attribute [rw] fields
-      #   @return [Array<Blueprinter::V2::Fields>] The fields to serialize, in the order they'll be serialized in
+      #   @return [Array<Blueprinter::V2::Fields::Configurable>] The fields to serialize, in the order they'll be serialized
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render`
       # @!attribute [r] store
@@ -33,7 +33,7 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] extension
@@ -55,7 +55,7 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [rw] object
@@ -80,7 +80,7 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] The parent's Blueprint instance
       # @!attribute [r] field
-      #   @return [Blueprinter::V2::Fields] The parent field
+      #   @return [Blueprinter::V2::Fields::Field] The parent field
       # @!attribute [r] object
       #   @return [Object] The parent object
       #
@@ -97,7 +97,7 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] blueprint_options
@@ -105,7 +105,7 @@ module Blueprinter
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] field
-      #   @return [Blueprinter::V2::Field] The field that's currently being evaluated
+      #   @return [Blueprinter::V2::Fields::Field] The field that's currently being evaluated
       # @!attribute [r] store
       #   @return [Hash] Arbitrary store available for this render
       # @!attribute [r] depth
@@ -125,7 +125,7 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class. If replaced, the render is aborted and a
       #           new one begun.
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>]
       # @!attribute [rw] options
       #   @return [Hash] Options passed to `render`. Can be modified.
       # @!attribute [rw] object

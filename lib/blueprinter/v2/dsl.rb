@@ -98,7 +98,7 @@ module Blueprinter
       #
       def field(name, source: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Field.new(
+        schema[name] = Fields::Field.new(
           type: :field,
           name: name,
           source: source.to_sym,
@@ -122,7 +122,7 @@ module Blueprinter
       def fields(*names, **options, &definition)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Field.new(
+          schema[name] = Fields::Field.new(
             type: :field,
             name: name,
             source: name,
@@ -150,7 +150,7 @@ module Blueprinter
       def association(name, blueprint, source: name, **options, &definition)
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
-        schema[name] = Field.new(
+        schema[name] = Fields::Field.new(
           type: is_collection ? :collection : :object,
           name: name,
           blueprint: blueprint_class,

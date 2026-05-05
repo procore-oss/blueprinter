@@ -35,15 +35,15 @@ module Blueprinter
         attr_reader :name
         # @return [Hash] Options defined on the view or inherited from the parent
         attr_reader :options
-        # @return [Hash<Symbol, Blueprinter::V2::Field>] Fields defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Fields defined on the view
         attr_reader :fields
-        # @return [Hash<Symbol, Blueprinter::V2::Object>] Associations to single objects defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Associations to single objects defined on the view
         attr_reader :objects
-        # @return [Hash<Symbol, Blueprinter::V2::Collection>] Associations to collections defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Associations to collections defined on the view
         attr_reader :collections
-        # @return [Hash<Symbol, Blueprinter::V2::Object>] All associations defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] All associations defined on the view
         attr_reader :associations
-        # @return [Array<Blueprinter::V2::Field>]
+        # @return [Array<Blueprinter::V2::Fields::Field>]
         # All fields, objects, and collections in the order they were defined
         attr_reader :ordered
 

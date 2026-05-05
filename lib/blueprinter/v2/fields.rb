@@ -74,29 +74,47 @@ module Blueprinter
     ConfigurableField = Struct.new(:type, :name, :source, :options, :value_proc, :blueprint, :_original) do
       include FieldHelpers
 
+      # Remove setters from field that shouldn't be changed
+      static_members = %i[type blueprint _original]
+      dynamic_members = members - static_members
+      static_members.each { |member| remove_method "#{member}=" }
+
+      # @!visibility private
+      def changed?
+        @changed || options != _original.options
+      end
+
       # @!visibility private
       def to_internal
         Field.new(
           type:,
           name: name.to_sym,
           source: source.to_sym,
-          source_str: source == original.source ? original.source_str : source.to_s,
+          source_str: source == _original.source ? _original.source_str : source.to_s,
           options:,
           value_proc:,
           blueprint:
         )
       end
 
-      # Remove setters from field that shouldn't be changed
-      %i[type blueprint _original].each { |member| remove_method "#{member}=" }
+      # rubocop:disable Lint/UselessAccessModifier
 
-      # rubocop:disable Lint/UselessAccessModifier, Layout/EmptyLinesAroundAccessModifier
       private
-      # rubocop:enable Lint/UselessAccessModifier, Layout/EmptyLinesAroundAccessModifier
 
-      # Ensure the original field can only be referenced from a private method
-      alias_method :original, :_original
-      remove_method :_original
+      # rubocop:enable Lint/UselessAccessModifier
+
+      dynamic_members.each do |member|
+        alias_method :"set_#{member}", :"#{member}="
+      end
+
+      public
+
+      dynamic_members.each do |member|
+        define_method :"#{member}=" do |val|
+          @changed = true
+          send(:"set_#{method}", val)
+        end
+      end
     end
   end
 end

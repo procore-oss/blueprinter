@@ -321,16 +321,16 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({})
   end
 
-  it 'runs around_serialize_object' do
+  it 'runs around_blueprint_init, around_serialize_object, around_serialize_collection, and around_blueprint' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
       end
 
       def around_blueprint_init(ctx)
-        @log << 'around_blueprint_init: a'
+        @log << "around_blueprint_init (#{ctx.blueprint.class}): a"
         yield ctx
-        @log << 'around_blueprint_init: b'
+        @log << "around_blueprint_init (#{ctx.blueprint.class}): b"
       end
 
       def around_serialize_object(ctx)
@@ -339,54 +339,48 @@ describe Blueprinter::V2::Serializer do
         @log << "around_serialize_object (#{ctx.object[:name]}): b"
         res
       end
+
+      def around_serialize_collection(ctx)
+        @log << "around_serialize_collection (#{ctx.object.size}): a"
+        res = yield ctx
+        @log << "around_serialize_collection (#{ctx.object.size}): b"
+        res
+      end
+
+      def around_blueprint(ctx)
+        @log << "around_blueprint (#{ctx.object[:name]}): a"
+        res = yield ctx
+        @log << "around_blueprint (#{ctx.object[:name]}): b"
+        res
+      end
     end
     log = []
-    widget_blueprint.extensions << ext.new(log)
+    application_blueprint.extensions << ext.new(log)
     widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] }
 
     result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
     expect(result).to eq(widget)
     expect(log).to eq [
-      'around_blueprint_init: a',
-      'around_blueprint_init: b',
-      'around_serialize_object (Foo): a',
-      'around_serialize_object (Foo): b',
-    ]
-  end
-
-  it 'runs around_serialize_collection' do
-    ext = Class.new(Blueprinter::Extension) do
-      def initialize(log)
-        @log = log
-      end
-
-      def around_blueprint_init(ctx)
-        @log << 'around_blueprint_init: a'
-        yield ctx
-        @log << 'around_blueprint_init: b'
-      end
-
-      def around_serialize_collection(ctx)
-        @log << "around_serialize_collection (#{ctx.object.map { |x| x[:name] }.join(',')}): a"
-        res = yield ctx
-        @log << "around_serialize_collection (#{ctx.object.map { |x| x[:name] }.join(',')}): b"
-        res
-      end
-    end
-    log = []
-    widget_blueprint.extensions << ext.new(log)
-    widgets = [
-      { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] },
-      { name: 'Bar', category: { name: 'Bar' }, parts: [{ num: 43 }, { num: 43 }] },
-    ]
-
-    result = widget_blueprint.serializer.collection(widgets, {}, instances:, store:, depth: 1)
-    expect(result).to eq(widgets)
-    expect(log).to eq [
-      'around_blueprint_init: a',
-      'around_blueprint_init: b',
-      'around_serialize_collection (Foo,Bar): a',
-      'around_serialize_collection (Foo,Bar): b',
+      "around_blueprint_init (WidgetBlueprint): a",
+      "around_blueprint_init (WidgetBlueprint): b",
+      "around_serialize_object (Foo): a",
+        "around_blueprint (Foo): a",
+          "around_blueprint_init (CategoryBlueprint): a",
+          "around_blueprint_init (CategoryBlueprint): b",
+          "around_serialize_object (Bar): a",
+            "around_blueprint (Bar): a",
+            "around_blueprint (Bar): b",
+          "around_serialize_object (Bar): b",
+          "around_blueprint_init (PartBlueprint): a",
+          "around_blueprint_init (PartBlueprint): b",
+          "around_serialize_collection (2): a",
+            "around_blueprint (): a",
+            "around_blueprint (): b",
+            "around_blueprint (): a",
+            "around_blueprint (): b",
+          "around_serialize_collection (2): b",
+        "around_blueprint (Foo): b",
+      "around_serialize_object (Foo): b"
     ]
   end
 

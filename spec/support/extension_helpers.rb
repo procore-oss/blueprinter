@@ -27,8 +27,11 @@ module ExtensionHelpers
           association(:foo_obj2, test.sub_blueprint) { |obj, _ctx| { name: "name: #{obj.dig(:foo_obj, :name)}" } }
           association(:foos2, [test.sub_blueprint]) { |obj, _ctx| [{ name: "nums: #{obj[:foos]&.map { |x| x[:num] }&.map(&:to_s)&.join(',')}" }] }
 
-          def was(val, _ctx)
-            "was #{val.inspect}"
+          def was(ctx)
+            obj = ctx.object
+            field = ctx.field.source
+            was_val = obj.is_a?(Hash) ? obj[field] : obj.public_send(field)
+            "was #{was_val.inspect}"
           end
 
           def foo?(ctx)

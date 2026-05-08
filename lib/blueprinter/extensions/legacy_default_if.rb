@@ -1,0 +1,31 @@
+# frozen_string_literal: true
+
+module Blueprinter
+  module Extensions
+    #
+    # Support for Legacy/V1's `default_if` options.
+    #
+    class LegacyDefaultIf < Extension
+      # @param ctx [Blueprinter::V2::Context::Init]
+      # @!visibility private
+      def around_blueprint_init(ctx)
+        ctx.blueprint_options[:default_if] = convert_v1(ctx.blueprint_options[:default_if]) if ctx.blueprint_options[:default_if]
+        ctx.fields.each do |field|
+          field.options[:default_if] = convert_v1(field.options[:default_if]) if field.options[:default_if]
+        end
+        yield ctx
+      end
+
+      private
+
+      def convert_v1(cond)
+        case cond
+        when ::Blueprinter::EMPTY_COLLECTION, ::Blueprinter::EMPTY_HASH, ::Blueprinter::EMPTY_STRING
+          ->(_ctx, value) { EmptyTypes.send(:use_default_value?, value, cond) }
+        else
+          cond
+        end
+      end
+    end
+  end
+end

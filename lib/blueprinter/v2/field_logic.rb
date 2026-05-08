@@ -26,17 +26,17 @@ module Blueprinter
       # Returns the given value or a default value. Default values are pulled from the field-level or Blueprint-level
       # "default" option. It will be used if the given value is nil or if the "default_if" option evaluates truthy.
       #
-      # @param ctx [Blueprinter::V2::Context::Field]
-      # @param field [Blueprinter::V2::Fields] Internal field definition (has extra, private, attrs)
+      # @param field [Blueprinter::V2::Fields::Field]
       # @param value [Object] The current field value
+      # @param ctx [Blueprinter::V2::Context::Field | nil]
       # @return [Object] The final field value
-      def self.value_or_default(ctx, field, value)
+      def self.value_or_default(field, value, ctx: nil)
         default_if = field._merged_options[:default_if]
-        return value unless value.nil? || (default_if && use_default?(default_if, value, ctx))
+        return value unless value.nil? || (default_if && use_default?(default_if, ctx, value))
 
         case (default_value = field._merged_options[:default])
-        when Proc then default_value.call(value, ctx)
-        when Symbol then ctx.blueprint.public_send(default_value, value, ctx)
+        when Proc then default_value.call(ctx)
+        when Symbol then ctx.blueprint.public_send(default_value, ctx)
         else default_value
         end
       end
@@ -47,10 +47,10 @@ module Blueprinter
       # @param value [Object] The current field value
       # @param ctx [Blueprinter::V2::Context::Field]
       # @return [True|False]
-      def self.use_default?(cond, value, ctx)
+      def self.use_default?(cond, ctx, value)
         case cond
-        when Proc then cond.call(value, ctx)
-        else ctx.blueprint.public_send(cond, value, ctx)
+        when Proc then cond.call(ctx, value)
+        else ctx.blueprint.public_send(cond, ctx, value)
         end
       end
     end

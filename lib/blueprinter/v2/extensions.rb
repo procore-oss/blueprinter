@@ -6,7 +6,7 @@ module Blueprinter
       # Core functionality built with extensions
       module Core
         autoload :Json, 'blueprinter/v2/extensions/core/json'
-        autoload :Wrapper, 'blueprinter/v2/extensions/core/wrapper'
+        autoload :Root, 'blueprinter/v2/extensions/core/root'
       end
     end
   end

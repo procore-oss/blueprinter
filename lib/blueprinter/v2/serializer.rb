@@ -18,7 +18,7 @@ module Blueprinter
         @blueprint_class = blueprint_class
         @formatter = Formatter.new(blueprint_class)
         @format = @formatter.any?
-        @hooks = Hooks.new([*blueprint_class.extensions, Extensions::Core::Json.new, Extensions::Core::Wrapper.new])
+        @hooks = Hooks.new([*blueprint_class.extensions, Extensions::Core::Json.new, Extensions::Core::Root.new])
         finalize_fields! @blueprint_class.schema.each_value.freeze, blueprint_class.options
         find_used_hooks!
         @needs_field_ctx = needs_field_ctx? default_fields

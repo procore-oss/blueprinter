@@ -321,6 +321,14 @@ describe Blueprinter::V2::Serializer do
     expect(result).to eq({})
   end
 
+  it 'uses the core root extension' do
+    result = category_blueprint.render({ name: 'Foo' }, { root: :data }).to_hash
+    expect(result).to eq({ data: { name: 'Foo' } })
+
+    result = category_blueprint.render({ name: 'Foo' }, { root: :data, meta: { links: [] } }).to_hash
+    expect(result).to eq({ data: { name: 'Foo' }, meta: { links: [] } })
+  end
+
   it 'runs around_blueprint_init, around_serialize_object, around_serialize_collection, and around_blueprint' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)

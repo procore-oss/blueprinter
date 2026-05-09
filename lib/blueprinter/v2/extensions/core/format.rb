@@ -8,6 +8,7 @@ module Blueprinter
       module Core
         #
         # A core extension that supports serializing to :json and :hash.
+        # @!visibility private
         #
         class Format < Extension
           # @param ctx [Blueprinter::V2::Context::Result]

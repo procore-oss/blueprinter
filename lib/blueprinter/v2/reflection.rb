@@ -2,7 +2,30 @@
 
 module Blueprinter
   module V2
-    # API for reflecting on Blueprints
+    # API for reflecting on V2 Blueprints. See {Blueprinter::V2::Reflection::View} to see what you can do with each view.
+    #
+    #   # The default view
+    #   view = WidgetBlueprint.reflections[:default]
+    #
+    #   # A custom view called :extended
+    #   view = WidgetBlueprint.reflections[:extended]
+    #
+    #   # A nested view
+    #   view = WidgetBlueprint.reflections[:extended][:plus]
+    #
+    # Alternatively you can first access the view you want, then it's reflections. The following two lines below access
+    # the same view:
+    #
+    #   view1 = WidgetBlueprint.reflections[:extended][:plus]
+    #   view2 = WidgetBlueprint[:extended].reflections[:plus]
+    #   view1 == view2
+    #
+    # The :default view always refers to the "base" that `reflections` was called on.
+    #
+    #   view1 = WidgetBlueprint.reflections[:extended]
+    #   view2 = WidgetBlueprint[:extended].reflections[:default]
+    #   view1 == view2
+    #
     module Reflection
       #
       # Returns a Hash of views keyed by name.
@@ -51,7 +74,7 @@ module Blueprinter
 
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base
         # @param name [Symbol] Name of the view
-        # @api private
+        # @!visibility private
         def initialize(spec, name)
           @name = name
           @options = spec.options

@@ -28,6 +28,9 @@ Lint/MissingSuper:
 Metrics/ClassLength:
   Max: 120
 
+Metrics/ModuleLength:
+  Max: 120
+
 Metrics/MethodLength:
   Max: 20
 

@@ -3,6 +3,7 @@
 module Blueprinter
   module V2
     # An interface for formatting values
+    # @!visibility private
     class Formatter
       # @return [Array<Blueprinter::V2::DSL::Nodes::Format>]
       def initialize(formatters)

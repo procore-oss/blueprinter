@@ -7,6 +7,35 @@ module Blueprinter
         #
         # Set an option value.
         #
+        # ```
+        # class WidgetBlueprint < ApplicationBlueprint
+        #   set :exclude_if_nil, true
+        #   # ...
+        #
+        #   # You can override options in views
+        #   view :extended do
+        #     set :exclude_if_nil, false
+        #     # ...
+        #   end
+        # end
+        # ```
+        #
+        # == Accessing the previous value
+        #
+        # When overriding an option in a child view or Blueprint, sometimes you may want to check,
+        # or incorporate, the previous value. You can do this with a block:
+        #
+        # ```
+        # set :foo, "foo"
+        #
+        # view :extended do
+        #   set :foo do |val|
+        #     # the value will be "foobar"
+        #     "#{val}bar"
+        #   end
+        # end
+        # ```
+        #
         # @param key [Symbol] Option name
         # @param value [Object | nil] Object value
         # @yield [Object | nil] Get the current value then return the value you want
@@ -27,6 +56,16 @@ module Blueprinter
 
         #
         # Adds one or more extensions.
+        #
+        # ```
+        # class WidgetBlueprint < ApplicationBlueprint
+        #   add MyExtension.new
+        #
+        #   view :extended do
+        #     add OtherExtension.new
+        #   end
+        # end
+        # ```
         #
         # @param *extensions [Blueprinter::Extension] Extension instances to add
         # @param prepend [true | false] Add this extension before all others
@@ -57,15 +96,22 @@ module Blueprinter
         #
         # Define an anonymous extension and add it to the current context.
         #
-        #   class WidgetBlueprint < ApplicationBlueprint
-        #     extension do
-        #       # modify every object before serialization
-        #       def around_serialize_object(ctx)
-        #         object = modify ctx.object
-        #         yield object
-        #       end
+        # ```
+        # class WidgetBlueprint < ApplicationBlueprint
+        #   extension do
+        #     # Decorate Blueprint output
+        #     def around_blueprint(ctx)
+        #       hash = yield ctx
+        #       hash[:meta] = metadata ctx.object
+        #       hash
+        #     end
+        #
+        #     def metadata(object)
+        #       # ...
         #     end
         #   end
+        # end
+        # ```
         #
         def extension(&block)
           bp_name = blueprint_name

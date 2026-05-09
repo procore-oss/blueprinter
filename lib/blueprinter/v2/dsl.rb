@@ -4,10 +4,10 @@ require 'set'
 
 module Blueprinter
   module V2
-    # Methods for defining Blueprint fields and views
     #
-    # Modules may extend this module to gain acces to the DSL. Blueprints may then include such modules to
-    # pull in their functionality.
+    # Methods for defining your Blueprints and views.
+    #
+    # You can also use the Blueprinter DSL in your own Ruby modules, then include them in your Blueprints:
     #
     # ```ruby
     # module MySharedBlueprinterCode

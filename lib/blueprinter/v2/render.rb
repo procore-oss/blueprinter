@@ -4,9 +4,31 @@ require 'blueprinter/v2/serializer'
 
 module Blueprinter
   module V2
+    #
+    # Represents a pending Blueprint render. Returned by {Blueprinter::V2::Base.render render},
+    # {Blueprinter::V2::Base.render_object render_object}, and {Blueprinter::V2::Base.render_collection render_collection}.
+    #
+    #   render = WidgetBlueprint.render(widget)
+    #
+    #   # output JSON
+    #   render.to_json
+    #
+    #   # output a Hash
+    #   render.to_hash
+    #
+    #   # output a format added by an extension
+    #   render.to :yaml
+    #
     class Render
+      # @return [Hash] Store available during render. Accessible to extensions, if/unless/default Procs, or field blocks.
       attr_accessor :store
 
+      # @param object [Object] The object (or collection) to render
+      # @param options [Hash] Options passed to `render`
+      # @param blueprint [Class] The Blueprint class to use
+      # @param collection [true | false] True of `object` is Enumerable
+      # @param instances [Blueprinter::V2::InstanceCache] Instance cache to use during this render
+      # @!visibility private
       def initialize(object, options, blueprint:, collection:, instances:)
         @object = object
         @options = options.dup
@@ -18,17 +40,30 @@ module Blueprinter
       end
 
       # Serialize the object to a Hash or array of Hashes
+      #
+      #   MyBlueprint.render(widget).to_hash
+      #
       # @return [Hash|Array<Hash>]
       def to_hash = to :hash
 
       # Serialize the object to a JSON string
+      #
+      #   MyBlueprint.render(widget).to_json
+      #
+      # In Rails controllers you may omit the `to_json` call:
+      #
+      #   render json: MyBlueprint.render(widget)
+      #
       # @param _arg Ignored (Rails controller compatibility)
       # @return [String]
       def to_json(_arg = nil) = to :json
 
-      # Serialize the object to the given format
-      # @param format [Symbol] Only :json and :hash are supported out of the box. Extensions may add support for others,
-      # or change the way :json and :hash behave.
+      # Serialize the object to the given format.
+      #
+      # Only `:json` and `:hash` are supported out of the box. Extensions may add support for others or alter
+      # how `:json` and `:hash` are handled.
+      #
+      # @param format [Symbol]
       # @return [Object]
       def to(format)
         blueprint = @instances.blueprint(@blueprint_class)

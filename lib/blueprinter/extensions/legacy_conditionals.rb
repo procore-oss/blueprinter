@@ -3,7 +3,27 @@
 module Blueprinter
   module Extensions
     #
-    # Support for Legacy/V1's legacy conditionals. V2 continue to work.
+    # An extension to add support for V1-style `if` and `unless` Procs.
+    #
+    # ```
+    # class ApplicationBlueprint < Blueprinter::V2::Base
+    #   extensions << Blueprinter::Extensions::LegacyConditionals.new
+    # end
+    # ```
+    #
+    # Your Blueprints can now mix and match V1 and V2 style `if` and `unless` Procs.
+    #
+    # ```ruby
+    # class MyBlueprint < ApplicationBlueprint
+    #   # V2 style
+    #   field :summary, if: ->(ctx) { ctx.object.summary.present? }
+    #
+    #   # V1 style
+    #   field :description, if: ->(_field_name, object, _options) {
+    #     object.summary.present?
+    #   }
+    # end
+    # ```
     #
     class LegacyConditionals < Extension
       # @!visibility private

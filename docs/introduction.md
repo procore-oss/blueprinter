@@ -13,20 +13,20 @@ Upgrading from 1.x? [Read the upgrade guide!](./upgrading/index.md)
 bundle add blueprinter
 ```
 
-See [rubydoc.info/gems/blueprinter](https://www.rubydoc.info/gems/blueprinter) for generated API documentation.
+See [rubydoc.info/gems/blueprinter](https://www.rubydoc.info/gems/blueprinter) for API documentation.
 
 ### Basic Usage
 
 ```ruby
 class WidgetBlueprint < ApplicationBlueprint
   field :name
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
+  association :category, CategoryBlueprint
+  association :parts, [PartBlueprint]
 
   view :extended do
     field :description
-    object :manufacturer, CompanyBlueprint
-    collection :vendors, CompanyBlueprint
+    association :manufacturer, CompanyBlueprint
+    association :vendors, [CompanyBlueprint]
   end
 end
 
@@ -36,5 +36,3 @@ WidgetBlueprint.render(widget).to_json
 # Render the extended view to a Hash
 WidgetBlueprint[:extended].render(widget).to_hash
 ```
-
-Look interesting? [Learn the DSL!](./dsl/index.md)

@@ -3,14 +3,21 @@
 module Blueprinter
   module V2
     #
-    # A Hash-like class that holds a Blueprint's views, but defers evaluation of their
-    # definitions until they're first accessed.
+    # A Hash-like class that holds a Blueprint's view definitions, but defers evaluation until first access.
     #
-    # This allows views to trivially inherit parent fields, etc even when they're defined AFTER the view.
+    # This allows views to trivially inherit parent fields, etc. regardless of the order they're defined in.
+    #
+    # @!visibility private
     #
     class ViewBuilder
       include Enumerable
 
+      # A view definition.
+      #
+      # @!attribute [r] definition
+      #   @return [Proc] Contains the definition
+      # @!attribute [r] empty
+      #   @return [true | false] If true, no fields should be inherited from the parent
       Def = Struct.new(:definition, :empty, keyword_init: true)
 
       # @param parent [Class] A subclass of Blueprinter::V2::Base

@@ -5,7 +5,7 @@ module Blueprinter
     # Structs passed to if/unless/default Procs, field definition blocks, and extension hooks.
     module Context
       #
-      # The blueprint being rendered along with options passed to render/render_object/render_collection.
+      # The blueprint being serialized along with options passed to render/render_object/render_collection.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class. You may modify the `blueprint.options` Hash.
@@ -57,7 +57,7 @@ module Blueprinter
       # @!attribute [rw] options
       #   @return [Hash] Options passed to `render` (frozen but can be replaced)
       # @!attribute [rw] object
-      #   @return [Object] The object or collection that's currently being rendered. Can be replaced.
+      #   @return [Object] The object or collection that's currently being serialized. Can be replaced.
       # @!attribute [r] parent
       #   @return [Blueprinter::V2::Context::Parent] Information about the parent, if any
       # @!attribute [r] store
@@ -99,7 +99,7 @@ module Blueprinter
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] object
-      #   @return [Object] The object or collection that's currently being rendered
+      #   @return [Object] The object or collection that's currently being serialized
       # @!attribute [r] field
       #   @return [Blueprinter::V2::Fields::Field] The field that's currently being evaluated
       # @!attribute [r] store
@@ -125,7 +125,7 @@ module Blueprinter
       # @!attribute [rw] options
       #   @return [Hash] Options passed to `render`. Can be modified.
       # @!attribute [rw] object
-      #   @return [Object] The object or collection that's currently being rendered. Can be replaced.
+      #   @return [Object] The object or collection that's currently being serialized. Can be replaced.
       # @!attribute [rw] format
       #   @return [Symbol] Requested format of result, e.g. :json. Can be replaced.
       # @!attribute [r] store
@@ -138,7 +138,7 @@ module Blueprinter
         end
       end
 
-      # Represents the final result of a render call that shouldn't be further modified by extensions
+      # Represents the final result of a `render` call that shouldn't be further modified by extensions
       # @!attribute [r] value
       #   @return [Object]
       Final = Struct.new(:value)

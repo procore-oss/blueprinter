@@ -3,7 +3,28 @@
 module Blueprinter
   module Extensions
     #
-    # Support for Legacy/V1's `default_if` options.
+    # An extension to add support for V1-style `default_if` values.
+    #
+    # ```
+    # class ApplicationBlueprint < Blueprinter::V2::Base
+    #   extensions << Blueprinter::Extensions::LegacyDefaultIf.new
+    # end
+    # ```
+    #
+    # Your Blueprints can now mix and match V1 and V2 `default_if` values.
+    #
+    # ```ruby
+    # class MyBlueprint < ApplicationBlueprint
+    #   # V2 style
+    #   field :summary, default: "None", default_if: ->(ctx, val) { val.empty? }
+    #   field :summary, default: "None", default_if: :empty_string?
+    #
+    #   # V1 style
+    #   field :description, default: "None", default_if: Blueprinter::EMPTY_STRING
+    #
+    #   def empty_string?(ctx, val) = val.empty?
+    # end
+    # ```
     #
     class LegacyDefaultIf < Extension
       # @param ctx [Blueprinter::V2::Context::Init]

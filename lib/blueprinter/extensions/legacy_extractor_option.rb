@@ -5,6 +5,28 @@ module Blueprinter
     #
     # Support for Legacy/V1's `extractor` option.
     #
+    # NOTE: In the long term it's recommended to refactor your extractor into a V2 extension using the `around_field_value`,
+    # `around_object_value`, and `around_collection_value` hooks. See {Blueprinter::Extension} for details.
+    #
+    # ```
+    # class ApplicationBlueprint < Blueprinter::V2::Base
+    #   extensions << Blueprinter::Extensions::LegacyExtractorOption.new
+    # end
+    # ```
+    #
+    # Your fields (and Blueprint options) can now use V1-style extractors without modification.
+    #
+    # ```ruby
+    # class MyBlueprint < ApplicationBlueprint
+    #   # set a global extractor for this blueprint
+    #   options[:extractor] = MyDefaultExtractor
+    #
+    #   field :name
+    #   # set on individual fields
+    #   field :weird_object, extractor: MyWeirdExtractor
+    # end
+    # ```
+    #
     class LegacyExtractorOption < Extension
       # @!visibility private
       def extract(ctx)

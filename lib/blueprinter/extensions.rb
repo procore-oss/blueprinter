@@ -6,6 +6,7 @@ module Blueprinter
     autoload :FieldOrder, 'blueprinter/extensions/field_order'
     autoload :LegacyConditionals, 'blueprinter/extensions/legacy_conditionals'
     autoload :LegacyDefaultIf, 'blueprinter/extensions/legacy_default_if'
+    autoload :LegacyRenameField, 'blueprinter/extensions/legacy_rename_field'
     autoload :MultiJson, 'blueprinter/extensions/multi_json'
     autoload :OpenTelemetry, 'blueprinter/extensions/open_telemetry'
     autoload :ViewOption, 'blueprinter/extensions/view_option'

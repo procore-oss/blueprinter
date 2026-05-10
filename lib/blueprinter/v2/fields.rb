@@ -114,7 +114,7 @@ module Blueprinter
         dynamic_members.each do |member|
           define_method :"#{member}=" do |val|
             @changed = true
-            send(:"set_#{method}", val)
+            send(:"set_#{member}", val)
           end
         end
       end

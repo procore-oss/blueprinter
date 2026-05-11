@@ -28,9 +28,56 @@ describe 'Extraction' do
     expect(result).to eq({ foo: 'Foo' })
   end
 
-  it 'extracts using a proc' do
+  it 'extracts using a block with zero args' do
     blueprint = Class.new(Blueprinter::V2::Base) do
-      field(:foo) { |obj, _ctx| "#{obj[:foo]}!" }
+      field(:foo) { "!" }
+    end
+
+    object = { foo: 'Foo' }
+    result = blueprint.serializer.object(object, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ foo: '!' })
+  end
+
+  it 'extracts using a block with one arg' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field(:foo) { |obj| "#{obj[:foo]}!" }
+    end
+
+    object = { foo: 'Foo' }
+    result = blueprint.serializer.object(object, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ foo: 'Foo!' })
+  end
+
+  it 'extracts using a block with two args' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field(:foo) { |obj, ctx| "#{obj[ctx.field.source]}!" }
+    end
+
+    object = { foo: 'Foo' }
+    result = blueprint.serializer.object(object, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ foo: 'Foo!' })
+  end
+
+  it 'extracts using a block with one+ args' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field(:foo) do |obj, *args|
+        ctx = args[0]
+        "#{obj[ctx.field.source]}!"
+      end
+    end
+
+    object = { foo: 'Foo' }
+    result = blueprint.serializer.object(object, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ foo: 'Foo!' })
+  end
+
+  it 'extracts using a block with N args' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field(:foo) do |*args|
+        obj = args[0]
+        ctx = args[1]
+        "#{obj[ctx.field.source]}!"
+      end
     end
 
     object = { foo: 'Foo' }

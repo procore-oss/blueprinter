@@ -178,8 +178,8 @@ module Blueprinter
       def needs_field_ctx?(fields)
         @field_hooks.values.any? || fields.any? do |f|
           default = f._merged_options[:default]
-          callable_default = default.is_a?(Proc) || default.is_a?(Symbol)
-          f._has_conditional || !!f.value_proc || !!f._merged_options[:default_if] || callable_default
+          f._has_conditional || !!f._merged_options[:default_if] || default.is_a?(Proc) || default.is_a?(Symbol) ||
+            (!!f.value_proc && f.value_proc.arity != 0 && f.value_proc.arity != 1)
         end
       end
 

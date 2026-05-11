@@ -23,7 +23,7 @@ describe Blueprinter::V2::Render do
       association :category, test.category_blueprint
 
       view :extended do
-        field :long_desc do |_ctx|
+        field :long_desc do |_obj, _ctx|
           'Long desc'
         end
       end

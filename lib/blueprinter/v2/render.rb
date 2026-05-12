@@ -50,7 +50,7 @@ module Blueprinter
           else
             serialize
           end
-        result.is_a?(Context::Final) ? result.value : result
+        result.is_a?(Context::Serialized) ? result.value : result
       end
 
       alias to_h to_hash

@@ -145,7 +145,7 @@ module Blueprinter
       # Represents the final result of a render call that shouldn't be further modified by extensions
       # @!attribute [r] value
       #   @return [Object]
-      Final = Struct.new(:value)
+      Serialized = Struct.new(:value)
     end
   end
 end

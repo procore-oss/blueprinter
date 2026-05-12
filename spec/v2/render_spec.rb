@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'yaml'
 
 describe Blueprinter::V2::Render do
   let(:application_blueprint) do
@@ -112,14 +113,8 @@ describe Blueprinter::V2::Render do
     it 'runs around the entire result' do
       widget_blueprint.extension do
         def around_result(ctx)
-          case ctx.format
-          when :json
-            ctx.format = :hash
-            result = yield(ctx).merge({ foo: 'bar' })
-            JSON.dump result
-          else
-            yield ctx
-          end
+          result = yield ctx
+          result.merge({ foo: 'bar' })
         end
       end
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
@@ -259,6 +254,24 @@ describe Blueprinter::V2::Render do
       render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
 
       expect { render.to_hash }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
+    end
+
+    it 'can output a custom format' do
+      widget_blueprint.extension do
+        def around_result(ctx)
+          case ctx.format
+          when :yaml
+            result = yield ctx
+            serialized YAML.dump result
+          else
+            yield ctx
+          end
+        end
+      end
+
+      widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
+      render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
+      expect(render.to(:yaml)).to eq({ name: 'Foo', desc: 'About', category: { name: 'Bar' } }.to_yaml)
     end
 
     context '#store' do

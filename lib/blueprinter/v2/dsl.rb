@@ -36,7 +36,7 @@ module Blueprinter
       #
       # Append one or more partials to this view.
       #
-      # @param names [Array<Symbol>] One or more partial names
+      # @param *names [Symbol] One or more partial names
       #
       def use(*names)
         names.each { |name| appended_partials << name.to_sym }
@@ -45,7 +45,7 @@ module Blueprinter
       #
       # Insert one or more partials in this view.
       #
-      # @param names [Array<Symbol>] One or more partial names
+      # @param *names [Symbol] One or more partial names
       #
       def use!(*names)
         names.each(&method(:apply_partial!))
@@ -164,11 +164,13 @@ module Blueprinter
       #
       # Exclude parent fields and associations from this view.
       #
-      # @param name [Array<Symbol>] One or more fields or associations to exclude
+      # @param *names [Symbol] One or more fields or associations to exclude
       #
       def exclude(*names)
-        self.excludes += names.map(&:to_sym)
+        self.exclusions += names.map(&:to_sym)
       end
+
+      alias excludes exclude
 
       private
 

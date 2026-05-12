@@ -112,14 +112,8 @@ describe Blueprinter::V2::Render do
     it 'runs around the entire result' do
       widget_blueprint.extension do
         def around_result(ctx)
-          case ctx.format
-          when :json
-            ctx.format = :hash
-            result = yield(ctx).merge({ foo: 'bar' })
-            JSON.dump result
-          else
-            yield ctx
-          end
+          result = yield ctx
+          result.merge({ foo: 'bar' })
         end
       end
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }

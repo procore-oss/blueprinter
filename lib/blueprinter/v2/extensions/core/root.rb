@@ -12,7 +12,7 @@ module Blueprinter
           def around_result(ctx)
             result = yield ctx
             root_name = ctx.options[:root]
-            return result if final?(result) || !root_name
+            return result if serialized?(result) || !root_name
 
             root = { root_name => result }
             root[:meta] = ctx.options[:meta] if ctx.options[:meta]

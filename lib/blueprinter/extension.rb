@@ -43,9 +43,9 @@ module Blueprinter
     def skip! = throw V2::Serializer::SIGNAL, V2::Serializer::SIG_SKIP
 
     # Helper for around_result hooks to declare that a result is "final"
-    def final(val) = V2::Context::Final.new(val)
+    def serialized(val) = V2::Context::Serialized.new(val)
 
-    # Helper for around_result hooks to check if a previous hook has declared a result "final"
-    def final?(val) = val.is_a? V2::Context::Final
+    # Helper for around_result hooks to check if a previous hook has declared a result "serialized"
+    def serialized?(val) = val.is_a? V2::Context::Serialized
   end
 end

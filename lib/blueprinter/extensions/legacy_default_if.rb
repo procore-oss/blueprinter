@@ -9,10 +9,16 @@ module Blueprinter
       # @param ctx [Blueprinter::V2::Context::Init]
       # @!visibility private
       def around_blueprint_init(ctx)
-        ctx.blueprint_options[:default_if] = convert_v1(ctx.blueprint_options[:default_if]) if ctx.blueprint_options[:default_if]
-        ctx.fields.each do |field|
-          field.options[:default_if] = convert_v1(field.options[:default_if]) if field.options[:default_if]
+        if (default_if = ctx.blueprint_options[:default_if])
+          ctx.blueprint_options[:default_if] = convert_v1(default_if)
         end
+
+        ctx.fields.each do |field|
+          if (default_if = field.options[:default_if])
+            field.options[:default_if] = convert_v1(default_if)
+          end
+        end
+
         yield ctx
       end
 

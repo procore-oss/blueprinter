@@ -175,6 +175,7 @@ module Blueprinter
       end
 
       # Skip Context::Field allocation when no field hooks, conditionals, callable defaults, or Proc extractors are in play
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def needs_field_ctx?(fields)
         @field_hooks.values.any? || fields.any? do |f|
           default = f._merged_options[:default]
@@ -182,6 +183,7 @@ module Blueprinter
             (!!f.value_proc && f.value_proc.arity != 0 && f.value_proc.arity != 1)
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
       def finalize_fields!(fields, blueprint_opts)

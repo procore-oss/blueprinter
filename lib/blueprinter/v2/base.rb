@@ -20,12 +20,12 @@ module Blueprinter
         # @return [String] The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :schema, :excludes, :formatters, :partials, :appended_partials, :eval_mutex
+        attr_accessor :views, :schema, :exclusions, :formatters, :partials, :appended_partials, :eval_mutex
       end
 
       self.views = ViewBuilder.new(self)
       self.schema = {}
-      self.excludes = []
+      self.exclusions = []
       self.formatters = {}
       self.partials = {}
       self.appended_partials = []
@@ -39,7 +39,7 @@ module Blueprinter
       def self.inherited(subclass)
         subclass.views = views.dup_for(subclass)
         subclass.schema = schema.transform_values(&:dup)
-        subclass.excludes = []
+        subclass.exclusions = []
         subclass.formatters = formatters.dup
         subclass.partials = partials.dup
         subclass.appended_partials = []
@@ -117,7 +117,7 @@ module Blueprinter
       # @api private
       def self.run_eval!
         appended_partials.each(&method(:apply_partial!))
-        excludes.each { |f| schema.delete f }
+        exclusions.each { |f| schema.delete f }
         extensions.freeze
         options.freeze
         formatters.freeze

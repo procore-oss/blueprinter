@@ -151,7 +151,7 @@ describe "Blueprinter::V2 Fields" do
       field :name
 
       view :foo do
-        exclude :short_desc
+        excludes :short_desc
         use :desc
       end
     end

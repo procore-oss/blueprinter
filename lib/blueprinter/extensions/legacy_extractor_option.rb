@@ -16,13 +16,13 @@ module Blueprinter
       end
 
       # @!visibility private
-      alias_method :around_field_value, :extract
+      alias around_field_value extract
 
       # @!visibility private
-      alias_method :around_object_value, :extract
+      alias around_object_value extract
 
       # @!visibility private
-      alias_method :around_collection_value, :extract
+      alias around_collection_value extract
     end
   end
 end

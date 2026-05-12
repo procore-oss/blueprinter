@@ -1,7 +1,5 @@
 # Basics
 
-## Hooks
-
 An extension will subclass `Blueprinter::Extension` and define one or more hook methods. (See `Blueprinter::Extension` for documentation about all hooks.)
 
 ```ruby
@@ -19,25 +17,11 @@ class ExcludeIfBlankExtension < Blueprinter::Extension
 end
 ```
 
-Then add the extension to a blueprint.
+Then add the extension to a blueprint:
 
 ```ruby
 class ApplicationBlueprint < Blueprinter::V2::Base
   extensions << ExcludeIfBlankExtension.new
-end
-```
-
-## Inline extensions
-
-The DSL allows you to define and add an extension with a single call:
-
-```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
-  extension do
-    def around_field_value(ctx)
-      # ...
-    end
-  end
 end
 ```
 

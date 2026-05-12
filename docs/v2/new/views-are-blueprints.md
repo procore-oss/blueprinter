@@ -1,11 +1,11 @@
 # Views are Blueprints
 
-In V2, a view is an anonymous subclass of the parent. Practially speaking there is no distinction between a "blueprint" and a "view".
+In V2, a view is an anonymous subclass of the Blueprint. There is no technical distinction between a "blueprint" and a "view".
 
 This has two important consequences:
 
-1. The DSL in V2 is *recursive*: views can do anything Blueprints can do.
-2. Views in V2 are *Ruby subclasses*: views can do anything Ruby classes can do.
+1. The DSL is *recursive*: views can do anything Blueprints can do.
+2. Views are *Ruby subclasses*: views can do anything Ruby classes can do.
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint
@@ -20,13 +20,10 @@ class MyBlueprint < ApplicationBlueprint
     # Like legacy/V1, views inherit fields from the parent. In V2 they also
     # inherit options, extensions, and formatters.
 
-    # Override a parent's option
+    # Override inherited options
     options[:exclude_if_nil] = false
 
-    # Because views are real Ruby subclass of MyBlueprint, they can do
-    # anything a Ruby class can do.
-
-    # Include a Module. Only this view (and any child views) will have it.
+    # Include a Ruby module. Only this view (and any child views) will have it.
     include MyHelpers
 
     # Override the formatter's method to ensure UTC time

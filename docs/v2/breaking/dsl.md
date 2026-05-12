@@ -16,6 +16,35 @@ association :parts, [PartBlueprint]
 association :parts, [PartBlueprint[:my_view]]
 ```
 
+If you're referencing the current view, such as in a recursive association, use `self`:
+
+```ruby
+view :with_child do
+  association :child, self
+end
+```
+
+If you're referencing a *different view in the current Blueprint*, you must wrap it in a Proc:
+
+```ruby
+class MyBlueprint < ApplicationBlueprint
+  association :child, -> { MyBlueprint[:child_view] }
+  association :children, [-> { MyBlueprint[:child_view] }]
+
+  view :child_view do
+    # ...
+  end
+end
+```
+
+If you're referencing the *same view name in a different Blueprint*, you may use `view_name`:
+
+```ruby
+view :extended do
+  association :category, CategoryBlueprint[view_name]
+end
+```
+
 ### Second arg in field blocks
 
 If you're using the *second* argument in your field/association blocks, it's no longer the render options. It's now a `Blueprinter::V2::Context::Field`
@@ -47,19 +76,10 @@ This change may look superfluous, but it's the result of a cool new feature: [pa
 
 Transforming a Blueprint's output can be done using the `around_blueprint` extension hook. (See `Blueprinter::Extension` for full Extension API docs).
 
-```ruby
-class MyTransformer < Blueprinter::Extension
-  # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
-    hash = yield ctx
-    hash.transform_keys! { |key| key.to_s.camelize(:lower) }
-    hash
-  end
-end
+However, the `LegacyTransformer` extension offers compatibility with legacy/V1 transformer classes:
 
-class MyBlueprint < ApplicationBlueprint
-  extensions << MyTransformer.new
-end
+```ruby
+extensions << Blueprinter::Extensions::LegacyTransformer.new(MyTransformer)
 ```
 
 ### `identifier`
@@ -67,7 +87,7 @@ end
 Blueprinter Legacy/V1 had a special DSL method called `identifier`. It would accept the name of your primary key field,
 add it to every view, and create a special view called `identifier` that contained only that field. It defaulted to `id`.
 
-V2 does not include this very opinionated functionality, but you can easily replicate it:
+V2 does not include this very opinionated functionality, but you can easily replicate it in your base Blueprint:
 
 ```ruby
 class ApplicationBlueprint < Blueprinter::Extension

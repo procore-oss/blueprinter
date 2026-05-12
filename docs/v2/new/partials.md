@@ -25,8 +25,7 @@ See the `Blueprinter::V2::DSL` docs for more info on `partial`, `use`, and `use!
 
 ### More than just fields
 
-Like everything in V2, partials are inherited from parent Blueprints or views. This means you can define a partial in `ApplicationBlueprint` and
-use it in your other Blueprints.
+Partials have access to the full DSL, so they can define options, extensions, formatters, views, and even other partials.
 
 ```ruby
 class ApplicationBlueprint < Blueprinter::V2::Base
@@ -34,6 +33,7 @@ class ApplicationBlueprint < Blueprinter::V2::Base
   partial :exclude_nil_or_blank do
     options[:exclude_if_nil] = true
 
+    # An inline extension that skips blank fields
     extension do
       def around_field_value(ctx)
         val = yield ctx
@@ -47,6 +47,7 @@ class ApplicationBlueprint < Blueprinter::V2::Base
 end
 
 class MyBlueprint < ApplicationBlueprint
+  # Child blueprints can opt into this behavior with a single line
   use :exclude_nil_or_blank
 end
 ```

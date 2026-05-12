@@ -19,8 +19,10 @@ module Blueprinter
   #
   # - {Blueprinter::Extensions::LegacyConditionals} Allows V1-style `if`/`unless` Procs
   # - {Blueprinter::Extensions::LegacyDefaultIf} Allows V1-style `default_if` options
+  # - {Blueprinter::Extensions::LegacyDynamicOptions} Adds V1's `options` option to associations
   # - {Blueprinter::Extensions::LegacyExtractorOption} Adds V1's `extractor` field option
   # - {Blueprinter::Extensions::LegacyRenameField} Adds V1's `name` field option
+  # - {Blueprinter::Extensions::LegacyTransformer} Adds V1's `name` field option
   # - {Blueprinter::Extensions::ViewOption} Adds a `view` option to `render`
   #
   # == Community extensions

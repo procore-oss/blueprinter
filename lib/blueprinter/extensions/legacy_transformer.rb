@@ -3,7 +3,15 @@
 module Blueprinter
   module Extensions
     #
-    # Support for Legacy/V1's transformers.
+    # An extension to add support for V1 transformer classes.
+    #
+    # ```
+    # class ApplicationBlueprint < Blueprinter::V2::Base
+    #   extensions << Blueprinter::Extensions::LegacyTransformer.new(
+    #     MyTransformer, OtherTransformer
+    #   )
+    # end
+    # ```
     #
     class LegacyTransformer < Extension
       # @param *transformers [Class] One or more transformers (Blueprinter::Transformer)

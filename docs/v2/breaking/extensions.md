@@ -1,5 +1,8 @@
 # Breaking Extension Changes
 
+> [!NOTE]
+Most applications don't use extensions (yet) and can skip this section.
+
 Legacy/V1 had only one extension hooks: `pre_render`. V2's closest hook is `around_result`, which runs once at the beginning of every call to `render`.
 
 Here's an example of an extension that supports both V1 and V2:

@@ -21,7 +21,6 @@ and the extracted value.
 
 ```ruby
 field :name, default: "N/A", default_if: ->(ctx, val) { val.empty? }
-
 field :name, default: "N/A", default_if: :empty_string?
 
 def empty_string?(ctx, val) = val.empty?

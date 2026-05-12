@@ -8,7 +8,8 @@ class DecoratorExtension < Blueprinter::Extension
     @attr = attr
     @decorator = decorator
   end
-  
+
+  # @param ctx [Blueprinter::V2::Context::Object]
   def around_blueprint(ctx)
     result = yield ctx
     result[@attr] = @decorator.call(ctx.object)

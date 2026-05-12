@@ -7,10 +7,11 @@ options first, then allows fields to override it.
 
 ```ruby
 class ExcludeIfBlankExtension < Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Field]
   def around_field_value(ctx)
     val = yield ctx
 
-    exclude = ctx.blueprint_options[:exclude_if_blank]
+    exclude = ctx.blueprint.options[:exclude_if_blank]
     exclude = ctx.field.options[:exclude_if_blank] if ctx.field.options.key? :exclude_if_blank
     skip! if exclude && val.blank?
 

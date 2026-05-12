@@ -14,6 +14,7 @@
     - [If/unless options](./v2/compatible/if-unless-options.md)
     - [default_if option](./v2/compatible/default_if-option.md)
     - [Field name option](./v2/compatible/field-name-option.md)
+    - [Dynamic options](./v2/compatible/dynamic-options.md)
     - [Extractor option](./v2/compatible/extractor-option.md)
   - [New Features](./v2/new/index.md)
     - [Formatters](./v2/new/formatters.md)
@@ -29,7 +30,7 @@
   - [Blueprint Decorator](./extensions/blueprint-decorator.md)
   - [Telemetry](./extensions/telemetry.md)
   - [Field Filter](./extensions/field-filter.md)
-  - [Field Modifier](./extensions/field-modifier.md)
+  - [Camelize Fields](./extensions/camelize-fields.md)
   - [YAML Serializer](./extensions/yaml-serializer.md)
 
 - [Legacy/V1 Docs](./v1.md)

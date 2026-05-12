@@ -90,21 +90,14 @@ See the Documentation for `Blueprinter::V2::DSL#format`.
 
 ### `default_transformers`
 
-Transformers can be implemented using V2s `around_blueprint` extension hook (See `Blueprinter::Extension` for full Extension API docs).
+Transformations can be done using V2's `around_blueprint` extension hook (See `Blueprinter::Extension` for full Extension API docs).
+
+However, the `LegacyTransformer` extension offers compatibility with legacy/V1 transformer classes:
 
 ```ruby
-class MyTransformer < Blueprinter::Extension
-  # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
-    hash = yield ctx
-    hash.transform_keys! { |key| key.to_s.camelize(:lower) }
-    hash
-  end
-end
-
-class ApplicationBlueprint < Blueprinter::V2::Base
-  extensions << MyTransformer.new
-end
+extensions << Blueprinter::Extensions::LegacyTransformer.new(
+  MyTransformer, OtherTransformer
+)
 ```
 
 ### `generator` / `method`
@@ -126,12 +119,9 @@ class MyJsonExtension < Blueprinter::Extension
   def around_result(ctx)
     case ctx.format
     when :json
-      # change the format to Hash, get the result, then serialize it
-      ctx.format = :hash
       result = yield ctx
       MySerializer.dump result
     else
-      # let Blueprinter, or other extensions, handle other formats
       yield ctx
     end
   end

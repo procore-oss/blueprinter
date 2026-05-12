@@ -1,8 +1,11 @@
 # Breaking Reflection Changes
 
+> [!NOTE]
+Most applications don't use reflection and can skip this section.
+
 V2's reflection API is backwards compatible with the exception of renamed fields. This is a result of [a change in the DSL](../compatible/field-name-option.md).
 
-In legacy/V1, here's how you would define and reflect on such a field:
+### V1 style
 
 ```ruby
 class MyBlueprint < Blueprinter::Base
@@ -17,7 +20,7 @@ puts field.name         # name of field's source
 # => :description
 ```
 
-In V2 it looks like this:
+### V2 style
 
 ```ruby
 class MyBlueprint < Blueprinter::Base

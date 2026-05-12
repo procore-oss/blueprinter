@@ -219,10 +219,15 @@ module Blueprinter
       # ```
       # class WidgetBlueprint < ApplicationBlueprint
       #   extension do
-      #     # modify every object before serialization
-      #     def around_serialize_object(ctx)
-      #       ctx.object = modify ctx.object
-      #       yield ctx
+      #     # Decorate Blueprint output
+      #     def around_blueprint(ctx)
+      #       hash = yield ctx
+      #       hash[:meta] = metadata ctx.object
+      #       hash
+      #     end
+      #
+      #     def metadata(object)
+      #       # ...
       #     end
       #   end
       # end
@@ -266,9 +271,6 @@ module Blueprinter
       #   "(#{ctx.field.name} is empty)"
       # end
       # ```
-      #
-      # NOTE: To ease with the transition from Legacy/V1, `if`/`unless` Procs that accept exactly **three** arguments will continue to work
-      # like they did in Legacy/V1. This may be removed in the future.
       #
       # The Proc (or method name) passed to `default_if` accepts two arguments: a {Blueprinter::V2::Context::Field} and the
       # field's value.
@@ -362,6 +364,9 @@ module Blueprinter
       #   association :subwidget, -> { WidgetBlueprint[:extended] }
       #
       #   # The Proc can accept on arg: the object
+      #   association :category, ->(category) { category.blueprint }
+      #
+      #   # For collections, wrap the Proc in an array
       #   association :categories, [->(category) { category.blueprint }]
       # end
       # ```

@@ -9,17 +9,17 @@ See the `Blueprinter::Extension` docs for the full API, or read through the [Ext
 
 Blueprinter V2 comes bundled with the following extensions. See the `Blueprinter::Extensions` module for full documentation about each one.
 
-### `Blueprinter::Extensions::MultiJson`
+### MultiJson
 
-Use the `multi_json` gem to serialize JSON.
+Use the `multi_json` gem to serialize JSON. See `Blueprinter::Extensions::MultiJson`.
 
-### `Blueprinter::Extensions::OpenTelemetry`
+### OpenTelemetry
 
-Instrument the serialization process so you can see which Blueprints or extensions are slowing things down.
+Instrument the serialization process so you can see which Blueprints or extensions are slowing things down. See `Blueprinter::Extensions::OpenTelemetry`.
 
-### `Blueprinter::Extensions::FieldOrder`
+### FieldOrder
 
-Change the default field order.
+Customize the field order in the serialized output. See `Blueprinter::Extensions::FieldOrder`.
 
 ### V1 Compatibility Extensions
 
@@ -27,6 +27,7 @@ These extensions offer V1-compatibility for some options. They're covered under 
 
 * `Blueprinter::Extensions::LegacyConditionals`
 * `Blueprinter::Extensions::LegacyDefaultIf`
+* `Blueprinter::Extensions::LegacyDynamicOptions`
 * `Blueprinter::Extensions::LegacyExtractorOption`
 * `Blueprinter::Extensions::LegacyRenameField`
 * `Blueprinter::Extensions::ViewOption`

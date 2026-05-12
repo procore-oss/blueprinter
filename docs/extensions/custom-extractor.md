@@ -4,21 +4,24 @@ Blueprinter V2 handles extraction from Hashes (symbol and string keys) and objec
 
 ```ruby
 class FooExtractorExtension < Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Field]
   def around_field_value(ctx)
     return yield ctx unless ctx.object.is_a? Foo
-    
+
     extract(ctx.object, ctx.field.source)
   end
-  
+
+  # @param ctx [Blueprinter::V2::Context::Field]
   def around_object_value(ctx)
     return yield ctx unless ctx.object.is_a? Foo
-    
+
     extract(ctx.object, ctx.field.source)
   end
-  
+
+  # @param ctx [Blueprinter::V2::Context::Field]
   def around_collection_value(ctx)
     return yield ctx unless ctx.object.is_a? Foo
-    
+
     extract(ctx.object, ctx.field.source)
   end
 

@@ -9,6 +9,7 @@ class MyTelemetryExtension
   end
 
   # Create a span for object serialization
+  # @param ctx [Blueprinter::V2::Context::Object]
   def around_serialize_object(ctx)
     @my_tel.span("blueprint.object", blueprint: ctx.blueprint.to_s) do
       yield ctx
@@ -16,6 +17,7 @@ class MyTelemetryExtension
   end
 
   # Create a span for collection serialization
+  # @param ctx [Blueprinter::V2::Context::Object]
   def around_serialize_collection(ctx)
     @my_tel.span("blueprint.collection", blueprint: ctx.blueprint.to_s) do
       yield ctx
@@ -23,6 +25,7 @@ class MyTelemetryExtension
   end
 
   # Create a span for other extension hooks
+  # @param ctx [Blueprinter::V2::Context::Hook]
   def around_hook(ctx)
     @my_tel.span("blueprint.extension", extension: ctx.extension.class.name, hook: ctx.hook) do
       yield

@@ -92,6 +92,7 @@ module Blueprinter
     #   additional key value pairs will be exposed during serialization.
     # @return [Hash]
     def hashify(object, view_name:, local_options:)
+      view_name = @forced_view_name if @forced_view_name # V2-forward compatibility
       raise Errors::UnknownView, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
 
       hooks = Blueprinter.configuration.hooks[:pre_render]

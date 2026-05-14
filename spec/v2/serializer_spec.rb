@@ -494,6 +494,36 @@ describe Blueprinter::V2::Serializer do
     expect(blueprint_instances).to eq 1
   end
 
+  it 'uses Blueprints from a Proc (0 args)' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      association :child, -> { self }
+    end
+
+    res = blueprint.serializer.object({ name: 'A', child: { name: 'B' } }, {}, instances:, store:, depth: 1)
+    expect(res).to eq({ name: 'A', child: { name: 'B', child: nil } })
+  end
+
+  it 'uses Blueprints from a Proc (1 arg)' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      association :child, ->(object) { object.fetch(:blueprint) }
+    end
+
+    res = blueprint.serializer.object({ name: 'A', child: { name: 'B', blueprint: } }, {}, instances:, store:, depth: 1)
+    expect(res).to eq({ name: 'A', child: { name: 'B', child: nil } })
+  end
+
+  it 'uses Blueprints from a Proc (collection)' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      association :children, [-> { self }]
+    end
+
+    res = blueprint.serializer.object({ name: 'A', children: [{ name: 'B' }] }, {}, instances:, store:, depth: 1)
+    expect(res).to eq({ name: 'A', children: [{ name: 'B', children: nil }] })
+  end
+
   it 'passes objects information about the parent' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log) = @log = log

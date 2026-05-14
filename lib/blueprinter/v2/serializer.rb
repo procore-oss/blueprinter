@@ -185,7 +185,7 @@ module Blueprinter
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
+      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def finalize_fields!(fields, blueprint_opts)
         fields.each do |field|
           next if field.frozen?
@@ -204,15 +204,7 @@ module Blueprinter
           field._extractor = field.value_proc ? Extractors::Proc : Extractors::Property
           field._has_conditional = field._merged_options.key?(:if) || field._merged_options.key?(:unless)
           field._has_default = field._merged_options.key?(:default)
-
-          if field.association?
-            field._serializer =
-              if field.blueprint.is_a?(ViewWrapper) || field.blueprint < ::Blueprinter::Base
-                FieldSerializers::V1Association
-              else
-                field.collection? ? FieldSerializers::Collection : FieldSerializers::Object
-              end
-          end
+          field._serializer = field_serializer(field) if field.association?
 
           # freeze everything
           field.options.freeze
@@ -221,7 +213,17 @@ module Blueprinter
           field.freeze
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
+      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+
+      def field_serializer(field)
+        if field.blueprint.is_a? Proc
+          field.collection? ? FieldSerializers::ProcCollection : FieldSerializers::ProcObject
+        elsif field.blueprint < ::Blueprinter::Base
+          FieldSerializers::V1Association
+        else
+          field.collection? ? FieldSerializers::Collection : FieldSerializers::Object
+        end
+      end
     end
     # rubocop:enable Metrics/ClassLength
   end

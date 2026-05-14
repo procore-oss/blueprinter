@@ -18,6 +18,30 @@ module Blueprinter
         end
       end
 
+      # Serializer for any Blueprint in a Proc
+      module ProcObject
+        def self.serialize(blueprint_proc, value, options, parent:, instances:, store:, depth:)
+          blueprint_class = blueprint_proc.arity.zero? ? blueprint_proc.call : blueprint_proc.call(value)
+          if blueprint_class < ::Blueprinter::Base
+            V1Association.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          else
+            Object.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          end
+        end
+      end
+
+      # Serializer for any Blueprint in a Proc
+      module ProcCollection
+        def self.serialize(blueprint_proc, value, options, parent:, instances:, store:, depth:)
+          blueprint_class = blueprint_proc.arity.zero? ? blueprint_proc.call : blueprint_proc.call(value)
+          if blueprint_class < ::Blueprinter::Base
+            V1Association.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          else
+            Collection.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
+          end
+        end
+      end
+
       # Serializer for V1 associations
       module V1Association
         def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)

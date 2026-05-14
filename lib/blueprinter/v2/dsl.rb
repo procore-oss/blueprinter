@@ -137,8 +137,8 @@ module Blueprinter
       # Defines an association to an object or collection.
       #
       # @param name [Symbol] Name of the association
-      # @param blueprint [Class|Array<Class>] Blueprint class to use (object). For a collection, wrap the blueprint in an
-      # array.
+      # @param blueprint [Class|Proc|Array<Class|Proc>] Blueprint class to use. For a collection, wrap the blueprint in an
+      #                  array. You may also pass a Proc that returns a Blueprint.
       # @param source [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
@@ -185,7 +185,7 @@ module Blueprinter
           end
 
         is_bp_class = assoc_arg.is_a?(Class) && (assoc_arg < V2::Base || assoc_arg < Blueprinter::Base)
-        raise ArgumentError, BLUEPRINT_ARRAY_OR_CLASS_ERR unless is_bp_class || assoc_arg.is_a?(ViewWrapper)
+        raise ArgumentError, BLUEPRINT_ARRAY_OR_CLASS_ERR unless is_bp_class || assoc_arg.is_a?(Proc)
 
         [is_collection, assoc_arg]
       end

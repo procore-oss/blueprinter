@@ -6,7 +6,6 @@ require_relative 'field'
 require_relative 'reflection'
 require_relative 'rendering'
 require_relative 'view_collection'
-require_relative 'view_wrapper'
 
 module Blueprinter
   class Base
@@ -358,6 +357,17 @@ module Blueprinter
         @_view_collection ||= ViewCollection.new
       end
 
+      # For compatibility with V2's DSL
+      #
+      # @return [Blueprinter::Base] An anonymous subclass that renders a specific view
+      def [](view_name)
+        raise Errors::UnknownView, "View '#{view_name}' could not be found in Blueprint '#{name}'" unless view? view_name
+
+        Class.new(self) do
+          @forced_view_name = view_name
+        end
+      end
+
       private
 
       attr_accessor :view_scope
@@ -374,15 +384,6 @@ module Blueprinter
       def association_extractor
         @_association_extractor ||= AssociationExtractor.new
       end
-    end
-
-    # For compatibility with V2
-    #
-    # @return [Blueprinter::ViewWrapper]
-    def self.[](view_name)
-      raise Errors::UnknownView, "View '#{view_name}' could not be found in Blueprint '#{name}'" unless view? view_name
-
-      ViewWrapper.new(self, view_name)
     end
   end
 end

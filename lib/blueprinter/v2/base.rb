@@ -102,6 +102,12 @@ module Blueprinter
         Render.new(objs, options, blueprint: self, instances:, collection: true)
       end
 
+      # Backwards-compatible JSON render. `MyBlueprint.render(object).to_json` is preferred.
+      def self.render_as_json(object, options = {}) = render(object, options).to_json
+
+      # Backwards-compatible Hash render `MyBlueprint.render(object).to_hash` is preferred.
+      def self.render_as_hash(object, options = {}) = render(object, options).to_hash
+
       # Apply partials and field exclusions
       # @api private
       def self.eval!(lock: true)

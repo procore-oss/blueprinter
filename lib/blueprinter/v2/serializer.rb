@@ -10,7 +10,7 @@ module Blueprinter
     class Serializer
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
-      Config = Struct.new(:blueprint, :blueprint_options, :fields, :options, :needs_field_ctx, keyword_init: true)
+      Config = Struct.new(:blueprint, :fields, :options, :needs_field_ctx, keyword_init: true)
 
       attr_reader :hooks, :formatter
 
@@ -25,39 +25,32 @@ module Blueprinter
       end
 
       def object(object, options, instances:, store:, depth: 1, parent: nil)
-        blueprint = instances.blueprint(@blueprint_class)
-        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
-        field_ctx = config.needs_field_ctx ? build_field_ctx(blueprint, config, store:, depth:) : nil
-        blueprint_ctx = @hook_around_blueprint ? build_object_ctx(blueprint, config, parent:, store:, depth:) : nil
+        config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options, store:, depth:)
+        field_ctx = config.needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
+        blueprint_ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
 
         if @hook_around_serialize_object
-          ctx = Context::Object.new(blueprint, config.fields, config.options, object, parent, store, depth)
+          ctx = build_object_ctx(config, object:, parent:, store:, depth:)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
-            serialize(blueprint, config, ctx.object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
+            config.options = ctx.options.freeze
+            blueprint_ctx&.options = config.options
+            serialize(config, ctx.object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
           end
         else
-          serialize(blueprint, config, object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
+          serialize(config, object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
         end
       end
 
       def collection(objects, options, instances:, store:, depth: 1, parent: nil)
-        blueprint = instances.blueprint(@blueprint_class)
-        config = store[blueprint.object_id] ||= blueprint_init(blueprint, options, store:, depth:)
-        # create the following context objects ONCE for this collection
-        field_ctx = config.needs_field_ctx ? build_field_ctx(blueprint, config, store:, depth:) : nil
-        blueprint_ctx = @hook_around_blueprint ? build_object_ctx(blueprint, config, parent:, store:, depth:) : nil
-
+        config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options, store:, depth:)
         if @hook_around_serialize_collection
-          ctx = Context::Object.new(blueprint, config.fields, config.options, objects, parent, store, depth)
+          ctx = build_object_ctx(config, object: objects, parent:, store:, depth:)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
-            ctx.object.map do |object|
-              serialize(blueprint, config, object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
-            end.to_a
+            config.options = ctx.options.freeze
+            serialize_collection(config, ctx.object, parent:, instances:, store:, depth:)
           end
         else
-          objects.map do |object|
-            serialize(blueprint, config, object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
-          end.to_a
+          serialize_collection(config, objects, parent:, instances:, store:, depth:)
         end
       end
 
@@ -67,28 +60,38 @@ module Blueprinter
 
       private
 
-      def build_field_ctx(blueprint, config, store:, depth:)
-        Context::Field.new(blueprint, config.fields, config.options, config.blueprint_options, nil, nil, store, depth)
+      def serialize_collection(config, objects, parent:, instances:, store:, depth:)
+        ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
+        field_ctx = config.needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
+
+        objects.map do |object|
+          serialize(config, object, instances:, store:, depth:, field_ctx:, ctx:)
+        end.to_a
       end
 
-      def build_object_ctx(blueprint, config, store:, depth:, parent: nil)
-        Context::Object.new(blueprint, config.fields, config.options, nil, parent, store, depth)
+      def build_field_ctx(config, store:, depth:)
+        Context::Field.new(config.blueprint, config.fields, config.options, nil, nil, store, depth)
       end
 
-      def serialize(blueprint, config, object, instances:, store:, depth:, ctx: nil, field_ctx: nil)
+      def build_object_ctx(config, store:, depth:, object: nil, parent: nil)
+        Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
+      end
+
+      def serialize(config, object, instances:, store:, depth:, ctx: nil, field_ctx: nil)
         if @hook_around_blueprint
           ctx.object = object
           @hooks.around(:around_blueprint, ctx) do |ctx|
-            _serialize(blueprint, config, ctx.object, instances:, store:, depth:, ctx: field_ctx)
+            config.options = ctx.options.freeze
+            _serialize(config, ctx.object, instances:, store:, depth:, ctx: field_ctx)
           end
         else
-          _serialize(blueprint, config, object, instances:, store:, depth:, ctx: field_ctx)
+          _serialize(config, object, instances:, store:, depth:, ctx: field_ctx)
         end
       end
 
       # Long and ugly for performance
       # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-      def _serialize(blueprint, config, object, instances:, store:, depth:, ctx: nil)
+      def _serialize(config, object, instances:, store:, depth:, ctx: nil)
         ctx&.object = object
         parent = nil
         # rubocop:disable Metrics/BlockLength
@@ -115,7 +118,7 @@ module Blueprinter
             if value.nil?
               field._merged_options[:exclude_if_nil] ? next : nil
             elsif field.type == :field
-              @format ? @formatter.call(blueprint, value) : value
+              @format ? @formatter.call(config.blueprint, value) : value
             else
               parent ||= Context::Parent.new(@blueprint_class)
               parent.field = field
@@ -138,27 +141,30 @@ module Blueprinter
       # @param store [Hash] The context store for this render
       # @param depth [Integer] Current serialization depth
       # @return [Blueprinter::V2::Serializer::Config]
-      def blueprint_init(blueprint, options, store:, depth:)
-        config = Config.new(blueprint:, blueprint_options: blueprint.class.options, fields: default_fields, options:,
-                            needs_field_ctx: @needs_field_ctx)
+      def blueprint_init(instances, options, store:, depth:)
+        blueprint = instances.blueprint(@blueprint_class)
+        config = Config.new(blueprint:, fields: default_fields, options:, needs_field_ctx: @needs_field_ctx)
+
         if @hook_around_blueprint_init
           fields = config.fields.map(&:to_configurable)
-          ctx = Context::Init.new(blueprint, config.blueprint_options.dup, fields, options, store, depth)
+          ctx = Context::Init.new(blueprint, fields, options, store, depth)
           @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-            changed = ctx.blueprint_options != config.blueprint_options
-            config.blueprint_options = ctx.blueprint_options.freeze
+            changed = ctx.blueprint.options != @blueprint_class.options
+            config.blueprint.options.freeze
             config.fields = ctx.fields.map do |f|
               changed ||= f.changed?
               changed ? f.to_internal : f._original
             end.freeze
+
             if changed
-              finalize_fields! config.fields, config.blueprint_options
+              finalize_fields! config.fields, config.blueprint.options
               config.needs_field_ctx = needs_field_ctx? config.fields
             end
           end
         end
+
         config.options.freeze
-        config.freeze
+        config
       end
 
       # Save time by skipping hooks that aren't used

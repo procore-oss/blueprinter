@@ -7,9 +7,9 @@ module Blueprinter
     module Extensions
       module Core
         #
-        # A core extension for serializing results to JSON.
+        # A core extension that supports serializing to :json and :hash.
         #
-        class Json < Extension
+        class Format < Extension
           # @param ctx [Blueprinter::V2::Context::Result]
           def around_result(ctx)
             result = yield ctx

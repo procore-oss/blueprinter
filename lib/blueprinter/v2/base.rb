@@ -9,7 +9,6 @@ module Blueprinter
     class Base
       extend DSL
       extend Reflection
-      include Helpers
 
       class << self
         # @return [Hash] Options set on this Blueprint
@@ -21,12 +20,12 @@ module Blueprinter
         # @return [String] The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @api private
-        attr_accessor :views, :schema, :excludes, :formatters, :partials, :appended_partials, :eval_mutex
+        attr_accessor :views, :schema, :exclusions, :formatters, :partials, :appended_partials, :eval_mutex
       end
 
       self.views = ViewBuilder.new(self)
       self.schema = {}
-      self.excludes = []
+      self.exclusions = []
       self.formatters = {}
       self.partials = {}
       self.appended_partials = []
@@ -40,7 +39,7 @@ module Blueprinter
       def self.inherited(subclass)
         subclass.views = views.dup_for(subclass)
         subclass.schema = schema.transform_values(&:dup)
-        subclass.excludes = []
+        subclass.exclusions = []
         subclass.formatters = formatters.dup
         subclass.partials = partials.dup
         subclass.appended_partials = []
@@ -49,6 +48,11 @@ module Blueprinter
         subclass.blueprint_name = subclass.name || blueprint_name
         subclass.view_name = :default
         subclass.eval_mutex = Mutex.new
+      end
+
+      def self.serializer
+        eval! unless @serializer
+        @serializer
       end
 
       # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
@@ -74,7 +78,7 @@ module Blueprinter
       # @return [Class] A descendent of Blueprinter::V2::Base
       #
       def self.[](name)
-        eval! unless @evaled
+        eval! unless @serializer
         child, children = name.to_s.split('.', 2)
         view = views[child.to_sym] || raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{self}'")
         children ? view[children] : view
@@ -98,13 +102,19 @@ module Blueprinter
         Render.new(objs, options, blueprint: self, instances:, collection: true)
       end
 
+      # Backwards-compatible JSON render. `MyBlueprint.render(object).to_json` is preferred.
+      def self.render_as_json(object, options = {}) = render(object, options).to_json
+
+      # Backwards-compatible Hash render `MyBlueprint.render(object).to_hash` is preferred.
+      def self.render_as_hash(object, options = {}) = render(object, options).to_hash
+
       # Apply partials and field exclusions
       # @api private
       def self.eval!(lock: true)
-        return if @evaled
+        return if @serializer
 
         if lock
-          eval_mutex.synchronize { run_eval! unless @evaled }
+          eval_mutex.synchronize { run_eval! unless @serializer }
         else
           run_eval!
         end
@@ -113,22 +123,27 @@ module Blueprinter
       # @api private
       def self.run_eval!
         appended_partials.each(&method(:apply_partial!))
-        excludes.each { |f| schema.delete f }
+        exclusions.each { |f| schema.delete f }
         extensions.freeze
         options.freeze
         formatters.freeze
         schema.freeze
-        schema.each_value do |f|
-          f.options&.freeze
-          f.freeze
-        end
-        @evaled = true
+        serializer = Serializer.new(self)
+        @serializer = serializer
       end
 
       # @api private
       def self.apply_partial!(name)
         p = partials[name] || raise(Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'")
         class_eval(&p)
+      end
+
+      # @return [Hash] Copy of options set on the class. Frozen after `around_blueprint_init` hooks run.
+      attr_reader :options
+
+      # @!visibility private
+      def initialize
+        @options = self.class.options.dup
       end
 
       # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"

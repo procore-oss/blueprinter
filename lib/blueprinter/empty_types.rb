@@ -9,6 +9,7 @@ module Blueprinter
 
   module EmptyTypes
     include TypeHelpers
+    extend self
 
     private
 

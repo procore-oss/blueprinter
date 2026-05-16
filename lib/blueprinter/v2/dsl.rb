@@ -36,7 +36,7 @@ module Blueprinter
       #
       # Append one or more partials to this view.
       #
-      # @param names [Array<Symbol>] One or more partial names
+      # @param *names [Symbol] One or more partial names
       #
       def use(*names)
         names.each { |name| appended_partials << name.to_sym }
@@ -45,7 +45,7 @@ module Blueprinter
       #
       # Insert one or more partials in this view.
       #
-      # @param names [Array<Symbol>] One or more partial names
+      # @param *names [Symbol] One or more partial names
       #
       def use!(*names)
         names.each(&method(:apply_partial!))
@@ -63,13 +63,12 @@ module Blueprinter
       end
 
       #
-      # Define an anonymous extension and add it to the current context. It will be initialized
-      # once per render.
+      # Define an anonymous extension and add it to the current context.
       #
       #   class WidgetBlueprint < ApplicationBlueprint
       #     extension do
       #       # modify every object before serialization
-      #       def around_blueprint(ctx)
+      #       def around_serialize_object(ctx)
       #         object = modify ctx.object
       #         yield object
       #       end
@@ -82,30 +81,28 @@ module Blueprinter
           @blueprint_name = bp_name
           def self.name = "#{@blueprint_name} extension"
           class_eval(&block)
-        end
+        end.new
       end
 
       #
       # Define a field.
       #
       # @param name [Symbol] Name of the field
-      # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param extractor [Class] Extractor class to use for this field
+      # @param source [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
-      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
-      # @return [Blueprinter::V2::Fields::Field]
       #
-      def field(name, from: name, **options, &definition)
+      def field(name, source: name, **options, &definition)
         name = name.to_sym
         schema[name] = Fields::Field.new(
+          type: :field,
           name: name,
-          from: from.to_sym,
-          from_str: from.to_s,
+          source: source.to_sym,
+          source_str: source.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -114,10 +111,25 @@ module Blueprinter
       #
       # Add multiple fields at once.
       #
-      def fields(*names)
+      # @param name [Symbol] Name of the field
+      # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
+      # @param default_if [Symbol | Proc] Return true to use the value in `default`
+      # @param exclude_if_nil [Boolean] Don't include field if the value is nil
+      # @param if [Symbol | Proc] Only include the field if it returns true
+      # @param unless [Symbol | Proc] Include the field unless it returns true
+      # @yield [Blueprinter::V2::Context] Generate the value from the block
+      #
+      def fields(*names, **options, &definition)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Fields::Field.new(name: name, from: name, from_str: name.to_s, options: {})
+          schema[name] = Fields::Field.new(
+            type: :field,
+            name: name,
+            source: name,
+            source_str: name.to_s,
+            options: options,
+            value_proc: definition
+          )
         end
       end
 
@@ -125,27 +137,25 @@ module Blueprinter
       # Defines an association to an object or collection.
       #
       # @param name [Symbol] Name of the association
-      # @param blueprint [Class|Array<Class>] Blueprint class to use (object). For a collection, wrap the blueprint in an
-      # array.
-      # @param from [Symbol] Optionally specify a different method to call to get the value for "name"
-      # @param extractor [Class] Extractor class to use for this field
+      # @param blueprint [Class|Proc|Array<Class|Proc>] Blueprint class to use. For a collection, wrap the blueprint in an
+      #                  array. You may also pass a Proc that returns a Blueprint.
+      # @param source [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
       # @param default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true
       # @param default_if [Symbol | Proc] Return true to use the value in `default`
       # @param exclude_if_nil [Boolean] Don't include field if the value is nil
-      # @param exclude_if_empty [Boolean] Don't include field if the value is nil or `empty?`
       # @param if [Symbol | Proc] Only include the field if it returns true
       # @param unless [Symbol | Proc] Include the field unless it returns true
       # @yield [Blueprinter::V2::Context] Generate the value from the block
       #
-      def association(name, blueprint, from: name, **options, &definition)
+      def association(name, blueprint, source: name, **options, &definition)
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
-        type = is_collection ? Fields::Collection : Fields::Object
-        schema[name] = type.new(
+        schema[name] = Fields::Field.new(
+          type: is_collection ? :collection : :object,
           name: name,
           blueprint: blueprint_class,
-          from: from.to_sym,
-          from_str: from.to_s,
+          source: source.to_sym,
+          source_str: source.to_s,
           value_proc: definition,
           options: options.dup
         )
@@ -154,11 +164,13 @@ module Blueprinter
       #
       # Exclude parent fields and associations from this view.
       #
-      # @param name [Array<Symbol>] One or more fields or associations to exclude
+      # @param *names [Symbol] One or more fields or associations to exclude
       #
       def exclude(*names)
-        self.excludes += names.map(&:to_sym)
+        self.exclusions += names.map(&:to_sym)
       end
+
+      alias excludes exclude
 
       private
 
@@ -173,7 +185,7 @@ module Blueprinter
           end
 
         is_bp_class = assoc_arg.is_a?(Class) && (assoc_arg < V2::Base || assoc_arg < Blueprinter::Base)
-        raise ArgumentError, BLUEPRINT_ARRAY_OR_CLASS_ERR unless is_bp_class || assoc_arg.is_a?(ViewWrapper)
+        raise ArgumentError, BLUEPRINT_ARRAY_OR_CLASS_ERR unless is_bp_class || assoc_arg.is_a?(Proc)
 
         [is_collection, assoc_arg]
       end

@@ -127,6 +127,36 @@ describe Blueprinter::V2::ViewBuilder do
     end.to_not raise_error
   end
 
+  it "allows blueprints to reference their own views" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      options[:exclude_if_nil] = true
+
+      view :extended do
+        field :description
+      end
+
+      field :name
+      association :child, -> { blueprint[:extended] }
+    end
+
+    result = blueprint.render({
+      name: 'Foo',
+      description: 'About Foo',
+      child: {
+        name: 'Bar',
+        description: 'About Bar'
+      }
+    }).to_h
+
+    expect(result).to eq({
+      name: 'Foo',
+      child: {
+        name: 'Bar',
+        description: 'About Bar'
+      }
+    })
+  end
+
   def definition(definition)
     described_class::Def.new(definition:, empty: false)
   end

@@ -17,7 +17,7 @@ describe "Blueprinter::V2 Rendering" do
     test = self
     Class.new(Blueprinter::V2::Base) do
       field :name
-      association :cat, test.category_blueprint, from: :category
+      association :cat, test.category_blueprint, source: :category
       association :parts, [test.part_blueprint]
     end
   end
@@ -84,5 +84,23 @@ describe "Blueprinter::V2 Rendering" do
         parts: [{ num: 42 }, { num: 43 }]
       }]
     }.to_json)
+  end
+
+  it 'supports V1 render_as_json' do
+    result = widget_blueprint.render_as_json(widget)
+    expect(result).to eq({
+      name: 'Foo',
+      cat: { name: 'Bar' },
+      parts: [{ num: 42 }, { num: 43 }]
+    }.to_json)
+  end
+
+  it 'supports V1 render_as_hash' do
+    result = widget_blueprint.render_as_hash(widget)
+    expect(result).to eq({
+      name: 'Foo',
+      cat: { name: 'Bar' },
+      parts: [{ num: 42 }, { num: 43 }]
+    })
   end
 end

@@ -236,7 +236,7 @@ describe Blueprinter::Hooks do
     it 'is skipped for hidden extensions' do
       ext1.class_eval { def hidden? = true }
       log = []
-      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, blueprint.options, { foo: 'Foo' }, field, 42)
+      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, { foo: 'Foo' }, field, 42)
       hooks = described_class.new [ext1.new(log)]
 
       res = hooks.around(:around_serialize_object, ctx) do |ctx|

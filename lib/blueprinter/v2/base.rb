@@ -138,6 +138,14 @@ module Blueprinter
         class_eval(&p)
       end
 
+      # @return [Hash] Copy of options set on the class. Frozen after `around_blueprint_init` hooks run.
+      attr_reader :options
+
+      # @!visibility private
+      def initialize
+        @options = self.class.options.dup
+      end
+
       # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"
       def inspect = self.class.to_s
 

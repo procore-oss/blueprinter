@@ -8,7 +8,7 @@ describe Blueprinter::V2::FieldLogic do
   context "value_or_default" do
     let(:field) { blueprint.schema.fetch(:foo) }
     let(:object) { { foo: 'Foo' } }
-    let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, {}, object, field, {}) }
+    let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, {}) }
 
     it 'passes values through by default' do
       ctx

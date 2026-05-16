@@ -13,8 +13,8 @@ module Blueprinter
       # @!visibility private
       def around_blueprint_init(ctx)
         # Convert blueprint if/unless options
-        ctx.blueprint_options[:if] = convert_v1(ctx.blueprint_options[:if]) if ctx.blueprint_options[:if]
-        ctx.blueprint_options[:unless] = convert_v1(ctx.blueprint_options[:unless]) if ctx.blueprint_options[:unless]
+        ctx.blueprint.options[:if] = convert_v1(ctx.blueprint.options[:if]) if ctx.blueprint.options[:if]
+        ctx.blueprint.options[:unless] = convert_v1(ctx.blueprint.options[:unless]) if ctx.blueprint.options[:unless]
 
         # Convert field if/unless options
         ctx.fields.each do |field|

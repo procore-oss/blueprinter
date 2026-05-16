@@ -8,9 +8,7 @@ module Blueprinter
       # The blueprint being rendered along with options passed to render/render_object/render_collection.
       #
       # @!attribute [r] blueprint
-      #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
-      # @!attribute [rw] blueprint_options
-      #   @return [Hash] Customize the Blueprint options for this render
+      #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class. You may modify the `blueprint.options` Hash.
       # @!attribute [rw] fields
       #   @return [Array<Blueprinter::V2::Fields::Configurable>] The fields to serialize, in the order they'll be serialized
       # @!attribute [r] options
@@ -20,8 +18,8 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Current serialization depth
       #
-      Init = Struct.new(:blueprint, :blueprint_options, :fields, :options, :store, :depth) do
-        (members - %i[blueprint_options fields]).each do |attr|
+      Init = Struct.new(:blueprint, :fields, :options, :store, :depth) do
+        (members - %i[fields]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
         end
@@ -56,8 +54,8 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] fields
       #   @return [Array<Blueprinter::V2::Fields::Field>]
-      # @!attribute [r] options
-      #   @return [Hash] Options passed to `render` (frozen)
+      # @!attribute [rw] options
+      #   @return [Hash] Options passed to `render` (frozen but can be replaced)
       # @!attribute [rw] object
       #   @return [Object] The object or collection that's currently being rendered. Can be replaced.
       # @!attribute [r] parent
@@ -68,7 +66,7 @@ module Blueprinter
       #   @return [Integer] Blueprint depth (1-indexed)
       #
       Object = Struct.new(:blueprint, :fields, :options, :object, :parent, :store, :depth) do
-        (members - %i[object]).each do |attr|
+        (members - %i[object options]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
         end
@@ -100,8 +98,6 @@ module Blueprinter
       #   @return [Array<Blueprinter::V2::Fields::Field>]
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
-      # @!attribute [r] blueprint_options
-      #   @return [Hash] Options from `blueprint.options`, possibly modified by `blueprint_around_init` hooks
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being rendered
       # @!attribute [r] field
@@ -111,7 +107,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       #
-      Field = Struct.new(:blueprint, :fields, :options, :blueprint_options, :object, :field, :store, :depth) do
+      Field = Struct.new(:blueprint, :fields, :options, :object, :field, :store, :depth) do
         (members - %i[field object]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }

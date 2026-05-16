@@ -8,7 +8,7 @@ module Blueprinter
     class LegacyExtractorOption < Extension
       # @!visibility private
       def extract(ctx)
-        extractor_class = ctx.field.options[:extractor] || ctx.blueprint_options[:extractor]
+        extractor_class = ctx.field.options[:extractor] || ctx.blueprint.options[:extractor]
         return yield ctx if extractor_class.nil?
 
         extractor = ctx.store[extractor_class.object_id] ||= extractor_class.new

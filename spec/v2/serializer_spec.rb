@@ -455,7 +455,7 @@ describe Blueprinter::V2::Serializer do
   it "allows around_blueprint_init to modify blueprint options and fields" do
     ext = Class.new(Blueprinter::Extension) do
       def around_blueprint_init(ctx)
-        ctx.blueprint_options[:exclude_if_nil] = true
+        ctx.blueprint.options[:exclude_if_nil] = true
         ctx.fields.sort_by!(&:name)
         ctx.fields.find { |f| f.name == :description }.options[:exclude_if_nil] = false
         yield ctx

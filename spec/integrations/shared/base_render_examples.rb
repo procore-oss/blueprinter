@@ -20,6 +20,16 @@ shared_examples 'Base::render' do
       end
       it('returns json with an identifier') { should eq('{"id":"THE ID IS ' + obj_id + '"}') }
     end
+
+    context 'with :as option to rename identifier' do
+      let(:result) { '{"uuid":' + obj_id + '}' }
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id, as: :uuid
+        end
+      end
+      it('returns json with a renamed identifier') { should eq(result) }
+    end
   end
 
   context 'Given blueprint has ::field' do
@@ -69,6 +79,28 @@ shared_examples 'Base::render' do
       end
     end
     it('returns json with a renamed field') { should eq(result) }
+  end
+
+  context 'Given blueprint has ::field with an :as argument' do
+    let(:result) { '{"first_name":"Meg","identifier":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id, as: :identifier
+        field :first_name
+      end
+    end
+    it('returns json with a renamed field') { should eq(result) }
+  end
+
+  context 'Given blueprint has ::field with both :name and :as arguments' do
+    let(:result) { '{"first_name":"Meg","identifier":' + obj_id + '}' }
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        field :id, name: :identifier, as: :ignored
+        field :first_name
+      end
+    end
+    it(':name takes precedence over :as') { should eq(result) }
   end
 
   context 'when field methods use a mix of symbols and strings' do

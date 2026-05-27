@@ -102,6 +102,14 @@ module Blueprinter
         Render.new(objs, options, blueprint: self, instances:, collection: true)
       end
 
+      def self.render_as_hash(obj, options = {})
+        render(obj, options).to_hash
+      end
+
+      def self.render_as_json(obj, options = {})
+        render(obj, options).to_hash.as_json
+      end
+
       # Apply partials and field exclusions
       # @api private
       def self.eval!(lock: true)

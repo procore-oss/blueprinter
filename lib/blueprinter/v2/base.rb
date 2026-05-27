@@ -21,6 +21,113 @@ module Blueprinter
         attr_accessor :blueprint_name
         # @api private
         attr_accessor :views, :schema, :exclusions, :formatters, :partials, :appended_partials, :eval_mutex
+
+        # Initialize subclass
+        def inherited(subclass)
+          subclass.views = views.dup_for(subclass)
+          subclass.schema = schema.transform_values(&:dup)
+          subclass.exclusions = []
+          subclass.formatters = formatters.dup
+          subclass.partials = partials.dup
+          subclass.appended_partials = []
+          subclass.extensions = extensions.dup
+          subclass.options = options.dup
+          subclass.blueprint_name = subclass.name || blueprint_name
+          subclass.view_name = :default
+          subclass.eval_mutex = Mutex.new
+        end
+
+        def serializer
+          eval! unless @serializer
+          @serializer
+        end
+
+        # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
+        def inspect = blueprint_name
+
+        # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
+        def to_s = blueprint_name
+
+        # Set the view name
+        # @api private
+        def append_name(name)
+          self.blueprint_name = "#{blueprint_name}.#{name}"
+          self.view_name = blueprint_name.sub(/^[^.]+\./, '').to_sym
+        end
+
+        #
+        # Access a child view.
+        #
+        #   MyBlueprint[:extended]
+        #   MyBlueprint["extended.plus"] or MyBlueprint[:extended][:plus]
+        #
+        # @param name [Symbol|String] Name of the view, e.g. :extended, "extended.plus"
+        # @return [Class] A descendent of Blueprinter::V2::Base
+        #
+        def [](name)
+          eval! unless @serializer
+          child, children = name.to_s.split('.', 2)
+          view = views[child.to_sym] || raise(Errors::UnknownView, "View '#{child}' not found in Blueprint '#{self}'")
+          children ? view[children] : view
+        end
+
+        def render(obj, options = {})
+          if obj.is_a?(Enumerable) && !obj.is_a?(Hash)
+            render_collection(obj, options)
+          else
+            render_object(obj, options)
+          end
+        end
+
+        def render_object(obj, options = {})
+          instances = InstanceCache.new
+          Render.new(obj, options, blueprint: self, instances:, collection: false)
+        end
+
+        def render_collection(objs, options = {})
+          instances = InstanceCache.new
+          Render.new(objs, options, blueprint: self, instances:, collection: true)
+        end
+
+        def render_as_hash(obj, options = {})
+          render(obj, options).to_hash
+        end
+
+        def render_as_json(obj, options = {})
+          render(obj, options).to_hash.as_json
+        end
+
+        # Apply partials and field exclusions
+        # @api private
+        def eval!(lock: true)
+          return if @serializer
+
+          if lock
+            eval_mutex.synchronize { run_eval! unless @serializer }
+          else
+            run_eval!
+          end
+        end
+
+        private
+
+        # @api private
+        def run_eval!
+          appended_partials.each(&method(:apply_partial!))
+          exclusions.each { |f| schema.delete f }
+          extensions.freeze
+          options.freeze
+          formatters.freeze
+          schema.freeze
+          serializer = Serializer.new(self)
+          @serializer = serializer
+        end
+
+        # @api private
+        def apply_partial!(name)
+          p = partials[name] || raise(Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'")
+          class_eval(&p)
+        end
       end
 
       self.views = ViewBuilder.new(self)
@@ -34,111 +141,6 @@ module Blueprinter
       self.blueprint_name = name
       self.view_name = :default
       self.eval_mutex = Mutex.new
-
-      # Initialize subclass
-      def self.inherited(subclass)
-        subclass.views = views.dup_for(subclass)
-        subclass.schema = schema.transform_values(&:dup)
-        subclass.exclusions = []
-        subclass.formatters = formatters.dup
-        subclass.partials = partials.dup
-        subclass.appended_partials = []
-        subclass.extensions = extensions.dup
-        subclass.options = options.dup
-        subclass.blueprint_name = subclass.name || blueprint_name
-        subclass.view_name = :default
-        subclass.eval_mutex = Mutex.new
-      end
-
-      def self.serializer
-        eval! unless @serializer
-        @serializer
-      end
-
-      # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
-      def self.inspect = blueprint_name
-
-      # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
-      def self.to_s = blueprint_name
-
-      # Set the view name
-      # @api private
-      def self.append_name(name)
-        self.blueprint_name = "#{blueprint_name}.#{name}"
-        self.view_name = blueprint_name.sub(/^[^.]+\./, '').to_sym
-      end
-
-      #
-      # Access a child view.
-      #
-      #   MyBlueprint[:extended]
-      #   MyBlueprint["extended.plus"] or MyBlueprint[:extended][:plus]
-      #
-      # @param name [Symbol|String] Name of the view, e.g. :extended, "extended.plus"
-      # @return [Class] A descendent of Blueprinter::V2::Base
-      #
-      def self.[](name)
-        eval! unless @serializer
-        child, children = name.to_s.split('.', 2)
-        view = views[child.to_sym] || raise(Errors::UnknownView, "View '#{child}' could not be found in Blueprint '#{self}'")
-        children ? view[children] : view
-      end
-
-      def self.render(obj, options = {})
-        if obj.is_a?(Enumerable) && !obj.is_a?(Hash)
-          render_collection(obj, options)
-        else
-          render_object(obj, options)
-        end
-      end
-
-      def self.render_object(obj, options = {})
-        instances = InstanceCache.new
-        Render.new(obj, options, blueprint: self, instances:, collection: false)
-      end
-
-      def self.render_collection(objs, options = {})
-        instances = InstanceCache.new
-        Render.new(objs, options, blueprint: self, instances:, collection: true)
-      end
-
-      def self.render_as_hash(obj, options = {})
-        render(obj, options).to_hash
-      end
-
-      def self.render_as_json(obj, options = {})
-        render(obj, options).to_hash.as_json
-      end
-
-      # Apply partials and field exclusions
-      # @api private
-      def self.eval!(lock: true)
-        return if @serializer
-
-        if lock
-          eval_mutex.synchronize { run_eval! unless @serializer }
-        else
-          run_eval!
-        end
-      end
-
-      # @api private
-      def self.run_eval!
-        appended_partials.each(&method(:apply_partial!))
-        exclusions.each { |f| schema.delete f }
-        extensions.freeze
-        options.freeze
-        formatters.freeze
-        schema.freeze
-        serializer = Serializer.new(self)
-        @serializer = serializer
-      end
-
-      # @api private
-      def self.apply_partial!(name)
-        p = partials[name] || raise(Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'")
-        class_eval(&p)
-      end
 
       # @return [Hash] Copy of options set on the class. Frozen after `around_blueprint_init` hooks run.
       attr_reader :options

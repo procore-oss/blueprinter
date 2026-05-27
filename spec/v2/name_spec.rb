@@ -23,7 +23,7 @@ describe "Blueprinter::V2 Names" do
     it 'raises for an invalid view name' do
       expect { NamedBlueprint[:wrong_name] }.to raise_error(
         Blueprinter::Errors::UnknownView,
-        "View 'wrong_name' could not be found in Blueprint 'NamedBlueprint'"
+        "View 'wrong_name' not found in Blueprint 'NamedBlueprint'"
       )
     end
 

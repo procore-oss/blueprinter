@@ -36,7 +36,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks blueprint options (Proc)' do
-      blueprint.options[:unless] = ->(ctx) { ctx.object[ctx.field.source] == 'Foo' }
+      blueprint.options { |opts| opts[:unless] = ->(ctx) { ctx.object[ctx.field.source] == 'Foo' } }
       skip = subject.skip?(ctx, field)
       expect(skip).to be true
 
@@ -46,7 +46,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks blueprint options (Symbol)' do
-      blueprint.options[:unless] = :foo?
+      blueprint.options { |opts| opts[:unless] = :foo? }
       skip = subject.skip?(ctx, field)
       expect(skip).to be true
 
@@ -56,7 +56,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'field options take priority over blueprint options' do
-      blueprint.options[:unless] = ->(_ctx) { false }
+      blueprint.options { |opts| opts[:unless] = ->(_ctx) { false } }
       blueprint.field :foo, unless: :foo?
       skip = subject.skip?(ctx, field)
       expect(skip).to be true

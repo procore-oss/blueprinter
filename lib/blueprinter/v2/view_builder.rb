@@ -11,8 +11,6 @@ module Blueprinter
     class ViewBuilder
       include Enumerable
 
-      Def = Struct.new(:definition, :empty, keyword_init: true)
-
       # @param parent [Class] A subclass of Blueprinter::V2::Base
       def initialize(parent)
         @parent = parent
@@ -24,14 +22,14 @@ module Blueprinter
       # Add a view definition.
       #
       # @param name [Symbol]
-      # @param definition [Blueprinter::V2::ViewBuilder::Def]
+      # @param definition [Proc|nil]
       #
       def []=(name, definition)
         name = name.to_sym
         raise Errors::InvalidBlueprint, 'You may not redefine the default view' if name == :default
 
         @pending[name] ||= []
-        @pending[name] << definition
+        @pending[name] << definition if definition
       end
 
       #
@@ -88,13 +86,11 @@ module Blueprinter
 
       def build_view(name)
         defs = @pending[name]
-        empty = defs.reduce(false) { |acc, d| d.empty.nil? ? acc : d.empty }
-
         view = @views.fetch name
         view.views.reset
-        view.append_name(name)
-        view.schema.clear if empty
-        defs.each { |d| view.class_eval(&d.definition) if d.definition }
+        view.blueprint_name = "#{view.blueprint_name}.#{name}"
+        view.view_name = view.blueprint_name.sub(/^[^.]+\./, '').to_sym
+        defs.each { |d| view.class_eval(&d) }
       end
     end
   end

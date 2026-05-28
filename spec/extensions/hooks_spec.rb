@@ -112,7 +112,7 @@ describe Blueprinter::Hooks do
     it 'runs nested hooks' do
       log = []
       extensions = [ext_a.new(log), ext_b.new(log), ext_c.new(log)]
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, { n: 0 })
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
       hooks = described_class.new extensions
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
         log << 'INNER'
@@ -125,7 +125,7 @@ describe Blueprinter::Hooks do
     it 'runs with no hooks' do
       log = []
       extensions = []
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, { n: 0 })
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
       hooks = described_class.new extensions
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
         log << 'INNER'
@@ -138,7 +138,7 @@ describe Blueprinter::Hooks do
     it 'returns early when not yielding' do
       log = []
       extensions = [ext_a.new(log), ext_b.new(log), cache_ext.new(log), ext_c.new(log)]
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, { n: 0 })
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
       hooks = described_class.new extensions
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
         log << 'INNER'
@@ -154,7 +154,7 @@ describe Blueprinter::Hooks do
         def around_serialize_object(_ctx) = skip!
       end
       extensions = [ext_a.new(log), ext_b.new(log), ext.new, ext_c.new(log)]
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, { n: 0 })
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
       hooks = described_class.new extensions
       res = catch Blueprinter::V2::Serializer::SIGNAL do
         hooks.around(:around_serialize_object, ctx) do |ctx|
@@ -168,7 +168,7 @@ describe Blueprinter::Hooks do
     it 'bypasses parent hooks with a skip in inner block' do
       log = []
       extensions = [ext_a.new(log), ext_b.new(log), ext_c.new(log)]
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, { n: 0 })
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
       hooks = described_class.new extensions
       res = catch Blueprinter::V2::Serializer::SIGNAL do
         hooks.around(:around_serialize_object, ctx) do |ctx|
@@ -185,7 +185,7 @@ describe Blueprinter::Hooks do
         def around_serialize_object(_ctx) = yield "oops"
       end
 
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, { n: 0 })
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
       hooks = described_class.new [ext.new]
       expect do
         hooks.around(:around_serialize_object, ctx, &:object)
@@ -217,7 +217,7 @@ describe Blueprinter::Hooks do
       log = []
       hooks = described_class.new [ext1.new(log)]
 
-      ctx = object_ctx.new(blueprint, serializer.default_fields, {}, object)
+      ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, object)
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
         log << 'INNER'
         ctx.object
@@ -236,7 +236,7 @@ describe Blueprinter::Hooks do
     it 'is skipped for hidden extensions' do
       ext1.class_eval { def hidden? = true }
       log = []
-      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, { foo: 'Foo' }, field, 42)
+      ctx = field_ctx.new(blueprint.new, serializer.default_fields, {}, { foo: 'Foo' }, field, 42)
       hooks = described_class.new [ext1.new(log)]
 
       res = hooks.around(:around_serialize_object, ctx) do |ctx|
@@ -256,7 +256,7 @@ describe Blueprinter::Hooks do
         def around_hook(ctx) = nil
       end
       log = []
-      ctx = field_ctx.new(blueprint, serializer.default_fields, {}, blueprint.options, { foo: 'Foo' }, field, 42)
+      ctx = field_ctx.new(blueprint.new, serializer.default_fields, {}, {}, { foo: 'Foo' }, field, 42)
       hooks = described_class.new [ext1.new(log), ext.new]
 
       expect do

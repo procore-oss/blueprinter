@@ -4,6 +4,17 @@ module Blueprinter
   module V2
     # Methods for defining Blueprint fields and views
     module DSL
+      # @!visibility private
+      module Nodes
+        Use = Struct.new(:name)
+        Exclude = Struct.new(:name)
+        Partial = Struct.new(:name, :block)
+        Options = Struct.new(:block)
+        Extensions = Struct.new(:block)
+        Format = Struct.new(:klass, :fmt)
+        Flag = Struct.new(:name)
+      end
+
       # @api private
       BLUEPRINT_ARRAY_OR_CLASS_ERR = 'Blueprint must be a Blueprint class or an Array containing a Blueprint class'
 
@@ -12,15 +23,14 @@ module Blueprinter
       # appended.
       #
       # @param name [Symbol] Name of the view
-      # @param empty [Boolean] Don't inherit fields from ancestors (default false)
       # @yield Define the view in the block
       #
-      def view(name, empty: nil, &definition)
+      def view(name, &definition)
         raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
         name = name.to_sym
-        partials[name] = definition
-        views[name] = ViewBuilder::Def.new(definition:, empty:)
+        partial(name, &definition)
+        views[name] = definition
       end
 
       #
@@ -30,25 +40,40 @@ module Blueprinter
       # @yield Define a new partial in the block
       #
       def partial(name, &definition)
-        partials[name.to_sym] = definition
+        nodes << Nodes::Partial.new(name.to_sym, definition)
       end
 
       #
-      # Append one or more partials to this view.
+      # Include one or more partials.
       #
       # @param *names [Symbol] One or more partial names
       #
       def use(*names)
-        names.each { |name| appended_partials << name.to_sym }
+        names.each do |name|
+          nodes << Nodes::Use.new(name.to_sym)
+        end
       end
 
       #
-      # Insert one or more partials in this view.
+      # Modify options inside the block.
       #
-      # @param *names [Symbol] One or more partial names
+      # @yield [Hash] Array of options that can be modified
       #
-      def use!(*names)
-        names.each(&method(:apply_partial!))
+      def options(&block)
+        raise BlueprinterError, "A block must be passed to 'options'" unless block
+
+        nodes << Nodes::Options.new(block)
+      end
+
+      #
+      # Modify extensions inside the block.
+      #
+      # @yield [Array] Array of extensions that can be modified
+      #
+      def extensions(&block)
+        raise BlueprinterError, "A block must be passed to 'extensions'" unless block
+
+        nodes << Nodes::Extensions.new(block)
       end
 
       #
@@ -59,7 +84,7 @@ module Blueprinter
       # @yield Do formatting in the block instead
       #
       def format(klass, formatter_method = nil, &formatter_block)
-        formatters[klass] = formatter_method || formatter_block
+        nodes << Nodes::Format.new(klass, formatter_method&.to_sym || formatter_block)
       end
 
       #
@@ -77,11 +102,13 @@ module Blueprinter
       #
       def extension(&block)
         bp_name = blueprint_name
-        extensions << Class.new(Extension) do
-          @blueprint_name = bp_name
-          def self.name = "#{@blueprint_name} extension"
-          class_eval(&block)
-        end.new
+        extensions do |exts|
+          exts << Class.new(Extension) do
+            @blueprint_name = bp_name
+            def self.name = "#{@blueprint_name} extension"
+            class_eval(&block)
+          end.new
+        end
       end
 
       #
@@ -98,7 +125,7 @@ module Blueprinter
       #
       def field(name, source: name, **options, &definition)
         name = name.to_sym
-        schema[name] = Fields::Field.new(
+        nodes << Fields::Field.new(
           type: :field,
           name: name,
           source: source.to_sym,
@@ -122,7 +149,7 @@ module Blueprinter
       def fields(*names, **options, &definition)
         names.each do |name|
           name = name.to_sym
-          schema[name] = Fields::Field.new(
+          nodes << Fields::Field.new(
             type: :field,
             name: name,
             source: name,
@@ -150,7 +177,7 @@ module Blueprinter
       def association(name, blueprint, source: name, **options, &definition)
         name = name.to_sym
         is_collection, blueprint_class = parse_blueprint(blueprint)
-        schema[name] = Fields::Field.new(
+        nodes << Fields::Field.new(
           type: is_collection ? :collection : :object,
           name: name,
           blueprint: blueprint_class,
@@ -162,15 +189,24 @@ module Blueprinter
       end
 
       #
-      # Exclude parent fields and associations from this view.
+      # Excludes the given fields and associations from parents or partials.
       #
       # @param *names [Symbol] One or more fields or associations to exclude
       #
       def exclude(*names)
-        self.exclusions += names.map(&:to_sym)
+        names.each do |name|
+          nodes << Nodes::Exclude.new(name.to_sym)
+        end
       end
 
       alias excludes exclude
+
+      #
+      # Excludes all fields and associations from parents or partials.
+      #
+      def exclude_all
+        nodes << Nodes::Flag.new(:exclude_all)
+      end
 
       private
 

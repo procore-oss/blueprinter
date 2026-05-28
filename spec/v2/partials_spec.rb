@@ -64,6 +64,30 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:default].fields.keys.sort).to eq %i(name foo bar zorp).sort
   end
 
+  it "allows partials to be nested" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      use :outer_partial
+      use :inner_partial
+      use :inner_partial2
+
+      partial :outer_partial do
+        field :summary
+
+        partial :inner_partial do
+          field :description
+
+          partial :inner_partial2 do
+            field :price
+          end
+        end
+      end
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to eq %i[name summary description price]
+  end
+
   it "allows a view to be defined in a partial" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
@@ -94,11 +118,12 @@ describe "Blueprinter::V2 Partials" do
 
   it "throws an error for an invalid partial name" do
     blueprint = Class.new(Blueprinter::V2::Base) do
+      self.blueprint_name = 'MyBlueprint'
       view :foo do
-        use :description
+        use :bar
       end
     end
-    expect { blueprint[:foo] }.to raise_error(Blueprinter::Errors::UnknownPartial)
+    expect { blueprint[:foo] }.to raise_error(Blueprinter::Errors::UnknownPartial, /No 'bar' partial in Blueprint 'MyBlueprint\.foo'/)
   end
 
   it 'creates an implicit partial for every view' do
@@ -122,53 +147,95 @@ describe "Blueprinter::V2 Partials" do
   end
 
   context 'precedence' do
-    it 'partials override what the view inherits' do
+    it 'partials can override what the view inherits' do
       blueprint = Class.new(Blueprinter::V2::Base) do
-        field :name
+        extensions { |exts| exts << Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name } }
+        options { |opts| opts[:foo] = true }
+        format Time, :iso8601
+        fields :name, :description
 
         view :foo do
           use :non_empty_name
         end
 
+        view :bar do
+          use :empty
+        end
+
         partial :non_empty_name do
+          extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
+          options { |opts| opts[:foo] = false }
+          format Time, :to_i
+          field :name, exclude_if_empty: true
+          exclude :description
+        end
+
+        partial :empty do
+          exclude_all
+          field :asdf
+        end
+      end
+
+      foo = blueprint.reflections[:foo]
+      expect(foo.extensions.map(&(:class))).to eq [Blueprinter::Extensions::FieldOrder, Blueprinter::Extensions::MultiJson]
+      expect(foo.options[:foo]).to be false
+      expect(foo.fields[:name].options).to eq({ exclude_if_empty: true })
+      expect(foo.fields.keys).to eq %i[name]
+
+      bar = blueprint.reflections[:bar]
+      expect(bar.fields.keys).to match_array %i[asdf]
+
+      expect(blueprint[:foo].formatters).to eq({ Time => :to_i })
+    end
+
+    it '`use` overrides what comes before' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        view :foo do
+          extensions { |exts| exts << Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name } }
+          options { |opts| opts[:foo] = true }
+          format Time, :iso8601
+          field :name
+          use :non_empty_name
+        end
+
+        partial :non_empty_name do
+          extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
+          options { |opts| opts[:foo] = false }
+          format Time, :to_i
           field :name, exclude_if_empty: true
         end
       end
 
       view = blueprint.reflections[:foo]
+      expect(view.extensions.map(&(:class))).to eq [Blueprinter::Extensions::FieldOrder, Blueprinter::Extensions::MultiJson]
+      expect(view.options[:foo]).to be false
       expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
+      expect(blueprint[:foo].formatters).to eq({ Time => :to_i })
     end
 
-    it '`use` overrides the view' do
+    it '`use` can be overridden' do
       blueprint = Class.new(Blueprinter::V2::Base) do
         view :foo do
           use :non_empty_name
+          extensions { |exts| exts << Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name } }
+          options { |opts| opts[:foo] = true }
+          format Time, :iso8601
           field :name
         end
 
         partial :non_empty_name do
+          extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
+          options { |opts| opts[:foo] = false }
+          format Time, :to_i
           field :name, exclude_if_empty: true
         end
       end
 
       view = blueprint.reflections[:foo]
-      expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
-    end
-
-    it '`use!` allows the view to override' do
-      blueprint = Class.new(Blueprinter::V2::Base) do
-        view :foo do
-          use! :non_empty_name
-          field :name
-        end
-
-        partial :non_empty_name do
-          field :name, exclude_if_empty: true
-        end
-      end
-
-      view = blueprint.reflections[:foo]
+      expect(view.extensions.map(&(:class))).to eq [Blueprinter::Extensions::MultiJson, Blueprinter::Extensions::FieldOrder]
+      expect(view.options[:foo]).to be true
       expect(view.fields[:name].options).to eq({})
+      expect(blueprint[:foo].formatters).to eq({ Time => :iso8601 })
     end
   end
 

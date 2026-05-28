@@ -4,8 +4,9 @@ module Blueprinter
   module V2
     # An interface for formatting values
     class Formatter
-      def initialize(blueprint)
-        @formatters = blueprint.formatters
+      # @return [Array<Blueprinter::V2::DSL::Nodes::Format>]
+      def initialize(formatters)
+        @formatters = formatters
       end
 
       def any? = @formatters.any?

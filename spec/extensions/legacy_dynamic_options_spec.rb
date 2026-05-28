@@ -12,7 +12,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
   it 'applies a Hash to the options' do
     test = self
     blueprint = Class.new(Blueprinter::V2::Base) do
-      extensions << test.subject
+      extensions { |exts| exts << test.subject }
       association :category, test.category_blueprint, options: { dynamic_val: 42 }
     end
 
@@ -23,7 +23,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
   it 'applies a Proc to the options' do
     test = self
     blueprint = Class.new(Blueprinter::V2::Base) do
-      extensions << test.subject
+      extensions { |exts| exts << test.subject }
       association :category, test.category_blueprint, options: ->(widget) { { dynamic_val: widget.fetch(:id) + 1 } }
     end
     result = blueprint.render({ id: 41, category: { name: 'Foo' } }).to_hash
@@ -33,7 +33,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
   it 'applies a Proc to the options (collections)' do
     test = self
     blueprint = Class.new(Blueprinter::V2::Base) do
-      extensions << test.subject
+      extensions { |exts| exts << test.subject }
       association :categories, [test.category_blueprint], options: ->(widget) { { dynamic_val: widget.fetch(:id) + 1 } }
     end
     result = blueprint.render({ id: 41, categories: [{ name: 'Foo' }] }).to_hash

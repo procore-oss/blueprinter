@@ -19,8 +19,9 @@ describe "Blueprinter::V2 Extension DSL" do
   end
 
   it "defines multiple extensions" do
+    blueprint.eval!
     serializer = Blueprinter::V2::Serializer.new(blueprint)
-    expect(blueprint.extensions.size).to eq 2
+    expect(blueprint._extensions.size).to eq 2
     expect(serializer.hooks.registered? :around_field_value).to be true
     expect(serializer.hooks.registered? :around_serialize_object).to be true
     expect(serializer.hooks.registered? :around_serialize_collection).to be false

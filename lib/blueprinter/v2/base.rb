@@ -1,37 +1,29 @@
 # frozen_string_literal: true
 
-require 'blueprinter/v2/instance_cache'
-require 'blueprinter/v2/render'
+require 'set'
 
 module Blueprinter
   module V2
     # Base class for V2 Blueprints
     class Base
       extend DSL
+      extend Rendering
       extend Reflection
 
       class << self
-        # @return [Hash] Options set on this Blueprint
-        attr_accessor :options
-        # @return [Array<Blueprinter::Extension>] Extensions set on this Blueprint
-        attr_accessor :extensions
         # @return [Symbol] The name of this view, e.g. :default, :"foo.bar"
         attr_accessor :view_name
         # @return [String] The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
-        # @api private
-        attr_accessor :views, :schema, :exclusions, :formatters, :partials, :appended_partials, :eval_mutex
+        # @!visibility private
+        attr_reader :views, :schema, :formatters, :_options, :_extensions
 
         # Initialize subclass
         def inherited(subclass)
+          subclass.nodes = []
           subclass.views = views.dup_for(subclass)
-          subclass.schema = schema.transform_values(&:dup)
-          subclass.exclusions = []
-          subclass.formatters = formatters.dup
-          subclass.partials = partials.dup
-          subclass.appended_partials = []
-          subclass.extensions = extensions.dup
-          subclass.options = options.dup
+          subclass._extensions = [].freeze
+          subclass._options = {}.freeze
           subclass.blueprint_name = subclass.name || blueprint_name
           subclass.view_name = :default
           subclass.eval_mutex = Mutex.new
@@ -47,13 +39,6 @@ module Blueprinter
 
         # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
         def to_s = blueprint_name
-
-        # Set the view name
-        # @api private
-        def append_name(name)
-          self.blueprint_name = "#{blueprint_name}.#{name}"
-          self.view_name = blueprint_name.sub(/^[^.]+\./, '').to_sym
-        end
 
         #
         # Access a child view.
@@ -71,36 +56,10 @@ module Blueprinter
           children ? view[children] : view
         end
 
-        def render(obj, options = {})
-          if obj.is_a?(Enumerable) && !obj.is_a?(Hash)
-            render_collection(obj, options)
-          else
-            render_object(obj, options)
-          end
-        end
-
-        def render_object(obj, options = {})
-          instances = InstanceCache.new
-          Render.new(obj, options, blueprint: self, instances:, collection: false)
-        end
-
-        def render_collection(objs, options = {})
-          instances = InstanceCache.new
-          Render.new(objs, options, blueprint: self, instances:, collection: true)
-        end
-
-        def render_as_hash(obj, options = {})
-          render(obj, options).to_hash
-        end
-
-        def render_as_json(obj, options = {})
-          render(obj, options).to_hash.as_json
-        end
-
         # Apply partials and field exclusions
         # @api private
         def eval!(lock: true)
-          return if @serializer
+          return if @serializer || self == V2::Base
 
           if lock
             eval_mutex.synchronize { run_eval! unless @serializer }
@@ -109,35 +68,74 @@ module Blueprinter
           end
         end
 
+        protected
+
+        # @!visibility private
+        attr_accessor :nodes
+        # @!visibility private
+        attr_writer :views, :schema, :formatters, :eval_mutex, :_options, :_extensions
+
         private
 
-        # @api private
+        attr_reader :eval_mutex
+
         def run_eval!
-          appended_partials.each(&method(:apply_partial!))
-          exclusions.each { |f| schema.delete f }
-          extensions.freeze
-          options.freeze
-          formatters.freeze
-          schema.freeze
-          serializer = Serializer.new(self)
-          @serializer = serializer
+          superclass.eval!
+          nodes.unshift(*inherited_partials)
+          self.nodes = expand_use
+          nodes.unshift(*inherited_formats, *inherited_fields).freeze
+
+          self._options = apply(DSL::Nodes::Options, superclass._options).freeze
+          self._extensions = apply(DSL::Nodes::Extensions, superclass._extensions).freeze
+          self.formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }.freeze
+          self.schema = nodes.grep(Fields::Field).to_h { |n| [n.name, n] }.freeze
+          @serializer = Serializer.new(self)
         end
 
-        # @api private
-        def apply_partial!(name)
-          p = partials[name] || raise(Errors::UnknownPartial, "Partial '#{name}' could not be found in Blueprint '#{self}'")
-          class_eval(&p)
+        def inherited_partials = superclass.nodes.grep(DSL::Nodes::Partial)
+        def inherited_formats = superclass.nodes.grep(DSL::Nodes::Format)
+        def inherited_fields = exclude_fields superclass.nodes.grep(Fields::Field)
+
+        def apply(type, start)
+          nodes.grep(type).each_with_object(start.dup) do |node, acc|
+            node.block.call(acc)
+          end
         end
+
+        def expand_use(partials: self.partials, exclude_all: exclude_all?, excluded: excluded_fields)
+          nodes.each_with_object([]) do |node, acc|
+            unless node.is_a? DSL::Nodes::Use
+              acc << node
+              next
+            end
+
+            p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{self}'")
+            self.nodes = []
+            class_eval(&p)
+            self.nodes = exclude_fields(nodes, exclude_all:, excluded:)
+
+            exclude_all ||= exclude_all?
+            excluded += excluded_fields
+            partials = partials.merge(self.partials)
+            acc.concat(expand_use(partials:, exclude_all:, excluded:))
+          end
+        end
+
+        def exclude_fields(nodes, exclude_all: exclude_all?, excluded: excluded_fields)
+          nodes.reject { |n| n.is_a?(Fields::Field) && (exclude_all || excluded.include?(n.name)) }
+        end
+
+        def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
+
+        def exclude_all? = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == :exclude_all }
+
+        def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
       end
 
       self.views = ViewBuilder.new(self)
-      self.schema = {}
-      self.exclusions = []
-      self.formatters = {}
-      self.partials = {}
-      self.appended_partials = []
-      self.extensions = []
-      self.options = {}
+      self.nodes = [].freeze
+      self._extensions = [].freeze
+      self._options = {}.freeze
       self.blueprint_name = name
       self.view_name = :default
       self.eval_mutex = Mutex.new
@@ -147,7 +145,7 @@ module Blueprinter
 
       # @!visibility private
       def initialize
-        @options = self.class.options.dup
+        @options = self.class._options.dup
       end
 
       # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"

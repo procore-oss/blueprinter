@@ -41,15 +41,20 @@ describe "Blueprinter::V2 Views" do
   context "fields, options, and extensions" do
     let(:application_blueprint) do
       Class.new(Blueprinter::V2::Base) do
-        options[:exclude_if_nil] = true
-        extensions << Class.new(Blueprinter::Extension).new
+        self.blueprint_name = 'ApplicationBlueprint'
+        options { |opts| opts[:exclude_if_nil] = true }
+        extensions { |exts| exts << Class.new(Blueprinter::Extension).new }
         fields :id
-        view(:identifier, empty: true) { field :id }
+        view :identifier do
+          exclude_all
+          field :id
+        end
       end
     end
 
     let(:blueprint) do
       Class.new(application_blueprint) do
+        self.blueprint_name = 'MyBlueprint'
         fields :name, :date
 
         view :extended do
@@ -59,13 +64,15 @@ describe "Blueprinter::V2 Views" do
     end
 
     it "inherits options" do
-      expect(blueprint.options).to eq({ exclude_if_nil: true })
-      expect(blueprint[:extended].options).to eq({ exclude_if_nil: true })
+      ref = blueprint.reflections
+      expect(ref[:default].options).to eq({ exclude_if_nil: true })
+      expect(ref[:extended].options).to eq({ exclude_if_nil: true })
     end
 
     it "inherits extensions" do
-      expect(blueprint.extensions.size).to eq 1
-      expect(blueprint[:extended].extensions.size).to eq 1
+      ref = blueprint.reflections
+      expect(ref[:default].extensions.size).to eq 1
+      expect(ref[:extended].extensions.size).to eq 1
     end
 
     it "inherits fields by default" do

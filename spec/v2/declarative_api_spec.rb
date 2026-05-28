@@ -86,6 +86,6 @@ describe "Blueprinter::V2 Declarative API" do
     end
 
     refs = blueprint.reflections
-    expect(refs[:foo].fields.keys.sort).to eq %i(id description).sort
+    expect(refs[:foo].fields.keys).to match_array %i(id description description3)
   end
 end

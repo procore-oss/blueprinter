@@ -6,7 +6,7 @@ describe Blueprinter::V2::FieldLogic do
   let(:subject) { described_class }
 
   context "value_or_default" do
-    let(:field) { blueprint.schema.fetch(:foo) }
+    let(:field) { blueprint.reflections[:default].fields.fetch(:foo) }
     let(:object) { { foo: 'Foo' } }
     let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, {}) }
 
@@ -67,22 +67,24 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks with field options default_if (Symbol) (default = blueprint options default)' do
-      blueprint.options[:default] = 'Bar'
+      blueprint.options { |opts| opts[:default] = 'Bar' }
       blueprint.field :foo, default_if: ->(_ctx, val) { val == 'Foo' }
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'
     end
 
     it 'checks with blueprint options default_if (Proc) (default = field options default)' do
-      blueprint.options[:default_if] = ->(_ctx, val) { val == 'Foo' }
+      blueprint.options { |opts| opts[:default_if] = ->(_ctx, val) { val == 'Foo' } }
       blueprint.field :foo, default: 'Bar'
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'
     end
 
     it 'checks with blueprint options default_if (Symbol) (default = blueprint options default)' do
-      blueprint.options[:default] = 'Bar'
-      blueprint.options[:default_if] = ->(_ctx, val) { val == 'Foo' }
+      blueprint.options do |opts|
+        opts[:default] = 'Bar'
+        opts[:default_if] = ->(_ctx, val) { val == 'Foo' }
+      end
       blueprint.field :foo
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'

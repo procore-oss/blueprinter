@@ -16,10 +16,10 @@ module Blueprinter
 
       def initialize(blueprint_class)
         @blueprint_class = blueprint_class
-        @formatter = Formatter.new(blueprint_class)
+        @formatter = Formatter.new(blueprint_class.formatters)
         @format = @formatter.any?
-        @hooks = Hooks.new([Extensions::Core::Format.new, *blueprint_class.extensions, Extensions::Core::Root.new])
-        finalize_fields! @blueprint_class.schema.each_value.freeze, blueprint_class.options
+        @hooks = Hooks.new([Extensions::Core::Format.new, *blueprint_class._extensions, Extensions::Core::Root.new])
+        finalize_fields! @blueprint_class.schema.each_value.freeze, blueprint_class._options
         find_used_hooks!
         @needs_field_ctx = needs_field_ctx? default_fields
       end
@@ -149,7 +149,7 @@ module Blueprinter
           fields = config.fields.map(&:to_configurable)
           ctx = Context::Init.new(blueprint, fields, options, store, depth)
           @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-            changed = ctx.blueprint.options != @blueprint_class.options
+            changed = ctx.blueprint.options != @blueprint_class._options
             config.blueprint.options.freeze
             config.fields = ctx.fields.map do |f|
               changed ||= f.changed?

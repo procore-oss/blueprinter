@@ -36,6 +36,8 @@ module Blueprinter
         # @return [Hash] Options defined on the view or inherited from the parent
         attr_reader :options
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Fields defined on the view
+        attr_reader :extensions
+        # @return [Array<Blueprinter::V2::Extension>] Extensions defined on the view
         attr_reader :fields
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Associations to single objects defined on the view
         attr_reader :objects
@@ -52,7 +54,8 @@ module Blueprinter
         # @api private
         def initialize(blueprint, name)
           @name = name
-          @options = blueprint.options
+          @options = blueprint._options
+          @extensions = blueprint._extensions
           @ordered = blueprint.schema.values.freeze
           @fields = ordered.select(&:field?).to_h { |f| [f.name, f] }.freeze
           @objects = ordered.select(&:object?).to_h { |f| [f.name, f] }.freeze

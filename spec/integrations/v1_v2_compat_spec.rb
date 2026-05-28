@@ -178,7 +178,7 @@ describe 'V1/V2 Compatibility' do
       blueprints = {}
       blueprints[:barprint] = Class.new(Blueprinter::V2::Base) do
         bp = blueprints
-        options[:exclude_if_nil] = true
+        options { |opts| opts[:exclude_if_nil] = true }
         field :name do |obj, ctx|
           "#{obj[:name]} - #{ctx.options[:tag]}"
         end

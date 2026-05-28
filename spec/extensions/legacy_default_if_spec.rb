@@ -12,7 +12,7 @@ describe Blueprinter::Extensions::LegacyDefaultIf do
   end
 
   it 'respects both V1 and V2 options' do
-    blueprint.extensions << subject
+    blueprint.extensions { |exts| exts << subject }
     result = blueprint.render({ name: '', desc: '' }).to_hash
     expect(result).to eq({ name: 'No name', desc: 'No desc' })
   end

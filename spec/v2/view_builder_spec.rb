@@ -23,7 +23,7 @@ describe Blueprinter::V2::ViewBuilder do
       field :description
       calls += 1
     end
-    builder[:foo] = definition(d)
+    builder[:foo] = d
 
     expect(calls).to eq 0
   end
@@ -34,7 +34,7 @@ describe Blueprinter::V2::ViewBuilder do
       field :description
       calls += 1
     end
-    builder[:foo] = definition(d)
+    builder[:foo] = d
 
     view = builder[:foo]
     builder[:foo]
@@ -44,7 +44,7 @@ describe Blueprinter::V2::ViewBuilder do
 
   it "fetches a view" do
     d = proc { field :description }
-    builder[:foo] = definition(d)
+    builder[:foo] = d
 
     view = builder.fetch(:foo)
     expect(view.reflections[:default].fields.keys.sort).to eq %i(id name description).sort
@@ -56,8 +56,8 @@ describe Blueprinter::V2::ViewBuilder do
 
   it "iterates over each view" do
     d = proc { field :description }
-    builder[:foo] = definition(d)
-    builder[:bar] = definition(d)
+    builder[:foo] = d
+    builder[:bar] = d
 
     keys = builder.each.map { |name, _| name }
     expect(keys.sort).to eq %i(default foo bar).sort
@@ -65,25 +65,25 @@ describe Blueprinter::V2::ViewBuilder do
 
   it "doesn't throw an error if you try to redefine an existing view" do
     d = proc { field :description }
-    builder[:foo] = definition(d)
+    builder[:foo] = d
     expect do
       d = proc { field :description }
-      builder[:foo] = definition(d)
+      builder[:foo] = d
     end.to_not raise_error
   end
 
   it "throws an error if you try to define the default view" do
     d = proc { field :description }
     expect {
-      builder[:default] = definition(d)
+      builder[:default] = d
     }.to raise_error Blueprinter::Errors::InvalidBlueprint
   end
 
   context "reset" do
     it "clears all views but default" do
       d = proc { field :description }
-      builder[:foo] = definition(d)
-      builder[:bar] = definition(d)
+      builder[:foo] = d
+      builder[:bar] = d
       builder.reset
 
       expect(builder[:foo]).to be_nil
@@ -97,8 +97,8 @@ describe Blueprinter::V2::ViewBuilder do
 
     it "duplicates views for another blueprint" do
       d = proc { field :description }
-      builder[:foo] = definition(d)
-      builder[:bar] = definition(d)
+      builder[:foo] = d
+      builder[:bar] = d
       builder2 = builder.dup_for(blueprint2)
 
       expect(builder[:default]).to eq blueprint
@@ -129,7 +129,7 @@ describe Blueprinter::V2::ViewBuilder do
 
   it "allows blueprints to reference their own views" do
     blueprint = Class.new(Blueprinter::V2::Base) do
-      options[:exclude_if_nil] = true
+      options { |opts| opts[:exclude_if_nil] = true }
 
       view :extended do
         field :description
@@ -155,9 +155,5 @@ describe Blueprinter::V2::ViewBuilder do
         description: 'About Bar'
       }
     })
-  end
-
-  def definition(definition)
-    described_class::Def.new(definition:, empty: false)
   end
 end

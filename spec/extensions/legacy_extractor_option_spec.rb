@@ -28,20 +28,20 @@ describe Blueprinter::Extensions::LegacyExtractorOption do
       field :desc, extractor: extractor
 
       view :with_extractor do
-        options { |opts| opts[:extractor] = extractor }
+        set :extractor, extractor
         field :foo, extractor: extractor2
       end
     end
   end
 
   it 'respects the field option' do
-    blueprint.extensions { |exts| exts << subject }
+    blueprint.add subject
     result = blueprint.render({ name: 'foo', desc: 'bar' }).to_hash
     expect(result).to eq({ name: 'foo', desc: 'Extracted: bar' })
   end
 
   it 'respects the blueprint option' do
-    blueprint.extensions { |exts| exts << subject }
+    blueprint.add subject
     result = blueprint[:with_extractor].render({ name: 'foo', desc: 'bar', foo: 'asdf' }).to_hash
     expect(result).to eq({
       name: 'Extracted: foo',

@@ -42,8 +42,8 @@ describe "Blueprinter::V2 Views" do
     let(:application_blueprint) do
       Class.new(Blueprinter::V2::Base) do
         self.blueprint_name = 'ApplicationBlueprint'
-        options { |opts| opts[:exclude_if_nil] = true }
-        extensions { |exts| exts << Class.new(Blueprinter::Extension).new }
+        set :exclude_if_nil, true
+        add Class.new(Blueprinter::Extension).new
         fields :id
         view :identifier do
           exclude_all

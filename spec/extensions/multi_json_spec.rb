@@ -18,7 +18,7 @@ describe Blueprinter::Extensions::MultiJson do
 
   it 'renders JSON from a blueprint' do
     mj_blueprint = Class.new(blueprint) do
-      extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
+      add Blueprinter::Extensions::MultiJson.new
     end
     widget = { id: 42, name: 'Foo', junk: true }
 
@@ -28,7 +28,7 @@ describe Blueprinter::Extensions::MultiJson do
 
   it 'passes global options to MultiJson.dump' do
     mj_blueprint = Class.new(blueprint) do
-      extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new({ pretty: true }) }
+      add Blueprinter::Extensions::MultiJson.new({ pretty: true })
     end
     widget = { id: 42, name: 'Foo', junk: true }
 
@@ -38,7 +38,7 @@ describe Blueprinter::Extensions::MultiJson do
 
   it 'passes local options to MultiJson.dump' do
     mj_blueprint = Class.new(blueprint) do
-      extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new({ pretty: true }) }
+      add Blueprinter::Extensions::MultiJson.new({ pretty: true })
     end
     widget = { id: 42, name: 'Foo', junk: true }
 

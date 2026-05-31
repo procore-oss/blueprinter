@@ -67,24 +67,22 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks with field options default_if (Symbol) (default = blueprint options default)' do
-      blueprint.options { |opts| opts[:default] = 'Bar' }
+      blueprint.set :default, 'Bar'
       blueprint.field :foo, default_if: ->(_ctx, val) { val == 'Foo' }
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'
     end
 
     it 'checks with blueprint options default_if (Proc) (default = field options default)' do
-      blueprint.options { |opts| opts[:default_if] = ->(_ctx, val) { val == 'Foo' } }
+      blueprint.set :default_if, ->(_ctx, val) { val == 'Foo' }
       blueprint.field :foo, default: 'Bar'
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'
     end
 
     it 'checks with blueprint options default_if (Symbol) (default = blueprint options default)' do
-      blueprint.options do |opts|
-        opts[:default] = 'Bar'
-        opts[:default_if] = ->(_ctx, val) { val == 'Foo' }
-      end
+      blueprint.set :default, 'Bar'
+      blueprint.set :default_if, ->(_ctx, val) { val == 'Foo' }
       blueprint.field :foo
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'

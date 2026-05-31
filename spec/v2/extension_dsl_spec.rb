@@ -19,9 +19,9 @@ describe "Blueprinter::V2 Extension DSL" do
   end
 
   it "defines multiple extensions" do
-    blueprint.eval!
+    ref = blueprint.reflections[:default]
     serializer = Blueprinter::V2::Serializer.new(blueprint)
-    expect(blueprint._extensions.size).to eq 2
+    expect(ref.extensions.size).to eq 2
     expect(serializer.hooks.registered? :around_field_value).to be true
     expect(serializer.hooks.registered? :around_serialize_object).to be true
     expect(serializer.hooks.registered? :around_serialize_collection).to be false
@@ -30,5 +30,85 @@ describe "Blueprinter::V2 Extension DSL" do
   it "runs the extensions" do
     res = blueprint.render({ name: "Foo" }).to_hash
     expect(res).to eq({ data: { name: "FOO" } })
+  end
+
+  it "add appends extensions" do
+    ext1 = Class.new(Blueprinter::Extension)
+    ext2 = Class.new(Blueprinter::Extension)
+    ext3 = Class.new(Blueprinter::Extension)
+
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      add ext1.new
+
+      view :extended do
+        add ext2.new, ext3.new
+      end
+    end
+
+    ref = blueprint.reflections
+    expect(ref[:default].extensions.map(&:class)).to eq [ext1]
+    expect(ref[:extended].extensions.map(&:class)).to eq [ext1, ext2, ext3]
+  end
+
+  it "add prepends extensions" do
+    ext1 = Class.new(Blueprinter::Extension)
+    ext2 = Class.new(Blueprinter::Extension)
+    ext3 = Class.new(Blueprinter::Extension)
+
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      add ext1.new
+
+      view :extended do
+        add ext2.new, ext3.new, prepend: true
+      end
+    end
+
+    ref = blueprint.reflections
+    expect(ref[:default].extensions.map(&:class)).to eq [ext1]
+    expect(ref[:extended].extensions.map(&:class)).to eq [ext2, ext3, ext1]
+  end
+
+  it "add throws an exception if someone accidentally passes a block" do
+    ext1 = Class.new(Blueprinter::Extension)
+    expect do
+      Class.new(Blueprinter::V2::Base) do
+        add ext1.new do
+        end
+      end
+    end.to raise_error(Blueprinter::BlueprinterError, /add does not accept a block/)
+  end
+
+  it "remove removes extensions by class" do
+    ext1 = Class.new(Blueprinter::Extension)
+    ext2 = Class.new(Blueprinter::Extension)
+    ext3 = Class.new(Blueprinter::Extension)
+
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      add ext1.new, ext2.new, ext3.new
+
+      view :extended do
+        remove ext2, ext3
+      end
+    end
+
+    ref = blueprint.reflections
+    expect(ref[:default].extensions.map(&:class)).to eq [ext1, ext2, ext3]
+    expect(ref[:extended].extensions.map(&:class)).to eq [ext1]
+  end
+
+  it "remove_all removes all extensions" do
+    ext1 = Class.new(Blueprinter::Extension)
+
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      add ext1.new
+
+      view :extended do
+        remove_all
+      end
+    end
+
+    ref = blueprint.reflections
+    expect(ref[:default].extensions.map(&:class)).to eq [ext1]
+    expect(ref[:extended].extensions.map(&:class)).to eq []
   end
 end

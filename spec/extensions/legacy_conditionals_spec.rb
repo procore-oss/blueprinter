@@ -18,7 +18,7 @@ describe Blueprinter::Extensions::LegacyConditionals do
   end
 
   it 'respects both V1 and V2 conditionals' do
-    blueprint.extensions { |exts| exts << subject }
+    blueprint.add subject
     result = blueprint.render({ name: 'Foo' }).to_hash
     expect(result).to eq({ name: 'Foo' })
   end

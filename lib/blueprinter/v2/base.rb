@@ -16,14 +16,12 @@ module Blueprinter
         # @return [String] The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @!visibility private
-        attr_reader :views, :schema, :formatters, :_options, :_extensions
+        attr_reader :views, :schema, :formatters, :options, :extensions
 
         # Initialize subclass
         def inherited(subclass)
           subclass.nodes = []
           subclass.views = views.dup_for(subclass)
-          subclass._extensions = [].freeze
-          subclass._options = {}.freeze
           subclass.blueprint_name = subclass.name || blueprint_name
           subclass.view_name = :default
           subclass.eval_mutex = Mutex.new
@@ -73,11 +71,12 @@ module Blueprinter
         # @!visibility private
         attr_accessor :nodes
         # @!visibility private
-        attr_writer :views, :schema, :formatters, :eval_mutex, :_options, :_extensions
+        attr_writer :views, :eval_mutex
 
         private
 
         attr_reader :eval_mutex
+        attr_writer :options, :extensions, :schema, :formatters
 
         def run_eval!
           superclass.eval!
@@ -85,8 +84,8 @@ module Blueprinter
           self.nodes = expand_use
           nodes.unshift(*inherited_formats, *inherited_fields).freeze
 
-          self._options = apply(DSL::Nodes::Options, superclass._options).freeze
-          self._extensions = apply(DSL::Nodes::Extensions, superclass._extensions).freeze
+          self.options = eval_options.freeze
+          self.extensions = eval_extensions.freeze
           self.formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }.freeze
           self.schema = nodes.grep(Fields::Field).to_h { |n| [n.name, n] }.freeze
           @serializer = Serializer.new(self)
@@ -96,30 +95,62 @@ module Blueprinter
         def inherited_formats = superclass.nodes.grep(DSL::Nodes::Format)
         def inherited_fields = exclude_fields superclass.nodes.grep(Fields::Field)
 
-        def apply(type, start)
-          nodes.grep(type).each_with_object(start.dup) do |node, acc|
-            node.block.call(acc)
-          end
-        end
-
+        # Return nodes, replacing any `use` nodes with the partial's nodes
         def expand_use(partials: self.partials, exclude_all: exclude_all?, excluded: excluded_fields)
           nodes.each_with_object([]) do |node, acc|
+            # Leave other node types as-is
             unless node.is_a? DSL::Nodes::Use
               acc << node
               next
             end
 
+            # Eval the partial, temporarily leaving `self.nodes` holding only the partial's nodes
             p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{self}'")
             self.nodes = []
             class_eval(&p)
             self.nodes = exclude_fields(nodes, exclude_all:, excluded:)
 
+            # Gather up any exclusions and partials defined by the partial (to be used on the next run)
             exclude_all ||= exclude_all?
             excluded += excluded_fields
             partials = partials.merge(self.partials)
+
+            # Call `expand_use` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
             acc.concat(expand_use(partials:, exclude_all:, excluded:))
           end
         end
+
+        def eval_options
+          nodes.each_with_object(superclass.options.dup) do |node, acc|
+            case node
+            when DSL::Nodes::SetOpt
+              acc[node.key] = node.val
+            when DSL::Nodes::SetDynamicOpt
+              acc[node.key] = node.block.call(acc[node.key])
+            when DSL::Nodes::UnsetOpt
+              acc.delete node.key
+            when DSL::Nodes::Flag
+              acc.clear if node.name == :unset_all
+            end
+          end
+        end
+
+        # rubocop:disable Metrics/CyclomaticComplexity
+        def eval_extensions
+          nodes.each_with_object(superclass.extensions.dup) do |node, acc|
+            case node
+            when DSL::Nodes::AppendExt
+              acc.push(node.ext)
+            when DSL::Nodes::PrependExt
+              acc.unshift(node.ext)
+            when DSL::Nodes::RemExt
+              acc.reject! { |ext| ext.is_a? node.klass }
+            when DSL::Nodes::Flag
+              acc.clear if node.name == :remove_all
+            end
+          end
+        end
+        # rubocop:enable Metrics/CyclomaticComplexity
 
         def exclude_fields(nodes, exclude_all: exclude_all?, excluded: excluded_fields)
           nodes.reject { |n| n.is_a?(Fields::Field) && (exclude_all || excluded.include?(n.name)) }
@@ -134,8 +165,8 @@ module Blueprinter
 
       self.views = ViewBuilder.new(self)
       self.nodes = [].freeze
-      self._extensions = [].freeze
-      self._options = {}.freeze
+      self.extensions = [].freeze
+      self.options = {}.freeze
       self.blueprint_name = name
       self.view_name = :default
       self.eval_mutex = Mutex.new
@@ -145,7 +176,7 @@ module Blueprinter
 
       # @!visibility private
       def initialize
-        @options = self.class._options.dup
+        @options = self.class.options.dup
       end
 
       # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"

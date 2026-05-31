@@ -24,7 +24,7 @@ describe Blueprinter::Extensions::LegacyTransformer do
   end
 
   it 'applies mutliple transformers' do
-    blueprint.extensions { |exts| exts << described_class.new(transformer1, transformer2) }
+    blueprint.add described_class.new(transformer1, transformer2)
     result = blueprint.render({ id: 42, name: 'Foo' }).to_hash
     expect(result).to eq({ id: '42', name: 'foo' })
   end

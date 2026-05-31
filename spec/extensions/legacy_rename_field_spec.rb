@@ -11,7 +11,7 @@ describe Blueprinter::Extensions::LegacyRenameField do
   end
 
   it "respects V1's name option" do
-    blueprint.extensions { |exts| exts << subject }
+    blueprint.add subject
     result = blueprint.render({
       name: 'Foo',
       description_v2: 'Desc V2',

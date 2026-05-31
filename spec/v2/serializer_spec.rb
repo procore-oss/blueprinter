@@ -116,7 +116,7 @@ describe Blueprinter::V2::Serializer do
       test = self
       blueprint = Class.new(application_blueprint) do
         self.blueprint_name = "BlockBlueprint"
-        extensions { |exts| exts << test.name_of_extractor.new(prefix: 'X') }
+        add test.name_of_extractor.new(prefix: 'X')
         field :name
         association :category, test.category_blueprint
         association :parts, [test.part_blueprint]
@@ -153,7 +153,7 @@ describe Blueprinter::V2::Serializer do
 
   it 'respects conditionals copied down from blueprints options' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
-      options { |opts| opts[:if] = ->(ctx) { ctx.options[:n] > 42 } }
+      set :if, ->(ctx) { ctx.options[:n] > 42 }
       field :name, if: ->(_ctx) { true }
       field :desc
     end
@@ -177,7 +177,7 @@ describe Blueprinter::V2::Serializer do
 
   it 'respects default values copied down from blueprint options' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
-      options { |opts| opts[:default] = 'Description!' }
+      set :default, 'Description!'
       field :name
       field :desc
     end
@@ -206,7 +206,7 @@ describe Blueprinter::V2::Serializer do
     ext2 = Class.new(Blueprinter::Extension) do
       def around_serialize_collection(ctx) = yield ctx
     end
-    category_blueprint.extensions { |exts| exts << ext1.new << ext2.new }
+    category_blueprint.add ext1.new, ext2.new
     serializer = category_blueprint.serializer
 
     expect(serializer.hooks.registered? :around_serialize_object).to be true
@@ -237,7 +237,7 @@ describe Blueprinter::V2::Serializer do
         value.is_a?(Date) ? value + 10 : '?'
       end
     end
-    widget_blueprint.extensions { |exts| exts << ext1.new << ext2.new }
+    widget_blueprint.add ext1.new, ext2.new
     widget = { name: 'Foo', created_on: Date.new(2024, 10, 31) }
 
     result = widget_blueprint[:extended].serializer.object(widget, {}, instances:, store:, depth: 1)
@@ -260,7 +260,7 @@ describe Blueprinter::V2::Serializer do
         { name: 'Bar' }
       end
     end
-    widget_blueprint.extensions { |exts| exts << ext1.new << ext2.new }
+    widget_blueprint.add ext1.new, ext2.new
     widget = { name: 'Foo', category: { name: 'Cat' } }
 
     result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
@@ -280,7 +280,7 @@ describe Blueprinter::V2::Serializer do
     ext3 = Class.new(Blueprinter::Extension) do
       def around_collection_value(ctx) = yield(ctx)[1..]
     end
-    widget_blueprint.extensions { |exts| exts << ext1.new << ext2.new << ext3.new }
+    widget_blueprint.add ext1.new, ext2.new, ext3.new
 
     widget = { name: 'Foo', parts: [{ num: 42 }] }
     result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
@@ -363,7 +363,7 @@ describe Blueprinter::V2::Serializer do
       end
     end
     log = []
-    application_blueprint.extensions { |exts| exts << ext.new(log) }
+    application_blueprint.add ext.new(log)
     widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] }
 
     result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
@@ -421,7 +421,7 @@ describe Blueprinter::V2::Serializer do
         yield ctx
       end
     end
-    application_blueprint.extensions { |exts| exts << ext.new(log) }
+    application_blueprint.add ext.new(log)
 
     widget_blueprint.serializer.collection(
       [
@@ -445,7 +445,7 @@ describe Blueprinter::V2::Serializer do
     ext = Class.new(Blueprinter::Extension) do
       def around_blueprint_init(ctx) = true
     end
-    application_blueprint.extensions { |exts| exts << ext.new }
+    application_blueprint.add ext.new
 
     expect do
       widget_blueprint.serializer.object({}, {}, instances:, store:, depth: 1)
@@ -463,7 +463,7 @@ describe Blueprinter::V2::Serializer do
     end
 
     blueprint = Class.new(application_blueprint) do
-      extensions { |exts| exts << ext.new }
+      add ext.new
       fields :id, :name, :summary, :description
     end
 
@@ -547,8 +547,8 @@ describe Blueprinter::V2::Serializer do
       end
     end
     log = []
-    category_blueprint.extensions { |exts| exts << ext.new(log) }
-    part_blueprint.extensions { |exts| exts << ext.new(log) }
+    category_blueprint.add ext.new(log)
+    part_blueprint.add ext.new(log)
     serializer = widget_blueprint.serializer
 
     widget = { name: 'Foo', category: { name: 'Bar' }, parts: [{ num: 42 }] }

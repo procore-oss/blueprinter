@@ -34,7 +34,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks blueprint options (true)' do
-      blueprint.options { |opts| opts[:exclude_if_nil] = true }
+      blueprint.set :exclude_if_nil, true
       res = subject.object(object, {}, instances:, store:, depth: 1)
       expect(res).to include(:foo)
 
@@ -44,7 +44,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'checks blueprint options (false)' do
-      blueprint.options { |opts| opts[:exclude_if_nil] = false }
+      blueprint.set :exclude_if_nil, false
       res = subject.object(object, {}, instances:, store:, depth: 1)
       expect(res).to include(:foo)
 
@@ -54,7 +54,7 @@ describe Blueprinter::V2::FieldLogic do
     end
 
     it 'field options take priority over blueprint options' do
-      blueprint.options { |opts| opts[:exclude_if_nil] = true }
+      blueprint.set :exclude_if_nil, true
       blueprint.field :foo, exclude_if_nil: false
       res = subject.object(object, {}, instances:, store:, depth: 1)
       expect(res).to include(:foo)

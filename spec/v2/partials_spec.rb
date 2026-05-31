@@ -149,8 +149,8 @@ describe "Blueprinter::V2 Partials" do
   context 'precedence' do
     it 'partials can override what the view inherits' do
       blueprint = Class.new(Blueprinter::V2::Base) do
-        extensions { |exts| exts << Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name } }
-        options { |opts| opts[:foo] = true }
+        add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+        set :foo, true
         format Time, :iso8601
         fields :name, :description
 
@@ -163,8 +163,8 @@ describe "Blueprinter::V2 Partials" do
         end
 
         partial :non_empty_name do
-          extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
-          options { |opts| opts[:foo] = false }
+          add Blueprinter::Extensions::MultiJson.new
+          set :foo, false
           format Time, :to_i
           field :name, exclude_if_empty: true
           exclude :description
@@ -191,16 +191,16 @@ describe "Blueprinter::V2 Partials" do
     it '`use` overrides what comes before' do
       blueprint = Class.new(Blueprinter::V2::Base) do
         view :foo do
-          extensions { |exts| exts << Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name } }
-          options { |opts| opts[:foo] = true }
+          add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+          set :foo, true
           format Time, :iso8601
           field :name
           use :non_empty_name
         end
 
         partial :non_empty_name do
-          extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
-          options { |opts| opts[:foo] = false }
+          add Blueprinter::Extensions::MultiJson.new
+          set :foo, false
           format Time, :to_i
           field :name, exclude_if_empty: true
         end
@@ -217,15 +217,15 @@ describe "Blueprinter::V2 Partials" do
       blueprint = Class.new(Blueprinter::V2::Base) do
         view :foo do
           use :non_empty_name
-          extensions { |exts| exts << Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name } }
-          options { |opts| opts[:foo] = true }
+          add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+          set :foo, true
           format Time, :iso8601
           field :name
         end
 
         partial :non_empty_name do
-          extensions { |exts| exts << Blueprinter::Extensions::MultiJson.new }
-          options { |opts| opts[:foo] = false }
+          add Blueprinter::Extensions::MultiJson.new
+          set :foo, false
           format Time, :to_i
           field :name, exclude_if_empty: true
         end

@@ -3,15 +3,20 @@
 module Blueprinter
   module V2
     # Methods for defining Blueprint fields and views
+    # rubocop:disable Metrics/ModuleLength
     module DSL
       # @!visibility private
       module Nodes
         Use = Struct.new(:name)
         Exclude = Struct.new(:name)
         Partial = Struct.new(:name, :block)
-        Options = Struct.new(:block)
-        Extensions = Struct.new(:block)
         Format = Struct.new(:klass, :fmt)
+        SetOpt = Struct.new(:key, :val)
+        SetDynamicOpt = Struct.new(:key, :block)
+        UnsetOpt = Struct.new(:key)
+        AppendExt = Struct.new(:ext)
+        PrependExt = Struct.new(:ext)
+        RemExt = Struct.new(:klass)
         Flag = Struct.new(:name)
       end
 
@@ -55,28 +60,6 @@ module Blueprinter
       end
 
       #
-      # Modify options inside the block.
-      #
-      # @yield [Hash] Array of options that can be modified
-      #
-      def options(&block)
-        raise BlueprinterError, "A block must be passed to 'options'" unless block
-
-        nodes << Nodes::Options.new(block)
-      end
-
-      #
-      # Modify extensions inside the block.
-      #
-      # @yield [Array] Array of extensions that can be modified
-      #
-      def extensions(&block)
-        raise BlueprinterError, "A block must be passed to 'extensions'" unless block
-
-        nodes << Nodes::Extensions.new(block)
-      end
-
-      #
       # Add a formatter for field values of the given class.
       #
       # @param klass [Class] The class of objects to format
@@ -102,13 +85,11 @@ module Blueprinter
       #
       def extension(&block)
         bp_name = blueprint_name
-        extensions do |exts|
-          exts << Class.new(Extension) do
-            @blueprint_name = bp_name
-            def self.name = "#{@blueprint_name} extension"
-            class_eval(&block)
-          end.new
-        end
+        add Class.new(Extension) {
+          @blueprint_name = bp_name
+          def self.name = "#{@blueprint_name} extension"
+          class_eval(&block)
+        }.new
       end
 
       #
@@ -194,9 +175,7 @@ module Blueprinter
       # @param *names [Symbol] One or more fields or associations to exclude
       #
       def exclude(*names)
-        names.each do |name|
-          nodes << Nodes::Exclude.new(name.to_sym)
-        end
+        names.each { |name| nodes << Nodes::Exclude.new(name.to_sym) }
       end
 
       alias excludes exclude
@@ -204,9 +183,61 @@ module Blueprinter
       #
       # Excludes all fields and associations from parents or partials.
       #
-      def exclude_all
-        nodes << Nodes::Flag.new(:exclude_all)
+      def exclude_all = nodes << Nodes::Flag.new(:exclude_all)
+
+      #
+      # Set an option value.
+      #
+      # @param key [Symbol] Option name
+      # @param value [Object | nil] Object value
+      # @yield [Object | nil] Get the current value then return the value you want
+      #
+      def set(key, value = nil, &block)
+        node = block ? Nodes::SetDynamicOpt.new(key, block) : Nodes::SetOpt.new(key, value)
+        nodes << node
       end
+
+      #
+      # Clear the given options.
+      #
+      # @param *keys [Symbol]
+      #
+      def unset(*keys)
+        keys.each { |key| nodes << Nodes::UnsetOpt.new(key) }
+      end
+
+      # Clears all options set before this point
+      def unset_all = nodes << Nodes::Flag.new(:unset_all)
+
+      #
+      # Adds one or more extensions.
+      #
+      # @param *extensions [Blueprinter::Extension] Extension instances to add
+      # @param prepend [true | false] Add this extension before all others
+      #
+      def add(*extensions, prepend: false)
+        if block_given?
+          raise BlueprinterError, 'Blueprinter::DSL#add does not accept a block. Did you mean to pass it to an extension?'
+        end
+
+        extensions.reverse! if prepend
+        extensions.each do |ext|
+          node = prepend ? Nodes::PrependExt.new(ext) : Nodes::AppendExt.new(ext)
+          nodes << node
+        end
+      end
+
+      #
+      # Removes extensions of the given classes.
+      #
+      # @param *klasses [Class]
+      #
+      def remove(*klasses)
+        klasses.each { |klass| nodes << Nodes::RemExt.new(klass) }
+      end
+
+      # Removes all extensions added before this point
+      def remove_all = nodes << Nodes::Flag.new(:remove_all)
 
       private
 
@@ -226,5 +257,6 @@ module Blueprinter
         [is_collection, assoc_arg]
       end
     end
+    # rubocop:enable Metrics/ModuleLength
   end
 end

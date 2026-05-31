@@ -54,8 +54,8 @@ module Blueprinter
         # @api private
         def initialize(blueprint, name)
           @name = name
-          @options = blueprint._options
-          @extensions = blueprint._extensions
+          @options = blueprint.options
+          @extensions = blueprint.extensions
           @ordered = blueprint.schema.values.freeze
           @fields = ordered.select(&:field?).to_h { |f| [f.name, f] }.freeze
           @objects = ordered.select(&:object?).to_h { |f| [f.name, f] }.freeze

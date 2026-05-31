@@ -338,7 +338,7 @@ describe Blueprinter::V2::Render do
             yield ctx
           end
         end
-        application_blueprint.extensions { |exts| exts << ext.new(log) }
+        application_blueprint.add ext.new(log)
 
         widget_blueprint[:with_parts].render({
           name: 'Widget A',

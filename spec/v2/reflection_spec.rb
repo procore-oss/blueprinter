@@ -5,12 +5,10 @@ describe "Blueprinter::V2::Reflection" do
     Class.new(Blueprinter::V2::Base) do
       view :foo
       view :bar do
-        options { |opts| opts[:foo] = 'foo' }
+        set :foo, 'foo'
         view :foo do
-          options do |opts|
-            opts[:foo] = 'bar'
-            opts[:exclude_if_nil] = true
-          end
+          set :foo, 'bar'
+          set :exclude_if_nil, true
           view :borp
         end
       end
@@ -82,7 +80,7 @@ describe "Blueprinter::V2::Reflection" do
     let(:blueprint) do
       test = self
       Class.new(Blueprinter::V2::Base) do
-        options { |opts| opts[:if] = ->(_ctx) { true } }
+        set :if, ->(_ctx) { true }
         field :name, default: 'None'
         association :category, test.category_blueprint, default: { name: 'None' }
 

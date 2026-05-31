@@ -14,13 +14,13 @@ describe Blueprinter::Extensions::ViewOption do
   end
 
   it 'does nothing by default' do
-    blueprint.extensions { |exts| exts << subject }
+    blueprint.add subject
     result = blueprint.render({}).to_hash
     expect(result).to eq({})
   end
 
   it 'finds a nested view' do
-    blueprint.extensions { |exts| exts << subject }
+    blueprint.add subject
     result = blueprint.render({}, view: 'foo.bar').to_hash
     expect(result).to eq({ foo: nil, bar: nil })
   end

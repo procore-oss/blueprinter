@@ -129,7 +129,7 @@ describe Blueprinter::V2::ViewBuilder do
 
   it "allows blueprints to reference their own views" do
     blueprint = Class.new(Blueprinter::V2::Base) do
-      options { |opts| opts[:exclude_if_nil] = true }
+      set :exclude_if_nil, true
 
       view :extended do
         field :description

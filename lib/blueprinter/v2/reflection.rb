@@ -19,6 +19,7 @@ module Blueprinter
       def flatten_children(parent, child_name, path = [])
         ref_key = path.empty? ? child_name : path.join('.').to_sym
         child_view = parent.views.fetch(child_name)
+        child_view.eval!
         child_ref = View.new(child_view, ref_key)
 
         child_view.views.reduce({ ref_key => child_ref }) do |acc, (name, _)|

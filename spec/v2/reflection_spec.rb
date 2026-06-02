@@ -1,15 +1,27 @@
 # frozen_string_literal: true
 
 describe "Blueprinter::V2::Reflection" do
-  let(:blueprint) do
+  let(:application_blueprint) do
     Class.new(Blueprinter::V2::Base) do
-      view :foo
-      view :bar do
+      use :asdf
+
+      partial :asdf do
+        view :identity do
+          view :foo
+        end
+      end
+    end
+  end
+
+  let(:blueprint) do
+    Class.new(application_blueprint) do
+      view :a
+      view :b do
         set :foo, 'foo'
-        view :foo do
+        view :c do
           set :foo, 'bar'
           set :exclude_if_nil, true
-          view :borp
+          view :d
         end
       end
     end
@@ -19,10 +31,12 @@ describe "Blueprinter::V2::Reflection" do
     view_names = blueprint.reflections.keys
     expect(view_names.sort).to eq %i(
       default
-      foo
-      bar
-      bar.foo
-      bar.foo.borp
+      identity
+      identity.foo
+      a
+      b
+      b.c
+      b.c.d
     ).sort
   end
 
@@ -30,48 +44,50 @@ describe "Blueprinter::V2::Reflection" do
     view_names = blueprint.reflections.values.map(&:name)
     expect(view_names.sort).to eq %i(
       default
-      foo
-      bar
-      bar.foo
-      bar.foo.borp
+      identity
+      identity.foo
+      a
+      b
+      b.c
+      b.c.d
     ).sort
   end
 
   it "finds nested view keys" do
-    bar_view_names = blueprint[:bar].reflections.keys
+    bar_view_names = blueprint[:b].reflections.keys
     expect(bar_view_names.sort).to eq %i(
       default
-      foo
-      foo.borp
+      c
+      c.d
     ).sort
 
-    bar_foo_view_names = blueprint[:"bar.foo"].reflections.keys
+    bar_foo_view_names = blueprint[:"b.c"].reflections.keys
     expect(bar_foo_view_names.sort).to eq %i(
       default
-      borp
+      d
     ).sort
   end
 
   it "finds nested view names" do
-    bar_view_names = blueprint[:bar].reflections.values.map(&:name)
+    bar_view_names = blueprint[:b].reflections.values.map(&:name)
     expect(bar_view_names.sort).to eq %i(
       default
-      foo
-      foo.borp
+      c
+      c.d
     ).sort
 
-    bar_foo_view_names = blueprint[:"bar.foo"].reflections.values.map(&:name)
+    bar_foo_view_names = blueprint[:"b.c"].reflections.values.map(&:name)
     expect(bar_foo_view_names.sort).to eq %i(
       default
-      borp
+      d
     ).sort
   end
 
   it 'has options' do
     expect(blueprint.reflections[:default].options).to eq({})
-    expect(blueprint.reflections[:bar].options).to eq({ foo: 'foo' })
-    expect(blueprint.reflections[:"bar.foo"].options).to eq({ foo: 'bar', exclude_if_nil: true })
-    expect(blueprint.reflections[:"bar.foo.borp"].options).to eq({ foo: 'bar', exclude_if_nil: true })
+    expect(blueprint.reflections[:b].options).to eq({ foo: 'foo' })
+    expect(blueprint.reflections[:"b.c"].options).to eq({ foo: 'bar', exclude_if_nil: true })
+    expect(blueprint.reflections[:"b.c.d"].options).to eq({ foo: 'bar', exclude_if_nil: true })
   end
 
   context 'fields and associations' do

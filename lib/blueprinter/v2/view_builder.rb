@@ -14,22 +14,8 @@ module Blueprinter
       # @param parent [Class] A subclass of Blueprinter::V2::Base
       def initialize(parent)
         @parent = parent
+        @views = { default: @parent }
         @mut = Mutex.new
-        reset
-      end
-
-      #
-      # Add a view definition.
-      #
-      # @param name [Symbol]
-      # @param definition [Proc|nil]
-      #
-      def []=(name, definition)
-        name = name.to_sym
-        raise Errors::InvalidBlueprint, 'You may not redefine the default view' if name == :default
-
-        @pending[name] ||= []
-        @pending[name] << definition if definition
       end
 
       #
@@ -40,13 +26,13 @@ module Blueprinter
       #
       def [](name)
         name = name.to_sym
-        if !@views.key?(name) && @pending.key?(name)
+        if !@views.key?(name) && view_defs.key?(name)
           @mut.synchronize do
             next if @views.key?(name)
 
             view = Class.new(@parent)
             @views[name] = view
-            build_view name
+            build_view view, name
             view.eval!(lock: false)
           end
         end
@@ -62,32 +48,26 @@ module Blueprinter
       def each(&block)
         enum = Enumerator.new do |y|
           y.yield(:default, self[:default])
-          @pending.each_key { |name| y.yield(name, self[name]) }
+          view_defs.each_key { |name| y.yield(name, self[name]) }
         end
         block ? enum.each(&block) : enum
       end
 
-      # Create a duplicate of this builder with a different default view
-      def dup_for(blueprint)
-        builder = self.class.new(blueprint)
-        @pending.each do |name, defs|
-          defs.each { |d| builder[name] = d }
-        end
-        builder
-      end
-
-      # Clear everything but the default view
-      def reset
-        @views = { default: @parent }
-        @pending = {}
-      end
-
       private
 
-      def build_view(name)
-        defs = @pending[name]
-        view = @views.fetch name
-        view.views.reset
+      def view_defs
+        @view_defs || @mut.synchronize do
+          next @view_defs if @view_defs
+
+          @view_defs = @parent.nodes.grep(DSL::Nodes::View).each_with_object({}) do |node, acc|
+            acc[node.name] ||= []
+            acc[node.name] << node.block if node.block
+          end
+        end
+      end
+
+      def build_view(view, name)
+        defs = view_defs[name]
         view.blueprint_name = "#{view.blueprint_name}.#{name}"
         view.view_name = view.blueprint_name.sub(/^[^.]+\./, '').to_sym
         defs.each { |d| view.class_eval(&d) }

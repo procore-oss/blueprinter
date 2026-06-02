@@ -16,12 +16,12 @@ module Blueprinter
         # @return [String] The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
         attr_accessor :blueprint_name
         # @!visibility private
-        attr_reader :views, :schema, :formatters, :options, :extensions
+        attr_reader :nodes, :views, :schema, :formatters, :options, :extensions
 
         # Initialize subclass
         def inherited(subclass)
           subclass.nodes = []
-          subclass.views = views.dup_for(subclass)
+          subclass.views = ViewBuilder.new(subclass)
           subclass.blueprint_name = subclass.name || blueprint_name
           subclass.view_name = :default
           subclass.eval_mutex = Mutex.new
@@ -69,9 +69,7 @@ module Blueprinter
         protected
 
         # @!visibility private
-        attr_accessor :nodes
-        # @!visibility private
-        attr_writer :views, :eval_mutex
+        attr_writer :nodes, :views, :eval_mutex
 
         private
 
@@ -80,9 +78,9 @@ module Blueprinter
 
         def run_eval!
           superclass.eval!
-          nodes.unshift(*inherited_partials)
+          nodes.unshift(*inherit(DSL::Nodes::Partial))
           self.nodes = expand_use
-          nodes.unshift(*inherited_formats, *inherited_fields).freeze
+          nodes.unshift(*inherit(DSL::Nodes::Format), *inherit_fields, *inherit_views).freeze
 
           self.options = eval_options.freeze
           self.extensions = eval_extensions.freeze
@@ -90,10 +88,6 @@ module Blueprinter
           self.schema = nodes.grep(Fields::Field).to_h { |n| [n.name, n] }.freeze
           @serializer = Serializer.new(self)
         end
-
-        def inherited_partials = superclass.nodes.grep(DSL::Nodes::Partial)
-        def inherited_formats = superclass.nodes.grep(DSL::Nodes::Format)
-        def inherited_fields = exclude_fields superclass.nodes.grep(Fields::Field)
 
         # Return nodes, replacing any `use` nodes with the partial's nodes
         def expand_use(partials: self.partials, exclude_all: exclude_all?, excluded: excluded_fields)
@@ -156,11 +150,13 @@ module Blueprinter
           nodes.reject { |n| n.is_a?(Fields::Field) && (exclude_all || excluded.include?(n.name)) }
         end
 
-        def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
-
+        def blueprint? = view_name == :default
         def exclude_all? = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == :exclude_all }
-
+        def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
         def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
+        def inherit_fields = exclude_fields inherit(Fields::Field)
+        def inherit_views = blueprint? ? inherit(DSL::Nodes::View) : []
+        def inherit(node_type) = superclass.nodes.grep(node_type)
       end
 
       self.views = ViewBuilder.new(self)

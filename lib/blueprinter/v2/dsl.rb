@@ -10,6 +10,7 @@ module Blueprinter
         Use = Struct.new(:name)
         Exclude = Struct.new(:name)
         Partial = Struct.new(:name, :block)
+        View = Struct.new(:name, :block)
         Format = Struct.new(:klass, :fmt)
         SetOpt = Struct.new(:key, :val)
         SetDynamicOpt = Struct.new(:key, :block)
@@ -31,11 +32,12 @@ module Blueprinter
       # @yield Define the view in the block
       #
       def view(name, &definition)
+        name = name.to_sym
+        raise Errors::InvalidBlueprint, 'You may not redefine the default view' if name == :default
         raise Errors::InvalidBlueprint, "View name may not contain '.'" if name.to_s =~ /\./
 
-        name = name.to_sym
         partial(name, &definition)
-        views[name] = definition
+        nodes << Nodes::View.new(name, definition)
       end
 
       #

@@ -108,5 +108,15 @@ describe "Blueprinter::V2 Views" do
       end
       expect(bp2.reflections[:foo].fields.keys.sort).to eq %i(description id name)
     end
+
+    it "throws an error if you try to define the default view" do
+      expect do
+        Class.new(Blueprinter::V2::Base) do
+          view :default do
+            field :name
+          end
+        end
+      end.to raise_error Blueprinter::Errors::InvalidBlueprint
+    end
   end
 end

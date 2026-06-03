@@ -11,9 +11,11 @@ module Blueprinter
       extend Reflection
 
       class << self
-        # @return [Symbol] The name of this view, e.g. :default, :"foo.bar"
+        # @return [Symbol] The name of this view (`:default`, `:foo`)
         attr_accessor :view_name
-        # @return [String] The fully-qualified name, e.g. "MyBlueprint", or "MyBlueprint.foo.bar"
+        # @return [Symbol] The full name of this view, including any parent views (`:default`, `:foo`, `:foo.bar`)
+        attr_accessor :view_path
+        # @return [String] The fully-qualified name (`MyBlueprint`, `MyBlueprint.foo.bar`)
         attr_accessor :blueprint_name
         # @!visibility private
         attr_reader :nodes, :views, :schema, :formatters, :options, :extensions
@@ -23,6 +25,7 @@ module Blueprinter
           subclass.nodes = []
           subclass.views = ViewBuilder.new(subclass)
           subclass.blueprint_name = subclass.name || blueprint_name
+          subclass.view_path = :default
           subclass.view_name = :default
           subclass.eval_mutex = Mutex.new
         end
@@ -164,6 +167,7 @@ module Blueprinter
       self.extensions = [].freeze
       self.options = {}.freeze
       self.blueprint_name = name
+      self.view_path = :default
       self.view_name = :default
       self.eval_mutex = Mutex.new
 

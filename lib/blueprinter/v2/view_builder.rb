@@ -69,7 +69,8 @@ module Blueprinter
       def build_view(view, name)
         defs = view_defs[name]
         view.blueprint_name = "#{view.blueprint_name}.#{name}"
-        view.view_name = view.blueprint_name.sub(/^[^.]+\./, '').to_sym
+        view.view_path = view.blueprint_name.sub(/^[^.]+\./, '').to_sym
+        view.view_name = name
         defs.each { |d| view.class_eval(&d) }
       end
     end

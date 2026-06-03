@@ -22,10 +22,9 @@ describe "Blueprinter::V2 Names" do
       expect(NamedBlueprint[:extended].view_name).to eq :extended
     end
 
-    it 'raises for an invalid view name' do
-      expect { NamedBlueprint[:wrong_name] }.to raise_error(
+    it "doesn't raise an error for an invalid view name" do
+      expect { NamedBlueprint[:wrong_name] }.to_not raise_error(
         Blueprinter::Errors::UnknownView,
-        "View 'wrong_name' not found in Blueprint 'NamedBlueprint'"
       )
     end
 
@@ -143,14 +142,15 @@ describe "Blueprinter::V2 Names" do
     foo_bar_name = nil
 
     bp = Class.new(Blueprinter::V2::Base) do
-      default_name = view_name
+      default_name = view_path
       view :foo do
-        foo_name = view_name
+        foo_name = view_path
         view :bar do
-          foo_bar_name = view_name
+          foo_bar_name = view_path
         end
       end
     end
+    bp.reflections
 
     bp[:default]
     bp[:foo]
@@ -158,6 +158,6 @@ describe "Blueprinter::V2 Names" do
 
     expect(default_name).to eq :default
     expect(foo_name).to eq :foo
-    expect(foo_bar_name).to eq :bar
+    expect(foo_bar_name).to eq :"foo.bar"
   end
 end

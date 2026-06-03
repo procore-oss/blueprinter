@@ -17,7 +17,7 @@ module Blueprinter
     autoload :InstanceCache, 'blueprinter/v2/instance_cache'
     autoload :Reflection, 'blueprinter/v2/reflection'
     autoload :Render, 'blueprinter/v2/render'
+    autoload :Rendering, 'blueprinter/v2/rendering'
     autoload :Serializer, 'blueprinter/v2/serializer'
-    autoload :ViewBuilder, 'blueprinter/v2/view_builder'
   end
 end

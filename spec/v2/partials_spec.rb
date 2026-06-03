@@ -123,7 +123,9 @@ describe "Blueprinter::V2 Partials" do
         use :bar
       end
     end
-    expect { blueprint[:foo] }.to raise_error(Blueprinter::Errors::UnknownPartial, /No 'bar' partial in Blueprint 'MyBlueprint\.foo'/)
+    expect do
+      blueprint[:foo].render({})
+    end.to raise_error(Blueprinter::Errors::UnknownPartial, /No 'bar' partial in Blueprint 'MyBlueprint\.foo'/)
   end
 
   it 'creates an implicit partial for every view' do

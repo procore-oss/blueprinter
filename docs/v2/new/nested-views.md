@@ -2,7 +2,7 @@
 
 Because the [V2 DSL is recursive](./views-are-blueprints.md), you can define views inside of views.
 
-Each view below inherits from its parent, which inherits from *its* parent, all the way up to `ApplicationBlueprint` and `Blueprinter::V2::Base`.
+Each nested view inherits from its parent, which inherits from *its* parent, all the way up to `ApplicationBlueprint` and `Blueprinter::V2::Base`.
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint

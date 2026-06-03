@@ -5,8 +5,9 @@ require 'blueprinter/v2/serializer'
 module Blueprinter
   module V2
     #
-    # Represents a pending Blueprint render. Returned by {Blueprinter::V2::Base.render render},
-    # {Blueprinter::V2::Base.render_object render_object}, and {Blueprinter::V2::Base.render_collection render_collection}.
+    # Represents a pending Blueprint render. Returned by {Blueprinter::V2::Rendering#render render},
+    # {Blueprinter::V2::Rendering#render_object render_object}, and
+    # {Blueprinter::V2::Rendering#render_collection render_collection}.
     #
     #   render = WidgetBlueprint.render(widget)
     #

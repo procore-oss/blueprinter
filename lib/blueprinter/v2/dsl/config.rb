@@ -3,9 +3,10 @@
 module Blueprinter
   module V2
     module DSL
+      # Set and unset options, add or remove extensions.
       module Config
         #
-        # Set an option value.
+        # Set an option on the Blueprint, view, or partial.
         #
         # ```
         # class WidgetBlueprint < ApplicationBlueprint
@@ -48,7 +49,7 @@ module Blueprinter
         #
         # Clear the given options.
         #
-        # @param *keys [Symbol]
+        # @param keys [Symbol]
         #
         def unset(*keys)
           keys.each { |key| nodes << Nodes::UnsetOpt.new(key) }
@@ -67,7 +68,7 @@ module Blueprinter
         # end
         # ```
         #
-        # @param *extensions [Blueprinter::Extension] Extension instances to add
+        # @param extensions [Blueprinter::Extension] Extension instances to add
         # @param prepend [true | false] Add this extension before all others
         #
         def add(*extensions, prepend: false)
@@ -85,7 +86,12 @@ module Blueprinter
         #
         # Removes extensions of the given classes, or that satisfy the given block.
         #
-        # @param *klasses [Class]
+        # ```
+        # remove ExtensionIDontWant
+        # remove { |ext| ext.is_a? ExtensionIDontWant }
+        # ```
+        #
+        # @param klasses [Class]
         # @yield [Blueprinter::Extension] Return true if the given extension should be removed
         #
         def remove(*klasses, &reject)

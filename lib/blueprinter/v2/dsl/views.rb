@@ -1,17 +1,21 @@
 # frozen_string_literal: true
 
+require 'set'
+
 module Blueprinter
   module V2
     module DSL
+      # Create child views and composable partials.
       module Views
         #
-        # Define a child view, which inherits everything from the parent including fields, associations,
-        # formatters, options, partials, and extensions.
+        # Define a child view. It will inherit fields, associations, formatters, options, partials, and extensions from
+        # the parent.
         #
-        # Views can be nested to an arbitrary depth. They can define fields, associations, formatters, options,
+        # Views have access to the full DSL, so they can define fields, associations, formatters, options,
         # extensions, partials, and nested views.
         #
-        # If a view with this name already exists, the definition will be appended.
+        # If a view with the given name already exists, the definition is *appended*. If you want to replace the existing
+        # existing view instead, see {Blueprinter::V2::DSL::Data#exclude}.
         #
         # ```
         # class WidgetBlueprint < ApplicationBlueprint
@@ -35,6 +39,11 @@ module Blueprinter
         # end
         # ```
         #
+        # == Automatic partials
+        #
+        # When you create a view, a {Blueprinter::V2::DSL::Views#partial partial} of the same name is automatically created.
+        # This allows you to {Blueprinter::V2::DSL::Views#use use} views just like partials!
+        #
         # @param name [Symbol] Name of the view
         # @yield Define the view in the block. It has access to the full DSL.
         #
@@ -53,7 +62,7 @@ module Blueprinter
         # views. Rather, views can `use` partials as shared functionality, similar to how Ruby classes
         # can include modules.
         #
-        # If a partial with this name already exists, it will be **replaced**.
+        # Defining a 2nd partial with the same name overrides the first.
         #
         # ```
         # class WidgetBlueprint < ApplicationBlueprint
@@ -76,7 +85,7 @@ module Blueprinter
         # end
         # ```
         #
-        # @param name [Symbol] Name of the partial to create or import
+        # @param name [Symbol] Name of the partial to create
         # @yield Define the partial in the block. It has access to the full DSL.
         #
         def partial(name, &definition)
@@ -92,13 +101,17 @@ module Blueprinter
         # end
         # ```
         #
-        # NOTE: `use` expands in-place, so ordering can matter. Preceding lines can be overridden by the partial,
-        # while subsequent lines can override what's in the partial.
+        # == Precedence
         #
-        # NOTE: Anytime you create a view, a partial of the same name is also created. This allows views to `use`
+        # `use` expands into the partial's content in-place, so ordering can matter. This allows the partial to override
+        # what came before it (fields, options, etc.), and be overridden by what comes after.
+        #
+        # == Using a view
+        #
+        # Anytime you create a view, a partial of the same name is also created. This allows views to `use`
         # other views just like partials.
         #
-        # @param *names [Symbol] One or more partial names
+        # @param names [Symbol] One or more partial names
         # @param exclude [Array<Symbol>] Names of fields or associations to exclude from the partial(s)
         # @param fields [true | false] If false, no fields from the partial(s) will be used
         # @param options [true | false] If false, no options from the partial(s) will be used

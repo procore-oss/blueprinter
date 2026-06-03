@@ -13,7 +13,7 @@ module Blueprinter
     #
     # Your Blueprints can now mix and match V1 and V2 `default_if` values.
     #
-    # ```ruby
+    # ```
     # class MyBlueprint < ApplicationBlueprint
     #   # V2 style
     #   field :summary, default: "None", default_if: ->(ctx, val) { val.empty? }

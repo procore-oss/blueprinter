@@ -7,7 +7,7 @@ module Blueprinter
     #
     # Add the extension to the Blueprint (or view) that needs dynamic options:
     #
-    # ```ruby
+    # ```
     # class WidgetBlueprint < ApplicationBlueprint
     #   add Blueprinter::Extensions::LegacyDynamicOptions.new
     #

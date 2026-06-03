@@ -1,6 +1,6 @@
 # Formatters
 
-Blueprinter V2 has a more generic approach to formatting, allowing any type of field value to have its own formatter applied:
+Blueprinter V2 has a more flexible and ergonomic approach to formatting, allowing any type of field value to have its own formatter applied with one line:
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint

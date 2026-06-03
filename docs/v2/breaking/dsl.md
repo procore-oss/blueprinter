@@ -4,7 +4,7 @@ At a quick glance the DSL looks nearly identical, but don't be fooled! See the d
 
 ### Association syntax
 
-Associations must declare whether they're single objects or collections of objects. Also, the `blueprint` and `view` options are gone.
+Associations in V2 are more concise while conveying more information.
 
 ```ruby
 # A single object
@@ -16,38 +16,25 @@ association :parts, [PartBlueprint]
 association :parts, [PartBlueprint[:my_view]]
 ```
 
-If you're referencing the current view, such as in a recursive association, use `self`:
-
-```ruby
-view :with_child do
-  association :child, self
-end
-```
-
-If you're referencing the *same view name in a different Blueprint*, you may use `view_name`:
+To dynamically reference the current view's name, use `view_name` or `view_path`:
 
 ```ruby
 view :extended do
-  association :category, CategoryBlueprint[view_name]
-end
-```
+  # ...
 
-If you're referencing a *different view in the current Blueprint*, you must wrap it in a Proc:
+  view :plus do
+    # Looks for a view named 'plus'
+    association :category, CategoryBlueprint[view_name]
 
-```ruby
-class MyBlueprint < ApplicationBlueprint
-  association :child, -> { MyBlueprint[:child_view] }
-  association :children, [-> { MyBlueprint[:child_view] }]
-
-  view :child_view do
-    # ...
+    # Looks for a nested view named 'extended.plus'
+    association :category, CategoryBlueprint[view_path]
   end
 end
 ```
 
 ### Second arg in field blocks
 
-If you're using the *second* argument in your field/association blocks, it's no longer the render options. It's now a `Blueprinter::V2::Context::Field`
+If you're using the **second** argument in your field/association blocks, it's no longer the render options. It's now a `Blueprinter::V2::Context::Field`
 object, which contains the render options along with a lot more.
 
 You can update your block in a single line:
@@ -84,10 +71,7 @@ add Blueprinter::Extensions::LegacyTransformer.new(MyTransformer)
 
 ### `identifier`
 
-Blueprinter Legacy/V1 had a special DSL method called `identifier`. It would accept the name of your primary key field,
-add it to every view, and create a special view called `identifier` that contained only that field. It defaulted to `id`.
-
-V2 does not include this very opinionated functionality, but you can easily replicate it in your base Blueprint:
+You can easily replicate legacy/V1's `identifier` field and view in your base Blueprint:
 
 ```ruby
 class ApplicationBlueprint < Blueprinter::Extension
@@ -96,7 +80,7 @@ class ApplicationBlueprint < Blueprinter::Extension
 
   # All Blueprints will get an identifier view, and it will only ever contain id
   view :identifier do
-    exclude_all
+    exclude fields: true
     field :id
   end
 end

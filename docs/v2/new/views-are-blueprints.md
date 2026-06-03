@@ -1,6 +1,6 @@
 # Views are Blueprints
 
-In V2, a view is an anonymous subclass of the Blueprint. There is no practical difference between a "blueprint" and a "view".
+A view is an anonymous subclass of its Blueprint. There is little practical or technical distinction between "blueprints" and "views".
 
 This has two important consequences:
 
@@ -17,11 +17,11 @@ class MyBlueprint < ApplicationBlueprint
 
   # This view is a subclass of MyBlueprint
   view :my_view do
-    # Like legacy/V1, views inherit fields from the parent. In V2 they also
-    # inherit options, extensions, formatters, and partials.
-
     # Override inherited options
     set :exclude_if_nil, false
+
+    # Add an extension
+    add OtherExtension.new
 
     # Include a Ruby module. Only this view (and any child views) will have it.
     include MyHelpers
@@ -54,7 +54,7 @@ MyBlueprint == MyBlueprint[:default]
 And since views are their own Blueprints, each view has its own default view:
 
 ```ruby
-MyBlueprint[:extended] == MyBlueprint[:extended][:default]
+MyBlueprint[:my_view] == MyBlueprint[:my_view][:default]
 => true
 ```
 

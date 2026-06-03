@@ -40,8 +40,7 @@ set :if, ->(ctx) {
 
 ### `custom_array_like_classes`
 
-V2 doesn't have a direct replacement for this. `render` has sensible heuristics for detecting what's a "collection" or not: any `Enumerable`
-except for `Hash`.
+`render` has sensible heuristics for detecting what's a "collection" or not: any `Enumerable` except for `Hash`.
 
 If that logic doesn't work for something, use one of these methods in place of `render`:
 
@@ -57,7 +56,7 @@ hash = WidgetBlueprint.render_object(arg).to_hash
 
 ### `extractor_default`
 
-"Extractors" are not a discrete concept in V2's, but they can be implemented using the `around_field_value`, `around_object_value`, and `around_collection_value`
+"Extractors" are not a discrete concept in V2, but they can be implemented using the `around_field_value`, `around_object_value`, and `around_collection_value`
 extension hooks.
 
 The bundled `LegacyExtractorOption` extension can be enabled to offer backwards-compatibility with legacy/V1's extractors:
@@ -137,7 +136,7 @@ end
 
 ### `sort_fields_by`
 
-By default V2 serializes fields in the order they were defined. If you want another order, use the bundled `FieldOrder` extension or
+By default V2 serializes fields in the order they were defined. If you want a different order, use the bundled `FieldOrder` extension or
 the `around_blueprint_init` extension hook.
 
 The following replicates legacy/V1's default field order of "alphabetical with _id_ first":
@@ -156,28 +155,10 @@ add Blueprinter::Extensions::FieldOrder.new { |a, b|
 
 ### `extensions`
 
-Adding extensions is now done in your Blueprints, views, or partials.
+Add a "global" extension by adding it to your base Blueprint:
 
 ```ruby
 add MyExtension.new
-```
-
-By default, `add` appends the extension. You can also prepend it:
-
-```ruby
-add MyExtensionThatMustBeFirst.new, prepend: true
-```
-
-You can remove all extensions of a given class:
-
-```ruby
-remove ExtensionIDontWant
-```
-
-Or you can remove them all:
-
-```ruby
-remove_all
 ```
 
 #### V2 Extension Hook API

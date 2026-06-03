@@ -10,14 +10,17 @@ module Blueprinter
   # V2 hooks follow a nested structure, allowing extensions to integrate deeply into the serialization lifecycle. The call
   # order of hooks looks like:
   #
-  # - `around_result`
-  #   - `around_blueprint_init`
-  #     - `around_serialize_object` | `around_serialize_collection`
-  #       - `around_blueprint`
-  #         - `around_field_value` | `around_object_value` | `around_collection_value`
-  #           - `around_blueprint_init`
+  # - [around_result](#Hook__around_result_)
+  #   - [around_blueprint_init](#Hook__around_blueprint_init_)
+  #     - [around_serialize_object](#Hook__around_serialize_object_) |
+  #       [around_serialize_collection](#Hook__around_serialize_collection_)
+  #       - [around_blueprint](#Hook__around_blueprint_)
+  #         - [around_field_value](#Hook__around_field_value_) |
+  #           [around_object_value](#Hook__around_object_value_) |
+  #           [around_collection_value](#Hook__around_collection_value_)
+  #           - [around_blueprint_init](#Hook__around_blueprint_init_)
   #             - …
-  # - `around_hook`
+  # - [around_hook](#Hook__around_hook_)
   #
   # === Extension hook arguments
   #
@@ -177,9 +180,9 @@ module Blueprinter
   # end
   # ```
   #
-  # NOTE: Any {Blueprinter::V2::DSL#format formatters} are called after all `around_field_value` hooks.
+  # NOTE: Any {Blueprinter::V2::DSL::Data#format formatters} are called after all `around_field_value` hooks.
   #
-  # The `skip!` helper may be used to abort field hooks and omit a field from the result.
+  # The {Blueprinter::Extension#skip! skip!} helper may be used to abort field hooks and omit a field from the result.
   #
   # If you want to handle field extraction on your own, omit the `yield` and extract the value yourself using
   # {Blueprinter::V2::Context::Field#field ctx.field} and {Blueprinter::V2::Context::Field#object ctx.object}.
@@ -202,7 +205,7 @@ module Blueprinter
   # end
   # ```
   #
-  # The `skip!` helper may be used to abort field hooks and omit a field from the result.
+  # The {Blueprinter::Extension#skip! skip!} helper may be used to abort field hooks and omit a field from the result.
   #
   # If you want to handle object extraction on your own, omit the `yield` and extract the value yourself using
   # {Blueprinter::V2::Context::Field#field ctx.field} and {Blueprinter::V2::Context::Field#object ctx.object}.
@@ -225,7 +228,7 @@ module Blueprinter
   # end
   # ```
   #
-  # The `skip!` helper may be used to abort field hooks and omit a field from the result.
+  # The {Blueprinter::Extension#skip! skip!} helper may be used to abort field hooks and omit a field from the result.
   #
   # If you want to handle collection extraction on your own, omit the `yield` and extract the value yourself using
   # {Blueprinter::V2::Context::Field#field ctx.field} and {Blueprinter::V2::Context::Field#object ctx.object}.

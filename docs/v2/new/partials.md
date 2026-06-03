@@ -1,7 +1,6 @@
 # Partials
 
-Partials allow you to define collections of fields, etc. to be used across multiple views. This allows your Blueprints to mix inheritence (parent Blueprints/views) 
-with composition (partials).
+Partials allow you to compose your Blueprints and views from reusable pieces.
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint
@@ -22,13 +21,13 @@ class MyBlueprint < ApplicationBlueprint
 end
 ```
 
+You may only use partials defined in the current Blueprint/view (or a parent). To share code across completely separate Blueprints, use [modules](./modules.md).
+
 See the `Blueprinter::V2::DSL` docs for more info on `partial` and `use`.
 
 ### More than just fields
 
 Partials have access to the full DSL, so they can set options, add extensions, formatters, views, and even other partials.
-
-The partial in the following example causes any nil or blank fields to be skipped:
 
 ```ruby
 class ApplicationBlueprint < Blueprinter::V2::Base
@@ -48,7 +47,7 @@ class ApplicationBlueprint < Blueprinter::V2::Base
 end
 ```
 
-Child blueprints can then opt into that behavior with a single line:
+Blueprints or views that use the above partial will skip any nil or blank fields:
 
 ```ruby
 class MyBlueprint < ApplicationBlueprint

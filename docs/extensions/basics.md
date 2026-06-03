@@ -20,8 +20,10 @@ end
 Then add the extension to a blueprint:
 
 ```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
+class MyBlueprint < Blueprinter::V2::Base
   add ExcludeIfBlankExtension.new
+
+  field :name, exclude_if_blank: true
 end
 ```
 

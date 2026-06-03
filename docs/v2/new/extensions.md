@@ -1,9 +1,30 @@
 # Extensions
 
-While extensions were added to legacy/V1 several years ago, they were an afterthought and fairly limited. Blueprinter V2 has been designed from the
+Extensions exist in legacy/V1, but they were added late and have limited functionality. Blueprinter V2 has been designed from the
 ground up with extensions in mind.
 
+## Extension API
+
 See the `Blueprinter::Extension` docs for the full API, or read through the [Extension Guide](../../extensions/index.md).
+
+## Using extensions
+
+Extensions can be added to Blueprints, views, and partials. They'll be inherited by child Blueprints or views.
+
+```ruby
+# Add some extensions (append)
+add MyExtension.new, MyOtherExtension.new
+
+# Prepend an extension
+add MyExtension.new, prepend: true
+
+# Remove an extension by class or block
+remove MyExtension
+remove { |ext| ext.is_a? MyExtension }
+
+# Prevent inheritance of extensions
+exclude extensions: true
+```
 
 ## Bundled extensions
 

@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-require 'set'
+require 'blueprinter/v2/evaluator'
+require 'blueprinter/v2/instance_cache'
+require 'blueprinter/v2/render'
 
 module Blueprinter
   module V2
     # Base class for V2 Blueprints
     class Base
       extend DSL
-      extend Rendering
       extend Reflection
 
       class << self
@@ -18,7 +19,9 @@ module Blueprinter
         # @return [String] The fully-qualified name (`MyBlueprint`, `MyBlueprint.foo.bar`)
         attr_accessor :blueprint_name
         # @!visibility private
-        attr_reader :nodes, :views, :schema, :formatters, :options, :extensions
+        attr_accessor :nodes
+        # @!visibility private
+        attr_reader :views, :schema, :formatters, :options, :extensions
 
         # Initialize subclass
         def inherited(subclass)
@@ -57,6 +60,32 @@ module Blueprinter
           children ? view[children] : view
         end
 
+        def render(obj, options = {})
+          if obj.is_a?(Enumerable) && !obj.is_a?(Hash)
+            render_collection(obj, options)
+          else
+            render_object(obj, options)
+          end
+        end
+
+        def render_object(obj, options = {})
+          instances = InstanceCache.new
+          Render.new(obj, options, blueprint: self, instances:, collection: false)
+        end
+
+        def render_collection(objs, options = {})
+          instances = InstanceCache.new
+          Render.new(objs, options, blueprint: self, instances:, collection: true)
+        end
+
+        def render_as_hash(obj, options = {})
+          render(obj, options).to_hash
+        end
+
+        def render_as_json(obj, options = {})
+          render(obj, options).to_hash.as_json
+        end
+
         # Apply partials and field exclusions
         # @api private
         def eval!(lock: true)
@@ -72,7 +101,7 @@ module Blueprinter
         protected
 
         # @!visibility private
-        attr_writer :nodes, :views, :eval_mutex
+        attr_writer :views, :eval_mutex
 
         private
 
@@ -81,85 +110,14 @@ module Blueprinter
 
         def run_eval!
           superclass.eval!
-          nodes.unshift(*inherit(DSL::Nodes::Partial))
-          self.nodes = expand_use
-          nodes.unshift(*inherit(DSL::Nodes::Format), *inherit_fields, *inherit_views).freeze
-
-          self.options = eval_options.freeze
-          self.extensions = eval_extensions.freeze
-          self.formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }.freeze
-          self.schema = nodes.grep(Fields::Field).to_h { |n| [n.name, n] }.freeze
+          eval = Evaluator.new(self)
+          self.nodes = eval.nodes
+          self.options = eval.options.freeze
+          self.extensions = eval.extensions.freeze
+          self.formatters = eval.formatters.freeze
+          self.schema = eval.fields.freeze
           @serializer = Serializer.new(self)
         end
-
-        # Return nodes, replacing any `use` nodes with the partial's nodes
-        def expand_use(partials: self.partials, exclude_all: exclude_all?, excluded: excluded_fields)
-          nodes.each_with_object([]) do |node, acc|
-            # Leave other node types as-is
-            unless node.is_a? DSL::Nodes::Use
-              acc << node
-              next
-            end
-
-            # Eval the partial, temporarily leaving `self.nodes` holding only the partial's nodes
-            p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{self}'")
-            self.nodes = []
-            class_eval(&p)
-            self.nodes = exclude_fields(nodes, exclude_all:, excluded:)
-
-            # Gather up any exclusions and partials defined by the partial (to be used on the next run)
-            exclude_all ||= exclude_all?
-            excluded += excluded_fields
-            partials = partials.merge(self.partials)
-
-            # Call `expand_use` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
-            acc.concat(expand_use(partials:, exclude_all:, excluded:))
-          end
-        end
-
-        def eval_options
-          nodes.each_with_object(superclass.options.dup) do |node, acc|
-            case node
-            when DSL::Nodes::SetOpt
-              acc[node.key] = node.val
-            when DSL::Nodes::SetDynamicOpt
-              acc[node.key] = node.block.call(acc[node.key])
-            when DSL::Nodes::UnsetOpt
-              acc.delete node.key
-            when DSL::Nodes::Flag
-              acc.clear if node.name == :unset_all
-            end
-          end
-        end
-
-        # rubocop:disable Metrics/CyclomaticComplexity
-        def eval_extensions
-          nodes.each_with_object(superclass.extensions.dup) do |node, acc|
-            case node
-            when DSL::Nodes::AppendExt
-              acc.push(node.ext)
-            when DSL::Nodes::PrependExt
-              acc.unshift(node.ext)
-            when DSL::Nodes::RemExt
-              acc.reject! { |ext| ext.is_a? node.klass }
-            when DSL::Nodes::Flag
-              acc.clear if node.name == :remove_all
-            end
-          end
-        end
-        # rubocop:enable Metrics/CyclomaticComplexity
-
-        def exclude_fields(nodes, exclude_all: exclude_all?, excluded: excluded_fields)
-          nodes.reject { |n| n.is_a?(Fields::Field) && (exclude_all || excluded.include?(n.name)) }
-        end
-
-        def blueprint? = view_name == :default
-        def exclude_all? = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == :exclude_all }
-        def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
-        def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
-        def inherit_fields = exclude_fields inherit(Fields::Field)
-        def inherit_views = blueprint? ? inherit(DSL::Nodes::View) : []
-        def inherit(node_type) = superclass.nodes.grep(node_type)
       end
 
       self.views = ViewBuilder.new(self)

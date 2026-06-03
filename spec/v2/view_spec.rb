@@ -25,6 +25,21 @@ describe "Blueprinter::V2 Views" do
     end
   end
 
+  it "invalid views can be referenced before eval" do
+    expect { blueprint[:"asdf"] }.to_not raise_error
+    expect { blueprint[:"asdf.zxcv"] }.to_not raise_error
+    expect { blueprint[:"extended.plus3"] }.to_not raise_error
+  end
+
+  it "throws if a view doesn't exist AFTER it's been evaled" do
+    blueprint.reflections
+    expect { blueprint[:"asdf"] }.to raise_error(Blueprinter::Errors::UnknownView)
+    expect { blueprint[:"asdf.zxcv"] }.to raise_error(Blueprinter::Errors::UnknownView)
+
+    blueprint[:extended].reflections
+    expect { blueprint[:"extended.plus3"] }.to raise_error(Blueprinter::Errors::UnknownView)
+  end
+
   it "are inherited by other blueprints" do
     blueprint2 = Class.new(blueprint) do
       view :foo do
@@ -107,6 +122,55 @@ describe "Blueprinter::V2 Views" do
           end
         end
       end.to raise_error Blueprinter::Errors::InvalidBlueprint
+    end
+
+    it "handles cyclic references" do
+      widget_blueprint = nil
+      category_blueprint = Class.new(Blueprinter::V2::Base) do
+        self.blueprint_name = "CategoryBlueprint"
+        view :cyclic do
+          association :widgets, [widget_blueprint[:cyclic]]
+        end
+      end
+      widget_blueprint = Class.new(Blueprinter::V2::Base) do
+        self.blueprint_name = "WidgetBlueprint"
+        view :cyclic do
+          association :category, category_blueprint[:cyclic]
+        end
+      end
+      expect do
+        widget_blueprint[:cyclic].reflections
+      end.to_not raise_error
+    end
+
+    it "allows blueprints to reference their own views" do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        set :exclude_if_nil, true
+
+        field :name
+        association :child, self[:extended]
+
+        view :extended do
+          field :description
+        end
+      end
+
+      result = blueprint.render({
+        name: 'Foo',
+        description: 'About Foo',
+        child: {
+          name: 'Bar',
+          description: 'About Bar'
+        }
+      }).to_h
+
+      expect(result).to eq({
+        name: 'Foo',
+        child: {
+          name: 'Bar',
+          description: 'About Bar'
+        }
+      })
     end
   end
 end

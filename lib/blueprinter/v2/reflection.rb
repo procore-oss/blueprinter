@@ -10,7 +10,7 @@ module Blueprinter
       # @return [Hash<Symbol, Blueprinter::V2::Reflection::View>]
       #
       def reflections
-        eval! unless @serializer
+        eval! unless evaled?
         @_reflections ||= flatten_children(self, :default).freeze
       end
 
@@ -18,11 +18,11 @@ module Blueprinter
       # @api private
       def flatten_children(parent, child_name, path = [])
         ref_key = path.empty? ? child_name : path.join('.').to_sym
-        child_view = parent.views.fetch(child_name)
+        child_view = parent[child_name]
         child_view.eval!
         child_ref = View.new(child_view, ref_key)
 
-        child_view.views.reduce({ ref_key => child_ref }) do |acc, (name, _)|
+        child_view.view_defs.reduce({ ref_key => child_ref }) do |acc, (name, _)|
           children = name == :default ? {} : flatten_children(child_view, name, path + [name])
           acc.merge(children)
         end

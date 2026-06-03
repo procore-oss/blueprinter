@@ -61,6 +61,14 @@ module Blueprinter
         nodes.grep(Fields::Field).to_h { |n| [n.name, n] }.freeze
       end
 
+      # Returns a Hash of view definition blocks keyed by name
+      def view_defs
+        nodes.grep(DSL::Nodes::View).each_with_object({}) do |node, acc|
+          acc[node.name] ||= []
+          acc[node.name] << node.block if node.block
+        end
+      end
+
       private
 
       attr_accessor :blueprint
@@ -100,13 +108,11 @@ module Blueprinter
       def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
 
       def inherit_fields = exclude_fields inherit(Fields::Field)
-      def inherit_views = blueprint? ? inherit(DSL::Nodes::View) : []
+      def inherit_views = blueprint.view_name == :default ? inherit(DSL::Nodes::View) : []
       def inherit(node_type) = blueprint.superclass.nodes.grep(node_type)
 
       # Returns a Hash of partial blocks, keyed by name
       def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
-
-      def blueprint? = blueprint.view_name == :default
     end
   end
 end

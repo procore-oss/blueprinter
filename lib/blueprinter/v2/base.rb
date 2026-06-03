@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 require 'blueprinter/v2/evaluator'
-require 'blueprinter/v2/instance_cache'
-require 'blueprinter/v2/render'
 
 module Blueprinter
   module V2
     # Base class for V2 Blueprints
     class Base
       extend DSL
+      extend Rendering
       extend Reflection
 
       class << self
@@ -21,20 +20,21 @@ module Blueprinter
         # @!visibility private
         attr_accessor :nodes
         # @!visibility private
-        attr_reader :views, :schema, :formatters, :options, :extensions
+        attr_reader :schema, :formatters, :options, :extensions
 
         # Initialize subclass
         def inherited(subclass)
           subclass.nodes = []
-          subclass.views = ViewBuilder.new(subclass)
+          subclass.children = { default: subclass }
           subclass.blueprint_name = subclass.name || blueprint_name
           subclass.view_path = :default
           subclass.view_name = :default
           subclass.eval_mutex = Mutex.new
+          subclass.children_mutex = Mutex.new
         end
 
         def serializer
-          eval! unless @serializer
+          eval! unless evaled?
           @serializer
         end
 
@@ -54,45 +54,38 @@ module Blueprinter
         # @return [Class] A descendent of Blueprinter::V2::Base
         #
         def [](name)
-          eval! unless @serializer
-          child, children = name.to_s.split('.', 2)
-          view = views[child.to_sym] || raise(Errors::UnknownView, "View '#{child}' not found in Blueprint '#{self}'")
-          children ? view[children] : view
-        end
+          name, name_tail = name.to_s.split('.', 2)
+          name = name.to_sym
 
-        def render(obj, options = {})
-          if obj.is_a?(Enumerable) && !obj.is_a?(Hash)
-            render_collection(obj, options)
-          else
-            render_object(obj, options)
+          unless children.key? name
+            children_mutex.synchronize do
+              next if children.key? name
+
+              # If the Blueprint has already been evaluated, throw an error if the view isn't defined.
+              # Otherwise, create a child that *may* be removed post-eval if it's found to be invalid.
+              # This allows Blueprints to reference their own views in associations (without using a Proc).
+              invalid = evaled? && !view_defs.key?(name)
+              raise Errors::UnknownView, "View '#{name}' not found in Blueprint '#{self}'" if invalid
+
+              child = Class.new(self)
+              child.blueprint_name = "#{child.blueprint_name}.#{name}"
+              child.view_path = child.blueprint_name.sub(/^[^.]+\./, '').to_sym
+              child.view_name = name
+              children[name] = child
+            end
           end
-        end
 
-        def render_object(obj, options = {})
-          instances = InstanceCache.new
-          Render.new(obj, options, blueprint: self, instances:, collection: false)
-        end
-
-        def render_collection(objs, options = {})
-          instances = InstanceCache.new
-          Render.new(objs, options, blueprint: self, instances:, collection: true)
-        end
-
-        def render_as_hash(obj, options = {})
-          render(obj, options).to_hash
-        end
-
-        def render_as_json(obj, options = {})
-          render(obj, options).to_hash.as_json
+          child = children.fetch(name)
+          name_tail ? child[name_tail] : child
         end
 
         # Apply partials and field exclusions
         # @api private
         def eval!(lock: true)
-          return if @serializer || self == V2::Base
+          return if evaled? || self == V2::Base
 
           if lock
-            eval_mutex.synchronize { run_eval! unless @serializer }
+            eval_mutex.synchronize { run_eval! unless evaled? }
           else
             run_eval!
           end
@@ -101,26 +94,50 @@ module Blueprinter
         protected
 
         # @!visibility private
-        attr_writer :views, :eval_mutex
+        attr_writer :children, :eval_mutex, :children_mutex
+        attr_accessor :view_defs
 
         private
 
-        attr_reader :eval_mutex
+        attr_reader :children, :eval_mutex, :children_mutex
         attr_writer :options, :extensions, :schema, :formatters
 
         def run_eval!
           superclass.eval!
+          eval_view! if view?
           eval = Evaluator.new(self)
           self.nodes = eval.nodes
           self.options = eval.options.freeze
           self.extensions = eval.extensions.freeze
           self.formatters = eval.formatters.freeze
           self.schema = eval.fields.freeze
+          self.view_defs = eval.view_defs.freeze
+          cleanup_children!
           @serializer = Serializer.new(self)
         end
+
+        # Grab and run this view's block(s) from the parent
+        def eval_view!
+          blocks = superclass.view_defs[view_name]
+          raise Errors::UnknownView, "View '#{view_name}' not found in Blueprint '#{superclass}'" if blocks.nil?
+
+          blocks.each { |b| class_eval(&b) }
+        end
+
+        # Before eval we allow Base#[] to accept any view name. (This allows Blueprints to self-reference their own views
+        # on associations.) After eval, we know which ones weren't valid.
+        def cleanup_children!
+          view_defs.each_key { |name| self[name] } # ensure all child classes are created
+          children_mutex.synchronize do
+            children.delete_if { |name| !view_defs.key?(name) && name != :default }
+            children.freeze
+          end
+        end
+
+        def evaled? = !@serializer.nil?
+        def view? = view_name != :default
       end
 
-      self.views = ViewBuilder.new(self)
       self.nodes = [].freeze
       self.extensions = [].freeze
       self.options = {}.freeze

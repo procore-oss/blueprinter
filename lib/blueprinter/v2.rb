@@ -30,8 +30,8 @@ module Blueprinter
   #
   # = Rendering
   #
-  # Call {Blueprinter::V2::Base.render render}, {Blueprinter::V2::Base.render_object render_object}, or
-  # {Blueprinter::V2::Base.render_collection render_collection} on your Blueprints to begin serializaing.
+  # Call {Blueprinter::V2::Rendering#render render}, {Blueprinter::V2::Rendering#render_object render_object}, or
+  # {Blueprinter::V2::Rendering#render_collection render_collection} on your Blueprints to begin serializaing.
   # Then call {Blueprinter::V2::Render#to_json to_json} or {Blueprinter::V2::Render#to_hash to_hash} on the
   # result.
   #

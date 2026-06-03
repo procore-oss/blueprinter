@@ -72,7 +72,7 @@ module Blueprinter
         # All fields, objects, and collections in the order they were defined
         attr_reader :ordered
 
-        # @param blueprint [Class] A subclass of Blueprinter::V2::Base
+        # @param spec [Blueprinter::V2::Specification::Spec]
         # @param name [Symbol] Name of the view
         # @!visibility private
         def initialize(spec, name)

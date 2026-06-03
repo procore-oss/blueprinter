@@ -14,7 +14,7 @@ module Blueprinter
     # ```
     #
     class LegacyTransformer < Extension
-      # @param *transformers [Class] One or more transformers (Blueprinter::Transformer)
+      # @param transformers [Class] One or more transformers (Blueprinter::Transformer)
       def initialize(*transformers)
         @transformers = transformers
       end

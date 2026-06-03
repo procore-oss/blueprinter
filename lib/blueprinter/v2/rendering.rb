@@ -25,11 +25,11 @@ module Blueprinter
       # with `root`)
       # @return [Blueprinter::V2::Render]
       #
-      def render(obj, options = {})
-        if obj.is_a?(Enumerable) && !obj.is_a?(Hash)
-          render_collection(obj, options)
+      def render(object, options = {})
+        if object.is_a?(Enumerable) && !object.is_a?(Hash)
+          render_collection(object, options)
         else
-          render_object(obj, options)
+          render_object(object, options)
         end
       end
 
@@ -47,9 +47,9 @@ module Blueprinter
       # with `root`)
       # @return [Blueprinter::V2::Render]
       #
-      def render_object(obj, options = {})
+      def render_object(object, options = {})
         instances = InstanceCache.new
-        Render.new(obj, options, blueprint: self, instances:, collection: false)
+        Render.new(object, options, blueprint: self, instances:, collection: false)
       end
 
       #
@@ -66,9 +66,9 @@ module Blueprinter
       # with `root`)
       # @return [Blueprinter::V2::Render]
       #
-      def render_collection(objs, options = {})
+      def render_collection(objects, options = {})
         instances = InstanceCache.new
-        Render.new(objs, options, blueprint: self, instances:, collection: true)
+        Render.new(objects, options, blueprint: self, instances:, collection: true)
       end
 
       #
@@ -81,8 +81,8 @@ module Blueprinter
       # with `root`)
       # @return [Hash | Array]
       #
-      def render_as_hash(obj, options = {})
-        render(obj, options).to_hash
+      def render_as_hash(objects, options = {})
+        render(objects, options).to_hash
       end
 
       #
@@ -95,8 +95,8 @@ module Blueprinter
       # with `root`)
       # @return [Hash | Array]
       #
-      def render_as_json(obj, options = {})
-        render(obj, options).to_hash.as_json
+      def render_as_json(objects, options = {})
+        render(objects, options).to_hash.as_json
       end
     end
   end

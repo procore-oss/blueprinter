@@ -13,7 +13,7 @@ module Blueprinter
     #
     # Your Blueprints can now mix and match V1 and V2 style `if` and `unless` Procs.
     #
-    # ```ruby
+    # ```
     # class MyBlueprint < ApplicationBlueprint
     #   # V2 style
     #   field :summary, if: ->(ctx) { ctx.object.summary.present? }

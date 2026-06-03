@@ -22,20 +22,9 @@ module Blueprinter
     # end
     # ```
     #
-    # Blueprints can inherit from other Blueprints, or from specific views. (Views are just anonymous subclasses.)
+    # == ApplicationBlueprint
     #
-    # ```
-    # class SpecialzedWidgetBlueprint < WidgetBlueprint
-    #   # ...
-    # end
-    #
-    # class WidgetPartsBlueprint < WidgetBlueprint[:with_parts]
-    #   # ...
-    # end
-    # ```
-    #
-    # It's good practice to define a base Blueprint for your applicaiton that defines common fields,
-    # options, and extensions. (Note that V1's `Blueprinter.configure` block has no effect on V2 Blueprints.)
+    # It's good practice to define a base Blueprint for your applicaiton that defines common fields, views, options, etc.
     #
     # ```
     # class ApplicationBlueprint < Blueprinter::V2::Base
@@ -43,9 +32,39 @@ module Blueprinter
     #   add MyExtension.new
     #   format(Time) { |t| t.iso8601 }
     #
-    #   fields :id, :created_at, :updated_at
+    #   field :id
+    #
+    #   view :identity do
+    #     exclude fields: true
+    #     field :id
+    #   end
+    #
+    #   partial :timestamps do
+    #     fields :created_at, :updated_at, :deleted_at
+    #   end
     # end
     # ```
+    #
+    # == Inheritance
+    #
+    # Blueprints can inherit from other Blueprints. They will inherit the parent's fields, formatters, partials, views,
+    # options, and extensions, and may override as necessary.
+    #
+    # ```
+    # class SpecialzedWidgetBlueprint < WidgetBlueprint
+    #   # ...
+    # end
+    # ```
+    #
+    # You can also inherit directly from another Blueprint's view:
+    #
+    # ```
+    # class WidgetPartsBlueprint < WidgetBlueprint[:with_parts]
+    #   # ...
+    # end
+    # ```
+    #
+    # == Initialization
     #
     # A Blueprint class is initialized exactly once during a given render. The instance is available through the
     # context object passed to if/unless/default Procs, field definition blocks, and extension hooks. See

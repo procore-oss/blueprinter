@@ -16,7 +16,7 @@ module Blueprinter
     #
     # Your fields (and Blueprint options) can now use V1-style extractors without modification.
     #
-    # ```ruby
+    # ```
     # class MyBlueprint < ApplicationBlueprint
     #   # set a global extractor for this blueprint
     #   set :extractor, MyDefaultExtractor

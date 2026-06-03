@@ -169,7 +169,7 @@ module Blueprinter
       #
       # Only runs the FIRST time a given Blueprint is used during a given render.
       #
-      # @param blueprint [Blueprinter::V2::Base] The Blueprint instance
+      # @param instances [Blueprinter::V2::InstanceCache]
       # @param options [Hash] Options given to `render`
       # @param store [Hash] The context store for this render
       # @param depth [Integer] Current serialization depth

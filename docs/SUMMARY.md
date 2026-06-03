@@ -21,6 +21,7 @@
     - [Views are Blueprints](./v2/new/views-are-blueprints.md)
     - [Nested views](./v2/new/nested-views.md)
     - [Partials](./v2/new/partials.md)
+    - [Modules](./v2/new/modules.md)
     - [Extensions](./v2/new/extensions.md)
 
 - [Building V2 Extensions](./extensions/index.md)
@@ -29,7 +30,6 @@
   - [Custom Extractor](./extensions/custom-extractor.md)
   - [Blueprint Decorator](./extensions/blueprint-decorator.md)
   - [Telemetry](./extensions/telemetry.md)
-  - [Field Filter](./extensions/field-filter.md)
   - [Camelize Fields](./extensions/camelize-fields.md)
   - [YAML Serializer](./extensions/yaml-serializer.md)
 

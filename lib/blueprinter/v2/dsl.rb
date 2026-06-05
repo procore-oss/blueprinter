@@ -18,6 +18,7 @@ module Blueprinter
         AppendExt = Struct.new(:ext)
         PrependExt = Struct.new(:ext)
         RemExt = Struct.new(:klass)
+        RemDynamicExt = Struct.new(:block)
         Flag = Struct.new(:name)
       end
 
@@ -228,12 +229,14 @@ module Blueprinter
       end
 
       #
-      # Removes extensions of the given classes.
+      # Removes extensions of the given classes, or that satisfy the given block.
       #
       # @param *klasses [Class]
+      # @yield [Blueprinter::Extension] Return true if the given extension should be removed
       #
-      def remove(*klasses)
+      def remove(*klasses, &reject)
         klasses.each { |klass| nodes << Nodes::RemExt.new(klass) }
+        nodes << Nodes::RemDynamicExt.new(reject) if reject
       end
 
       # Excludes all extensions from parents or partials.

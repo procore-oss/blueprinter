@@ -96,6 +96,24 @@ describe "Blueprinter::V2 Extension DSL" do
     expect(ref[:extended].extensions.map(&:class)).to eq [ext1]
   end
 
+  it "remove removes extensions with a block" do
+    ext1 = Class.new(Blueprinter::Extension)
+    ext2 = Class.new(Blueprinter::Extension)
+    ext3 = Class.new(Blueprinter::Extension)
+
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      add ext1.new, ext2.new, ext3.new
+
+      view :extended do
+        remove { |ext| ext.is_a? ext3 }
+      end
+    end
+
+    ref = blueprint.reflections
+    expect(ref[:default].extensions.map(&:class)).to eq [ext1, ext2, ext3]
+    expect(ref[:extended].extensions.map(&:class)).to eq [ext1, ext2]
+  end
+
   it "exclude_extensions removes all inherited extensions" do
     ext1 = Class.new(Blueprinter::Extension)
 

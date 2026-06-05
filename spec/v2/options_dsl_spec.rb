@@ -47,13 +47,13 @@ describe "Blueprinter::V2 Options" do
     expect(refs[:extended].options).to eq({ foo: "foo" })
   end
 
-  it "unset_all unsets all options" do
+  it "excludes all inherited options" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       set :foo, "foo"
       set :bar, "bar"
 
       view :extended do
-        unset_all
+        exclude_options
         set :zorp, "zorp"
       end
     end

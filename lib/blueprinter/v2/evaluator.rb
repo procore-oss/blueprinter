@@ -19,7 +19,8 @@ module Blueprinter
 
       # Returns the declared options for this blueprint/view
       def options
-        nodes.each_with_object(blueprint.superclass.options.dup) do |node, acc|
+        initial_val = exclude_options? ? {} : blueprint.superclass.options.dup
+        nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::SetOpt
             acc[node.key] = node.val
@@ -27,16 +28,14 @@ module Blueprinter
             acc[node.key] = node.block.call(acc[node.key])
           when DSL::Nodes::UnsetOpt
             acc.delete node.key
-          when DSL::Nodes::Flag
-            acc.clear if node.name == :unset_all
           end
         end
       end
 
       # Returns the declared extensions for this blueprint/view
-      # rubocop:disable Metrics/CyclomaticComplexity
       def extensions
-        nodes.each_with_object(blueprint.superclass.extensions.dup) do |node, acc|
+        initial_val = exclude_extensions? ? [] : blueprint.superclass.extensions.dup
+        nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::AppendExt
             acc.push(node.ext)
@@ -44,12 +43,9 @@ module Blueprinter
             acc.unshift(node.ext)
           when DSL::Nodes::RemExt
             acc.reject! { |ext| ext.is_a? node.klass }
-          when DSL::Nodes::Flag
-            acc.clear if node.name == :remove_all
           end
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       # Returns the declared formatters for this blueprint/view
       def formatters
@@ -75,7 +71,8 @@ module Blueprinter
       attr_writer :nodes
 
       # Return nodes, replacing any `use` nodes with the partial's nodes
-      def expand_use(partials: self.partials, exclude_all: exclude_all?, excluded: excluded_fields)
+      def expand_use(partials: self.partials, excluded: excluded_fields, exclude_fields: exclude_fields?,
+                     exclude_options: exclude_options?, exclude_extensions: exclude_extensions?)
         nodes.each_with_object([]) do |node, acc|
           # Leave other node types as-is
           unless node.is_a? DSL::Nodes::Use
@@ -87,27 +84,44 @@ module Blueprinter
           p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{blueprint}'")
           blueprint.nodes = []
           blueprint.class_eval(&p)
-          self.nodes = exclude_fields(blueprint.nodes, exclude_all:, excluded:)
+          self.nodes = exclude(blueprint.nodes, excluded:, exclude_fields:, exclude_options:, exclude_extensions:)
 
           # Gather up any exclusions and partials defined by the partial (to be used on the next run)
-          exclude_all ||= exclude_all?
           excluded += excluded_fields
+          exclude_fields ||= exclude_fields?
+          exclude_options ||= exclude_options?
+          exclude_extensions ||= exclude_extensions?
           partials = partials.merge(self.partials)
 
           # Call `expand_use` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
-          acc.concat(expand_use(partials:, exclude_all:, excluded:))
+          acc.concat(expand_use(partials:, excluded:, exclude_fields:, exclude_options:, exclude_extensions:))
         end
       end
 
       # Return nodes with certain (or all) field nodes excluded
-      def exclude_fields(nodes, exclude_all: exclude_all?, excluded: excluded_fields)
-        nodes.reject { |n| n.is_a?(Fields::Field) && (exclude_all || excluded.include?(n.name)) }
+      def exclude(nodes, excluded: excluded_fields, exclude_fields: exclude_fields?, exclude_options: exclude_options?,
+                  exclude_extensions: exclude_extensions?)
+        nodes.reject do |n|
+          case n
+          when Fields::Field
+            exclude_fields || excluded.include?(n.name)
+          when DSL::Nodes::SetOpt, DSL::Nodes::SetDynamicOpt
+            exclude_options
+          when DSL::Nodes::AppendExt, DSL::Nodes::PrependExt
+            exclude_extensions
+          else
+            false
+          end
+        end
       end
 
-      def exclude_all? = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == :exclude_all }
+      def exclude_options? = flag? :exclude_options
+      def exclude_extensions? = flag? :exclude_extensions
+      def exclude_fields? = flag? :exclude_fields
       def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
+      def flag?(name) = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == name }
 
-      def inherit_fields = exclude_fields inherit(Fields::Field)
+      def inherit_fields = exclude inherit(Fields::Field)
       def inherit_views = blueprint.view_name == :default ? inherit(DSL::Nodes::View) : []
       def inherit(node_type) = blueprint.superclass.nodes.grep(node_type)
 

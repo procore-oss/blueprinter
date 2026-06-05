@@ -182,10 +182,8 @@ module Blueprinter
 
       alias excludes exclude
 
-      #
       # Excludes all fields and associations from parents or partials.
-      #
-      def exclude_all = nodes << Nodes::Flag.new(:exclude_all)
+      def exclude_fields = nodes << Nodes::Flag.new(:exclude_fields)
 
       #
       # Set an option value.
@@ -208,8 +206,8 @@ module Blueprinter
         keys.each { |key| nodes << Nodes::UnsetOpt.new(key) }
       end
 
-      # Clears all options set before this point
-      def unset_all = nodes << Nodes::Flag.new(:unset_all)
+      # Excludes all options from parents or partials.
+      def exclude_options = nodes << Nodes::Flag.new(:exclude_options)
 
       #
       # Adds one or more extensions.
@@ -238,8 +236,8 @@ module Blueprinter
         klasses.each { |klass| nodes << Nodes::RemExt.new(klass) }
       end
 
-      # Removes all extensions added before this point
-      def remove_all = nodes << Nodes::Flag.new(:remove_all)
+      # Excludes all extensions from parents or partials.
+      def exclude_extensions = nodes << Nodes::Flag.new(:exclude_extensions)
 
       private
 

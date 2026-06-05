@@ -33,6 +33,7 @@ module Blueprinter
       end
 
       # Returns the declared extensions for this blueprint/view
+      # rubocop:disable Metrics/CyclomaticComplexity
       def extensions
         initial_val = exclude_extensions? ? [] : blueprint.superclass.extensions.dup
         nodes.each_with_object(initial_val) do |node, acc|
@@ -43,9 +44,12 @@ module Blueprinter
             acc.unshift(node.ext)
           when DSL::Nodes::RemExt
             acc.reject! { |ext| ext.is_a? node.klass }
+          when DSL::Nodes::RemDynamicExt
+            acc.reject!(&node.block)
           end
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       # Returns the declared formatters for this blueprint/view
       def formatters

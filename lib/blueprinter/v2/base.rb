@@ -144,7 +144,6 @@ module Blueprinter
       self.blueprint_name = name
       self.view_path = :default
       self.view_name = :default
-      self.eval_mutex = Mutex.new
 
       # @return [Hash] Copy of options set on the class. Frozen after `around_blueprint_init` hooks run.
       attr_reader :options

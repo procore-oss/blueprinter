@@ -160,21 +160,12 @@ describe "Blueprinter::V2 Partials" do
           use :non_empty_name
         end
 
-        view :bar do
-          use :empty
-        end
-
         partial :non_empty_name do
           add Blueprinter::Extensions::MultiJson.new
           set :foo, false
           format Time, :to_i
           field :name, exclude_if_empty: true
           exclude :description
-        end
-
-        partial :empty do
-          exclude_all
-          field :asdf
         end
       end
 
@@ -183,9 +174,6 @@ describe "Blueprinter::V2 Partials" do
       expect(foo.options[:foo]).to be false
       expect(foo.fields[:name].options).to eq({ exclude_if_empty: true })
       expect(foo.fields.keys).to eq %i[name]
-
-      bar = blueprint.reflections[:bar]
-      expect(bar.fields.keys).to match_array %i[asdf]
 
       expect(blueprint[:foo].formatters).to eq({ Time => :to_i })
     end

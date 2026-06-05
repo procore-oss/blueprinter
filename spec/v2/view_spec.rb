@@ -61,7 +61,7 @@ describe "Blueprinter::V2 Views" do
         add Class.new(Blueprinter::Extension).new
         fields :id
         view :identifier do
-          exclude_all
+          exclude_fields
           field :id
         end
       end

@@ -141,6 +141,7 @@ module Blueprinter
       self.nodes = [].freeze
       self.extensions = [].freeze
       self.options = {}.freeze
+      self.formatters = {}.freeze
       self.blueprint_name = name
       self.view_path = :default
       self.view_name = :default

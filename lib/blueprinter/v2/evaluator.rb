@@ -13,7 +13,7 @@ module Blueprinter
         self.blueprint = blueprint
         self.nodes = inherit(DSL::Nodes::Partial) + blueprint.nodes
         self.nodes = expand_use
-        nodes.unshift(*inherit(DSL::Nodes::Format), *inherit_fields, *inherit_views)
+        nodes.unshift(*inherit_fields, *inherit_views)
         nodes.freeze
       end
 
@@ -53,7 +53,9 @@ module Blueprinter
 
       # Returns the declared formatters for this blueprint/view
       def formatters
-        nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }
+        initial_val = exclude_formatters? ? {} : blueprint.superclass.formatters.dup
+        local_formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }
+        initial_val.merge(local_formatters)
       end
 
       # Returns the declared fields and associations for this blueprint/view
@@ -75,8 +77,9 @@ module Blueprinter
       attr_writer :nodes
 
       # Return nodes, replacing any `use` nodes with the partial's nodes
+      # rubocop:disable Metrics/CyclomaticComplexity
       def expand_use(partials: self.partials, excluded: excluded_fields, exclude_fields: exclude_fields?,
-                     exclude_options: exclude_options?, exclude_extensions: exclude_extensions?)
+                     exclude_opt: exclude_options?, exclude_ext: exclude_extensions?, exclude_fmt: exclude_formatters?)
         nodes.each_with_object([]) do |node, acc|
           # Leave other node types as-is
           unless node.is_a? DSL::Nodes::Use
@@ -88,31 +91,35 @@ module Blueprinter
           p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{blueprint}'")
           blueprint.nodes = []
           blueprint.class_eval(&p)
-          self.nodes = exclude(blueprint.nodes, excluded:, exclude_fields:, exclude_options:, exclude_extensions:)
+          self.nodes = exclude(blueprint.nodes, excluded:, exclude_fields:, exclude_opt:, exclude_ext:, exclude_fmt:)
 
           # Gather up any exclusions and partials defined by the partial (to be used on the next run)
           excluded += excluded_fields
           exclude_fields ||= exclude_fields?
-          exclude_options ||= exclude_options?
-          exclude_extensions ||= exclude_extensions?
+          exclude_opt ||= exclude_options?
+          exclude_ext ||= exclude_extensions?
+          exclude_fmt ||= exclude_formatters?
           partials = partials.merge(self.partials)
 
           # Call `expand_use` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
-          acc.concat(expand_use(partials:, excluded:, exclude_fields:, exclude_options:, exclude_extensions:))
+          acc.concat(expand_use(partials:, excluded:, exclude_fields:, exclude_opt:, exclude_ext:, exclude_fmt:))
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       # Return nodes with certain (or all) field nodes excluded
-      def exclude(nodes, excluded: excluded_fields, exclude_fields: exclude_fields?, exclude_options: exclude_options?,
-                  exclude_extensions: exclude_extensions?)
+      def exclude(nodes, excluded: excluded_fields, exclude_fields: exclude_fields?, exclude_opt: exclude_options?,
+                  exclude_ext: exclude_extensions?, exclude_fmt: exclude_formatters?)
         nodes.reject do |n|
           case n
           when Fields::Field
             exclude_fields || excluded.include?(n.name)
           when DSL::Nodes::SetOpt, DSL::Nodes::SetDynamicOpt
-            exclude_options
+            exclude_opt
           when DSL::Nodes::AppendExt, DSL::Nodes::PrependExt
-            exclude_extensions
+            exclude_ext
+          when DSL::Nodes::Format
+            exclude_fmt
           else
             false
           end
@@ -121,6 +128,7 @@ module Blueprinter
 
       def exclude_options? = flag? :exclude_options
       def exclude_extensions? = flag? :exclude_extensions
+      def exclude_formatters? = flag? :exclude_formatters
       def exclude_fields? = flag? :exclude_fields
       def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
       def flag?(name) = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == name }

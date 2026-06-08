@@ -173,18 +173,23 @@ module Blueprinter
       end
 
       #
-      # Excludes the given fields and associations from parents or partials.
+      # Excludes the given fields and associations from parents or partials. Or categorically exclude things.
       #
-      # @param *names [Symbol] One or more fields or associations to exclude
+      # @param *names [Symbol] Fields or associations to exclude
+      # @param fields [true | false] Exclude all fields
+      # @param options [true | false] Exclude all options
+      # @param extensions [true | false] Exclude all extensions
+      # @param formatters [true | false] Exclude all formatters
       #
-      def exclude(*names)
+      def exclude(*names, fields: false, options: false, extensions: false, formatters: false)
         names.each { |name| nodes << Nodes::Exclude.new(name.to_sym) }
+        nodes << Nodes::Flag.new(:exclude_fields) if fields
+        nodes << Nodes::Flag.new(:exclude_options) if options
+        nodes << Nodes::Flag.new(:exclude_extensions) if extensions
+        nodes << Nodes::Flag.new(:exclude_formatters) if formatters
       end
 
       alias excludes exclude
-
-      # Excludes all fields and associations from parents or partials.
-      def exclude_fields = nodes << Nodes::Flag.new(:exclude_fields)
 
       #
       # Set an option value.
@@ -206,9 +211,6 @@ module Blueprinter
       def unset(*keys)
         keys.each { |key| nodes << Nodes::UnsetOpt.new(key) }
       end
-
-      # Excludes all options from parents or partials.
-      def exclude_options = nodes << Nodes::Flag.new(:exclude_options)
 
       #
       # Adds one or more extensions.
@@ -238,9 +240,6 @@ module Blueprinter
         klasses.each { |klass| nodes << Nodes::RemExt.new(klass) }
         nodes << Nodes::RemDynamicExt.new(reject) if reject
       end
-
-      # Excludes all extensions from parents or partials.
-      def exclude_extensions = nodes << Nodes::Flag.new(:exclude_extensions)
 
       private
 

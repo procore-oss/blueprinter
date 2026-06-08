@@ -114,14 +114,14 @@ describe "Blueprinter::V2 Extension DSL" do
     expect(ref[:extended].extensions.map(&:class)).to eq [ext1, ext2]
   end
 
-  it "exclude_extensions removes all inherited extensions" do
+  it "exclude removes all inherited extensions" do
     ext1 = Class.new(Blueprinter::Extension)
 
     blueprint = Class.new(Blueprinter::V2::Base) do
       add ext1.new
 
       view :extended do
-        exclude_extensions
+        exclude extensions: true
       end
     end
 

@@ -53,7 +53,7 @@ describe "Blueprinter::V2 Options" do
       set :bar, "bar"
 
       view :extended do
-        exclude_options
+        exclude options: true
         set :zorp, "zorp"
       end
     end

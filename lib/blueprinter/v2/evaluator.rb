@@ -88,7 +88,8 @@ module Blueprinter
           end
 
           # Eval the partial, temporarily leaving `blueprint.nodes` and `self.nodes` holding only the partial's nodes
-          p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{blueprint}'")
+          p = partials[node.name] ||
+              raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{blueprint}' (#{node.callsite})")
           blueprint.nodes = []
           blueprint.class_eval(&p)
           self.nodes = exclude(blueprint.nodes, exclusions:)

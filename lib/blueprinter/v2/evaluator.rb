@@ -7,19 +7,21 @@ module Blueprinter
     # Evaluates a Blueprint's AST nodes
     # @!visibility private
     class Evaluator
+      Exclusions = Struct.new(:field_names, :fields, :options, :extensions, :formatters, keyword_init: true)
       attr_reader :nodes
 
       def initialize(blueprint)
         self.blueprint = blueprint
         self.nodes = inherit(DSL::Nodes::Partial) + blueprint.nodes
-        self.nodes = expand_use
-        nodes.unshift(*inherit_fields, *inherit_views)
+        self.nodes = expand_partials
+        nodes.unshift(*exclude(inherit(Fields::Field)))
+        nodes.unshift(*inherit(DSL::Nodes::View)) if blueprint?
         nodes.freeze
       end
 
       # Returns the declared options for this blueprint/view
       def options
-        initial_val = exclude_options? ? {} : blueprint.superclass.options.dup
+        initial_val = flag?(:exclude_options) ? {} : blueprint.superclass.options.dup
         nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::SetOpt
@@ -35,7 +37,7 @@ module Blueprinter
       # Returns the declared extensions for this blueprint/view
       # rubocop:disable Metrics/CyclomaticComplexity
       def extensions
-        initial_val = exclude_extensions? ? [] : blueprint.superclass.extensions.dup
+        initial_val = flag?(:exclude_extensions) ? [] : blueprint.superclass.extensions.dup
         nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::AppendExt
@@ -53,7 +55,7 @@ module Blueprinter
 
       # Returns the declared formatters for this blueprint/view
       def formatters
-        initial_val = exclude_formatters? ? {} : blueprint.superclass.formatters.dup
+        initial_val = flag?(:exclude_formatters) ? {} : blueprint.superclass.formatters.dup
         local_formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }
         initial_val.merge(local_formatters)
       end
@@ -77,9 +79,7 @@ module Blueprinter
       attr_writer :nodes
 
       # Return nodes, replacing any `use` nodes with the partial's nodes
-      # rubocop:disable Metrics/CyclomaticComplexity
-      def expand_use(partials: self.partials, excluded: excluded_fields, exclude_fields: exclude_fields?,
-                     exclude_opt: exclude_options?, exclude_ext: exclude_extensions?, exclude_fmt: exclude_formatters?)
+      def expand_partials(exclusions: self.exclusions, partials: self.partials)
         nodes.each_with_object([]) do |node, acc|
           # Leave other node types as-is
           unless node.is_a? DSL::Nodes::Use
@@ -91,54 +91,51 @@ module Blueprinter
           p = partials[node.name] || raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{blueprint}'")
           blueprint.nodes = []
           blueprint.class_eval(&p)
-          self.nodes = exclude(blueprint.nodes, excluded:, exclude_fields:, exclude_opt:, exclude_ext:, exclude_fmt:)
+          self.nodes = exclude(blueprint.nodes, exclusions:)
 
-          # Gather up any exclusions and partials defined by the partial (to be used on the next run)
-          excluded += excluded_fields
-          exclude_fields ||= exclude_fields?
-          exclude_opt ||= exclude_options?
-          exclude_ext ||= exclude_extensions?
-          exclude_fmt ||= exclude_formatters?
-          partials = partials.merge(self.partials)
+          # Grab any exclusions and partials it defined for the next run
+          exclusions = self.exclusions exclusions
+          partials = partials.merge self.partials
 
-          # Call `expand_use` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
-          acc.concat(expand_use(partials:, excluded:, exclude_fields:, exclude_opt:, exclude_ext:, exclude_fmt:))
+          # Call `expand_partials` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
+          acc.concat(expand_partials(exclusions:, partials:))
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       # Return nodes with certain (or all) field nodes excluded
-      def exclude(nodes, excluded: excluded_fields, exclude_fields: exclude_fields?, exclude_opt: exclude_options?,
-                  exclude_ext: exclude_extensions?, exclude_fmt: exclude_formatters?)
+      def exclude(nodes, exclusions: self.exclusions)
         nodes.reject do |n|
           case n
           when Fields::Field
-            exclude_fields || excluded.include?(n.name)
+            exclusions.fields || exclusions.field_names.include?(n.name)
           when DSL::Nodes::SetOpt, DSL::Nodes::SetDynamicOpt
-            exclude_opt
+            exclusions.options
           when DSL::Nodes::AppendExt, DSL::Nodes::PrependExt
-            exclude_ext
+            exclusions.extensions
           when DSL::Nodes::Format
-            exclude_fmt
+            exclusions.formatters
           else
             false
           end
         end
       end
 
-      def exclude_options? = flag? :exclude_options
-      def exclude_extensions? = flag? :exclude_extensions
-      def exclude_formatters? = flag? :exclude_formatters
-      def exclude_fields? = flag? :exclude_fields
-      def excluded_fields = Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name))
+      # Create or update exclusions based on the current nodes
+      def exclusions(state = Exclusions.new(field_names: Set.new))
+        excluded_field_names = nodes.grep(DSL::Nodes::Exclude).map(&:name)
+        Exclusions.new(
+          field_names: state.field_names + Set.new(excluded_field_names),
+          fields: state.fields || flag?(:exclude_fields),
+          options: state.options || flag?(:exclude_options),
+          extensions: state.extensions || flag?(:exclude_extensions),
+          formatters: state.formatters || flag?(:exclude_formatters)
+        )
+      end
+
+      def blueprint? = blueprint.view_name == :default
       def flag?(name) = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == name }
-
-      def inherit_fields = exclude inherit(Fields::Field)
-      def inherit_views = blueprint.view_name == :default ? inherit(DSL::Nodes::View) : []
-      def inherit(node_type) = blueprint.superclass.nodes.grep(node_type)
-
-      # Returns a Hash of partial blocks, keyed by name
       def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
+      def inherit(node_type) = blueprint.superclass.nodes.grep(node_type)
     end
   end
 end

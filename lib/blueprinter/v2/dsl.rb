@@ -7,7 +7,7 @@ module Blueprinter
     module DSL
       # @!visibility private
       module Nodes
-        Use = Struct.new(:name)
+        Use = Struct.new(:name, :callsite)
         Exclude = Struct.new(:name)
         Partial = Struct.new(:name, :block)
         View = Struct.new(:name, :block)
@@ -57,8 +57,9 @@ module Blueprinter
       # @param *names [Symbol] One or more partial names
       #
       def use(*names)
+        callsite = caller[0]
         names.each do |name|
-          nodes << Nodes::Use.new(name.to_sym)
+          nodes << Nodes::Use.new(name.to_sym, callsite)
         end
       end
 

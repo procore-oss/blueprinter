@@ -40,6 +40,40 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:extended].fields.keys.sort).to eq %i(name description tags).sort
   end
 
+  it "can have certain fields excluded" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      use :my_partial, exclude: [:foo]
+      field :name
+
+      partial :my_partial do
+        fields :foo, :bar
+      end
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to match_array %i[name bar]
+  end
+
+  it "can have things excluded categorically" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      use :my_partial, fields: false, options: false, extensions: false, formatters: false
+      field :name
+
+      partial :my_partial do
+        set :exclude_if_nil, true
+        add Blueprinter::Extensions::MultiJson.new
+        format(TrueClass) { "Y" }
+        fields :foo, :bar
+      end
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to match_array %i[name]
+    expect(ref.options).to eq({})
+    expect(ref.extensions).to eq([])
+    expect(blueprint.formatters).to eq ({})
+  end
+
   it "allows use statements to be nested" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name

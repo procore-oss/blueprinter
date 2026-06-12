@@ -7,7 +7,7 @@ module Blueprinter
     module DSL
       # @!visibility private
       module Nodes
-        Use = Struct.new(:name, :callsite)
+        Use = Struct.new(:name, :exclude, :fields, :options, :extensions, :formatters, :callsite, keyword_init: true)
         Exclude = Struct.new(:name)
         Partial = Struct.new(:name, :block)
         View = Struct.new(:name, :block)
@@ -55,11 +55,16 @@ module Blueprinter
       # Include one or more partials.
       #
       # @param *names [Symbol] One or more partial names
+      # @param exclude [Array<Symbol>] Names of fields or associations to exclude from the partial(s)
+      # @param fields [true | false] If false, no fields from the partial(s) will be used
+      # @param options [true | false] If false, no options from the partial(s) will be used
+      # @param extensions [true | false] If false, no extensions from the partial(s) will be used
+      # @param formatters [true | false] If false, no formatters from the partial(s) will be used
       #
-      def use(*names)
+      def use(*names, exclude: [], fields: true, options: true, extensions: true, formatters: true)
         callsite = caller[0]
         names.each do |name|
-          nodes << Nodes::Use.new(name.to_sym, callsite)
+          nodes << Nodes::Use.new(name: name.to_sym, exclude:, fields:, options:, extensions:, formatters:, callsite:)
         end
       end
 
@@ -174,7 +179,9 @@ module Blueprinter
       end
 
       #
-      # Excludes the given fields and associations from parents or partials. Or categorically exclude things.
+      # Excludes the given fields and associations from parent Blueprints or views. Or categorically exclude things.
+      #
+      # Note: Does **not** affect fields, options, etc. coming from partials.
       #
       # @param *names [Symbol] Fields or associations to exclude
       # @param fields [true | false] Exclude all fields

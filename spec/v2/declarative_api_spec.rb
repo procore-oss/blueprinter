@@ -67,25 +67,4 @@ describe "Blueprinter::V2 Declarative API" do
     refs = blueprint[:"foo.bar"].reflections
     expect(refs[:default].fields.keys.sort).to eq %i(name foo bar description).sort
   end
-
-  it "excludes fields added after the exclude statement" do
-    blueprint = Class.new(Blueprinter::V2::Base) do
-      field :id
-      field :name
-
-      view :foo do
-        exclude :name, :description2, :description3
-        use :desc
-        field :description3
-      end
-
-      partial :desc do
-        field :description
-        field :description2
-      end
-    end
-
-    refs = blueprint.reflections
-    expect(refs[:foo].fields.keys).to match_array %i(id description description3)
-  end
 end

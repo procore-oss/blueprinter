@@ -14,7 +14,7 @@ module Blueprinter
         self.blueprint = blueprint
         self.nodes = inherit(DSL::Nodes::Partial) + blueprint.nodes
         self.nodes = expand_partials
-        nodes.unshift(*exclude(inherit(Fields::Field)))
+        nodes.unshift(*exclude(inherit(Fields::Field), parent_exclusions))
         nodes.unshift(*inherit(DSL::Nodes::View)) if blueprint?
         nodes.freeze
       end
@@ -79,7 +79,7 @@ module Blueprinter
       attr_writer :nodes
 
       # Return nodes, replacing any `use` nodes with the partial's nodes
-      def expand_partials(exclusions: self.exclusions, partials: self.partials)
+      def expand_partials(partials = self.partials)
         nodes.each_with_object([]) do |node, acc|
           # Leave other node types as-is
           unless node.is_a? DSL::Nodes::Use
@@ -92,19 +92,16 @@ module Blueprinter
               raise(Errors::UnknownPartial, "No '#{node.name}' partial in Blueprint '#{blueprint}' (#{node.callsite})")
           blueprint.nodes = []
           blueprint.class_eval(&p)
-          self.nodes = exclude(blueprint.nodes, exclusions:)
-
-          # Grab any exclusions and partials it defined for the next run
-          exclusions = self.exclusions exclusions
-          partials = partials.merge self.partials
+          self.nodes = exclude(blueprint.nodes, node.exclusions)
 
           # Call `expand_partials` again on the partial's nodes, in case the partial used partials. Then append to all nodes.
-          acc.concat(expand_partials(exclusions:, partials:))
+          partials = partials.merge self.partials
+          acc.concat(expand_partials(partials))
         end
       end
 
       # Return nodes with certain (or all) field nodes excluded
-      def exclude(nodes, exclusions: self.exclusions)
+      def exclude(nodes, exclusions)
         nodes.reject do |n|
           case n
           when Fields::Field
@@ -121,15 +118,14 @@ module Blueprinter
         end
       end
 
-      # Create or update exclusions based on the current nodes
-      def exclusions(state = Exclusions.new(field_names: Set.new))
-        excluded_field_names = nodes.grep(DSL::Nodes::Exclude).map(&:name)
+      # Things that should be excluded from the parent
+      def parent_exclusions
         Exclusions.new(
-          field_names: state.field_names + Set.new(excluded_field_names),
-          fields: state.fields || flag?(:exclude_fields),
-          options: state.options || flag?(:exclude_options),
-          extensions: state.extensions || flag?(:exclude_extensions),
-          formatters: state.formatters || flag?(:exclude_formatters)
+          field_names: Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name)),
+          fields: flag?(:exclude_fields),
+          options: flag?(:exclude_options),
+          extensions: flag?(:exclude_extensions),
+          formatters: flag?(:exclude_formatters)
         )
       end
 

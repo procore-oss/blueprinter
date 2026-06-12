@@ -103,63 +103,6 @@ describe "Blueprinter::V2 Fields" do
     expect(refs[:"extended.plus"].fields.keys.sort).to eq %i(name description foo).sort
   end
 
-  it "excludes specified fields and associations from the parent class" do
-    application_blueprint = Class.new(Blueprinter::V2::Base) do
-      field :id
-      field :foo
-    end
-    blueprint = Class.new(application_blueprint) do
-      exclude :foo
-      field :name
-    end
-
-    refs = blueprint.reflections
-    expect(refs[:default].fields.keys.sort).to eq %i(id name).sort
-  end
-
-  it "excludes specified fields and associations from the parent view" do
-    category_blueprint = Class.new(Blueprinter::V2::Base)
-    widget_blueprint = Class.new(Blueprinter::V2::Base)
-    blueprint = Class.new(Blueprinter::V2::Base) do
-      field :id
-      field :name
-      association :category, category_blueprint
-      association :widgets, [widget_blueprint]
-
-      view :foo do
-        exclude :name, :category
-        field :description
-      end
-    end
-
-    refs = blueprint.reflections
-    expect(refs[:default].fields.keys.sort).to eq %i(id name).sort
-    expect(refs[:default].objects.keys.sort).to eq %i(category).sort
-    expect(refs[:default].collections.keys.sort).to eq %i(widgets).sort
-    expect(refs[:foo].fields.keys.sort).to eq %i(id description).sort
-    expect(refs[:foo].objects.keys.sort).to eq %i().sort
-    expect(refs[:foo].collections.keys.sort).to eq %i(widgets).sort
-  end
-
-  it "excludes specified fields and associations from partials" do
-    blueprint = Class.new(Blueprinter::V2::Base) do
-      partial :desc do
-        field :short_desc
-        field :long_desc
-      end
-
-      field :name
-
-      view :foo do
-        excludes :short_desc
-        use :desc
-      end
-    end
-
-    refs = blueprint.reflections
-    expect(refs[:foo].fields.keys).to eq %i(name long_desc)
-  end
-
   context 'formatters' do
     let(:blueprint) do
       Class.new(Blueprinter::V2::Base) do

@@ -6,12 +6,14 @@ module Blueprinter
   module V2
     # Evaluates a Blueprint's AST nodes
     # @!visibility private
-    class Evaluator
+    class Specification
+      Spec = Struct.new(:nodes, :options, :extensions, :formatters, :schema, :view_defs, keyword_init: true)
       Exclusions = Struct.new(:field_names, :fields, :options, :extensions, :formatters, keyword_init: true)
-      attr_reader :nodes
 
       def initialize(blueprint)
+        self.parent = blueprint.superclass.spec
         self.blueprint = blueprint
+        eval_view! if view?
         self.nodes = inherit(DSL::Nodes::Partial) + blueprint.nodes
         self.nodes = expand_partials
         nodes.unshift(*exclude(inherit(Fields::Field), parent_exclusions))
@@ -19,9 +21,25 @@ module Blueprinter
         nodes.freeze
       end
 
+      # Returns the full specification for a Blueprint/view
+      def generate
+        Spec.new(
+          nodes:,
+          options: options.freeze,
+          extensions: extensions.freeze,
+          formatters: formatters.freeze,
+          schema: schema.freeze,
+          view_defs: view_defs.freeze
+        ).freeze
+      end
+
+      private
+
+      attr_accessor :blueprint, :parent, :nodes
+
       # Returns the declared options for this blueprint/view
       def options
-        initial_val = flag?(:exclude_options) ? {} : blueprint.superclass.options.dup
+        initial_val = flag?(:exclude_options) ? {} : parent.options.dup
         nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::SetOpt
@@ -37,7 +55,7 @@ module Blueprinter
       # Returns the declared extensions for this blueprint/view
       # rubocop:disable Metrics/CyclomaticComplexity
       def extensions
-        initial_val = flag?(:exclude_extensions) ? [] : blueprint.superclass.extensions.dup
+        initial_val = flag?(:exclude_extensions) ? [] : parent.extensions.dup
         nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::AppendExt
@@ -55,14 +73,14 @@ module Blueprinter
 
       # Returns the declared formatters for this blueprint/view
       def formatters
-        initial_val = flag?(:exclude_formatters) ? {} : blueprint.superclass.formatters.dup
+        initial_val = flag?(:exclude_formatters) ? {} : parent.formatters.dup
         local_formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }
         initial_val.merge(local_formatters)
       end
 
       # Returns the declared fields and associations for this blueprint/view
-      def fields
-        nodes.grep(Fields::Field).to_h { |n| [n.name, n] }.freeze
+      def schema
+        nodes.grep(Fields::Field).to_h { |n| [n.name, n] }
       end
 
       # Returns a Hash of view definition blocks keyed by name
@@ -72,11 +90,6 @@ module Blueprinter
           acc[node.name] << node.block if node.block
         end
       end
-
-      private
-
-      attr_accessor :blueprint
-      attr_writer :nodes
 
       # Return nodes, replacing any `use` nodes with the partial's nodes
       def expand_partials(partials = self.partials)
@@ -129,10 +142,19 @@ module Blueprinter
         )
       end
 
+      # Grab and run this view's block(s) from the parent
+      def eval_view!
+        blocks = parent.view_defs[blueprint.view_name] ||
+                 raise(Errors::UnknownView, "View '#{blueprint.view_name}' not found in Blueprint '#{blueprint.superclass}'")
+
+        blocks.each { |b| blueprint.class_eval(&b) }
+      end
+
+      def view? = !blueprint?
       def blueprint? = blueprint.view_name == :default
       def flag?(name) = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == name }
       def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
-      def inherit(node_type) = blueprint.superclass.nodes.grep(node_type)
+      def inherit(node_type) = parent.nodes.grep(node_type)
     end
   end
 end

@@ -22,7 +22,7 @@ describe "Blueprinter::V2 Exclusions" do
     expect(ref.fields.keys).to eq %i[name]
     expect(ref.options).to eq({ foo: "foo" })
     expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::FieldOrder]
-    expect(blueprint.formatters).to eq({})
+    expect(blueprint.spec.formatters).to eq({})
   end
 
   it "allows a locally defined field" do
@@ -55,7 +55,7 @@ describe "Blueprinter::V2 Exclusions" do
     expect(ref.fields.keys).to eq %i[description]
     expect(ref.options).to eq({ bar: "bar" })
     expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::MultiJson]
-    expect(blueprint[:extended].formatters).to eq({})
+    expect(blueprint[:extended].spec.formatters).to eq({})
   end
 
   it "excludes from parent view" do
@@ -78,7 +78,7 @@ describe "Blueprinter::V2 Exclusions" do
     expect(ref.fields.keys).to eq %i[description]
     expect(ref.options).to eq({ bar: "bar" })
     expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::MultiJson]
-    expect(blueprint[:"extended.plus"].formatters).to eq({})
+    expect(blueprint[:"extended.plus"].spec.formatters).to eq({})
   end
 
   it "exclusions can be added by a partial" do
@@ -98,6 +98,6 @@ describe "Blueprinter::V2 Exclusions" do
     expect(ref.fields.keys).to eq %i[name]
     expect(ref.options).to eq({ foo: "foo" })
     expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::FieldOrder]
-    expect(blueprint.formatters).to eq({})
+    expect(blueprint.spec.formatters).to eq({})
   end
 end

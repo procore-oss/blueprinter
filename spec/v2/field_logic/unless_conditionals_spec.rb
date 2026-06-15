@@ -6,7 +6,7 @@ describe Blueprinter::V2::FieldLogic do
   let(:subject) { described_class }
   let(:object) { { foo: 'Foo' } }
   let(:field_ref) { blueprint.reflections[:default].fields[:foo] }
-  let(:field) { blueprint.schema.fetch(:foo) }
+  let(:field) { blueprint.spec.schema.fetch(:foo) }
   let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field_ref) }
 
   context 'skip? (unless)' do

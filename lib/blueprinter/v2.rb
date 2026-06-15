@@ -8,7 +8,6 @@ module Blueprinter
     autoload :Base, 'blueprinter/v2/base'
     autoload :Context, 'blueprinter/v2/context'
     autoload :DSL, 'blueprinter/v2/dsl'
-    autoload :Evaluator, 'blueprinter/v2/evaluator'
     autoload :Extensions, 'blueprinter/v2/extensions'
     autoload :Extractors, 'blueprinter/v2/extractors'
     autoload :FieldLogic, 'blueprinter/v2/field_logic'
@@ -19,5 +18,6 @@ module Blueprinter
     autoload :Render, 'blueprinter/v2/render'
     autoload :Rendering, 'blueprinter/v2/rendering'
     autoload :Serializer, 'blueprinter/v2/serializer'
+    autoload :Specification, 'blueprinter/v2/specification'
   end
 end

@@ -16,7 +16,7 @@ describe Blueprinter::V2::Formatter do
 
   let(:formatter) do
     blueprint.eval!
-    described_class.new(blueprint.formatters)
+    described_class.new(blueprint.spec.formatters)
   end
 
   it 'calls proc formatters' do

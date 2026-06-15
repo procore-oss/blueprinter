@@ -20,9 +20,9 @@ module Blueprinter
         ref_key = path.empty? ? child_name : path.join('.').to_sym
         child_view = parent[child_name]
         child_view.eval!
-        child_ref = View.new(child_view, ref_key)
+        child_ref = View.new(child_view.spec, ref_key)
 
-        child_view.view_defs.reduce({ ref_key => child_ref }) do |acc, (name, _)|
+        child_view.spec.view_defs.reduce({ ref_key => child_ref }) do |acc, (name, _)|
           children = name == :default ? {} : flatten_children(child_view, name, path + [name])
           acc.merge(children)
         end
@@ -53,11 +53,11 @@ module Blueprinter
         # @param blueprint [Class] A subclass of Blueprinter::V2::Base
         # @param name [Symbol] Name of the view
         # @api private
-        def initialize(blueprint, name)
+        def initialize(spec, name)
           @name = name
-          @options = blueprint.options
-          @extensions = blueprint.extensions
-          @ordered = blueprint.schema.values.freeze
+          @options = spec.options
+          @extensions = spec.extensions
+          @ordered = spec.schema.values.freeze
           @fields = ordered.select(&:field?).to_h { |f| [f.name, f] }.freeze
           @objects = ordered.select(&:object?).to_h { |f| [f.name, f] }.freeze
           @collections = ordered.select(&:collection?).to_h { |f| [f.name, f] }.freeze

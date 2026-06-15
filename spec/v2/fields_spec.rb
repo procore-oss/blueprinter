@@ -116,20 +116,20 @@ describe "Blueprinter::V2 Fields" do
       iso8601 = ->(x, _opts) { x.iso8601 }
       blueprint.format(Date, &iso8601)
       blueprint.eval!
-      expect(blueprint.formatters[Date]).to eq iso8601
+      expect(blueprint.spec.formatters[Date]).to eq iso8601
     end
 
     it 'adds a method formatter' do
       blueprint.format(Date, :fmt_date)
       blueprint.eval!
-      expect(blueprint.formatters[Date]).to eq :fmt_date
+      expect(blueprint.spec.formatters[Date]).to eq :fmt_date
     end
 
     it 'are inherited' do
       blueprint.format(Date, :fmt_date)
       child = Class.new(blueprint)
       child.eval!
-      expect(child.formatters[Date]).to eq :fmt_date
+      expect(child.spec.formatters[Date]).to eq :fmt_date
     end
   end
 end

@@ -71,7 +71,7 @@ describe "Blueprinter::V2 Partials" do
     expect(ref.fields.keys).to match_array %i[name]
     expect(ref.options).to eq({})
     expect(ref.extensions).to eq([])
-    expect(blueprint.formatters).to eq ({})
+    expect(blueprint.spec.formatters).to eq ({})
   end
 
   it "allows use statements to be nested" do
@@ -209,7 +209,7 @@ describe "Blueprinter::V2 Partials" do
       expect(foo.fields[:name].options).to eq({ exclude_if_empty: true })
       expect(foo.fields.keys).to eq %i[name]
 
-      expect(blueprint[:foo].formatters).to eq({ Time => :to_i })
+      expect(blueprint[:foo].spec.formatters).to eq({ Time => :to_i })
     end
 
     it '`use` overrides what comes before' do
@@ -234,7 +234,7 @@ describe "Blueprinter::V2 Partials" do
       expect(view.extensions.map(&(:class))).to eq [Blueprinter::Extensions::FieldOrder, Blueprinter::Extensions::MultiJson]
       expect(view.options[:foo]).to be false
       expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
-      expect(blueprint[:foo].formatters).to eq({ Time => :to_i })
+      expect(blueprint[:foo].spec.formatters).to eq({ Time => :to_i })
     end
 
     it '`use` can be overridden' do
@@ -259,7 +259,7 @@ describe "Blueprinter::V2 Partials" do
       expect(view.extensions.map(&(:class))).to eq [Blueprinter::Extensions::MultiJson, Blueprinter::Extensions::FieldOrder]
       expect(view.options[:foo]).to be true
       expect(view.fields[:name].options).to eq({})
-      expect(blueprint[:foo].formatters).to eq({ Time => :iso8601 })
+      expect(blueprint[:foo].spec.formatters).to eq({ Time => :iso8601 })
     end
   end
 

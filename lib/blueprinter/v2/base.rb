@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'blueprinter/v2/evaluator'
+require 'blueprinter/v2/specification'
 
 module Blueprinter
   module V2
@@ -19,8 +19,6 @@ module Blueprinter
         attr_accessor :blueprint_name
         # @!visibility private
         attr_accessor :nodes
-        # @!visibility private
-        attr_reader :schema, :formatters, :options, :extensions
 
         # Initialize subclass
         def inherited(subclass)
@@ -64,7 +62,7 @@ module Blueprinter
               # If the Blueprint has already been evaluated, throw an error if the view isn't defined.
               # Otherwise, create a child that *may* be removed post-eval if it's found to be invalid.
               # This allows Blueprints to reference their own views in associations (without using a Proc).
-              invalid = evaled? && !view_defs.key?(name)
+              invalid = evaled? && !spec.view_defs.key?(name)
               raise Errors::UnknownView, "View '#{name}' not found in Blueprint '#{self}'" if invalid
 
               child = Class.new(self)
@@ -77,6 +75,14 @@ module Blueprinter
 
           child = children.fetch(name)
           name_tail ? child[name_tail] : child
+        end
+
+        # Returns (generating if necessary) the evaluated Blueprint specification
+        # @!visibility private
+        # @return [Blueprinter::V2::Specification::Spec]
+        def spec
+          eval! unless @spec
+          @spec
         end
 
         # Apply partials and field exclusions
@@ -95,53 +101,36 @@ module Blueprinter
 
         # @!visibility private
         attr_writer :children, :eval_mutex, :children_mutex
-        attr_accessor :view_defs
 
         private
 
         attr_reader :children, :eval_mutex, :children_mutex
-        attr_writer :options, :extensions, :schema, :formatters
+        attr_writer :spec
 
         def run_eval!
           superclass.eval!
-          eval_view! if view?
-          eval = Evaluator.new(self)
-          self.nodes = eval.nodes
-          self.options = eval.options.freeze
-          self.extensions = eval.extensions.freeze
-          self.formatters = eval.formatters.freeze
-          self.schema = eval.fields.freeze
-          self.view_defs = eval.view_defs.freeze
+          self.spec = Specification.new(self).generate
+          nodes.clear.freeze
           cleanup_children!
           @serializer = Serializer.new(self)
-        end
-
-        # Grab and run this view's block(s) from the parent
-        def eval_view!
-          blocks = superclass.view_defs[view_name]
-          raise Errors::UnknownView, "View '#{view_name}' not found in Blueprint '#{superclass}'" if blocks.nil?
-
-          blocks.each { |b| class_eval(&b) }
         end
 
         # Before eval we allow Base#[] to accept any view name. (This allows Blueprints to self-reference their own views
         # on associations.) After eval, we know which ones weren't valid.
         def cleanup_children!
-          view_defs.each_key { |name| self[name] } # ensure all child classes are created
+          spec.view_defs.each_key { |name| self[name] } # ensure all child classes are created
           children_mutex.synchronize do
-            children.delete_if { |name| !view_defs.key?(name) && name != :default }
+            children.delete_if { |name| !spec.view_defs.key?(name) && name != :default }
             children.freeze
           end
         end
 
         def evaled? = !@serializer.nil?
-        def view? = view_name != :default
       end
 
       self.nodes = [].freeze
-      self.extensions = [].freeze
-      self.options = {}.freeze
-      self.formatters = {}.freeze
+      self.spec = Specification::Spec
+                  .new(nodes: [], options: {}, extensions: [], formatters: {}, schema: {}, view_defs: {}).freeze
       self.blueprint_name = name
       self.view_path = :default
       self.view_name = :default
@@ -151,7 +140,7 @@ module Blueprinter
 
       # @!visibility private
       def initialize
-        @options = self.class.options.dup
+        @options = self.class.spec.options.dup
       end
 
       # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"

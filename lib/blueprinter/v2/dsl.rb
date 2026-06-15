@@ -65,7 +65,7 @@ module Blueprinter
       #
       def use(*names, exclude: [], fields: true, options: true, extensions: true, formatters: true)
         callsite = caller[0]
-        exclusions = Evaluator::Exclusions.new(
+        exclusions = Specification::Exclusions.new(
           field_names: Set.new(exclude), fields: !fields, options: !options, extensions: !extensions, formatters: !formatters
         )
         names.each do |name|

@@ -85,19 +85,23 @@ module Blueprinter
           @spec
         end
 
+        protected
+
         # Apply partials and field exclusions
         # @api private
-        def eval!(lock: true)
+        def eval!
           return if evaled? || self == V2::Base
 
-          if lock
-            eval_mutex.synchronize { run_eval! unless evaled? }
-          else
-            run_eval!
+          eval_mutex.synchronize do
+            return if evaled?
+
+            superclass.eval!
+            self.spec = Specification.new(self).generate
+            nodes.clear.freeze
+            cleanup_children!
+            @serializer = Serializer.new(self)
           end
         end
-
-        protected
 
         # @!visibility private
         attr_writer :children, :eval_mutex, :children_mutex
@@ -106,14 +110,6 @@ module Blueprinter
 
         attr_reader :children, :eval_mutex, :children_mutex
         attr_writer :spec
-
-        def run_eval!
-          superclass.eval!
-          self.spec = Specification.new(self).generate
-          nodes.clear.freeze
-          cleanup_children!
-          @serializer = Serializer.new(self)
-        end
 
         # Before eval we allow Base#[] to accept any view name. (This allows Blueprints to self-reference their own views
         # on associations.) After eval, we know which ones weren't valid.

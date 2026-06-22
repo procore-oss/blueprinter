@@ -15,7 +15,7 @@ describe Blueprinter::V2::Formatter do
   end
 
   let(:formatter) do
-    blueprint.eval!
+    blueprint.reflections
     described_class.new(blueprint.spec.formatters)
   end
 

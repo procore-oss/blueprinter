@@ -7,13 +7,15 @@ describe Blueprinter::Extensions::LegacyConditionals do
       field :name
       # All conditionals are designed to hide their fields
       field :desc_if, if: ->(_ctx) { false }
-      field :desc_unless, unless: ->(_ctx) { true }
+      field :desc_unless, unless: :always_true
       field :legacy_desc_if, if: ->(field, object, _options) do
         field != :legacy_desc_if || object[:name] != 'Foo'
       end
       field :legacy_desc_unless, unless: ->(field, object, _options) do
         field == :legacy_desc_unless && object[:name] == 'Foo'
       end
+
+      def always_true(_ctx) = true
     end
   end
 

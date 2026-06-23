@@ -591,7 +591,7 @@ field :display_name do |user|
 end
 ```
 
-_NOTE:_ When using `Symbol#to_proc`, the block is invoked with only the object — `options` are not available, and the configured extractor is bypassed. For simple renames of an existing attribute, prefer the `name:` option instead (see [Renaming](#renaming)), which routes through the configured extractor and keeps the DSL consistent.
+_NOTE:_ When using `Symbol#to_proc`, the block is invoked with only the object — `options` are not available, and the configured extractor is bypassed. For simple renames of an existing attribute, prefer the `name:` (or its alias `as:`) option instead (see [Renaming](#renaming)), which routes through the configured extractor and keeps the DSL consistent.
 
 </details>
 
@@ -669,7 +669,7 @@ class UserBlueprint < Blueprinter::Base
 end
 ```
 
-_NOTE:_ As with fields, this bypasses the configured extractor and does not have access to `options`. To use a different key name than the underlying method (without a block), use `identifier :method_name, name: :key_name`.
+_NOTE:_ As with fields, this bypasses the configured extractor and does not have access to `options`. To use a different key name than the underlying method (without a block), use `identifier :method_name, name: :key_name` (or `identifier :method_name, as: :key_name`).
 
 </details>
 
@@ -780,7 +780,7 @@ _NOTE:_ The field-level setting overrides the global config setting (for the fie
 <summary>Exclude Fields with nil Values</summary>
 
 
-By default, fields with `nil` values are included when rendering. You can override this behavior by setting `:exclude_if_nil: true` in the field definition. 
+By default, fields with `nil` values are included when rendering. You can override this behavior by setting `:exclude_if_nil: true` in the field definition.
 
 Usage:
 

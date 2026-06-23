@@ -44,8 +44,12 @@ module Blueprinter
       #     end
       #   end
       #
+      # @param as [Symbol] an alias for :name to rename the identifier key in
+      #   the JSON output. If both :name and :as are provided, :name takes precedence.
+      #
       # @return [Field] A Field object
-      def identifier(method, name: method, extractor: Blueprinter.configuration.default_extractor, &block)
+      def identifier(method, name: nil, as: nil, extractor: Blueprinter.configuration.default_extractor, &block)
+        name = name || as || method
         view_collection[:identifier] << Field.new(
           method,
           name,
@@ -68,6 +72,8 @@ module Blueprinter
       # @option options [Symbol] :name Use this to rename the method. Useful if
       #   if you want your JSON key named differently in the output than your
       #   object's field or method name.
+      # @option options [Symbol] :as An alias for :name. If both :name and :as
+      #   are provided, :name takes precedence.
       # @option options [String,Proc] :datetime_format Format Date or DateTime object
       #   If the option provided is a String, the object will be formatted with given strftime
       #   formatting.
@@ -109,13 +115,17 @@ module Blueprinter
       #     # other code
       #   end
       #
+      # @option options [Symbol] :as An alias for :name. Use this to rename the
+      #   method in the JSON output. If both :name and :as are provided, :name
+      #   takes precedence.
+      #
       # @return [Field] A Field object
       def field(method, options = {}, &block)
         method = method.to_sym
 
         current_view << Field.new(
           method,
-          options.fetch(:name) { method },
+          options.fetch(:name) { options.fetch(:as) { method } },
           options.fetch(:extractor) { Blueprinter.configuration.default_extractor },
           self,
           options.merge(block:)
@@ -131,6 +141,8 @@ module Blueprinter
       #   blueprint to use for the associated object.
       # @option options [Symbol] :name Use this to rename the association in the
       #   JSON output.
+      # @option options [Symbol] :as An alias for :name. If both :name and :as
+      #   are provided, :name takes precedence.
       # @option options [Symbol] :view Specify the view to use or fall back to
       #   to the :default view.
       # @option options [Hash, Proc] :options Additional options to merge into the
@@ -171,12 +183,12 @@ module Blueprinter
         method = method.to_sym
         current_view << Association.new(
           method:,
-          name: options.fetch(:name) { method },
+          name: options.fetch(:name) { options.fetch(:as) { method } },
           extractor: options.fetch(:extractor) { association_extractor },
           blueprint: options.fetch(:blueprint),
           parent_blueprint: self,
           view: options.fetch(:view, :default),
-          options: options.except(:name, :extractor, :blueprint, :view).merge(block:)
+          options: options.except(:name, :as, :extractor, :blueprint, :view).merge(block:)
         )
       end
 

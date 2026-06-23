@@ -28,7 +28,7 @@ module Blueprinter
       private
 
       def convert_v1(cond)
-        if cond.arity == V1_ARITY
+        if cond.is_a?(Proc) && cond.arity == V1_ARITY
           ->(ctx) { cond.call(ctx.field.source, ctx.object, ctx.options) }
         else
           cond

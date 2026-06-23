@@ -16,7 +16,7 @@ module Blueprinter
         eval_view! if view?
         self.nodes = inherit(DSL::Nodes::Partial) + blueprint.nodes
         self.nodes = expand_partials
-        nodes.unshift(*exclude(inherit(Fields::Field), parent_exclusions))
+        nodes.unshift(*exclude(inherit(Fields::Field), exclusions))
         nodes.unshift(*inherit(DSL::Nodes::View)) if blueprint?
         nodes.freeze
       end
@@ -39,7 +39,7 @@ module Blueprinter
 
       # Returns the declared options for this blueprint/view
       def options
-        initial_val = flag?(:exclude_options) ? {} : parent.options.dup
+        initial_val = exclusions.options ? {} : parent.options.dup
         nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::SetOpt
@@ -55,7 +55,7 @@ module Blueprinter
       # Returns the declared extensions for this blueprint/view
       # rubocop:disable Metrics/CyclomaticComplexity
       def extensions
-        initial_val = flag?(:exclude_extensions) ? [] : parent.extensions.dup
+        initial_val = exclusions.extensions ? [] : parent.extensions.dup
         nodes.each_with_object(initial_val) do |node, acc|
           case node
           when DSL::Nodes::AppendExt
@@ -73,7 +73,7 @@ module Blueprinter
 
       # Returns the declared formatters for this blueprint/view
       def formatters
-        initial_val = flag?(:exclude_formatters) ? {} : parent.formatters.dup
+        initial_val = exclusions.formatters ? {} : parent.formatters.dup
         local_formatters = nodes.grep(DSL::Nodes::Format).to_h { |n| [n.klass, n.fmt] }
         initial_val.merge(local_formatters)
       end
@@ -132,8 +132,8 @@ module Blueprinter
       end
 
       # Things that should be excluded from the parent
-      def parent_exclusions
-        Exclusions.new(
+      def exclusions
+        @_exclusions ||= Exclusions.new(
           field_names: Set.new(nodes.grep(DSL::Nodes::Exclude).map(&:name)),
           fields: flag?(:exclude_fields),
           options: flag?(:exclude_options),
@@ -146,7 +146,6 @@ module Blueprinter
       def eval_view!
         blocks = parent.view_defs[blueprint.view_name] ||
                  raise(Errors::UnknownView, "View '#{blueprint.view_name}' not found in Blueprint '#{blueprint.superclass}'")
-
         blocks.each { |b| blueprint.class_eval(&b) }
       end
 

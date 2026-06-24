@@ -67,4 +67,43 @@ describe "Blueprinter::V2 Declarative API" do
     refs = blueprint[:"foo.bar"].reflections
     expect(refs[:default].fields.keys.sort).to eq %i(name foo bar description).sort
   end
+
+  it "can be used in a Ruby module" do
+    mod = Module.new do
+      extend Blueprinter::V2::DSL
+
+      set :my_option, true
+      field :foo
+      partial :my_partial do
+        field :description
+      end
+      view :my_view do
+        field :bar
+      end
+    end
+
+    # test that DSL modules can include other DSL modules
+    mod2 = Module.new do
+      extend Blueprinter::V2::DSL
+      include mod
+    end
+
+    # test that DSL modules can be included in non-Blueprinter things
+    Class.new { include mod2 }
+
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      include mod2
+
+      field :zorp
+      view :asdf do
+        use :my_partial
+      end
+    end
+
+    refs = blueprint.reflections
+    expect(refs[:default].options).to eq({ my_option: true})
+    expect(refs[:default].fields.keys).to eq %i[foo zorp]
+    expect(refs[:asdf].fields.keys).to eq %i[foo zorp description]
+    expect(refs[:my_view].fields.keys).to eq %i[foo zorp bar]
+  end
 end

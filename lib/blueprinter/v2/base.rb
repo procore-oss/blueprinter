@@ -6,7 +6,9 @@ module Blueprinter
   module V2
     # Base class for V2 Blueprints
     class Base
-      extend DSL
+      extend DSL::Config
+      extend DSL::Data
+      extend DSL::Views
       extend Rendering
       extend Reflection
 

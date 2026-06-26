@@ -53,6 +53,16 @@ describe '::Base' do
             to eq(blueprint.render(object_with_attributes))
         end
       end
+      context 'and the view is not defined' do
+        it 'raises Errors::UnknownView' do
+          expect { blueprint.render(object_with_attributes, view: :missing) }.
+            to raise_error(Blueprinter::Errors::UnknownView, "View 'missing' is not defined")
+        end
+        it 'remains rescuable as BlueprinterError' do
+          expect { blueprint.render(object_with_attributes, view: :missing) }.
+            to raise_error(Blueprinter::BlueprinterError)
+        end
+      end
     end
 
     context 'when using Symbol#to_proc syntax' do

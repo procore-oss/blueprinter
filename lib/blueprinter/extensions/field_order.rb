@@ -16,7 +16,7 @@ module Blueprinter
         @sorter = sorter
       end
 
-      # @param ctx [Blueprinter::V2::Context::Render]
+      # @param ctx [Blueprinter::V2::Context::Init]
       def around_blueprint_init(ctx)
         ctx.fields = ctx.fields.sort(&@sorter)
         yield ctx

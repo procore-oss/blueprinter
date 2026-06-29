@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_support/json'
+
 describe "Blueprinter::V2 Rendering" do
   let(:category_blueprint) do
     Class.new(Blueprinter::V2::Base) do
@@ -17,7 +19,7 @@ describe "Blueprinter::V2 Rendering" do
     test = self
     Class.new(Blueprinter::V2::Base) do
       field :name
-      association :cat, test.category_blueprint, from: :category
+      association :cat, test.category_blueprint, source: :category
       association :parts, [test.part_blueprint]
     end
   end
@@ -84,5 +86,27 @@ describe "Blueprinter::V2 Rendering" do
         parts: [{ num: 42 }, { num: 43 }]
       }]
     }.to_json)
+  end
+
+  it 'responds to legacy render_as_hash' do
+    result = widget_blueprint.render_as_hash(widget, { root: :data })
+    expect(result).to eq({
+      data: {
+        name: 'Foo',
+        cat: { name: 'Bar' },
+        parts: [{ num: 42 }, { num: 43 }]
+      }
+    })
+  end
+
+  it 'responds to legacy render_as_json' do
+    result = widget_blueprint.render_as_json(widget, { root: :data })
+    expect(result).to eq({
+      data: {
+        name: 'Foo',
+        cat: { name: 'Bar' },
+        parts: [{ num: 42 }, { num: 43 }]
+      }
+    }.as_json)
   end
 end

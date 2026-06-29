@@ -56,8 +56,8 @@ describe Blueprinter::Extensions::OpenTelemetry do
   it 'fires during render' do
     log = []
     meta_ext = meta_extension.new(log)
-    blueprint.extensions << subject << meta_ext
-    sub_blueprint.extensions << subject << meta_ext
+    blueprint.add subject, meta_ext
+    sub_blueprint.add subject, meta_ext
     attributes = { 'library.name' => 'Blueprinter', 'library.version' => Blueprinter::VERSION }
     object = { foo: 'Foo', foo_obj: { name: 'Bar1' }, foos: [{ name: 'Bar2' }] }
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).

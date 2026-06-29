@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 describe Blueprinter::Extensions::ViewOption do
-  let(:instances) { Blueprinter::V2::InstanceCache.new }
-  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1) }
-  let(:context) { Blueprinter::V2::Context::Result }
-  let(:object) { { id: 42, foo: 'Foo', bar: 'Bar' } }
+  subject { described_class.new }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       view :foo do
@@ -17,14 +14,14 @@ describe Blueprinter::Extensions::ViewOption do
   end
 
   it 'does nothing by default' do
-    ctx = context.new(serializer.blueprint, [], {}, :json)
-    new_ctx = described_class.new.around_result(ctx) { |ctx| ctx }
-    expect(new_ctx.blueprint.class).to be serializer.blueprint.class
+    blueprint.add subject
+    result = blueprint.render({}).to_hash
+    expect(result).to eq({})
   end
 
   it 'finds a nested view' do
-    ctx = context.new(serializer.blueprint, [], { view: 'foo.bar' }, :json)
-    new_ctx = described_class.new.around_result(ctx) { |ctx| ctx }
-    expect(new_ctx.blueprint.class).to be blueprint['foo.bar']
+    blueprint.add subject
+    result = blueprint.render({}, view: 'foo.bar').to_hash
+    expect(result).to eq({ foo: nil, bar: nil })
   end
 end

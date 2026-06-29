@@ -7,17 +7,17 @@ module Blueprinter
     module Extensions
       module Core
         #
-        # A core extension for serializing results to JSON.
+        # A core extension that supports serializing to :json and :hash.
         #
-        class Json < Extension
+        class Format < Extension
           # @param ctx [Blueprinter::V2::Context::Result]
           def around_result(ctx)
             result = yield ctx
-            return result if final? result
+            return result if serialized? result
 
             case ctx.format
             when :hash then result
-            when :json then final ::JSON.dump result
+            when :json then serialized ::JSON.dump result
             else raise BlueprinterError, "Unrecognized serialization format `#{ctx.format.inspect}`"
             end
           end

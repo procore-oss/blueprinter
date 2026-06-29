@@ -40,6 +40,40 @@ describe "Blueprinter::V2 Partials" do
     expect(refs[:extended].fields.keys.sort).to eq %i(name description tags).sort
   end
 
+  it "can have certain fields excluded" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      use :my_partial, exclude: [:foo]
+      field :name
+
+      partial :my_partial do
+        fields :foo, :bar
+      end
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to match_array %i[name bar]
+  end
+
+  it "can have things excluded categorically" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      use :my_partial, fields: false, options: false, extensions: false, formatters: false
+      field :name
+
+      partial :my_partial do
+        set :exclude_if_nil, true
+        add Blueprinter::Extensions::MultiJson.new
+        format(TrueClass) { "Y" }
+        fields :foo, :bar
+      end
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to match_array %i[name]
+    expect(ref.options).to eq({})
+    expect(ref.extensions).to eq([])
+    expect(blueprint.spec.formatters).to eq ({})
+  end
+
   it "allows use statements to be nested" do
     blueprint = Class.new(Blueprinter::V2::Base) do
       field :name
@@ -62,6 +96,30 @@ describe "Blueprinter::V2 Partials" do
 
     refs = blueprint.reflections
     expect(refs[:default].fields.keys.sort).to eq %i(name foo bar zorp).sort
+  end
+
+  it "allows partials to be nested" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      use :outer_partial
+      use :inner_partial
+      use :inner_partial2
+
+      partial :outer_partial do
+        field :summary
+
+        partial :inner_partial do
+          field :description
+
+          partial :inner_partial2 do
+            field :price
+          end
+        end
+      end
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to eq %i[name summary description price]
   end
 
   it "allows a view to be defined in a partial" do
@@ -94,11 +152,14 @@ describe "Blueprinter::V2 Partials" do
 
   it "throws an error for an invalid partial name" do
     blueprint = Class.new(Blueprinter::V2::Base) do
+      self.blueprint_name = 'MyBlueprint'
       view :foo do
-        use :description
+        use :bar
       end
     end
-    expect { blueprint[:foo] }.to raise_error(Blueprinter::Errors::UnknownPartial)
+    expect do
+      blueprint[:foo].render({})
+    end.to raise_error(Blueprinter::Errors::UnknownPartial, /No 'bar' partial in Blueprint 'MyBlueprint\.foo'/)
   end
 
   it 'creates an implicit partial for every view' do
@@ -122,53 +183,112 @@ describe "Blueprinter::V2 Partials" do
   end
 
   context 'precedence' do
-    it 'partials override what the view inherits' do
+    it 'partials can override what the view inherits' do
       blueprint = Class.new(Blueprinter::V2::Base) do
-        field :name
+        add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+        set :foo, true
+        format Time, :iso8601
+        fields :name, :description
 
         view :foo do
           use :non_empty_name
         end
 
         partial :non_empty_name do
+          add Blueprinter::Extensions::MultiJson.new
+          set :foo, false
+          format Time, :to_i
+          field :name, exclude_if_empty: true
+          exclude :description
+        end
+      end
+
+      foo = blueprint.reflections[:foo]
+      expect(foo.extensions.map(&(:class))).to eq [Blueprinter::Extensions::FieldOrder, Blueprinter::Extensions::MultiJson]
+      expect(foo.options[:foo]).to be false
+      expect(foo.fields[:name].options).to eq({ exclude_if_empty: true })
+      expect(foo.fields.keys).to eq %i[name]
+
+      expect(blueprint[:foo].spec.formatters).to eq({ Time => :to_i })
+    end
+
+    it '`use` overrides what comes before' do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        view :foo do
+          add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+          set :foo, true
+          format Time, :iso8601
+          field :name
+          use :non_empty_name
+        end
+
+        partial :non_empty_name do
+          add Blueprinter::Extensions::MultiJson.new
+          set :foo, false
+          format Time, :to_i
           field :name, exclude_if_empty: true
         end
       end
 
       view = blueprint.reflections[:foo]
+      expect(view.extensions.map(&(:class))).to eq [Blueprinter::Extensions::FieldOrder, Blueprinter::Extensions::MultiJson]
+      expect(view.options[:foo]).to be false
       expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
+      expect(blueprint[:foo].spec.formatters).to eq({ Time => :to_i })
     end
 
-    it '`use` overrides the view' do
+    it '`use` can be overridden' do
       blueprint = Class.new(Blueprinter::V2::Base) do
         view :foo do
           use :non_empty_name
+          add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+          set :foo, true
+          format Time, :iso8601
           field :name
         end
 
         partial :non_empty_name do
+          add Blueprinter::Extensions::MultiJson.new
+          set :foo, false
+          format Time, :to_i
           field :name, exclude_if_empty: true
         end
       end
 
       view = blueprint.reflections[:foo]
-      expect(view.fields[:name].options).to eq({ exclude_if_empty: true })
-    end
-
-    it '`use!` allows the view to override' do
-      blueprint = Class.new(Blueprinter::V2::Base) do
-        view :foo do
-          use! :non_empty_name
-          field :name
-        end
-
-        partial :non_empty_name do
-          field :name, exclude_if_empty: true
-        end
-      end
-
-      view = blueprint.reflections[:foo]
+      expect(view.extensions.map(&(:class))).to eq [Blueprinter::Extensions::MultiJson, Blueprinter::Extensions::FieldOrder]
+      expect(view.options[:foo]).to be true
       expect(view.fields[:name].options).to eq({})
+      expect(blueprint[:foo].spec.formatters).to eq({ Time => :iso8601 })
+    end
+  end
+
+  context 'sharing with Ruby modules' do
+    let(:shared_partials) do
+      Module.new do
+        def self.included(klass)
+          klass.class_eval do
+            partial :external_partial do
+              field :external_field
+            end
+          end
+        end
+      end
+    end
+
+    let(:blueprint_a) do
+      tests = self
+      Class.new(Blueprinter::V2::Base) { include tests.shared_partials; use :external_partial }
+    end
+
+    let(:blueprint_b) do
+      tests = self
+      Class.new(Blueprinter::V2::Base) { include tests.shared_partials; use :external_partial }
+    end
+
+    it 'allows importing external partials' do
+      expect(blueprint_a.reflections[:default].fields.keys).to eq %i[external_field]
+      expect(blueprint_b.reflections[:default].fields.keys).to eq %i[external_field]
     end
   end
 end

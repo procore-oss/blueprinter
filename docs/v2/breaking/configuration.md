@@ -109,7 +109,7 @@ configured).
 add Blueprinter::Extensions::MultiJson.new
 ```
 
-If `multi_json` doesn't support your serializer, you can use the `around_result` extension hook:
+If `multi_json` doesn't support your serializer, you can create your own extension using the `around_result` hook:
 
 ```ruby
 class MyJsonExtension < Blueprinter::Extension

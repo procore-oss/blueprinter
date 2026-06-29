@@ -32,6 +32,8 @@ view :extended do
 end
 ```
 
+Learn more about [nested views](../new/nested-views.md).
+
 ### Second arg in field blocks
 
 If you're using the **second** argument in your field/association blocks, it's no longer the render options. It's now a `Blueprinter::V2::Context::Field`

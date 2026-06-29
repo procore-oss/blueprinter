@@ -3,7 +3,7 @@
 Extensions exist in legacy/V1, but they were added late and have limited functionality. Blueprinter V2 has been designed from the
 ground up with extensions in mind.
 
-## Extension API
+## Writing extensions
 
 See the `Blueprinter::Extension` docs for the full API, or read through the [Extension Guide](../../extensions/index.md).
 

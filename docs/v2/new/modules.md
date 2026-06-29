@@ -45,3 +45,17 @@ class MyBlueprint < ApplicationBlueprint
   end
 end
 ```
+
+Or partials:
+
+```ruby
+class MyBlueprint < ApplicationBlueprint
+  # ...
+
+  partial :my_partial do
+    include MySharedBlueprintCode
+    
+    # ...
+  end
+end
+```

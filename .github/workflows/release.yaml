@@ -38,6 +38,6 @@ jobs:
           user: ""
           key: rubygems
           token: ${{secrets.RUBY_GEMS_API_KEY}}
-      - uses: fac/ruby-gem-push-action@b2b56ea12bd8eb96b1add0befca8a9726b652078 # v2
+      - uses: fac/ruby-gem-push-action@0c13437bdf0ff46fd87964681fdd72d433e848c1 # v2
         with:
           key: rubygems

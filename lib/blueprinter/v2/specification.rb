@@ -151,7 +151,7 @@ module Blueprinter
 
       def view? = !blueprint?
       def blueprint? = blueprint.view_name == :default
-      def flag?(name) = nodes.grep(DSL::Nodes::Flag).any? { |n| n.name == name }
+      def flag?(name) = nodes.grep(DSL::Nodes::Flag).select { |n| n.name == name }.last&.value == true
       def partials = nodes.grep(DSL::Nodes::Partial).to_h { |n| [n.name, n.block] }
       def inherit(node_type) = parent.nodes.grep(node_type)
     end

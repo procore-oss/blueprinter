@@ -25,6 +25,22 @@ describe "Blueprinter::V2 Exclusions" do
     expect(blueprint.spec.formatters).to eq({})
   end
 
+  it "unexcludes from parent class" do
+    blueprint = Class.new(application_blueprint) do
+      add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }
+      set :foo, "foo"
+      field :name
+      exclude fields: true, options: true, extensions: true, formatters: true
+      exclude fields: false, options: false, extensions: false, formatters: false
+    end
+
+    ref = blueprint.reflections[:default]
+    expect(ref.fields.keys).to eq %i[id created_at updated_at name]
+    expect(ref.options).to eq({ my_opt: true, foo: "foo" })
+    expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::ViewOption Blueprinter::Extensions::FieldOrder]
+    expect(blueprint.spec.formatters.keys).to match_array [TrueClass]
+  end
+
   it "allows a locally defined field" do
     blueprint = Class.new(application_blueprint) do
       add Blueprinter::Extensions::FieldOrder.new { |a, b| a.name <=> b.name }

@@ -98,7 +98,7 @@ module Blueprinter
         #
         # Excludes the given fields and associations from parent Blueprints or views. Or categorically exclude things.
         #
-        # Note: Does **not** affect fields, options, etc. coming from partials.
+        # Note: Does **not** affect fields, options, etc. coming from partials or modules.
         #
         # @param *names [Symbol] Fields or associations to exclude
         # @param fields [true | false] Exclude all fields
@@ -106,12 +106,12 @@ module Blueprinter
         # @param extensions [true | false] Exclude all extensions
         # @param formatters [true | false] Exclude all formatters
         #
-        def exclude(*names, fields: false, options: false, extensions: false, formatters: false)
+        def exclude(*names, fields: nil, options: nil, extensions: nil, formatters: nil)
           names.each { |name| nodes << Nodes::Exclude.new(name.to_sym) }
-          nodes << Nodes::Flag.new(:exclude_fields) if fields
-          nodes << Nodes::Flag.new(:exclude_options) if options
-          nodes << Nodes::Flag.new(:exclude_extensions) if extensions
-          nodes << Nodes::Flag.new(:exclude_formatters) if formatters
+          nodes << Nodes::Flag.new(:exclude_fields, fields) unless fields.nil?
+          nodes << Nodes::Flag.new(:exclude_options, options) unless options.nil?
+          nodes << Nodes::Flag.new(:exclude_extensions, extensions) unless extensions.nil?
+          nodes << Nodes::Flag.new(:exclude_formatters, formatters) unless formatters.nil?
         end
 
         alias excludes exclude

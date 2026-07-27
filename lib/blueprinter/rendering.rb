@@ -2,6 +2,7 @@
 
 require 'blueprinter/errors/invalid_root'
 require 'blueprinter/errors/meta_requires_root'
+require 'blueprinter/errors/unknown_view'
 require 'blueprinter/deprecation'
 
 module Blueprinter
@@ -91,7 +92,7 @@ module Blueprinter
     #   additional key value pairs will be exposed during serialization.
     # @return [Hash]
     def hashify(object, view_name:, local_options:)
-      raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
+      raise Errors::UnknownView, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
 
       object = Blueprinter.configuration.extensions.pre_render(object, self, view_name, local_options)
       prepare_data(object, view_name, local_options)

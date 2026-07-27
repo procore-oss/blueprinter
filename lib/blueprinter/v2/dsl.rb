@@ -48,7 +48,7 @@ module Blueprinter
         PrependExt = Struct.new(:ext)
         RemExt = Struct.new(:klass)
         RemDynamicExt = Struct.new(:block)
-        Flag = Struct.new(:name)
+        Flag = Struct.new(:name, :value)
       end
 
       autoload :Config, 'blueprinter/v2/dsl/config'

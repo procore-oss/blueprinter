@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Extensions - Blueprinter</title>
+        <title>Rendering - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon-bc91b3a9.svg">
-        <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
-        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../../favicon-bc91b3a9.svg">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../theme/hljs-overrides-ac35c0bd.css">
-        <link rel="stylesheet" href="../theme/custom-e18203ad.css">
+        <link rel="stylesheet" href="../../theme/hljs-overrides-ac35c0bd.css">
+        <link rel="stylesheet" href="../../theme/custom-e18203ad.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-d0a84f19.js";
+            window.path_to_searchindex_js = "../../searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f275a713.js"></script>
+        <script src="../../toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Blueprinter</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/procore-oss/blueprinter" title="Git repository" aria-label="Git repository">
@@ -178,206 +178,31 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
-<p>Blueprinter has a powerful middleware-based extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter’s features are implemented using the extension API!</p>
-<p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="../dsl/extensions.html#using-extensions">add it to your configuration</a>.</p>
-<h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
-<p>Hooks are called in the following order. They are passed a <a href="./context-objects.html">context object</a> as an argument.</p>
-<div class="hooks"><a href="#around_result">around_result</a>
-  <a href="#around_blueprint_init">around_blueprint_init</a>
-    <a href="#around_serialize_object">around_serialize_object</a> | <a href="#around_serialize_collection">around_serialize_collection</a>
-      <a href="#around_blueprint">around_blueprint</a>
-        <a href="#around_field_value">around_field_value</a> | <a href="#around_object_value">around_object_value</a> | <a href="#around_collection_value">around_collection_value</a>
-          <a href="#around_blueprint_init">around_blueprint_init...</a>
-</div>
+                        <h1 id="breaking-rendering-changes"><a class="header" href="#breaking-rendering-changes">Breaking Rendering Changes</a></h1>
+<p>If you’re using Rails’ <code>render json:</code> you <strong>don’t</strong> have to change anything:</p>
+<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
+</code></pre>
+<p>Otherwise, it now looks like this:</p>
+<pre><code class="language-ruby"># JSON string
+WidgetBlueprint.render(widget).to_json
 
-<p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
-<h3 id="around_result"><a class="header" href="#around_result">around_result</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#result-context">Result Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Low - run once during render</p>
+# Hash (or array of Hashes if you passed an Enumerable)
+WidgetBlueprint.render(widget).to_hash
+</code></pre>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The legacy <code>render_as_hash</code> and <code>render_as_json</code> methods are still present but may be removed in a future release.</p>
 </blockquote>
-<p>The <code>around_result</code> hook runs around the entire serialization process, allowing you to modify the initial input and final output.</p>
-<p>The following example hook caches an entire result for five minutes.</p>
-<pre><code class="language-ruby">def around_result(ctx)
-  cache(ctx.blueprint.class, ctx.object, ctx.format, ttl: 300) do
-    yield ctx
-  end
-end
-</code></pre>
-<h4 id="finalizing"><a class="header" href="#finalizing">Finalizing</a></h4>
-<p>The <code>final</code> and <code>final?</code> helpers allow middleware to declare, and check if, a result is “finalized” and should no longer be altered. These helpers should <strong>only</strong> be used in <code>around_result</code>.</p>
-<pre><code class="language-ruby">def around_result(ctx)
-  result = yield ctx
-  return result if final? result
-
-  result = somehow_modify result
-  final result
-end
-</code></pre>
-<h3 id="around_blueprint_init"><a class="header" href="#around_blueprint_init">around_blueprint_init</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#render-context">Render Context</a> <br><strong>cost</strong> Low - run once per used blueprint during render</p>
-</blockquote>
-<p>The <code>around_blueprint_init</code> hook runs the first time a new Blueprint is used during a render cycle. It can be used by extensions to perform time-saving setup before a render.</p>
-<blockquote class="blockquote-tag blockquote-tag-important">
-<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
-<p><code>around_blueprint_init</code> <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
-</blockquote>
-<pre><code class="language-ruby">def around_blueprint_init(ctx)
-  perform_setup ctx.blueprint, ctx.options
-  yield ctx
-end
-</code></pre>
-<h3 id="around_serialize_object"><a class="header" href="#around_serialize_object">around_serialize_object</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>The <code>around_serialize_object</code> hook runs around every object (as opposed to collection) that’s serialized. The following example would see it called <strong>four</strong> times: once for the category itself and once for each item.</p>
-<pre><code class="language-ruby">CategoryBlueprint.render({
-  name: "Foo",
-  items: [item1, item2, item3],
-}).to_json
-</code></pre>
-<p>The following example hook modifies both the input object and the output result.</p>
-<pre><code class="language-ruby">def around_serialize_object(ctx)
-  # modify the object before it's serialized
-  ctx.object = modify ctx.object
-
-  result = yield ctx
-
-  # modify the result
-  result.merge({ foo: "Bar" })
-end
-</code></pre>
-<h3 id="around_serialize_collection"><a class="header" href="#around_serialize_collection">around_serialize_collection</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>The <code>around_serialize_collection</code> hook runs around every collection that’s serialized. The following example would see it called three times: once for the array of categories and once for each set of items.</p>
-<pre><code class="language-ruby">CategoryBlueprint.render([
-  { name: "Foo", items: [item1] },
-  { name: "Bar", items: [item2, item3] },
-]).to_json
-</code></pre>
-<p>The following example hook modifies both the input collection and the output results.</p>
-<pre><code class="language-ruby">def around_serialize_collection(ctx)
-  # modify the collection before it's serialized
-  ctx.object = modify ctx.object
-
-  result = yield ctx
-
-  # modify the result
-  result.reject { |obj| some_logic obj }
-end
-</code></pre>
-<h3 id="around_blueprint"><a class="header" href="#around_blueprint">around_blueprint</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>The <code>around_blueprint</code> hook runs every time an object, including members of collections, are serialized. The following example would see it called three times: once for the category and once for each item.</p>
-<pre><code class="language-ruby">CategoryBlueprint.render({ name: "Foo", items: [item1, item] }).to_json
-</code></pre>
-<p>The following example hook modifies both the input object and the output result.</p>
-<pre><code class="language-ruby">def around_blueprint(ctx)
-  # modify the object before it's serialized
-  ctx.object = modify ctx.object
-
-  result = yield ctx
-
-  # modify the result
-  result.merge({ foo: "Bar" })
-end
-</code></pre>
-<h3 id="around_field_value"><a class="header" href="#around_field_value">around_field_value</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every (non-object, non-collection) field</p>
-</blockquote>
-<p>The <code>around_field_value</code> hook runs around every non-object, non-collection field that’s extracted. The following example trims leading and trailing whitespace from string values.</p>
-<pre><code class="language-ruby">def around_field_value(ctx)
-  val = yield ctx
-  case val
-  when String then val.strip
-  else val
-  end
-end
-</code></pre>
-<h4 id="skipping-fields"><a class="header" href="#skipping-fields">Skipping fields</a></h4>
-<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
-<pre><code class="language-ruby">def around_field_value(ctx)
-  val = yield ctx
-  skip if ctx.field.options[:skip_on] == val
-  val
-end
-</code></pre>
-<h3 id="around_object_value"><a class="header" href="#around_object_value">around_object_value</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every object field</p>
-</blockquote>
-<p>The <code>around_object_value</code> hook runs around every object field that’s extracted (before it’s serialized with a Blueprint). The following example adds a <code>foo</code> attribute to each object Hash.</p>
-<pre><code class="language-ruby">def around_object_value(ctx)
-  val = yield ctx
-  case val
-  when Hash then val.merge({ foo: "bar" })
-  else val
-  end
-end
-</code></pre>
-<h4 id="skipping-fields-1"><a class="header" href="#skipping-fields-1">Skipping fields</a></h4>
-<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
-<pre><code class="language-ruby">def around_object_value(ctx)
-  val = yield ctx
-  skip if ctx.field.options[:skip_on] == val
-  val
-end
-</code></pre>
-<h3 id="around_collection_value"><a class="header" href="#around_collection_value">around_collection_value</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every collection field</p>
-</blockquote>
-<p>The <code>around_collection_value</code> hook runs around every collection field that’s extracted (before it’s serialized with a Blueprint). The following example removes deleted widgets from a collection.</p>
-<pre><code class="language-ruby">def around_collection_value(ctx)
-  val = yield ctx
-  case ctx.field.blueprint
-  when WidgetBlueprint
-    val.reject { |widget| widget.deleted? }
-  else
-    val
-  end
-end
-</code></pre>
-<h4 id="skipping-fields-2"><a class="header" href="#skipping-fields-2">Skipping fields</a></h4>
-<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
-<pre><code class="language-ruby">def around_collection_value(ctx)
-  val = yield ctx
-  skip if ctx.field.options[:skip_on] == val
-  val
-end
-</code></pre>
-<h3 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="./context-objects.html#hook-context">Hook Context</a> <br><strong>cost</strong> Variable - runs around all your extensions</p>
-</blockquote>
-<p>The <code>around_hook</code> hook runs around all other extension hooks. Unlike other hooks, the return value <strong>not</strong> used.</p>
-<blockquote class="blockquote-tag blockquote-tag-important">
-<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
-<p><code>around_hook</code> <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
-</blockquote>
-<pre><code class="language-ruby">def around_hook(ctx)
-  # do something
-  yield
-  # do something else
-end
-</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../api/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../v2/breaking/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../api/reflection.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../v2/breaking/dsl.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -387,11 +212,11 @@ end
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../api/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../v2/breaking/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../api/reflection.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../v2/breaking/dsl.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -411,13 +236,13 @@ end
         </script>
 
 
-        <script src="../elasticlunr-ef4e11c1.min.js"></script>
-        <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
 
-        <script src="../clipboard-1626706a.min.js"></script>
-        <script src="../highlight-cacfe08c.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-cacfe08c.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

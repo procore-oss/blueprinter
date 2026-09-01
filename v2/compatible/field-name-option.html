@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Fields - Blueprinter</title>
+        <title>Field name option - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../favicon-bc91b3a9.svg">
-        <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
-        <link rel="stylesheet" href="../css/chrome-ae938929.css">
-        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../../favicon-bc91b3a9.svg">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../theme/hljs-overrides-ac35c0bd.css">
-        <link rel="stylesheet" href="../theme/custom-e18203ad.css">
+        <link rel="stylesheet" href="../../theme/hljs-overrides-ac35c0bd.css">
+        <link rel="stylesheet" href="../../theme/custom-e18203ad.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-d0a84f19.js";
+            window.path_to_searchindex_js = "../../searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f275a713.js"></script>
+        <script src="../../toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Blueprinter</h1>
 
                     <div class="right-buttons">
-                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/procore-oss/blueprinter" title="Git repository" aria-label="Git repository">
@@ -178,78 +178,31 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
-<pre><code class="language-ruby"># Use field for scalar values, arrays of scalar values, or even a Hash
-field :name
-field :tags
-
-# Add multiple fields at once
-fields :description, :price
-
-# Use object to render an object or Hash using another blueprint
-object :category, CategoryBlueprint
-
-# Use collection to render an array-like collection of objects
-collection :parts, PartBlueprint
+                        <h1 id="field-name-option"><a class="header" href="#field-name-option">Field name option</a></h1>
+<p>In Blueprinter Legacy/V1, when a field’s serialized name differs from the source name you represent it like this:</p>
+<pre><code class="language-ruby"># V1: Here's a field called "description". It pulls from "desc".
+field :desc, name: :description
 </code></pre>
-<h2 id="options"><a class="header" href="#options">Options</a></h2>
-<p>Fields accept a wide array of built-in options, and <a href="./extensions.html">extensions</a> can define even more. <a href="./options.html">Find all built-in options here.</a></p>
-<pre><code class="language-ruby">field :description, default: "No description"
-collection :parts, PartBlueprint, exclude_if_empty: true
-</code></pre>
-<h2 id="extracting-field-values"><a class="header" href="#extracting-field-values">Extracting field values</a></h2>
-<p>Blueprinter is pretty smart about extracting field values from objects and Hashes, but there are ways to customize the behavior if needed.</p>
-<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
-<ul>
-<li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
-<li>For anything else, Blueprinter will look for a public method matching the field name.</li>
-<li>The <a href="./options.html#from">from</a> field option can be used to specify a different method name or Hash key.</li>
-</ul>
-<h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
-<p>If you pass a block to your field, the default behavior will be bypassed and the block’s return value will be used. It will be passed the current object and a <a href="../api/context-objects.html#field-context">Field context</a> object.</p>
-<pre><code class="language-ruby">field :description do |object, ctx|
-  object.description.upcase
-end
-
-# Blocks can call instance methods defined on your Blueprint
-collection :parts, PartBlueprint do |object, ctx|
-  active_parts object
-end
-
-def active_parts(object)
-  object.parts.select(&amp;:active?)
+<p>To allow this to continue working, enable the <code>LegacyRenameField</code> extension:</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::LegacyRenameField.new
 end
 </code></pre>
-<h3 id="extracting-with-extensions"><a class="header" href="#extracting-with-extensions">Extracting with extensions</a></h3>
-<p>The <a href="../api/extensions.html#around_field_value">around_field_value</a>, <a href="../api/extensions.html#around_object_value">around_object_value</a>, and <a href="../api/extensions.html#around_collection_value">around_collection_value</a> middleware hooks can intercept extraction and return whatever values they want. <a href="./extensions.html">Learn more about using extensions</a>.</p>
-<pre><code class="language-ruby">class MyExtractor &lt; Blueprinter::Extension
-  def around_field_value(ctx)
-    if ctx.field.options[:my_extractor] || ctx.blueprint.class.options[:my_extractor]
-      # If the field or blueprint has the "my_extractor" option, use custom extraction
-      my_custom_extraction(ctx.object, ctx.field)
-    else
-      # Otherwise use the default behavior
-      yield ctx
-    end
-  end
-
-  private
-
-  def my_custom_extraction(object, field)
-    # ...
-  end
-end
+<h2 id="v2-style"><a class="header" href="#v2-style">V2 style</a></h2>
+<p>Since Blueprinter is a serializer, the DSL should describe the serialized result, not the source object. V2 reads much more naturally:</p>
+<pre><code class="language-ruby"># V2: Here's a field called "description". It pulls from "desc".
+field :description, source: :desc
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../dsl/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../v2/compatible/default_if-option.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../dsl/views.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../v2/compatible/dynamic-options.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -259,11 +212,11 @@ end
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../dsl/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../v2/compatible/default_if-option.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../dsl/views.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../v2/compatible/dynamic-options.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -283,13 +236,13 @@ end
         </script>
 
 
-        <script src="../elasticlunr-ef4e11c1.min.js"></script>
-        <script src="../mark-09e88c2c.min.js"></script>
-        <script src="../searcher-c2a407aa.js"></script>
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
 
-        <script src="../clipboard-1626706a.min.js"></script>
-        <script src="../highlight-cacfe08c.js"></script>
-        <script src="../book-a0b12cfe.js"></script>
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-cacfe08c.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Legacy/V1 Docs - Blueprinter</title>
+        <title>Configuration - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon-bc91b3a9.svg">
-        <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
-        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../../favicon-bc91b3a9.svg">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="theme/hljs-overrides-ac35c0bd.css">
-        <link rel="stylesheet" href="theme/custom-e18203ad.css">
+        <link rel="stylesheet" href="../../theme/hljs-overrides-ac35c0bd.css">
+        <link rel="stylesheet" href="../../theme/custom-e18203ad.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-08ae324d.js";
+            window.path_to_searchindex_js = "../../searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-1e3b5a67.js"></script>
+        <script src="../../toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Blueprinter</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/procore-oss/blueprinter" title="Git repository" aria-label="Git repository">
@@ -178,17 +178,132 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
-<p>TODO copy from old README</p>
+                        <h1 id="breaking-configuration-changes"><a class="header" href="#breaking-configuration-changes">Breaking Configuration Changes</a></h1>
+<p>Configuration in V2 uses a completely different paradigm. There is <em>no global configuration</em> in V2. All configuration happens in Blueprints,
+views, or partials by setting options or adding extensions.</p>
+<p>Options and extensions are inherited from parent Blueprints and views and can be overridden by their children. This allows different parts of your system
+to be configured differently. “Global” configuration should be placed in your application’s base Blueprint, e.g. <code>ApplicationBlueprint</code>.</p>
+<p>Each legacy/V1 global configuration option is listed below, along with its V2 equivalent.</p>
+<h3 id="association_default--field_default"><a class="header" href="#association_default--field_default"><code>association_default</code> / <code>field_default</code></a></h3>
+<p>Set the <code>:default</code> option in your base Blueprint. It will be passed a <code>Blueprinter::V2::Context::Field</code> object, containing the current field,
+the current object, and a lot more.</p>
+<pre><code class="language-ruby">set :default, -&gt;(ctx) {
+  case ctx.field.type
+  when :field then "N/A"
+  when :object then {}
+  when :collection then []
+  end
+}
+</code></pre>
+<h3 id="if--unless"><a class="header" href="#if--unless"><code>if</code> / <code>unless</code></a></h3>
+<p>Set the <code>:if</code> and <code>:unless</code> options in your base Blueprint. They will be passed a <code>Blueprinter::V2::Context::Field</code> object, containing the
+current field, the current object, and a lot more.</p>
+<pre><code class="language-ruby">set :if, -&gt;(ctx) {
+  # extract the V1 args from ctx
+  field_name = ctx.field.source
+  object = ctx.object
+  options = ctx.options
+  # ...
+}
+</code></pre>
+<h3 id="custom_array_like_classes"><a class="header" href="#custom_array_like_classes"><code>custom_array_like_classes</code></a></h3>
+<p><code>render</code> has sensible heuristics for detecting what’s a “collection” or not: any <code>Enumerable</code> except for <code>Hash</code>.</p>
+<p>If that logic doesn’t work for something, use one of these methods in place of <code>render</code>:</p>
+<pre><code class="language-ruby"># Force `arg` to be treated like a collection (must respond to `map` with an Enumerable)
+array = WidgetBlueprint.render_collection(arg).to_hash
+</code></pre>
+<pre><code class="language-ruby"># Force `arg` to be treated like an object
+hash = WidgetBlueprint.render_object(arg).to_hash
+</code></pre>
+<h3 id="extractor_default"><a class="header" href="#extractor_default"><code>extractor_default</code></a></h3>
+<p>“Extractors” are not a discrete concept in V2, but they can be implemented using the <code>around_field_value</code>, <code>around_object_value</code>, and <code>around_collection_value</code>
+extension hooks.</p>
+<p>The bundled <code>LegacyExtractorOption</code> extension can be enabled to offer backwards-compatibility with legacy/V1’s extractors:</p>
+<pre><code class="language-ruby"># Add the extension
+add Blueprinter::Extensions::LegacyExtractorOption.new
+
+# Set the `extractor` option
+set :extractor, MyExtractor
+</code></pre>
+<h3 id="datetime_format"><a class="header" href="#datetime_format"><code>datetime_format</code></a></h3>
+<p>Formatting can now be applied to any class. Format dates, times, booleans, or anything else. Define them in your blueprints, views, or partials.</p>
+<pre><code class="language-ruby"># You can define them with blocks
+format(TrueClass) { |val| "Y" }
+format(FalseClass) { |val| "N" }
+
+# Or with method names
+format Date, :iso8601
+format Time, :iso8601
+
+def iso8601(val) = val.iso8601
+</code></pre>
+<p>See the Documentation for <code>Blueprinter::V2::DSL#format</code>.</p>
+<h3 id="default_transformers"><a class="header" href="#default_transformers"><code>default_transformers</code></a></h3>
+<p>Transformations can be done using V2’s <code>around_blueprint</code> extension hook (See <code>Blueprinter::Extension</code> for full Extension API docs).</p>
+<p>However, the bundled <code>LegacyTransformer</code> extension offers compatibility with legacy/V1 transformer classes:</p>
+<pre><code class="language-ruby">add Blueprinter::Extensions::LegacyTransformer.new(
+  MyTransformer, OtherTransformer
+)
+</code></pre>
+<h3 id="generator--method"><a class="header" href="#generator--method"><code>generator</code> / <code>method</code></a></h3>
+<p>To use a different JSON serializer you can use the <code>Blueprinter::Extensions::MultiJson</code> extension. (You’ll need the <code>multi_json</code> gem installed and
+configured).</p>
+<pre><code class="language-ruby"># Be sure this is the FIRST extension you add
+add Blueprinter::Extensions::MultiJson.new
+</code></pre>
+<p>If <code>multi_json</code> doesn’t support your serializer, you can create your own extension using the <code>around_result</code> hook:</p>
+<pre><code class="language-ruby">class MyJsonExtension &lt; Blueprinter::Extension
+  def around_result(ctx)
+    case ctx.format
+    when :json
+      result = yield ctx
+      json = MySerializer.dump result
+      # The `serialized` helper tells Blueprinter we've already JSONified the result
+      serialized json
+    else
+      yield ctx
+    end
+  end
+end
+</code></pre>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  # Be sure this is the FIRST extension you add
+  add MyJsonExtension.new
+end
+</code></pre>
+<h3 id="sort_fields_by"><a class="header" href="#sort_fields_by"><code>sort_fields_by</code></a></h3>
+<p>By default V2 serializes fields in the order they were defined. If you want a different order, use the bundled <code>FieldOrder</code> extension or
+the <code>around_blueprint_init</code> extension hook.</p>
+<p>The following replicates legacy/V1’s default field order of “alphabetical with <em>id</em> first”:</p>
+<pre><code class="language-ruby">add Blueprinter::Extensions::FieldOrder.new { |a, b|
+  if a.name == :id
+    -1
+  elsif b.name == :id
+    1
+  else
+    a.name &lt;=&gt; b.name
+  end
+}
+</code></pre>
+<h3 id="extensions"><a class="header" href="#extensions"><code>extensions</code></a></h3>
+<p>Add a “global” extension by adding it to your base Blueprint:</p>
+<pre><code class="language-ruby">add MyExtension.new
+</code></pre>
+<h4 id="v2-extension-hook-api"><a class="header" href="#v2-extension-hook-api">V2 Extension Hook API</a></h4>
+<p>V2 has a completely different, and much more poweful, hook system. Be sure your extension supports the V2 API!</p>
+<p>Read <a href="./extensions.html">Breaking Extension Changes</a>, the <a href="../../extensions/index.html">Extension Guide</a>, or the documentation for <code>Blueprinter::Extension</code> for more info.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="extensions/yaml-serializer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../v2/breaking/dsl.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
+                            <a rel="next prefetch" href="../../v2/breaking/reflection.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -196,10 +311,13 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="extensions/yaml-serializer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../v2/breaking/dsl.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
+                    <a rel="next prefetch" href="../../v2/breaking/reflection.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
             </nav>
 
         </div>
@@ -217,13 +335,13 @@
         </script>
 
 
-        <script src="elasticlunr-ef4e11c1.min.js"></script>
-        <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
 
-        <script src="clipboard-1626706a.min.js"></script>
-        <script src="highlight-cacfe08c.js"></script>
-        <script src="book-a0b12cfe.js"></script>
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-cacfe08c.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

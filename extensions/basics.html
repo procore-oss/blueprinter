@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Options - Blueprinter</title>
+        <title>Basics - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-d0a84f19.js";
+            window.path_to_searchindex_js = "../searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f275a713.js"></script>
+        <script src="../toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,273 +178,41 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="options"><a class="header" href="#options">Options</a></h1>
-<p>Numerous options can be defined on Blueprints, views, partials, or individual fields. Some can also be passed to <code>render</code>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  # Blueprint options apply to all fields, associations, views, and partials in
-  # the Blueprint. They are inherited from the parent class but can be overridden.
-  options[:exclude_if_empty] = true
+                        <h1 id="basics"><a class="header" href="#basics">Basics</a></h1>
+<p>An extension will subclass <code>Blueprinter::Extension</code> and define one or more hook methods. (See <code>Blueprinter::Extension</code> for documentation about all hooks.)</p>
+<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
+  def around_field_value(ctx)
+    # get the value by yielding to other extensions and Blueprinter's internals
+    val = yield ctx
 
-  # Field options apply to individual fields or associations. They can override
-  # Blueprint options.
-  field :name, exclude_if_empty: false
+    # skip this field and halt further extensions if the value is blank
+    skip! if ctx.field.options[:exclude_if_blank] &amp;&amp; val.blank?
 
-  # Options in views apply to all fields, associations, partials and nested views
-  # in the view. They inherit options from the Blueprint, or from parent views,
-  # and can override them.
-  view :foo do
-    options[:exclude_if_empty] = false
-  end
-
-  # Options in partials apply to all fields, associations, views, and partials in
-  # the partial. All of these are applied to the views that use the partial.
-  partial :bar do
-    options[:exclude_if_empty] = false
-  end
-
-  # Some options accept Procs/labmdas. These can call instance methods defined on
-  # your Blueprint. Or you can pass a method name as a symbol.
-  field :foo, if: -&gt;(ctx) { long_complex_check? ctx }
-  field :bar, if: :long_complex_check?
-
-  def long_complex_check?(ctx)
-    # ...
+    # return the value for the next extension (or Blueprinter) to use
+    val
   end
 end
-
-# Passing a supported option to render will override what's in the blueprint
-WidgetBlueprint.render(widget, exclude_if_empty: false).to_json
 </code></pre>
-<p>For easier reference, options are grouped into the following categories:</p>
-<ul>
-<li><a href="#default-values">Default values</a>: Provide defaults for empty fields</li>
-<li><a href="#conditional-fields">Conditional fields</a>: Exclude fields based on conditions</li>
-<li><a href="#field-mapping">Field mapping</a>: Change how field values are extracted from objects</li>
-<li><a href="#other">Metadata</a>: Wrap or add metadata to the output</li>
-</ul>
-<h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
-<p>Options that accept Procs, lambdas, or method names are usually passed a <a href="../api/context-objects.html#field-context">Field context</a> argument. It contains the object being rendered as well as other useful information.</p>
-<h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
-<p>These options allow you to set default values for fields and associations, and customize when they’re used.</p>
-<h4 id="default"><a class="header" href="#default">default</a></h4>
-<p>A default value used when the field or assocation is nil.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">field :foo, default: "Foo"
-field :foo, default: -&gt;(ctx) { "Foo" }
-field :foo, default: :foo
+<p>Then add the extension to a blueprint:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; Blueprinter::V2::Base
+  add ExcludeIfBlankExtension.new
 
-def foo(ctx) = "Foo"
+  field :name, exclude_if_blank: true
+end
 </code></pre>
-<h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
-<p>Default value for any nil non-association field in its scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:field_default] = "Foo"
-options[:field_default] = -&gt;(ctx) { "Foo" }
-options[:field_default] = :foo
-
-def foo(ctx) = "Foo"
-
-WidgetBluerpint.render(widget, field_default: "Foo").to_json
-</code></pre>
-<h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
-<p>Default value for any nil object field in its scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
-options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
-options[:object_default] = :foo
-
-def foo(ctx) = { name: "Foo" }
-
-WidgetBluerpint.render(widget, object_default: { name: "Foo" }).to_json
-</code></pre>
-<h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
-<p>Default value for any nil collection field.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
-options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
-options[:collection_default] = :foo
-
-def foo(ctx) = [{ name: "Foo" }]
-
-WidgetBluerpint.render(widget, collection_default: [{ name: "Foo" }]).to_json
-</code></pre>
-<h4 id="default_if"><a class="header" href="#default_if">default_if</a></h4>
-<p>Use the default value if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">field :foo, default: "Foo", default_if: -&gt;(ctx) { ctx.object.disabled? }
-field :foo, default: "Foo", default_if: :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-</code></pre>
-<h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
-<p>Same as <a href="#default_if">default_if</a>, but applies to any non-association field in scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
-options[:field_default_if] = :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-
-WidgetBluerpint.render(widget, field_default_if: :disabled?).to_json
-</code></pre>
-<h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
-<p>Same as <a href="#default_if">default_if</a>, but applies to any object field in scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
-options[:object_default_if] = :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-
-WidgetBluerpint.render(widget, object_default_if: :disabled?).to_json
-</code></pre>
-<h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
-<p>Same as <a href="#default_if">default_if</a>, but applies to any collection field in scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
-options[:collection_default_if] = :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-
-WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
-</code></pre>
-<h2 id="conditional-fields"><a class="header" href="#conditional-fields">Conditional Fields</a></h2>
-<p>These options allow you to exclude fields from the output.</p>
-<h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
-<p>Exclude fields if they’re nil.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
-</blockquote>
-<pre><code class="language-ruby">options[:exclude_if_nil] = true
-
-field :description, exclude_if_nil: true
-
-WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
-</code></pre>
-<h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
-<p>Exclude fields if they’re nil, or if they respond to <code>empty?</code> and it returns true.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
-</blockquote>
-<pre><code class="language-ruby">options[:exclude_if_empty] = true
-
-field :description, exclude_if_empty: true
-
-WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
-</code></pre>
-<h4 id="if"><a class="header" href="#if">if</a></h4>
-<p>Only include the field if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">field :foo, if: -&gt;(ctx) { ctx.object.enabled? }
-field :foo, if: :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-</code></pre>
-<h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
-<p>Only include non-association fields if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
-options[:field_if] = :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-
-WidgetBluerpint.render(widget, field_if: :enabled?).to_json
-</code></pre>
-<h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
-<p>Only include object fields if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
-options[:object_if] = :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-
-WidgetBluerpint.render(widget, object_if: :enabled?).to_json
-</code></pre>
-<h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
-<p>Only include collection fields if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
-options[:collection_if] = :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-
-WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
-</code></pre>
-<h4 id="unless"><a class="header" href="#unless">unless</a></h4>
-<p>Inverse of <a href="#if">if</a>.</p>
-<h4 id="field_unless"><a class="header" href="#field_unless">field_unless</a></h4>
-<p>Inverse of <a href="#field_if">field_if</a>.</p>
-<h4 id="object_unless"><a class="header" href="#object_unless">object_unless</a></h4>
-<p>Inverse of <a href="#object_if">object_if</a>.</p>
-<h4 id="collection_unless"><a class="header" href="#collection_unless">collection_unless</a></h4>
-<p>Inverse of <a href="#collection_if">collection_if</a>.</p>
-<h2 id="field-mapping"><a class="header" href="#field-mapping">Field mapping</a></h2>
-<p>These options let you change how fields values are extracted from your objects.</p>
-<h4 id="from"><a class="header" href="#from">from</a></h4>
-<p>Populate the field using a method/Hash key other than the field name.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em></p>
-</blockquote>
-<pre><code class="language-ruby">field :desc, from: :description
-</code></pre>
-<h2 id="metadata"><a class="header" href="#metadata">Metadata</a></h2>
-<p>These options allow you to add metadata to the rendered output.</p>
-<h4 id="root"><a class="header" href="#root">root</a></h4>
-<p>Pass a root key to wrap the output.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em></p>
-</blockquote>
-<pre><code class="language-ruby">options[:root] = :data
-
-WidgetBlueprint.render(widget, root: :data).to_json
-</code></pre>
-<h4 id="meta"><a class="header" href="#meta">meta</a></h4>
-<p>Add a <code>meta</code> key and data to the wrapped output (requires the <code>root</code> option).</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="../api/context-objects.html#result-context">Result context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:root] = :data
-options[:meta] = { page: 1 }
-
-# If you pass a Proc/lambda, it can call instance methods defined on the Blueprint
-options[:meta] = -&gt;(ctx) { { page: page_num(ctx) } }
-
-WidgetBlueprint
-  .render(widget, root: :data, meta: { page: params[:page] })
-  .to_json
-</code></pre>
+<h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
+<p>All extension hooks take a single argument: a context object. It contains the “context” of the current operation (Blueprint, options, field, the object, etc.) so you can react to it and, in some cases, alter it.</p>
+<p>There are several different context object types. See the <code>Blueprinter::V2::Context</code> module for documentation on which hooks receive which types, and what can be done with them.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../dsl/formatters.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../extensions/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../dsl/extensions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../extensions/exclude-if-blank.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -454,11 +222,11 @@ WidgetBlueprint
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../dsl/formatters.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../extensions/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../dsl/extensions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../extensions/exclude-if-blank.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

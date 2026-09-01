@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-d0a84f19.js";
+            window.path_to_searchindex_js = "searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-f275a713.js"></script>
+        <script src="toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -184,21 +184,21 @@
 <p>This is a WIP for API V2!</p>
 </blockquote>
 <p>Blueprinter is a JSON serializer for your business objects. It is designed to be simple, flexible, and performant.</p>
-<p>Upgrading from 1.x? <a href="./upgrading/index.html">Read the upgrade guide!</a></p>
+<p>Upgrading from Blueprinter V1? <a href="./v2/index.html">Read over the changes!</a></p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
 <pre><code class="language-bash">bundle add blueprinter
 </code></pre>
-<p>See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for generated API documentation.</p>
+<p>See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for API documentation.</p>
 <h3 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h3>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
+  association :category, CategoryBlueprint
+  association :parts, [PartBlueprint]
 
   view :extended do
     field :description
-    object :manufacturer, CompanyBlueprint
-    collection :vendors, CompanyBlueprint
+    association :manufacturer, CompanyBlueprint
+    association :vendors, [CompanyBlueprint]
   end
 end
 
@@ -208,14 +208,13 @@ WidgetBlueprint.render(widget).to_json
 # Render the extended view to a Hash
 WidgetBlueprint[:extended].render(widget).to_hash
 </code></pre>
-<p>Look interesting? <a href="./dsl/index.html">Learn the DSL!</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
 
-                            <a rel="next prefetch" href="dsl/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="v2/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -226,7 +225,7 @@ WidgetBlueprint[:extended].render(widget).to_hash
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
 
-                    <a rel="next prefetch" href="dsl/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="v2/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

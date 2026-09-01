@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Extensions - Blueprinter</title>
+        <title>Telemetry - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-d0a84f19.js";
+            window.path_to_searchindex_js = "../searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-f275a713.js"></script>
+        <script src="../toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -178,81 +178,51 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
-<p>Blueprinter has a powerful extension system that permits middleware throughout the entire serialization lifecycle. Some extensions are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="../api/extensions.html">Extension API</a>.</p>
-<h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
-<p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They’re inherited from parent classes and views, but can be overridden.</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  # This extension instance will exist for the duration of your program
-  extensions &lt;&lt; FooExtension.new
+                        <h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
+<p>Blueprinter bundles the <code>Blueprinter::Extensions::OpenTelemetry</code> extension. But if that doesn’t work with your tooling, build your own!</p>
+<pre><code class="language-ruby">class MyTelemetryExtension
+  def initialize(my_tel)
+    @my_tel = my_tel
+  end
 
-  # These extensions will be initialized once during each render
-  extensions &lt;&lt; BarExtension
-  extensions &lt;&lt; -&gt; { ZorpExtension.new(some_args) }
-
-  # Inline extensions are also initialized once per render
-  extension do
-    def around_blueprint(ctx)
-      result = yield ctx
-      result.merge({ foo: "Foo" })
+  # Create a span for object serialization
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_serialize_object(ctx)
+    @my_tel.span("blueprint.object", blueprint: ctx.blueprint.to_s) do
+      yield ctx
     end
   end
 
-  view :minimal do
-    # extensions is a simple Array, so you can add or remove elements
-    extensions.select! { |ext| ext.is_a? FooExtension }
-
-    # or simply replace the whole Array
-    self.extensions = [FooExtension.new]
+  # Create a span for collection serialization
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_serialize_collection(ctx)
+    @my_tel.span("blueprint.collection", blueprint: ctx.blueprint.to_s) do
+      yield ctx
+    end
   end
+
+  # Create a span for other extension hooks
+  # @param ctx [Blueprinter::V2::Context::Hook]
+  def around_hook(ctx)
+    @my_tel.span("blueprint.extension", extension: ctx.extension.class.name, hook: ctx.hook) do
+      yield
+    end
+  end
+
+  # Prevent `around_hook` from running around this extension's own hooks
+  def hidden? = true
 end
 </code></pre>
-<h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
-<p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
-<h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
-<p>Control the order of fields in your output. See <a href="../api/fields.html">Fields API</a> for more information about the block parameters.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
-</code></pre>
-<h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>
-<p>The MultiJson extension switches Blueprinter from Ruby’s built-in JSON library to the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. Just install the <code>multi_json</code> gem, your serialization library of choice, and enable the extension.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new
-
-# Any options you pass will be forwarded to MultiJson.dump
-extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new(pretty: true)
-
-# You can also pass MultiJson.dump options during render
-WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
-</code></pre>
-<p>If <code>multi_json</code> doesn’t support your preferred JSON library, you can use Blueprinter’s <a href="../api/extensions.html#around_result">around_result</a> extension hook to render JSON however you like.</p>
-<h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>
-<p>Enable the OpenTelemetry extension to see what’s happening while you render your blueprints. One outer <code>blueprinter.render</code> span will nest various <code>blueprinter.object</code> and <code>blueprinter.collection</code> spans. Each span will include the blueprint/view name that triggered it.</p>
-<p>Extension hooks will be wrapped in <code>blueprinter.extension</code> spans and annotated with the current extension and hook name.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
-</code></pre>
-<h3 id="viewoption"><a class="header" href="#viewoption">ViewOption</a></h3>
-<p>The ViewOption extension uses the <a href="../api/extensions.html#around_result">around_result</a> extension hook to add a <code>view</code> option to <code>render</code>, <code>render_object</code>, and <code>render_collection</code>. It allows V1-compatible rendering of views.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::ViewOption.new
-</code></pre>
-<p>Now you can render a view either way:</p>
-<pre><code class="language-ruby"># V2 style
-MyBlueprint[:foo].render(obj)
-# or V1 style
-MyBlueprint.render(obj, view: :foo)
-</code></pre>
-<h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
-<p><em>Have an extension you’d like to share? Let us know and we may add it to the list!</em></p>
-<h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
-<p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> is an official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../dsl/options.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../extensions/blueprint-decorator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../rendering.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../extensions/camelize-fields.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -262,11 +232,11 @@ MyBlueprint.render(obj, view: :foo)
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../dsl/options.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../extensions/blueprint-decorator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../rendering.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../extensions/camelize-fields.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

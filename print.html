@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-d0a84f19.js";
+            window.path_to_searchindex_js = "searchindex-08ae324d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-f275a713.js"></script>
+        <script src="toc-1e3b5a67.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -185,21 +185,21 @@
 <p>This is a WIP for API V2!</p>
 </blockquote>
 <p>Blueprinter is a JSON serializer for your business objects. It is designed to be simple, flexible, and performant.</p>
-<p>Upgrading from 1.x? <a href="#upgrading-to-api-v2">Read the upgrade guide!</a></p>
+<p>Upgrading from Blueprinter V1? <a href="#changes-in-v2">Read over the changes!</a></p>
 <h3 id="installation"><a class="header" href="#installation">Installation</a></h3>
 <pre><code class="language-bash">bundle add blueprinter
 </code></pre>
-<p>See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for generated API documentation.</p>
+<p>See <a href="https://www.rubydoc.info/gems/blueprinter">rubydoc.info/gems/blueprinter</a> for API documentation.</p>
 <h3 id="basic-usage"><a class="header" href="#basic-usage">Basic Usage</a></h3>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
+  association :category, CategoryBlueprint
+  association :parts, [PartBlueprint]
 
   view :extended do
     field :description
-    object :manufacturer, CompanyBlueprint
-    collection :vendors, CompanyBlueprint
+    association :manufacturer, CompanyBlueprint
+    association :vendors, [CompanyBlueprint]
   end
 end
 
@@ -209,1230 +209,838 @@ WidgetBlueprint.render(widget).to_json
 # Render the extended view to a Hash
 WidgetBlueprint[:extended].render(widget).to_hash
 </code></pre>
-<p>Look interesting? <a href="#blueprinter-dsl">Learn the DSL!</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="blueprinter-dsl"><a class="header" href="#blueprinter-dsl">Blueprinter DSL</a></h1>
-<h2 id="define-your-base-class"><a class="header" href="#define-your-base-class">Define your base class</a></h2>
-<p>Define an <code>ApplicationBlueprint</code> for your blueprints to inherit from. Any global configuration goes here: common <a href="#fields">fields</a>, <a href="#views">views</a>, <a href="#partials">partials</a>, <a href="#formatters">formatters</a>, <a href="#extensions">extensions</a>, and <a href="#options-1">options</a>.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
-  extensions &lt;&lt; MyExtension.new
-  options[:exclude_if_nil] = true
-  field :id
-end
-</code></pre>
-<h2 id="define-blueprints-for-your-models"><a class="header" href="#define-blueprints-for-your-models">Define blueprints for your models</a></h2>
-<p>This blueprint inherits everything from <code>ApplicationBlueprint</code>, then adds a <code>name</code> field and two associations that will render using other blueprints.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+<h1 id="changes-in-v2"><a class="header" href="#changes-in-v2">Changes in V2</a></h1>
+<p>While Blueprinter V2 is recognizably <em>Blueprinter</em>, there are several breaking changes. Some of them will require code changes while others
+can be made backwards-compatible using bundled extensions.</p>
+<pre><code class="language-ruby"># Can you spot the differences?
+class WidgetBlueprint &lt; ApplicationBlueprint
   field :name
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
-end
-</code></pre>
-<p>There’s a lot more you can do with the Blueprinter DSL. <a href="#fields">Fields</a> are a good place to start!</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="fields"><a class="header" href="#fields">Fields</a></h1>
-<pre><code class="language-ruby"># Use field for scalar values, arrays of scalar values, or even a Hash
-field :name
-field :tags
-
-# Add multiple fields at once
-fields :description, :price
-
-# Use object to render an object or Hash using another blueprint
-object :category, CategoryBlueprint
-
-# Use collection to render an array-like collection of objects
-collection :parts, PartBlueprint
-</code></pre>
-<h2 id="options"><a class="header" href="#options">Options</a></h2>
-<p>Fields accept a wide array of built-in options, and <a href="#extensions">extensions</a> can define even more. <a href="#options-1">Find all built-in options here.</a></p>
-<pre><code class="language-ruby">field :description, default: "No description"
-collection :parts, PartBlueprint, exclude_if_empty: true
-</code></pre>
-<h2 id="extracting-field-values"><a class="header" href="#extracting-field-values">Extracting field values</a></h2>
-<p>Blueprinter is pretty smart about extracting field values from objects and Hashes, but there are ways to customize the behavior if needed.</p>
-<h3 id="default-behavior"><a class="header" href="#default-behavior">Default behavior</a></h3>
-<ul>
-<li>For Hashes, Blueprinter will look for a key matching the field name - first with a Symbol, then a String.</li>
-<li>For anything else, Blueprinter will look for a public method matching the field name.</li>
-<li>The <a href="#from">from</a> field option can be used to specify a different method name or Hash key.</li>
-</ul>
-<h3 id="field-blocks"><a class="header" href="#field-blocks">Field blocks</a></h3>
-<p>If you pass a block to your field, the default behavior will be bypassed and the block’s return value will be used. It will be passed the current object and a <a href="#field-context">Field context</a> object.</p>
-<pre><code class="language-ruby">field :description do |object, ctx|
-  object.description.upcase
-end
-
-# Blocks can call instance methods defined on your Blueprint
-collection :parts, PartBlueprint do |object, ctx|
-  active_parts object
-end
-
-def active_parts(object)
-  object.parts.select(&amp;:active?)
-end
-</code></pre>
-<h3 id="extracting-with-extensions"><a class="header" href="#extracting-with-extensions">Extracting with extensions</a></h3>
-<p>The <a href="#around_field_value">around_field_value</a>, <a href="#around_object_value">around_object_value</a>, and <a href="#around_collection_value">around_collection_value</a> middleware hooks can intercept extraction and return whatever values they want. <a href="#extensions">Learn more about using extensions</a>.</p>
-<pre><code class="language-ruby">class MyExtractor &lt; Blueprinter::Extension
-  def around_field_value(ctx)
-    if ctx.field.options[:my_extractor] || ctx.blueprint.class.options[:my_extractor]
-      # If the field or blueprint has the "my_extractor" option, use custom extraction
-      my_custom_extraction(ctx.object, ctx.field)
-    else
-      # Otherwise use the default behavior
-      yield ctx
-    end
-  end
-
-  private
-
-  def my_custom_extraction(object, field)
-    # ...
-  end
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="views"><a class="header" href="#views">Views</a></h1>
-<p>Blueprints can define views to provide different representations of the data. A view inherits everything from its parent but is free to override as needed. In addition to <a href="#fields">fields</a>, views can define <a href="#options-1">options</a>, <a href="#partials">partials</a>, <a href="#formatters">formatters</a>, <a href="#extensions">extensions</a>, and <a href="#nesting-views">nested views</a>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  field :name
-  object :category, CategoryBlueprint
-
-  # The "with_parts" view inherits from "default" and adds a collection of parts
-  view :with_parts do
-    collection :parts, PartBlueprint
-  end
-
-  # Views can include other views
-  view :full do
-    use :with_parts
-    field :description
-  end
-end
-</code></pre>
-<p>At the top level of every Blueprint is an implicit view called <code>default</code>. The default view is used when no other is specified. All other views in the Blueprint inherit from it.</p>
-<h3 id="nesting-views"><a class="header" href="#nesting-views">Nesting views</a></h3>
-<p>You can nest views within views, allowing for a hierarchy of inheritance.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  field :name
-  object :category, CategoryBlueprint
+  field(:desc) { |widget| widget.description[0..100] }
+  association :category, CategoryBlueprint
 
   view :extended do
-    field :description
-    collection :parts, PartBlueprint
-
-    # The "extended.with_price" view adds a price field
-    view :with_price do
-      field :price
-    end
-  end
-</code></pre>
-<h3 id="excluding-fields"><a class="header" href="#excluding-fields">Excluding fields</a></h3>
-<p>Views can exclude select fields from parents, views they’ve included, or from <a href="#partials">partials</a>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  fields :name, :description, :price
-
-  view :minimal do
-    exclude :description, :price
+    field :desc, source: :description
+    association :subcategory, CategoryBlueprint[:subcategory]
+    association :parts, [PartBlueprint]
   end
 end
 </code></pre>
-<p>You can exclude and and all parent fields by creating an empty view:</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  fields :name, :description, :price
+<h2 id="interoperability"><a class="header" href="#interoperability">Interoperability</a></h2>
+<p>The initial release of V2 is included <em>alongside</em> legacy/V1 code, allowing you to migrate your codebase slowly. V2 Blueprints can reference
+legacy/V1 Blueprints in associations, and vice versa.</p>
+<p>Eventually the legacy/V1 code will be removed, necessitating a complete switch to V2.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="breaking-changes"><a class="header" href="#breaking-changes">Breaking Changes</a></h1>
+<p>When you migrate a Blueprint to V2, you’ll be required to make the changes in this section.</p>
+<p>Generally speaking the Blueprint DSL is easy to upgrade. But if you’re using extensive global configuration options, be prepared to change how they work.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="breaking-rendering-changes"><a class="header" href="#breaking-rendering-changes">Breaking Rendering Changes</a></h1>
+<p>If you’re using Rails’ <code>render json:</code> you <strong>don’t</strong> have to change anything:</p>
+<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
+</code></pre>
+<p>Otherwise, it now looks like this:</p>
+<pre><code class="language-ruby"># JSON string
+WidgetBlueprint.render(widget).to_json
 
-  view :minimal, empty: true do
-    field :the_only_field
+# Hash (or array of Hashes if you passed an Enumerable)
+WidgetBlueprint.render(widget).to_hash
+</code></pre>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The legacy <code>render_as_hash</code> and <code>render_as_json</code> methods are still present but may be removed in a future release.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="breaking-dsl-changes"><a class="header" href="#breaking-dsl-changes">Breaking DSL Changes</a></h1>
+<p>At a quick glance the DSL looks nearly identical, but don’t be fooled! See the docs of <code>Blueprinter::V2::DSL</code> for complete documentation of all new features.</p>
+<h3 id="association-syntax"><a class="header" href="#association-syntax">Association syntax</a></h3>
+<p>Associations in V2 are more concise while conveying more information.</p>
+<pre><code class="language-ruby"># A single object
+association :category, CategoryBlueprint
+association :category, CategoryBlueprint[:my_view]
+
+# A collection (Enumerable) of objects
+association :parts, [PartBlueprint]
+association :parts, [PartBlueprint[:my_view]]
+</code></pre>
+<p>To dynamically reference the current view’s name, use <code>view_name</code> or <code>view_path</code>:</p>
+<pre><code class="language-ruby">view :extended do
+  # ...
+
+  view :plus do
+    # Looks for a view named 'plus'
+    association :category, CategoryBlueprint[view_name]
+
+    # Looks for a nested view named 'extended.plus'
+    association :category, CategoryBlueprint[view_path]
   end
 end
 </code></pre>
-<h3 id="referencing-views"><a class="header" href="#referencing-views">Referencing views</a></h3>
-<p>When defining an association, you can choose a view from its blueprint:</p>
-<pre><code class="language-ruby">object :widget, WidgetBlueprint[:extended]
-</code></pre>
-<p>Nested views can be accessed with a dot syntax or a nested Hash syntax.</p>
-<pre><code class="language-ruby">collection :widgets, WidgetBlueprint["extended.with_price"]
-collection :widgets, WidgetBlueprint[:extended][:with_price]
-</code></pre>
-<h3 id="inheriting-from-views"><a class="header" href="#inheriting-from-views">Inheriting from views</a></h3>
-<p>You can inherit from another blueprint, or from one of its views:</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint[:with_timestamps]
+<p>Learn more about <a href="#nested-views">nested views</a>.</p>
+<h3 id="second-arg-in-field-blocks"><a class="header" href="#second-arg-in-field-blocks">Second arg in field blocks</a></h3>
+<p>If you’re using the <strong>second</strong> argument in your field/association blocks, it’s no longer the render options. It’s now a <code>Blueprinter::V2::Context::Field</code>
+object, which contains the render options along with a lot more.</p>
+<p>You can update your block in a single line:</p>
+<pre><code class="language-ruby">field :description do |object, ctx|
+  options = ctx.options
   # ...
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="partials"><a class="header" href="#partials">Partials</a></h1>
-<p>Partials allow you to compose views from reusable components. Just like views, partials can define <a href="#fields">fields</a>, <a href="#options-1">options</a>, <a href="#views">views</a>, other <a href="#partials">partials</a>, <a href="#formatters">formatters</a>, and <a href="#extensions">extensions</a>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  field :name
-
-  view :foo do
-    use :associations
-    field :foo
-  end
-
-  view :bar do
-    use :associations, :description
-    field :bar
-  end
-
-  partial :associations do
-    object :category, CategoryBlueprint
-    collection :parts, PartBlueprint
-  end
-
-  partial :description do
-    field :description
-  end
+<h3 id="including-a-view"><a class="header" href="#including-a-view">Including a view</a></h3>
+<p>If you’re including a view in another view, replace <code>include_view</code> with <code>use</code>.</p>
+<pre><code class="language-ruby">view :my_view do
+  use :other_view
+  # ...
 end
 </code></pre>
-<p>There are two ways of including partials: <a href="#append-with-use">appending with ‘use’</a> and <a href="#inserting-with-use">inserting with ‘use!’</a> (see <a href="#examples-of-use-and-use">examples</a>).</p>
-<h3 id="append-with-use"><a class="header" href="#append-with-use">Append with ‘use’</a></h3>
-<p>Partials are <em>appended</em> to your view, giving them the opportunity to override your view’s fields, options, etc. Precedence (highest to lowest) is:</p>
-<ol>
-<li>Definitions in the partial</li>
-<li>Definitions in the view</li>
-<li>Definitions inherited from the blueprint/parent views</li>
-</ol>
-<h3 id="insert-with-use"><a class="header" href="#insert-with-use">Insert with ‘use!’</a></h3>
-<p>Partials are embedded immediately, <em>on that line</em>, allowing subsequent lines to override the partial. Precedence (highest to lowest) is:</p>
-<ol>
-<li>Definitions in the view <em>after</em> <code>use!</code></li>
-<li>Definitions in the partial</li>
-<li>Definitions in the view <em>before</em> <code>use!</code></li>
-<li>Definitions inherited from the blueprint/parent views</li>
-</ol>
-<h3 id="examples-of-use-and-use"><a class="header" href="#examples-of-use-and-use">Examples of ‘use’ and ‘use!’</a></h3>
-<pre><code class="language-ruby">partial :no_empty_fields do
-  options[:field_if] = :og_field_logic
-  # other stuff
-end
-
-# :foo appends the partial, so it overrides the view's field_if
-view :foo do
-  use :no_empty_fields
-  options[:field_if] = :other_field_logic
-end
-
-# :bar inserts the partial, but the next line overrides the partial's field_if
-view :bar do
-  use! :no_empty_fields
-  options[:field_if] = :other_field_logic
-end
+<p>This change may look superfluous, but it’s the result of a cool new feature: <a href="#partials">partials</a>.</p>
+<h3 id="transformers"><a class="header" href="#transformers">Transformers</a></h3>
+<p>Transforming a Blueprint’s output can be done using the <code>around_blueprint</code> extension hook. (See <code>Blueprinter::Extension</code> for full Extension API docs).</p>
+<p>However, the <code>LegacyTransformer</code> extension offers compatibility with legacy/V1 transformer classes:</p>
+<pre><code class="language-ruby">add Blueprinter::Extensions::LegacyTransformer.new(MyTransformer)
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
-<p>Declaratively format field values by class. You can define formatters anywhere in your blueprints: top level, <a href="#views">views</a>, and <a href="#partials">partials</a>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  # Strip whitespace from all strings
-  format(String) { |val| val.strip }
-
-  # Format all dates and times using ISO-8601
-  format Date, :iso8601
-  format Time, :iso8601
-
-  def iso8601(val)
-    val.iso8601
-  end
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="options-1"><a class="header" href="#options-1">Options</a></h1>
-<p>Numerous options can be defined on Blueprints, views, partials, or individual fields. Some can also be passed to <code>render</code>.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  # Blueprint options apply to all fields, associations, views, and partials in
-  # the Blueprint. They are inherited from the parent class but can be overridden.
-  options[:exclude_if_empty] = true
-
-  # Field options apply to individual fields or associations. They can override
-  # Blueprint options.
-  field :name, exclude_if_empty: false
-
-  # Options in views apply to all fields, associations, partials and nested views
-  # in the view. They inherit options from the Blueprint, or from parent views,
-  # and can override them.
-  view :foo do
-    options[:exclude_if_empty] = false
-  end
-
-  # Options in partials apply to all fields, associations, views, and partials in
-  # the partial. All of these are applied to the views that use the partial.
-  partial :bar do
-    options[:exclude_if_empty] = false
-  end
-
-  # Some options accept Procs/labmdas. These can call instance methods defined on
-  # your Blueprint. Or you can pass a method name as a symbol.
-  field :foo, if: -&gt;(ctx) { long_complex_check? ctx }
-  field :bar, if: :long_complex_check?
-
-  def long_complex_check?(ctx)
-    # ...
-  end
-end
-
-# Passing a supported option to render will override what's in the blueprint
-WidgetBlueprint.render(widget, exclude_if_empty: false).to_json
-</code></pre>
-<p>For easier reference, options are grouped into the following categories:</p>
-<ul>
-<li><a href="#default-values">Default values</a>: Provide defaults for empty fields</li>
-<li><a href="#conditional-fields">Conditional fields</a>: Exclude fields based on conditions</li>
-<li><a href="#field-mapping">Field mapping</a>: Change how field values are extracted from objects</li>
-<li><a href="#other">Metadata</a>: Wrap or add metadata to the output</li>
-</ul>
-<h4 id="a-note-about-context-objects"><a class="header" href="#a-note-about-context-objects">A note about context objects</a></h4>
-<p>Options that accept Procs, lambdas, or method names are usually passed a <a href="#field-context">Field context</a> argument. It contains the object being rendered as well as other useful information.</p>
-<h2 id="default-values"><a class="header" href="#default-values">Default Values</a></h2>
-<p>These options allow you to set default values for fields and associations, and customize when they’re used.</p>
-<h4 id="default"><a class="header" href="#default">default</a></h4>
-<p>A default value used when the field or assocation is nil.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">field :foo, default: "Foo"
-field :foo, default: -&gt;(ctx) { "Foo" }
-field :foo, default: :foo
-
-def foo(ctx) = "Foo"
-</code></pre>
-<h4 id="field_default"><a class="header" href="#field_default">field_default</a></h4>
-<p>Default value for any nil non-association field in its scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:field_default] = "Foo"
-options[:field_default] = -&gt;(ctx) { "Foo" }
-options[:field_default] = :foo
-
-def foo(ctx) = "Foo"
-
-WidgetBluerpint.render(widget, field_default: "Foo").to_json
-</code></pre>
-<h4 id="object_default"><a class="header" href="#object_default">object_default</a></h4>
-<p>Default value for any nil object field in its scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:object_default] = { name: "Foo" }
-options[:object_default] = -&gt;(ctx) { { name: "Foo" } }
-options[:object_default] = :foo
-
-def foo(ctx) = { name: "Foo" }
-
-WidgetBluerpint.render(widget, object_default: { name: "Foo" }).to_json
-</code></pre>
-<h4 id="collection_default"><a class="header" href="#collection_default">collection_default</a></h4>
-<p>Default value for any nil collection field.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:collection_default] = [{ name: "Foo" }]
-options[:collection_default] = -&gt;(ctx) { [{ name: "Foo" }] }
-options[:collection_default] = :foo
-
-def foo(ctx) = [{ name: "Foo" }]
-
-WidgetBluerpint.render(widget, collection_default: [{ name: "Foo" }]).to_json
-</code></pre>
-<h4 id="default_if"><a class="header" href="#default_if">default_if</a></h4>
-<p>Use the default value if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">field :foo, default: "Foo", default_if: -&gt;(ctx) { ctx.object.disabled? }
-field :foo, default: "Foo", default_if: :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-</code></pre>
-<h4 id="field_default_if"><a class="header" href="#field_default_if">field_default_if</a></h4>
-<p>Same as <a href="#default_if">default_if</a>, but applies to any non-association field in scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:field_default_if] = -&gt;(ctx) { ctx.object.disabled? }
-options[:field_default_if] = :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-
-WidgetBluerpint.render(widget, field_default_if: :disabled?).to_json
-</code></pre>
-<h4 id="object_default_if"><a class="header" href="#object_default_if">object_default_if</a></h4>
-<p>Same as <a href="#default_if">default_if</a>, but applies to any object field in scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:object_default_if] = -&gt;(ctx) { ctx.object.disabled? }
-options[:object_default_if] = :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-
-WidgetBluerpint.render(widget, object_default_if: :disabled?).to_json
-</code></pre>
-<h4 id="collection_default_if"><a class="header" href="#collection_default_if">collection_default_if</a></h4>
-<p>Same as <a href="#default_if">default_if</a>, but applies to any collection field in scope.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:collection_default_if] = -&gt;(ctx) { ctx.object.disabled? }
-options[:collection_default_if] = :disabled?
-
-def disabled?(ctx) = ctx.object.disabled?
-
-WidgetBluerpint.render(widget, collection_default_if: :disabled?).to_json
-</code></pre>
-<h2 id="conditional-fields"><a class="header" href="#conditional-fields">Conditional Fields</a></h2>
-<p>These options allow you to exclude fields from the output.</p>
-<h4 id="exclude_if_nil"><a class="header" href="#exclude_if_nil">exclude_if_nil</a></h4>
-<p>Exclude fields if they’re nil.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
-</blockquote>
-<pre><code class="language-ruby">options[:exclude_if_nil] = true
-
-field :description, exclude_if_nil: true
-
-WidgetBluerpint.render(widget, exclude_if_nil: true).to_json
-</code></pre>
-<h4 id="exclude_if_empty"><a class="header" href="#exclude_if_empty">exclude_if_empty</a></h4>
-<p>Exclude fields if they’re nil, or if they respond to <code>empty?</code> and it returns true.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, field, object, collection, render</em></p>
-</blockquote>
-<pre><code class="language-ruby">options[:exclude_if_empty] = true
-
-field :description, exclude_if_empty: true
-
-WidgetBluerpint.render(widget, exclude_if_empty: true).to_json
-</code></pre>
-<h4 id="if"><a class="header" href="#if">if</a></h4>
-<p>Only include the field if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">field :foo, if: -&gt;(ctx) { ctx.object.enabled? }
-field :foo, if: :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-</code></pre>
-<h4 id="field_if"><a class="header" href="#field_if">field_if</a></h4>
-<p>Only include non-association fields if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:field_if] = -&gt;(ctx) { ctx.object.enabled? }
-options[:field_if] = :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-
-WidgetBluerpint.render(widget, field_if: :enabled?).to_json
-</code></pre>
-<h4 id="object_if"><a class="header" href="#object_if">object_if</a></h4>
-<p>Only include object fields if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:object_if] = -&gt;(ctx) { ctx.object.enabled? }
-options[:object_if] = :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-
-WidgetBluerpint.render(widget, object_if: :enabled?).to_json
-</code></pre>
-<h4 id="collection_if"><a class="header" href="#collection_if">collection_if</a></h4>
-<p>Only include collection fields if the given Proc or method name returns truthy.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#field-context">Field context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:collection_if] = -&gt;(ctx) { ctx.object.enabled? }
-options[:collection_if] = :enabled?
-
-def enabled?(ctx) = ctx.object.enabled?
-
-WidgetBluerpint.render(widget, collection_if: :enabled?).to_json
-</code></pre>
-<h4 id="unless"><a class="header" href="#unless">unless</a></h4>
-<p>Inverse of <a href="#if">if</a>.</p>
-<h4 id="field_unless"><a class="header" href="#field_unless">field_unless</a></h4>
-<p>Inverse of <a href="#field_if">field_if</a>.</p>
-<h4 id="object_unless"><a class="header" href="#object_unless">object_unless</a></h4>
-<p>Inverse of <a href="#object_if">object_if</a>.</p>
-<h4 id="collection_unless"><a class="header" href="#collection_unless">collection_unless</a></h4>
-<p>Inverse of <a href="#collection_if">collection_if</a>.</p>
-<h2 id="field-mapping"><a class="header" href="#field-mapping">Field mapping</a></h2>
-<p>These options let you change how fields values are extracted from your objects.</p>
-<h4 id="from"><a class="header" href="#from">from</a></h4>
-<p>Populate the field using a method/Hash key other than the field name.</p>
-<blockquote>
-<p><em>Available in field, object, collection</em></p>
-</blockquote>
-<pre><code class="language-ruby">field :desc, from: :description
-</code></pre>
-<h2 id="metadata"><a class="header" href="#metadata">Metadata</a></h2>
-<p>These options allow you to add metadata to the rendered output.</p>
-<h4 id="root"><a class="header" href="#root">root</a></h4>
-<p>Pass a root key to wrap the output.</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em></p>
-</blockquote>
-<pre><code class="language-ruby">options[:root] = :data
-
-WidgetBlueprint.render(widget, root: :data).to_json
-</code></pre>
-<h4 id="meta"><a class="header" href="#meta">meta</a></h4>
-<p>Add a <code>meta</code> key and data to the wrapped output (requires the <code>root</code> option).</p>
-<blockquote>
-<p><em>Available in blueprint, view, partial, render</em><br><strong>@param</strong> <a href="#result-context">Result context</a></p>
-</blockquote>
-<pre><code class="language-ruby">options[:root] = :data
-options[:meta] = { page: 1 }
-
-# If you pass a Proc/lambda, it can call instance methods defined on the Blueprint
-options[:meta] = -&gt;(ctx) { { page: page_num(ctx) } }
-
-WidgetBlueprint
-  .render(widget, root: :data, meta: { page: params[:page] })
-  .to_json
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="extensions"><a class="header" href="#extensions">Extensions</a></h1>
-<p>Blueprinter has a powerful extension system that permits middleware throughout the entire serialization lifecycle. Some extensions are included with Blueprinter, others are available as gems, and you can easily write your own using the <a href="#extensions-2">Extension API</a>.</p>
-<h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
-<p>Extensions can be added to your <code>ApplicationBlueprint</code> or any other blueprint, view, or partial. They’re inherited from parent classes and views, but can be overridden.</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  # This extension instance will exist for the duration of your program
-  extensions &lt;&lt; FooExtension.new
-
-  # These extensions will be initialized once during each render
-  extensions &lt;&lt; BarExtension
-  extensions &lt;&lt; -&gt; { ZorpExtension.new(some_args) }
-
-  # Inline extensions are also initialized once per render
-  extension do
-    def around_blueprint(ctx)
-      result = yield ctx
-      result.merge({ foo: "Foo" })
-    end
-  end
-
-  view :minimal do
-    # extensions is a simple Array, so you can add or remove elements
-    extensions.select! { |ext| ext.is_a? FooExtension }
-
-    # or simply replace the whole Array
-    self.extensions = [FooExtension.new]
-  end
-end
-</code></pre>
-<h2 id="included-extensions"><a class="header" href="#included-extensions">Included extensions</a></h2>
-<p>These extensions are distributed with Blueprinter. Simply add them to your configuration.</p>
-<h3 id="field-order"><a class="header" href="#field-order">Field Order</a></h3>
-<p>Control the order of fields in your output. See <a href="#fields-3">Fields API</a> for more information about the block parameters.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new { |a, b| a.name &lt;=&gt; b.name }
-</code></pre>
-<h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>
-<p>The MultiJson extension switches Blueprinter from Ruby’s built-in JSON library to the <a href="https://rubygems.org/gems/multi_json">multi_json</a> gem. Just install the <code>multi_json</code> gem, your serialization library of choice, and enable the extension.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new
-
-# Any options you pass will be forwarded to MultiJson.dump
-extensions &lt;&lt; Blueprinter::Extensions::MultiJson.new(pretty: true)
-
-# You can also pass MultiJson.dump options during render
-WidgetBlueprint.render(widget, multi_json: { pretty: true }).to_json
-</code></pre>
-<p>If <code>multi_json</code> doesn’t support your preferred JSON library, you can use Blueprinter’s <a href="#around_result">around_result</a> extension hook to render JSON however you like.</p>
-<h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>
-<p>Enable the OpenTelemetry extension to see what’s happening while you render your blueprints. One outer <code>blueprinter.render</code> span will nest various <code>blueprinter.object</code> and <code>blueprinter.collection</code> spans. Each span will include the blueprint/view name that triggered it.</p>
-<p>Extension hooks will be wrapped in <code>blueprinter.extension</code> spans and annotated with the current extension and hook name.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::OpenTelemetry.new("my-tracer-name")
-</code></pre>
-<h3 id="viewoption"><a class="header" href="#viewoption">ViewOption</a></h3>
-<p>The ViewOption extension uses the <a href="#around_result">around_result</a> extension hook to add a <code>view</code> option to <code>render</code>, <code>render_object</code>, and <code>render_collection</code>. It allows V1-compatible rendering of views.</p>
-<pre><code class="language-ruby">extensions &lt;&lt; Blueprinter::Extensions::ViewOption.new
-</code></pre>
-<p>Now you can render a view either way:</p>
-<pre><code class="language-ruby"># V2 style
-MyBlueprint[:foo].render(obj)
-# or V1 style
-MyBlueprint.render(obj, view: :foo)
-</code></pre>
-<h2 id="gem-extensions"><a class="header" href="#gem-extensions">Gem extensions</a></h2>
-<p><em>Have an extension you’d like to share? Let us know and we may add it to the list!</em></p>
-<h3 id="blueprinter-activerecord"><a class="header" href="#blueprinter-activerecord">blueprinter-activerecord</a></h3>
-<p><a href="https://github.com/procore-oss/blueprinter-activerecord">blueprinter-activerecord</a> is an official extension from the Blueprinter team providing ActiveRecord integration, including automatic preloading of associations based on your Blueprint definitions.</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="rendering"><a class="header" href="#rendering">Rendering</a></h1>
-<h3 id="rendering-to-json"><a class="header" href="#rendering-to-json">Rendering to JSON</a></h3>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
-</code></pre>
-<p>If you’re using Rails, you may omit <code>.to_json</code> when calling <code>render json:</code></p>
-<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
-</code></pre>
-<p>Ruby’s built-in <code>JSON</code> library is used by default. Alternatively, you can use the built-in <a href="#multijson">MultiJson extension</a>. Or for total control, implement the <a href="#around_result">around_result</a> and call any serializer you like.</p>
-<h3 id="rendering-to-a-hash"><a class="header" href="#rendering-to-a-hash">Rendering to a Hash</a></h3>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
-</code></pre>
-<h3 id="rendering-a-view"><a class="header" href="#rendering-a-view">Rendering a view</a></h3>
-<pre><code class="language-ruby"># Render a view
-WidgetBlueprint[:extended].render(widget).to_json
-
-# Render a nested view
-WidgetBlueprint["extended.price"].render(widget).to_json
-
-# These two both render the default view
-WidgetBlueprint.render(widget).to_json
-WidgetBlueprint[:default].render(widget).to_json
-</code></pre>
-<h3 id="passing-options"><a class="header" href="#passing-options">Passing options</a></h3>
-<p>An options hash can be passed to <code>render</code>. Read more about <a href="#options-1">options</a>.</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(Widget.all, exclude_if_nil: true).to_json
-</code></pre>
-<h3 id="rendering-collections"><a class="header" href="#rendering-collections">Rendering collections</a></h3>
-<p><code>render</code> will treat any <code>Enumerable</code>, except <code>Hash</code>, as an array of objects:</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(Widget.all).to_json
-</code></pre>
-<p>If you wish to be explicit you may use <code>render_object</code> and <code>render_collection</code>:</p>
-<pre><code class="language-ruby">WidgetBlueprint.render_object(widget).to_json
-
-WidgetBlueprint.render_collection(Widget.all).to_json
-</code></pre>
-<p>Whatever you pass to <code>render_collection</code> must respond to <code>map</code>, yielding zero or more serializable objects, and returning an <code>Enumerable</code> with the mapped results.</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="blueprinter-api"><a class="header" href="#blueprinter-api">Blueprinter API</a></h1>
-<p>Blueprinter has a rich API for extending the serialization process and reflecting on your blueprints.</p>
-<h2 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h2>
-<p>The extensions API offers middleware for various parts of the serialization process. <a href="#extensions-2">Read more</a>.</p>
-<h2 id="reflection"><a class="header" href="#reflection">Reflection</a></h2>
-<p>The reflection API allows your application, or Blueprinter extensions, to introspect on your blueprints’ options, fields, and views. <a href="#reflection-1">Read more</a>.</p>
-<h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
-<p>Context objects are the arguments you’ll receive in most of the above APIs. <a href="#context-objects-1">Read more</a>.</p>
-<h2 id="fields-1"><a class="header" href="#fields-1">Fields</a></h2>
-<p>Several APIs provide access to structs describing field definitions. <a href="#fields-3">Read more</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="extensions-2"><a class="header" href="#extensions-2">Extensions</a></h1>
-<p>Blueprinter has a powerful middleware-based extension system with hooks for every step of the serialization lifecycle. In fact, many of Blueprinter’s features are implemented using the extension API!</p>
-<p>Simply extend the <code>Blueprinter::Extension</code> class, define the hooks you need, and <a href="#using-extensions">add it to your configuration</a>.</p>
-<h2 id="hooks"><a class="header" href="#hooks">Hooks</a></h2>
-<p>Hooks are called in the following order. They are passed a <a href="#context-objects-1">context object</a> as an argument.</p>
-<div class="hooks"><a href="#around_result">around_result</a>
-  <a href="#around_blueprint_init">around_blueprint_init</a>
-    <a href="#around_serialize_object">around_serialize_object</a> | <a href="#around_serialize_collection">around_serialize_collection</a>
-      <a href="#around_blueprint">around_blueprint</a>
-        <a href="#around_field_value">around_field_value</a> | <a href="#around_object_value">around_object_value</a> | <a href="#around_collection_value">around_collection_value</a>
-          <a href="#around_blueprint_init">around_blueprint_init...</a>
-</div>
-
-<p>Additionally, the <a href="#around_hook">around_hook</a> hook runs around all other hooks.</p>
-<h3 id="around_result"><a class="header" href="#around_result">around_result</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#result-context">Result Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Low - run once during render</p>
-</blockquote>
-<p>The <code>around_result</code> hook runs around the entire serialization process, allowing you to modify the initial input and final output.</p>
-<p>The following example hook caches an entire result for five minutes.</p>
-<pre><code class="language-ruby">def around_result(ctx)
-  cache(ctx.blueprint.class, ctx.object, ctx.format, ttl: 300) do
-    yield ctx
-  end
-end
-</code></pre>
-<h4 id="finalizing"><a class="header" href="#finalizing">Finalizing</a></h4>
-<p>The <code>final</code> and <code>final?</code> helpers allow middleware to declare, and check if, a result is “finalized” and should no longer be altered. These helpers should <strong>only</strong> be used in <code>around_result</code>.</p>
-<pre><code class="language-ruby">def around_result(ctx)
-  result = yield ctx
-  return result if final? result
-
-  result = somehow_modify result
-  final result
-end
-</code></pre>
-<h3 id="around_blueprint_init"><a class="header" href="#around_blueprint_init">around_blueprint_init</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#render-context">Render Context</a> <br><strong>cost</strong> Low - run once per used blueprint during render</p>
-</blockquote>
-<p>The <code>around_blueprint_init</code> hook runs the first time a new Blueprint is used during a render cycle. It can be used by extensions to perform time-saving setup before a render.</p>
-<blockquote class="blockquote-tag blockquote-tag-important">
-<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
-<p><code>around_blueprint_init</code> <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
-</blockquote>
-<pre><code class="language-ruby">def around_blueprint_init(ctx)
-  perform_setup ctx.blueprint, ctx.options
-  yield ctx
-end
-</code></pre>
-<h3 id="around_serialize_object"><a class="header" href="#around_serialize_object">around_serialize_object</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>The <code>around_serialize_object</code> hook runs around every object (as opposed to collection) that’s serialized. The following example would see it called <strong>four</strong> times: once for the category itself and once for each item.</p>
-<pre><code class="language-ruby">CategoryBlueprint.render({
-  name: "Foo",
-  items: [item1, item2, item3],
-}).to_json
-</code></pre>
-<p>The following example hook modifies both the input object and the output result.</p>
-<pre><code class="language-ruby">def around_serialize_object(ctx)
-  # modify the object before it's serialized
-  ctx.object = modify ctx.object
-
-  result = yield ctx
-
-  # modify the result
-  result.merge({ foo: "Bar" })
-end
-</code></pre>
-<h3 id="around_serialize_collection"><a class="header" href="#around_serialize_collection">around_serialize_collection</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>The <code>around_serialize_collection</code> hook runs around every collection that’s serialized. The following example would see it called three times: once for the array of categories and once for each set of items.</p>
-<pre><code class="language-ruby">CategoryBlueprint.render([
-  { name: "Foo", items: [item1] },
-  { name: "Bar", items: [item2, item3] },
-]).to_json
-</code></pre>
-<p>The following example hook modifies both the input collection and the output results.</p>
-<pre><code class="language-ruby">def around_serialize_collection(ctx)
-  # modify the collection before it's serialized
-  ctx.object = modify ctx.object
-
-  result = yield ctx
-
-  # modify the result
-  result.reject { |obj| some_logic obj }
-end
-</code></pre>
-<h3 id="around_blueprint"><a class="header" href="#around_blueprint">around_blueprint</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#object-context">Object Context</a> <br><strong>return</strong> result <br><strong>cost</strong> Medium - run every time any blueprint is rendered</p>
-</blockquote>
-<p>The <code>around_blueprint</code> hook runs every time an object, including members of collections, are serialized. The following example would see it called three times: once for the category and once for each item.</p>
-<pre><code class="language-ruby">CategoryBlueprint.render({ name: "Foo", items: [item1, item] }).to_json
-</code></pre>
-<p>The following example hook modifies both the input object and the output result.</p>
-<pre><code class="language-ruby">def around_blueprint(ctx)
-  # modify the object before it's serialized
-  ctx.object = modify ctx.object
-
-  result = yield ctx
-
-  # modify the result
-  result.merge({ foo: "Bar" })
-end
-</code></pre>
-<h3 id="around_field_value"><a class="header" href="#around_field_value">around_field_value</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every (non-object, non-collection) field</p>
-</blockquote>
-<p>The <code>around_field_value</code> hook runs around every non-object, non-collection field that’s extracted. The following example trims leading and trailing whitespace from string values.</p>
-<pre><code class="language-ruby">def around_field_value(ctx)
-  val = yield ctx
-  case val
-  when String then val.strip
-  else val
-  end
-end
-</code></pre>
-<h4 id="skipping-fields"><a class="header" href="#skipping-fields">Skipping fields</a></h4>
-<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
-<pre><code class="language-ruby">def around_field_value(ctx)
-  val = yield ctx
-  skip if ctx.field.options[:skip_on] == val
-  val
-end
-</code></pre>
-<h3 id="around_object_value"><a class="header" href="#around_object_value">around_object_value</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every object field</p>
-</blockquote>
-<p>The <code>around_object_value</code> hook runs around every object field that’s extracted (before it’s serialized with a Blueprint). The following example adds a <code>foo</code> attribute to each object Hash.</p>
-<pre><code class="language-ruby">def around_object_value(ctx)
-  val = yield ctx
-  case val
-  when Hash then val.merge({ foo: "bar" })
-  else val
-  end
-end
-</code></pre>
-<h4 id="skipping-fields-1"><a class="header" href="#skipping-fields-1">Skipping fields</a></h4>
-<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
-<pre><code class="language-ruby">def around_object_value(ctx)
-  val = yield ctx
-  skip if ctx.field.options[:skip_on] == val
-  val
-end
-</code></pre>
-<h3 id="around_collection_value"><a class="header" href="#around_collection_value">around_collection_value</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#field-context">Field Context</a> <br><strong>return</strong> result <br><strong>cost</strong> High - run for every collection field</p>
-</blockquote>
-<p>The <code>around_collection_value</code> hook runs around every collection field that’s extracted (before it’s serialized with a Blueprint). The following example removes deleted widgets from a collection.</p>
-<pre><code class="language-ruby">def around_collection_value(ctx)
-  val = yield ctx
-  case ctx.field.blueprint
-  when WidgetBlueprint
-    val.reject { |widget| widget.deleted? }
-  else
-    val
-  end
-end
-</code></pre>
-<h4 id="skipping-fields-2"><a class="header" href="#skipping-fields-2">Skipping fields</a></h4>
-<p>You can tell blueprinter to completely skip a field using <code>skip</code>. It will bail out of the hook and any previous hooks that yielded.</p>
-<pre><code class="language-ruby">def around_collection_value(ctx)
-  val = yield ctx
-  skip if ctx.field.options[:skip_on] == val
-  val
-end
-</code></pre>
-<h3 id="around_hook"><a class="header" href="#around_hook">around_hook</a></h3>
-<blockquote>
-<p><strong>param</strong> <a href="#hook-context">Hook Context</a> <br><strong>cost</strong> Variable - runs around all your extensions</p>
-</blockquote>
-<p>The <code>around_hook</code> hook runs around all other extension hooks. Unlike other hooks, the return value <strong>not</strong> used.</p>
-<blockquote class="blockquote-tag blockquote-tag-important">
-<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
-<p><code>around_hook</code> <strong>must</strong> yield, otherwise a <code>Blueprinter::Errors::ExtensionHook</code> will be raised.</p>
-</blockquote>
-<pre><code class="language-ruby">def around_hook(ctx)
-  # do something
-  yield
-  # do something else
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="reflection-1"><a class="header" href="#reflection-1">Reflection</a></h1>
-<p>Blueprints may be reflected on to inspect their views, fields, and options. This is useful for building <a href="#extensions-2">extensions</a>, and possibly even for some applications.</p>
-<p>We will use the following blueprint in the examples below:</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  field :name
-  field :description, exclude_if_empty: true
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
-
-  view :extended do
-    object :manufacturer, CompanyBlueprint[:full]
-
-    view :with_price do
-      field :price
-    end
-  end
-end
-</code></pre>
-<h2 id="blueprint--view-names"><a class="header" href="#blueprint--view-names">Blueprint &amp; view names</a></h2>
-<pre><code class="language-ruby">WidgetBlueprint.blueprint_name
-=&gt; "WidgetBlueprint"
-
-WidgetBlueprint.view_name
-=&gt; :default
-
-WidgetBlueprint[:extended].blueprint_name
-=&gt; "WidgetBlueprint.extended"
-
-WidgetBlueprint[:extended].view_name
-=&gt; :extended
-
-WidgetBlueprint["extended.with_price"].blueprint_name
-=&gt; "WidgetBlueprint.extended.with_price"
-
-WidgetBlueprint["extended.with_price"].view_name
-=&gt; :"extended.with_price"
-</code></pre>
-<h2 id="blueprint--view-options"><a class="header" href="#blueprint--view-options">Blueprint &amp; view options</a></h2>
-<pre><code class="language-ruby">WidgetBlueprint.options
-=&gt; {exclude_if_nil: true}
-
-WidgetBlueprint[:extended].options
-=&gt; {exclude_if_nil: true, exclude_if_empty: true}
-</code></pre>
-<h2 id="views-1"><a class="header" href="#views-1">Views</a></h2>
-<p>Here, <code>:default</code> refers to the top level of the blueprint.</p>
-<pre><code class="language-ruby">WidgetBlueprint.reflections.keys
-=&gt; [:default, :extended, :"extended.with_price"]
-</code></pre>
-<p>You can also reflect directly on a view.</p>
-<pre><code class="language-ruby">WidgetBlueprint[:extended].reflections.keys
-=&gt; [:default, :with_price]
-</code></pre>
-<p><strong>Notice that the names are relative</strong>: <code>:default</code> now refers to the <code>:extended</code> view, since we called <code>.reflections</code> on <code>:extended</code>. The prefix is also gone from the nested <code>:with_price</code> view.</p>
-<h2 id="fields-2"><a class="header" href="#fields-2">Fields</a></h2>
-<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
-
-# Regular fields
-view.fields.keys
-=&gt; [:name, :description]
-
-# Object fields
-view.objects.keys
-=&gt; [:category]
-
-# Collection fields
-view.collections.keys
-=&gt; [:parts]
-
-# All fields in the order they were defined
-view.ordered
-# returns an array of field objects
-</code></pre>
-<h2 id="field-metadata"><a class="header" href="#field-metadata">Field metadata</a></h2>
-<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
-field = view.fields[:description]
-
-field.name
-=&gt; :description
-
-field.from
-=&gt; :description # the :from option in the DSL
-
-field.value_proc
-=&gt; nil # the block you passed to the field, if any
-
-field.options # all other options passed to the field
-=&gt; { exclude_if_empty: true }
-</code></pre>
-<p>Object and collection fields have the same metadata as regular fields, plus a <code>blueprint</code> attribute:</p>
-<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:default]
-field = view.collections[:parts]
-
-# it returns the Blueprint class, so you can continue reflecting
-field.blueprint
-=&gt; PartBlueprint
-
-field.blueprint.reflections[:default].fields
-=&gt; # array of fields on the default view of PartBlueprint
-</code></pre>
-<p>If you used a view in an object or collection field, you can reflect on that view just like a blueprint:</p>
-<pre><code class="language-ruby">view = WidgetBlueprint.reflections[:extended]
-field = view.objects[:manufacturer]
-
-field.blueprint.to_s
-=&gt; "CompanyBlueprint.full"
-
-# Remember, we're reflecting ON the :full view, so the name is relative!
-field.blueprint.reflections[:default].fields
-=&gt; # array of fields on the :full view of CompanyBlueprint
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="context-objects-1"><a class="header" href="#context-objects-1">Context Objects</a></h1>
-<p>Context objects are the arguments passed to APIs like <a href="#field-blocks">field blocks</a>, <a href="#options-1">option procs</a> and <a href="#extensions-2">extension hooks</a>. There are several kinds of context objects, each with its own set of fields.</p>
-<h2 id="render-context"><a class="header" href="#render-context">Render Context</a></h2>
-<p><em>* Field can be assigned.</em></p>
-<blockquote>
-<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
-</blockquote>
-<blockquote>
-<p><strong>fields</strong> * <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a>.</p>
-</blockquote>
-<blockquote>
-<p><strong>options</strong> * <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
-</blockquote>
-<blockquote>
-<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
-</blockquote>
-<blockquote>
-<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
-</blockquote>
-<h2 id="object-context"><a class="header" href="#object-context">Object Context</a></h2>
-<p><em>* Field can be assigned.</em></p>
-<blockquote>
-<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
-</blockquote>
-<blockquote>
-<p><strong>fields</strong> <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#blueprint_fields">blueprint_fields</a> hook.</p>
-</blockquote>
-<blockquote>
-<p><strong>options</strong> <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
-</blockquote>
-<blockquote>
-<p><strong>object</strong> * <br>The object or collection currently being serialized.</p>
-</blockquote>
-<blockquote>
-<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
-</blockquote>
-<blockquote>
-<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
-</blockquote>
-<h2 id="field-context"><a class="header" href="#field-context">Field Context</a></h2>
-<blockquote>
-<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
-</blockquote>
-<blockquote>
-<p><strong>fields</strong> <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#blueprint_fields">blueprint_fields</a> hook.</p>
-</blockquote>
-<blockquote>
-<p><strong>options</strong> <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
-</blockquote>
-<blockquote>
-<p><strong>object</strong> <br>The object currently being serialized.</p>
-</blockquote>
-<blockquote>
-<p><strong>field</strong> <br>A struct of the field, object, or collection currently being rendered. You can use this to access the field’s name and options. See <a href="#fields-3">Fields API</a>.</p>
-</blockquote>
-<blockquote>
-<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
-</blockquote>
-<blockquote>
-<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
-</blockquote>
-<h2 id="result-context"><a class="header" href="#result-context">Result Context</a></h2>
-<p><em>* Field can be assigned.</em></p>
-<blockquote>
-<p><strong>blueprint</strong> * <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
-</blockquote>
-<blockquote>
-<p><strong>fields</strong> <br>A frozen array of field definitions that were serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#around_blueprint_init">around_blueprint_init</a> hook.</p>
-</blockquote>
-<blockquote>
-<p><strong>options</strong> * <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
-</blockquote>
-<blockquote>
-<p><strong>object</strong> * <br>The object or collection that was just serialized.</p>
-</blockquote>
-<blockquote>
-<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
-</blockquote>
-<blockquote>
-<p><strong>format</strong> * <br>The requested serialization format (e.g. <code>:json</code>, <code>:hash</code>).</p>
-</blockquote>
-<h2 id="hook-context"><a class="header" href="#hook-context">Hook Context</a></h2>
-<blockquote>
-<p><strong>blueprint</strong> <br>The current Blueprint instance. You can use this to access the Blueprint’s name, options, reflections, and instance methods.</p>
-</blockquote>
-<blockquote>
-<p><strong>fields</strong> <br>A frozen array of field definitions that will be serialized, in order. See <a href="#fields-3">Fields API</a> and the <a href="#around_blueprint_init">around_blueprint_init</a> hook.</p>
-</blockquote>
-<blockquote>
-<p><strong>options</strong> <br>The frozen options Hash passed to <code>render</code>. An empty Hash if none was passed.</p>
-</blockquote>
-<blockquote>
-<p><strong>extension</strong> <br>Instance of the current extension</p>
-</blockquote>
-<blockquote>
-<p><strong>hook</strong> <br>Name of the current hook</p>
-</blockquote>
-<blockquote>
-<p><strong>store</strong> <br>A Hash that can be used to store &amp; access information by extensions and your application.</p>
-</blockquote>
-<blockquote>
-<p><strong>depth</strong> <br>The current blueprint depth (1-indexed).</p>
-</blockquote>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="fields-3"><a class="header" href="#fields-3">Fields</a></h1>
-<p>Extensions, reflection, and other APIs allow access to structs that describe fields.</p>
-<blockquote>
-<p><strong>type</strong><br><em>Symbol</em> <code>:field | :object | :collection</code><br>The type of field.</p>
-</blockquote>
-<blockquote>
-<p><strong>name</strong><br><em>Symbol</em><br>Name of the field as it will appear in the JSON or Hash output.</p>
-</blockquote>
-<blockquote>
-<p><strong>from</strong><br><em>Symbol</em><br>Name of the field in the source object (usually the same as <code>name</code>).</p>
-</blockquote>
-<blockquote>
-<p><strong>from_str</strong><br><em>String</em><br>Same as <code>from</code>, but as a frozen string.</p>
-</blockquote>
-<blockquote>
-<p><strong>value_proc</strong><br><em>nil | Proc</em><br>The block passed to the field definition (if given). Expects a <a href="#field-context">Field Context</a> argument and returns the field value.</p>
-</blockquote>
-<blockquote>
-<p><strong>options</strong><br><em>Hash</em><br>A frozen Hash of any additional options passed to the field.</p>
-</blockquote>
-<blockquote>
-<p><strong>blueprint</strong> (object and collection only)<br><em>Class</em><br>The blueprint to use for serializaing the object or collection.</p>
-</blockquote>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="upgrading-to-api-v2"><a class="header" href="#upgrading-to-api-v2">Upgrading to API V2</a></h1>
-<p>You have two options when updating from the legacy/V1 API: <a href="#full-update">full update</a> or <a href="#incremental-update">incremental update</a>.</p>
-<p>Regardless which you choose, you’ll need to familiarize yourself with the <a href="#blueprinter-dsl">new DSL</a> and <a href="#blueprinter-api">API</a>. The rest of this section will focus on the differences between V1 and V2.</p>
-<h2 id="full-update"><a class="header" href="#full-update">Full update</a></h2>
-<p>Update <code>blueprinter</code> to 2.x. All of your blueprints will need updated to use the <a href="#blueprinter-dsl">new DSL</a>. If you’re making use of extensions, custom extractors, or transformers, they’ll also need updated to the <a href="#blueprinter-api">new API</a>.</p>
-<h2 id="incremental-update"><a class="header" href="#incremental-update">Incremental update</a></h2>
-<p>Larger applications may find it easier to update incrementally. Update <code>blueprinter</code> to 1.2.x, which contains both the legacy/V1 and V2 APIs. They can be used side-by-side.</p>
-<pre><code class="language-ruby"># A legacy/V1 blueprint
-class WidgetBlueprint &lt; Blueprinter::Blueprint
-  field :name
-
-  view :with_desc do
-    field :description
-  end
-
-  view :with_category do
-    # Using a V2 blueprint in a legacy/V1 blueprint
-    association :category, blueprint: CategoryBlueprint, view: :extended
-  end
-end
-
-# A V2 blueprint
-class CategoryBlueprint &lt; ApplicationBlueprint
-  field :name
-
-  view :extended do
-    # Using a legacy/V1 blueprint in a V2 blueprint
-    collection :widgets, WidgetBlueprint[:with_desc]
-  end
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<p>Blueprinter V2 has no concept of global configruation like V1’s <code>Blueprinter.configure</code>. Instead, blueprints and views inherit configuration from their parent classes. By putting your “global” configuration into <code>ApplicationBlueprint</code>, all your application’s blueprints and views will inherit it.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
-  options[:exclude_if_nil] = true
-  extensions &lt;&lt; MyExtension.new
-end
-</code></pre>
-<p>Read more about <a href="#options-1">options</a> and <a href="#extensions">extensions</a>.</p>
-<h2 id="overrides"><a class="header" href="#overrides">Overrides</a></h2>
-<p>Child classes, <a href="#views">views</a>, and <a href="#partials">partials</a> can override their inherited configuration.</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  options[:exclude_if_nil] = false
-
-  view :foo do
-    options.clear
-    extensions.clear
-  end
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="customization"><a class="header" href="#customization">Customization</a></h1>
-<h2 id="formatting"><a class="header" href="#formatting">Formatting</a></h2>
-<p>Blueprinter V2 has a more generic approach to formatting, allowing any type of value to have formatting applied. <a href="#formatters">Learn more</a>.</p>
-<pre><code class="language-ruby">format(Date) { |date| date.iso8601 }
-</code></pre>
-<p>The <a href="#around_field_value">around_field_value</a>, <a href="#around_object_value">around_object_value</a>, and <a href="#around_collection_value">around_collection_value</a> extension hooks can also be used.</p>
-<h2 id="custom-extractors"><a class="header" href="#custom-extractors">Custom extractors</a></h2>
-<p>Custom extraction in V2 can also be accomplished with the <a href="#around_field_value">around_field_value</a>, <a href="#around_object_value">around_object_value</a>, and <a href="#around_collection_value">around_collection_value</a> hooks. <a href="#extracting-with-extensions">Read more</a>.</p>
-<h2 id="transformers"><a class="header" href="#transformers">Transformers</a></h2>
-<p>Blueprinter V2’s <a href="#extensions-2">extension hooks</a> offer many ways to transform your inputs and outputs. The <a href="#around_blueprint">around_blueprint</a> hook offers equivalent functionality to Legacy/V1 transformers.</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="fields-4"><a class="header" href="#fields-4">Fields</a></h1>
-<h2 id="identifier-field-and-view"><a class="header" href="#identifier-field-and-view">Identifier field and view</a></h2>
-<p>Blueprinter Legacy/V1 had a special feature for an <code>id</code> field and <code>identifier</code> view. Blueprinter V2 does not have this concept, but you can simulate it in your <code>ApplicationBlueprint</code>.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
-  # Every Blueprint that inherits from ApplicationBlueprint will have this field
+<h3 id="identifier"><a class="header" href="#identifier"><code>identifier</code></a></h3>
+<p>You can easily replicate legacy/V1’s <code>identifier</code> field and view in your base Blueprint:</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Extension
+  # The id field will be added to all Blueprints and views
   field :id
 
-  # Every Blueprint that inherits from ApplicationBlueprint will have this view,
-  # and it will only have the `id` field
-  view :identifier, empty: true do
+  # All Blueprints will get an identifier view, and it will only ever contain id
+  view :identifier do
+    exclude fields: true
     field :id
   end
 end
 </code></pre>
-<h2 id="renaming-fields"><a class="header" href="#renaming-fields">Renaming fields</a></h2>
-<p>In Blueprinter Legacy/V1, you could rename fields using the <code>name</code> option. Blueprinter V2 swaps the order and uses <code>from</code>. We believe this makes your blueprints more readable.</p>
-<p>In the following examples, both blueprints are populating the output field <em>description</em> from a source attribute named <em>desc</em>.</p>
-<pre><code class="language-ruby"># Legacy/V1
-field :desc, name: :description
-
-# V2
-field :description, from: :desc
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="breaking-configuration-changes"><a class="header" href="#breaking-configuration-changes">Breaking Configuration Changes</a></h1>
+<p>Configuration in V2 uses a completely different paradigm. There is <em>no global configuration</em> in V2. All configuration happens in Blueprints,
+views, or partials by setting options or adding extensions.</p>
+<p>Options and extensions are inherited from parent Blueprints and views and can be overridden by their children. This allows different parts of your system
+to be configured differently. “Global” configuration should be placed in your application’s base Blueprint, e.g. <code>ApplicationBlueprint</code>.</p>
+<p>Each legacy/V1 global configuration option is listed below, along with its V2 equivalent.</p>
+<h3 id="association_default--field_default"><a class="header" href="#association_default--field_default"><code>association_default</code> / <code>field_default</code></a></h3>
+<p>Set the <code>:default</code> option in your base Blueprint. It will be passed a <code>Blueprinter::V2::Context::Field</code> object, containing the current field,
+the current object, and a lot more.</p>
+<pre><code class="language-ruby">set :default, -&gt;(ctx) {
+  case ctx.field.type
+  when :field then "N/A"
+  when :object then {}
+  when :collection then []
+  end
+}
 </code></pre>
-<h2 id="associations"><a class="header" href="#associations">Associations</a></h2>
-<p>Blueprinter Legacy/V1 figured out if associations were single items or arrays at runtime. Blueprinter V2 accounts for this in the DSL. Also, the <code>:blueprint</code> and <code>:view</code> options are gone.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  field :name
-  object :category, CategoryBlueprint
-  collection :parts, PartBlueprint
-
-  # specify a view
-  object :manufacturer, CompanyBlueprint[:extended]
-end
+<h3 id="if--unless"><a class="header" href="#if--unless"><code>if</code> / <code>unless</code></a></h3>
+<p>Set the <code>:if</code> and <code>:unless</code> options in your base Blueprint. They will be passed a <code>Blueprinter::V2::Context::Field</code> object, containing the
+current field, the current object, and a lot more.</p>
+<pre><code class="language-ruby">set :if, -&gt;(ctx) {
+  # extract the V1 args from ctx
+  field_name = ctx.field.source
+  object = ctx.object
+  options = ctx.options
+  # ...
+}
 </code></pre>
-<h2 id="field-order-1"><a class="header" href="#field-order-1">Field order</a></h2>
-<p>Blueprinter Legacy/V1 offered two options for ordering fields: <code>:name_asc</code> (default), and <code>:definition</code> (order they were defined in). Blueprinter V2 defaults to the order of definition. You can define a different order using the <a href="#around_blueprint_init">around_blueprint_init</a> extension hook or the built-in <a href="#field-order">FieldOrder</a> extension.</p>
-<p>The following replicates Legacy/V1’s default field order using the built-in <a href="#field-order">FieldOrder</a> extension.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::Blueprint
-  extensions &lt;&lt; Blueprinter::Extensions::FieldOrder.new do |a, b|
-    if a.name == :id
-      -1
-    elsif b.name == :id
-      1
+<h3 id="custom_array_like_classes"><a class="header" href="#custom_array_like_classes"><code>custom_array_like_classes</code></a></h3>
+<p><code>render</code> has sensible heuristics for detecting what’s a “collection” or not: any <code>Enumerable</code> except for <code>Hash</code>.</p>
+<p>If that logic doesn’t work for something, use one of these methods in place of <code>render</code>:</p>
+<pre><code class="language-ruby"># Force `arg` to be treated like a collection (must respond to `map` with an Enumerable)
+array = WidgetBlueprint.render_collection(arg).to_hash
+</code></pre>
+<pre><code class="language-ruby"># Force `arg` to be treated like an object
+hash = WidgetBlueprint.render_object(arg).to_hash
+</code></pre>
+<h3 id="extractor_default"><a class="header" href="#extractor_default"><code>extractor_default</code></a></h3>
+<p>“Extractors” are not a discrete concept in V2, but they can be implemented using the <code>around_field_value</code>, <code>around_object_value</code>, and <code>around_collection_value</code>
+extension hooks.</p>
+<p>The bundled <code>LegacyExtractorOption</code> extension can be enabled to offer backwards-compatibility with legacy/V1’s extractors:</p>
+<pre><code class="language-ruby"># Add the extension
+add Blueprinter::Extensions::LegacyExtractorOption.new
+
+# Set the `extractor` option
+set :extractor, MyExtractor
+</code></pre>
+<h3 id="datetime_format"><a class="header" href="#datetime_format"><code>datetime_format</code></a></h3>
+<p>Formatting can now be applied to any class. Format dates, times, booleans, or anything else. Define them in your blueprints, views, or partials.</p>
+<pre><code class="language-ruby"># You can define them with blocks
+format(TrueClass) { |val| "Y" }
+format(FalseClass) { |val| "N" }
+
+# Or with method names
+format Date, :iso8601
+format Time, :iso8601
+
+def iso8601(val) = val.iso8601
+</code></pre>
+<p>See the Documentation for <code>Blueprinter::V2::DSL#format</code>.</p>
+<h3 id="default_transformers"><a class="header" href="#default_transformers"><code>default_transformers</code></a></h3>
+<p>Transformations can be done using V2’s <code>around_blueprint</code> extension hook (See <code>Blueprinter::Extension</code> for full Extension API docs).</p>
+<p>However, the bundled <code>LegacyTransformer</code> extension offers compatibility with legacy/V1 transformer classes:</p>
+<pre><code class="language-ruby">add Blueprinter::Extensions::LegacyTransformer.new(
+  MyTransformer, OtherTransformer
+)
+</code></pre>
+<h3 id="generator--method"><a class="header" href="#generator--method"><code>generator</code> / <code>method</code></a></h3>
+<p>To use a different JSON serializer you can use the <code>Blueprinter::Extensions::MultiJson</code> extension. (You’ll need the <code>multi_json</code> gem installed and
+configured).</p>
+<pre><code class="language-ruby"># Be sure this is the FIRST extension you add
+add Blueprinter::Extensions::MultiJson.new
+</code></pre>
+<p>If <code>multi_json</code> doesn’t support your serializer, you can create your own extension using the <code>around_result</code> hook:</p>
+<pre><code class="language-ruby">class MyJsonExtension &lt; Blueprinter::Extension
+  def around_result(ctx)
+    case ctx.format
+    when :json
+      result = yield ctx
+      json = MySerializer.dump result
+      # The `serialized` helper tells Blueprinter we've already JSONified the result
+      serialized json
     else
-      a.name &lt;=&gt; b.name
+      yield ctx
     end
   end
 end
 </code></pre>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  # Be sure this is the FIRST extension you add
+  add MyJsonExtension.new
+end
+</code></pre>
+<h3 id="sort_fields_by"><a class="header" href="#sort_fields_by"><code>sort_fields_by</code></a></h3>
+<p>By default V2 serializes fields in the order they were defined. If you want a different order, use the bundled <code>FieldOrder</code> extension or
+the <code>around_blueprint_init</code> extension hook.</p>
+<p>The following replicates legacy/V1’s default field order of “alphabetical with <em>id</em> first”:</p>
+<pre><code class="language-ruby">add Blueprinter::Extensions::FieldOrder.new { |a, b|
+  if a.name == :id
+    -1
+  elsif b.name == :id
+    1
+  else
+    a.name &lt;=&gt; b.name
+  end
+}
+</code></pre>
+<h3 id="extensions"><a class="header" href="#extensions"><code>extensions</code></a></h3>
+<p>Add a “global” extension by adding it to your base Blueprint:</p>
+<pre><code class="language-ruby">add MyExtension.new
+</code></pre>
+<h4 id="v2-extension-hook-api"><a class="header" href="#v2-extension-hook-api">V2 Extension Hook API</a></h4>
+<p>V2 has a completely different, and much more poweful, hook system. Be sure your extension supports the V2 API!</p>
+<p>Read <a href="#breaking-extension-changes">Breaking Extension Changes</a>, the <a href="#extension-guide">Extension Guide</a>, or the documentation for <code>Blueprinter::Extension</code> for more info.</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="rendering-1"><a class="header" href="#rendering-1">Rendering</a></h1>
-<p>You can read the full <a href="#rendering">rendering documentation here</a>. This page highlights the main differences between V1 and V2.</p>
-<h3 id="rendering-to-json-1"><a class="header" href="#rendering-to-json-1">Rendering to JSON</a></h3>
-<p>If you’re using Rails’s <code>render json:</code>, V2 blueprints should continue to work like Legacy/V1:</p>
-<pre><code class="language-ruby">render json: WidgetBlueprint.render(widget)
-</code></pre>
-<p>Otherwise, it now looks like this:</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_json
-</code></pre>
-<h3 id="rendering-to-hash"><a class="header" href="#rendering-to-hash">Rendering to Hash</a></h3>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget).to_hash
-</code></pre>
-<h3 id="views-2"><a class="header" href="#views-2">Views</a></h3>
-<p>V2’s preferred method of rendering views is:</p>
-<pre><code class="language-ruby">WidgetBlueprint[:extended].render(widget).to_json
-</code></pre>
-<p>However, the <a href="#viewoption">ViewOption</a> extension can be enabled to allow V1-style view rendering:</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :extended).to_json
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="reflection-2"><a class="header" href="#reflection-2">Reflection</a></h1>
-<p>The <a href="#reflection-1">V2 Reflection API</a> has very few changes from Legacy/V1.</p>
-<h2 id="reflecting-on-fields"><a class="header" href="#reflecting-on-fields">Reflecting on fields</a></h2>
-<p>Regular fields (no change):</p>
-<pre><code class="language-ruby">MyBlueprint.reflections[:default].fields
-</code></pre>
-<p>Objects and collections:</p>
-<pre><code class="language-ruby"># Legacy/V1 does not differentiate between objects and collections
-MyV1Blueprint.reflections[:default].associations
-
-# V2 does
-MyV2Blueprint.reflections[:default].objects
-MyV2Blueprint.reflections[:default].collections
-</code></pre>
-<h2 id="field-names"><a class="header" href="#field-names">Field names</a></h2>
-<p><a href="#field-metadata">V2’s field metadata</a> is similar, but there’s an important different in <code>name</code>.</p>
-<h4 id="legacyv1"><a class="header" href="#legacyv1">Legacy/V1</a></h4>
-<p>In Legacy/V1, <code>name</code> refers to what the field is called in the <em>input</em>.</p>
-<pre><code class="language-ruby">class MyV1Blueprint &lt; Blueprinter::Base
-  field :foo, name: :bar
+<h1 id="breaking-reflection-changes"><a class="header" href="#breaking-reflection-changes">Breaking Reflection Changes</a></h1>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Most applications don’t use reflection and can skip this section.</p>
+</blockquote>
+<p>V2’s reflection API is backwards compatible with the exception of renamed fields. This is a result of <a href="#field-name-option">a change in the DSL</a>.</p>
+<h3 id="v1-style"><a class="header" href="#v1-style">V1 style</a></h3>
+<pre><code class="language-ruby">class MyBlueprint &lt; Blueprinter::Base
+  # A field named "desc" that pulls from "description"
+  field :description, name: :desc
 end
 
-ref = MyV1Blueprint.reflections[:default]
-
-# What the field is called in the source object
-ref.fields[:foo].name
-=&gt; :foo
-
-# What the field will be called in the output
-ref.fields[:foo].display_name
-=&gt; :bar
+field = MyBlueprint.reflections[:default].fields[:desc]
+puts field.display_name # name of serialized field
+# =&gt; :desc
+puts field.name         # name of field's source
+# =&gt; :description
 </code></pre>
-<h4 id="v2"><a class="header" href="#v2">V2</a></h4>
-<p>In V2, <code>name</code> refers to what the field is called in the <em>output</em>. Note that this change is also reflected in the Hash key.</p>
-<pre><code class="language-ruby">class MyV2Blueprint &lt; Blueprinter::Blueprint
-  field :bar, from: :foo
+<h3 id="v2-style"><a class="header" href="#v2-style">V2 style</a></h3>
+<pre><code class="language-ruby">class MyBlueprint &lt; Blueprinter::Base
+  # A field named "desc" that pulls from "description"
+  field :desc, source: :description
 end
 
-ref = MyV1Blueprint.reflections[:default]
-
-# What the field will be called in the output
-ref.fields[:bar].name
-=&gt; :bar
-
-# What the field is called in the source object
-ref.fields[:bar].from
-=&gt; :foo
+field = MyBlueprint.reflections[:default].fields[:desc]
+puts field.name   # name of serialized field
+# =&gt; :desc
+puts field.source # name of field's source
+# =&gt; :description
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="extensions-3"><a class="header" href="#extensions-3">Extensions</a></h1>
-<p>The <a href="#extensions-2">V2 Extension API</a>, as well as the DSL for <a href="#extensions">enabling V2 extensions</a>, are vastly different and more powerful than V1. Legacy/V1 had only one extension hook: <code>pre_render</code>. V2 <a href="#hooks">has eight</a>.</p>
-<h2 id="porting-pre_render"><a class="header" href="#porting-pre_render">Porting pre_render</a></h2>
-<p>Legacy/V1’s <code>pre_render</code> hook does not exist in V2, but it has several possible replacements:</p>
+<h1 id="breaking-extension-changes"><a class="header" href="#breaking-extension-changes">Breaking Extension Changes</a></h1>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Most applications don’t use extensions (yet) and can skip this section.</p>
+</blockquote>
+<p>Legacy/V1 had only one extension hook: <code>pre_render</code>. V2’s closest analog is <code>around_result</code>, which runs once at the beginning of every call to <code>render</code>.</p>
+<p>Here’s an example of an extension that supports both V1 and V2:</p>
+<pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
+  # V1 API
+  def pre_render(object, blueprint_class, view, options)
+    modify(object, blueprint_class, view, options)
+  end
+
+  # V2 API
+  def around_result(ctx)
+    blueprint_class = ctx.blueprint.class
+    view = blueprint_class.view_name
+    ctx.object = modify(ctx.object, blueprint_class, view, ctx.options)
+    yield ctx
+  end
+
+  private
+
+  def modify(object, blueprint_class, view, options)
+    # return a modified or new object
+  end
+end
+</code></pre>
+<p>See <code>Blueprinter::Extension</code> for the full V2 extension API, or read the <a href="#extension-guide">Extension Guide</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="compatible-changes"><a class="header" href="#compatible-changes">Compatible Changes</a></h1>
+<p>When you migrate a Blueprint to V2, you can enable several bundled extensions to maintain backwards-compatibility with certain features.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>These extensions don’t <em>replace</em> V2’s native behavior. Instead, they detect and convert V1-style options. This allows your application
+to migrate to V2 at a gradual pace.</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rendering-views"><a class="header" href="#rendering-views">Rendering views</a></h1>
+<p>V2’s method of rendering a view is:</p>
+<pre><code class="language-ruby">WidgetBlueprint[:my_view].render(widget).to_json
+</code></pre>
+<p>However, the bundled <code>ViewOption</code> extension can be enabled to allow V1-style view rendering:</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::ViewOption.new
+end
+
+WidgetBlueprint.render(widget, view: :my_view).to_json
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="ifunless-options"><a class="header" href="#ifunless-options">If/unless options</a></h1>
+<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1.</p>
+<p>You can maintain backwards compatibility using the bundled <code>LegacyConditionals</code> extension:</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::LegacyConditionals.new
+end
+</code></pre>
+<p><code>if</code>/<code>unless</code> Procs with three arguments will continue to work like they did in V1:</p>
+<pre><code class="language-ruby">field :a, if: -&gt;(field_name, object, options) { object.active? }
+</code></pre>
+<h2 id="v2-style-1"><a class="header" href="#v2-style-1">V2 style</a></h2>
+<p>V2-style <code>if</code>/<code>unless</code> Procs will continue to work. They accept a single <code>Blueprinter::V2::Context::Field</code> argument:</p>
+<pre><code class="language-ruby">field :a, if: -&gt;(ctx) {
+  field_name = ctx.field.source
+  object = ctx.object
+  options = ctx.options
+  object.active?
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="default_if-option"><a class="header" href="#default_if-option">default_if option</a></h1>
+<p>V2 has a much more flexible <code>default_if</code> option. You can maintain backwards compatibility with V1 using the <code>LegacyDefaultIf</code> extension.</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::LegacyDefaultIf.new
+end
+</code></pre>
+<p>The old <code>default_if</code> values will continue to work (until a future Blueprinter removes the constants).</p>
+<pre><code class="language-ruby">field :name, default: "N/A", default_if: Blueprinter::EMPTY_STRING
+</code></pre>
+<h2 id="v2-style-2"><a class="header" href="#v2-style-2">V2 style</a></h2>
+<p>The native V2 option allows for Procs or symbols (method names). The logic is up to you.</p>
+<p>They’re passed a <code>Blueprinter::V2::Context::Field</code> object and the extracted value.</p>
+<pre><code class="language-ruby">field :name, default: "N/A", default_if: -&gt;(ctx, val) { val.empty? }
+field :name, default: "N/A", default_if: :empty_string?
+
+def empty_string?(ctx, val) = val.empty?
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="field-name-option"><a class="header" href="#field-name-option">Field name option</a></h1>
+<p>In Blueprinter Legacy/V1, when a field’s serialized name differs from the source name you represent it like this:</p>
+<pre><code class="language-ruby"># V1: Here's a field called "description". It pulls from "desc".
+field :desc, name: :description
+</code></pre>
+<p>To allow this to continue working, enable the <code>LegacyRenameField</code> extension:</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::LegacyRenameField.new
+end
+</code></pre>
+<h2 id="v2-style-3"><a class="header" href="#v2-style-3">V2 style</a></h2>
+<p>Since Blueprinter is a serializer, the DSL should describe the serialized result, not the source object. V2 reads much more naturally:</p>
+<pre><code class="language-ruby"># V2: Here's a field called "description". It pulls from "desc".
+field :description, source: :desc
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="dynamic-options"><a class="header" href="#dynamic-options">Dynamic options</a></h1>
+<p>Associations in legacy/V1 provided an <code>:options</code> option on associations. It allowed you to define a Hash or Proc that would be merged into the render options.</p>
+<p>It was provided as a work-around when legacy/V1 began freezing options, since options could no longer be used as an arbitrary “store” in field blocks, etc.</p>
+<p>In V2 it’s provided using the <code>LegacyDynamicOptions</code> extension:</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  add Blueprinter::Extensions::LegacyDynamicOptions.new
+    
+  association :category, CategoryBlueprint, options: -&gt;(widget) {
+    # Will be merged into `ctx.options`
+    { foo: widget.foo }
+  }
+end
+</code></pre>
+<h2 id="v2-style-4"><a class="header" href="#v2-style-4">V2 style</a></h2>
+<p>V2 provides the <code>ctx.store</code> Hash for Blueprints and extensions to share information.</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  association :category, CategoryBlueprint do |widget, ctx|
+    cxt.store[:foo] = widget.foo
+    widget.category
+  end
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="extractor-option"><a class="header" href="#extractor-option">Extractor option</a></h1>
+<p>V2 does not have a specific “extractor” concept. But you can allow your existing extractors to continue working by enabling the <code>LegacyExtractorOption</code> extension.</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::LegacyExtractorOption.new
+end
+</code></pre>
+<p>It works on field options as well as Blueprint/view/partial options.</p>
+<h2 id="v2-style-5"><a class="header" href="#v2-style-5">V2 style</a></h2>
+<p>In V2 you can override Blueprinter’s field extraction using field blocks or the <code>around_field_value</code>, <code>around_object_value</code>, and <code>around_collection_value</code> extension hooks.</p>
+<pre><code class="language-ruby">class MyExtractorExtension &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def extract(ctx)
+    # Instead of yielding to get the field value, extract and return it here
+    field_source = ctx.field.source
+    object = ctx.object
+    # ...
+  end
+  
+  alias around_field_value extract
+  alias around_object_value extract
+  alias around_collection_value extract
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="new-features"><a class="header" href="#new-features">New Features</a></h1>
+<p>V2 introduces several new concepts to Blueprinter. Some of these may have been mentioned in previous sections, but continue reading for a deep dive.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="formatters"><a class="header" href="#formatters">Formatters</a></h1>
+<p>Blueprinter V2 has a more flexible and ergonomic approach to formatting, allowing any class to define its own formatter in a single line:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  format(Date) { |date| date.iso8601 }
+  format TrueClass, :boolean_str
+  format FalseClass, :boolean_str
+
+  def boolean_str(bool)
+    bool ? "Y" : "N"
+  end
+end
+</code></pre>
+<p>If your formatter needs more information (field details, options passed to render, etc) use the <code>around_field_value</code>, <code>around_object_value</code>, and <code>around_collection_value</code> extension hooks. See <code>Blueprinter::Extension</code> for the full API, or get started with the <a href="#extension-guide">Extension Guide</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="views-are-blueprints"><a class="header" href="#views-are-blueprints">Views are Blueprints</a></h1>
+<p>A view is an anonymous subclass of its Blueprint. There is little practical or technical distinction between “blueprints” and “views”.</p>
+<p>This has two important consequences:</p>
+<ol>
+<li>The DSL is <em>recursive</em>: views can do anything Blueprints can do.</li>
+<li>Views are <em>Ruby classes</em>: views can do anything Ruby classes can do.</li>
+</ol>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  set :exclude_if_nil, true
+  add MyExtension.new
+  format Time, :iso8601
+  
+  fields :name, :description
+
+  # This view is a subclass of MyBlueprint
+  view :my_view do
+    # Override inherited options
+    set :exclude_if_nil, false
+
+    # Add an extension
+    add OtherExtension.new
+
+    # Include a Ruby module. Only this view (and any child views) will have it.
+    include MyHelpers
+
+    # Override the formatter's method to ensure UTC time
+    def iso8601(t) = t.utc.iso8601
+  end
+
+  def iso8601(t) = t.iso8601
+end
+</code></pre>
+<p>You can even subclass another Blueprint’s view!</p>
+<pre><code class="language-ruby">class FooBlueprint &lt; MyBlueprint[:my_view] do
+  # ...
+end
+</code></pre>
+<h3 id="the-default-view"><a class="header" href="#the-default-view">The default view</a></h3>
+<p>The <em>default</em> view is simply an alias to the class:</p>
+<pre><code class="language-ruby">MyBlueprint == MyBlueprint[:default]
+=&gt; true
+</code></pre>
+<p>And since views are their own Blueprints, each view has its own default view:</p>
+<pre><code class="language-ruby">MyBlueprint[:my_view] == MyBlueprint[:my_view][:default]
+=&gt; true
+</code></pre>
+<p>Which brings us to the next topic: <a href="#nested-views">Nested Views</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="nested-views"><a class="header" href="#nested-views">Nested views</a></h1>
+<p>Because the <a href="#views-are-blueprints">V2 DSL is recursive</a>, you can define views inside of views.</p>
+<p>Each nested view inherits from its parent, which inherits from <em>its</em> parent, all the way up to <code>ApplicationBlueprint</code> and <code>Blueprinter::V2::Base</code>.</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  fields :name, :description
+
+  view :extended do
+    association :category, CategoryBlueprint
+
+    view :with_foo do
+      association :foo, FooBlueprint
+    end
+
+    view :with_bar do
+      association :bar, BarBlueprint
+    end
+  end
+end
+</code></pre>
+<p>You can render nested views using dot syntax:</p>
+<pre><code class="language-ruby">MyBlueprint["extended.with_foo"].render(widget).to_json
+</code></pre>
+<p>or nested Hash syntax:</p>
+<pre><code class="language-ruby">MyBlueprint[:extended][:with_bar].render(widget).to_json
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="partials"><a class="header" href="#partials">Partials</a></h1>
+<p>Partials allow you to compose your Blueprints and views from reusable pieces.</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  view :view_1 do
+    use :common_associations
+    # ...
+  end
+
+  view :view_2 do
+    use :common_associations
+    # ...
+  end
+  
+  partial :common_associations do
+    association :foo, FooBlueprint
+    association :bar, [BarBlueprint]
+  end
+end
+</code></pre>
+<p>You may only use partials defined in the current Blueprint/view (or a parent). To share code across completely separate Blueprints, use <a href="#modules">modules</a>.</p>
+<p>See the <code>Blueprinter::V2::DSL</code> docs for more info on <code>partial</code> and <code>use</code>.</p>
+<h3 id="more-than-just-fields"><a class="header" href="#more-than-just-fields">More than just fields</a></h3>
+<p>Partials have access to the full DSL, so they can set options, add extensions, formatters, views, and even other partials.</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  partial :exclude_nil_or_blank do
+    # Enable the built-in "skip if nil" option
+    set :exclude_if_nil, true
+
+    # Add an inline extension to skip blank fields
+    extension do
+      def around_field_value(ctx)
+        val = yield ctx
+        skip! if val.blank?
+        val
+      end
+    end
+  end
+end
+</code></pre>
+<p>Blueprints or views that use the above partial will skip any nil or blank fields:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  use :exclude_nil_or_blank
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="modules"><a class="header" href="#modules">Modules</a></h1>
+<p>Any Ruby module can be extended with the Blueprinter DSL:</p>
+<pre><code class="language-ruby">module MySharedBlueprintCode
+  extend Blueprinter::V2::DSL
+
+  set :exclude_if_nil, true
+  add MyExtension.new
+  
+  format Time, :iso8601
+  format Date, :iso8601
+
+  field :foo
+
+  view :full do
+    association :bar, BarBlueprint
+  end
+
+  def iso8601(val) = val.iso8601
+end
+</code></pre>
+<p>Then included into Blueprints:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  include MySharedBlueprintCode
+
+  # ...
+end
+</code></pre>
+<p>Or views:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  # ...
+
+  view :my_view do
+    include MySharedBlueprintCode
+    
+    # ...
+  end
+end
+</code></pre>
+<p>Or partials:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  # ...
+
+  partial :my_partial do
+    include MySharedBlueprintCode
+    
+    # ...
+  end
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
+<p>Extensions exist in legacy/V1, but they were added late and have limited functionality. Blueprinter V2 has been designed from the
+ground up with extensions in mind.</p>
+<h2 id="writing-extensions"><a class="header" href="#writing-extensions">Writing extensions</a></h2>
+<p>See the <code>Blueprinter::Extension</code> docs for the full API, or read through the <a href="#extension-guide">Extension Guide</a>.</p>
+<h2 id="using-extensions"><a class="header" href="#using-extensions">Using extensions</a></h2>
+<p>Extensions can be added to Blueprints, views, and partials. They’ll be inherited by child Blueprints or views.</p>
+<pre><code class="language-ruby"># Add some extensions (append)
+add MyExtension.new, MyOtherExtension.new
+
+# Prepend an extension
+add MyExtension.new, prepend: true
+
+# Remove an extension by class or block
+remove MyExtension
+remove { |ext| ext.is_a? MyExtension }
+
+# Prevent inheritance of extensions
+exclude extensions: true
+</code></pre>
+<h2 id="bundled-extensions"><a class="header" href="#bundled-extensions">Bundled extensions</a></h2>
+<p>Blueprinter V2 comes bundled with the following extensions. See the <code>Blueprinter::Extensions</code> module for full documentation about each one.</p>
+<h3 id="multijson"><a class="header" href="#multijson">MultiJson</a></h3>
+<p>Uses the <code>multi_json</code> gem to serialize JSON. See <code>Blueprinter::Extensions::MultiJson</code>.</p>
+<h3 id="opentelemetry"><a class="header" href="#opentelemetry">OpenTelemetry</a></h3>
+<p>Instruments the serialization process so you can see which Blueprints or extensions are slowing things down. See <code>Blueprinter::Extensions::OpenTelemetry</code>.</p>
+<h3 id="fieldorder"><a class="header" href="#fieldorder">FieldOrder</a></h3>
+<p>Customizes the field order in the serialized output. See <code>Blueprinter::Extensions::FieldOrder</code>.</p>
+<h3 id="v1-compatibility-extensions"><a class="header" href="#v1-compatibility-extensions">V1 Compatibility Extensions</a></h3>
+<p>These extensions offer V1-compatibility for some options. They’re covered under the <a href="#compatible-changes">Compatible Changes</a> section.</p>
 <ul>
-<li><a href="#around_result">around_result</a> runs once around each entire result</li>
-<li><a href="#around_serialize_object">around_serialize_object</a> runs around each object’s serialization</li>
-<li><a href="#around_serialize_collection">around_serialize_collection</a> runs around each collection’s serialization</li>
-<li><a href="#around_blueprint">around_blueprint</a> runs each time a blueprint serializes an object</li>
+<li><code>Blueprinter::Extensions::LegacyConditionals</code></li>
+<li><code>Blueprinter::Extensions::LegacyDefaultIf</code></li>
+<li><code>Blueprinter::Extensions::LegacyDynamicOptions</code></li>
+<li><code>Blueprinter::Extensions::LegacyExtractorOption</code></li>
+<li><code>Blueprinter::Extensions::LegacyRenameField</code></li>
+<li><code>Blueprinter::Extensions::ViewOption</code></li>
 </ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="extension-guide"><a class="header" href="#extension-guide">Extension Guide</a></h1>
+<p>Is there some functionality you wish Blueprinter had? Building an extension might be the best way to add it!</p>
+<p>This guide will walk you through building some sample extensions. While reading the docs for <code>Blueprinter::Extension</code> is the best way to learn
+the entire API, this guide shows off some of the powerful things you can do.</p>
+<p>If you need more inspiration, look over some real-world extensions like <a href="https://github.com/procore-oss/blueprinter-activerecord/">blueprinter-activerecord</a>
+or Blueprinter’s bundled extensions (TODO link).</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="basics"><a class="header" href="#basics">Basics</a></h1>
+<p>An extension will subclass <code>Blueprinter::Extension</code> and define one or more hook methods. (See <code>Blueprinter::Extension</code> for documentation about all hooks.)</p>
+<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
+  def around_field_value(ctx)
+    # get the value by yielding to other extensions and Blueprinter's internals
+    val = yield ctx
+
+    # skip this field and halt further extensions if the value is blank
+    skip! if ctx.field.options[:exclude_if_blank] &amp;&amp; val.blank?
+
+    # return the value for the next extension (or Blueprinter) to use
+    val
+  end
+end
+</code></pre>
+<p>Then add the extension to a blueprint:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; Blueprinter::V2::Base
+  add ExcludeIfBlankExtension.new
+
+  field :name, exclude_if_blank: true
+end
+</code></pre>
+<h2 id="context-objects"><a class="header" href="#context-objects">Context Objects</a></h2>
+<p>All extension hooks take a single argument: a context object. It contains the “context” of the current operation (Blueprint, options, field, the object, etc.) so you can react to it and, in some cases, alter it.</p>
+<p>There are several different context object types. See the <code>Blueprinter::V2::Context</code> module for documentation on which hooks receive which types, and what can be done with them.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="exclude-if-blank"><a class="header" href="#exclude-if-blank">Exclude If Blank</a></h1>
+<p>Here’s a more fully formed version of the ExcludeIfBlank extension from the previous section.</p>
+<p>It works just like the built-in <code>exclude_if_nil</code> option, but checks for <code>blank?</code> instead. It checks the Blueprint
+options first, then allows fields to override it.</p>
+<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def around_field_value(ctx)
+    val = yield ctx
+
+    exclude = ctx.blueprint.options[:exclude_if_blank]
+    exclude = ctx.field.options[:exclude_if_blank] if ctx.field.options.key? :exclude_if_blank
+    skip! if exclude &amp;&amp; val.blank?
+
+    val
+  end
+end
+</code></pre>
+<p>Add it to your <code>ApplicationBlueprint</code> and use it in your blueprints.</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add ExcludeIfBlankExtension.new
+end
+</code></pre>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  field :name
+  field :description, exclude_if_blank: true
+end
+</code></pre>
+<pre><code class="language-ruby">class CategoryBlueprint &lt; ApplicationBlueprint
+  set :exclude_if_blank, true
+
+  field :name, exclude_if_blank: false
+  field :description
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="custom-extractor"><a class="header" href="#custom-extractor">Custom Extractor</a></h1>
+<p>Blueprinter V2 automatically handles extraction from Hashes (symbol and string keys) and objects (<code>public_send</code>). If you have a more complex case, use the <code>around_field_value</code>, <code>around_object_value</code>, or   <code>around_collection_value</code> extension hooks.</p>
+<p>The following example extension allows you to define extraction behavior for a given class:</p>
+<pre><code class="language-ruby">class CustomExtractor &lt; Blueprinter::Extension
+  def initialize(klass, &amp;extractor)
+    @klass = klass
+    @extractor = extractor
+  end
+  
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def around_field_value(ctx)
+    if ctx.object.is_a? @klass
+      # Use custom extraction
+      @extractor.call(ctx.field.source, ctx.object)
+    else
+      # Let Blueprinter (or another extension) handle extraction
+      yield ctx
+    end
+  end
+
+  # Same behavior for associations
+  alias around_object_value around_field_value
+  alias around_collection_value around_field_value
+end
+</code></pre>
+<p>Then add it to your base Blueprint, or to a specific Blueprint:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  add CustomExtractor.new(MyClass) { |attr, object|
+    # extract `attr` from `object` and return
+  }
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="blueprint-decorator"><a class="header" href="#blueprint-decorator">Blueprint Decorator</a></h1>
+<p>This example adds metadata to the output of a Blueprint, similar to Legacy/V1’s transformer feature.</p>
+<pre><code class="language-ruby">class DecoratorExtension &lt; Blueprinter::Extension
+  def initialize(attr, &amp;decorator)
+    @attr = attr
+    @decorator = decorator
+  end
+
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_blueprint(ctx)
+    result = yield ctx
+    result[@attr] = @decorator.call(ctx.object)
+    result
+  end
+end
+</code></pre>
+<p>Add the extension to whatever blueprints need metadata:</p>
+<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
+  add DecoratorExtension.new(:metadata) { |object|
+    # extract and return metadata from the object
+  }
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
+<p>Blueprinter bundles the <code>Blueprinter::Extensions::OpenTelemetry</code> extension. But if that doesn’t work with your tooling, build your own!</p>
+<pre><code class="language-ruby">class MyTelemetryExtension
+  def initialize(my_tel)
+    @my_tel = my_tel
+  end
+
+  # Create a span for object serialization
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_serialize_object(ctx)
+    @my_tel.span("blueprint.object", blueprint: ctx.blueprint.to_s) do
+      yield ctx
+    end
+  end
+
+  # Create a span for collection serialization
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_serialize_collection(ctx)
+    @my_tel.span("blueprint.collection", blueprint: ctx.blueprint.to_s) do
+      yield ctx
+    end
+  end
+
+  # Create a span for other extension hooks
+  # @param ctx [Blueprinter::V2::Context::Hook]
+  def around_hook(ctx)
+    @my_tel.span("blueprint.extension", extension: ctx.extension.class.name, hook: ctx.hook) do
+      yield
+    end
+  end
+
+  # Prevent `around_hook` from running around this extension's own hooks
+  def hidden? = true
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="camelize-fields"><a class="header" href="#camelize-fields">Camelize Fields</a></h1>
+<p>This example alters the <code>source</code> of each field to use camel case, leaving the serialized name as-is.</p>
+<pre><code class="language-ruby">class CamelizedSourceExtension &lt; Blueprinter::Extension
+  def around_blueprint_init(ctx)
+    ctx.fields.each do |field|
+      field.source = field.source.to_s.camelize(:lower).to_sym
+    end
+    yield ctx
+  end
+end
+</code></pre>
+<p>It’s the equivalent of doing this for every field:</p>
+<pre><code class="language-ruby">field :foo_bar, source: :fooBar
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="yaml-serializer"><a class="header" href="#yaml-serializer">YAML Serializer</a></h1>
+<p>This example adds YAML to Blueprinter. Why? Because we can.</p>
+<pre><code class="language-ruby">class YamlSerializerExtension &lt; Blueprinter::Extension
+  def around_result(ctx)
+    case ctx.format
+    when :yaml
+      # Get the Hash/Array result
+      result = yield ctx
+      
+      # Convert it to YAML
+      yaml = YAML.dump result
+      
+      # Return YAML, declaring it as already serialized
+      serialized yaml
+    else
+      # Let Blueprinter or another extension handle other formats
+      yield ctx
+    end
+  end
+end
+</code></pre>
+<p>You can serialize to your custom format using the <code>to</code> method:</p>
+<pre><code class="language-ruby">MyBlueprint.render(object).to(:yaml)
+</code></pre>
+<h3 id="extensions-that-serialize-should-be-added-first"><a class="header" href="#extensions-that-serialize-should-be-added-first">Extensions that serialize should be added FIRST</a></h3>
+<p>When you’re adding an extension that adds a serialization format, or replaces the built-it <code>:json</code> or <code>:hash</code> ones, be sure it’s listed <strong>first</strong>.</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add YamlSerializerExtension.new, OtherExtension.new
+end
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>

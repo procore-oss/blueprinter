@@ -3,7 +3,7 @@
 module Blueprinter
   module Extensions
     #
-    # An optional, built-in extension for a ":view" option on render.
+    # Support for Legacy/V1's `:view` option on `render`.
     #
     class ViewOption < Extension
       # @param ctx [Blueprinter::V2::Context::Result]

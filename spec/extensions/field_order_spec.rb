@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
 describe Blueprinter::Extensions::FieldOrder do
-  let(:instances) { Blueprinter::V2::InstanceCache.new }
-  let(:serializer) { Blueprinter::V2::Serializer.new(blueprint, {}, instances, store: {}, initial_depth: 1) }
-  let(:context) { Blueprinter::V2::Context::Render.new(serializer.blueprint, serializer.fields, {}, 1) }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do
       field :foo
@@ -13,13 +10,13 @@ describe Blueprinter::Extensions::FieldOrder do
   end
 
   it 'sorts fields alphabetically' do
-    ext = described_class.new { |a, b| a.name <=> b.name }
-    ctx = ext.around_blueprint_init(context) { |ctx| ctx }
-    expect(ctx.fields.map(&:name)).to eq %i(bar foo id)
+    blueprint.add described_class.new { |a, b| a.name <=> b.name }
+    result = blueprint.render({}).to_json
+    expect(result).to eq '{"bar":null,"foo":null,"id":null}'
   end
 
   it 'sorts fields alphabetically with id first' do
-    ext = described_class.new do |a, b|
+    blueprint.add described_class.new { |a, b|
       if a.name == :id
         -1
       elsif b.name == :id
@@ -27,8 +24,8 @@ describe Blueprinter::Extensions::FieldOrder do
       else
         a.name <=> b.name
       end
-    end
-    ctx = ext.around_blueprint_init(context) { |ctx| ctx }
-    expect(ctx.fields.map(&:name)).to eq %i(id bar foo)
+    }
+    result = blueprint.render({}).to_json
+    expect(result).to eq '{"id":null,"bar":null,"foo":null}'
   end
 end

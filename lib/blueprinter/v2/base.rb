@@ -4,7 +4,72 @@ require 'blueprinter/v2/specification'
 
 module Blueprinter
   module V2
-    # Base class for V2 Blueprints
+    #
+    # Base class for V2 Blueprints. See {Blueprinter::V2::DSL} for the full API.
+    #
+    # The following example creates two views: `:default` (top-level) and `:with_parts`, which inherits everything from
+    # `:default`.
+    #
+    # ```
+    # class WidgetBlueprint < ApplicationBlueprint
+    #   field :name
+    #   field :description, default: "None"
+    #   association :category, CategoryBlueprint
+    #
+    #   view :with_parts do
+    #     association :parts, [PartBlueprint]
+    #   end
+    # end
+    # ```
+    #
+    # == ApplicationBlueprint
+    #
+    # It's good practice to define a base Blueprint for your applicaiton that defines common fields, views, options, etc.
+    #
+    # ```
+    # class ApplicationBlueprint < Blueprinter::V2::Base
+    #   set :exclude_if_nil, true
+    #   add MyExtension.new
+    #   format(Time) { |t| t.iso8601 }
+    #
+    #   field :id
+    #
+    #   view :identity do
+    #     exclude fields: true
+    #     field :id
+    #   end
+    #
+    #   partial :timestamps do
+    #     fields :created_at, :updated_at, :deleted_at
+    #   end
+    # end
+    # ```
+    #
+    # == Inheritance
+    #
+    # Blueprints can inherit from other Blueprints. They will inherit the parent's fields, formatters, partials, views,
+    # options, and extensions, and may override as necessary.
+    #
+    # ```
+    # class SpecialzedWidgetBlueprint < WidgetBlueprint
+    #   # ...
+    # end
+    # ```
+    #
+    # You can also inherit directly from another Blueprint's view:
+    #
+    # ```
+    # class WidgetPartsBlueprint < WidgetBlueprint[:with_parts]
+    #   # ...
+    # end
+    # ```
+    #
+    # == Initialization
+    #
+    # A Blueprint class is initialized exactly once during a given render. The instance is available through the
+    # context object passed to if/unless/default Procs, field definition blocks, and extension hooks. See
+    # {Blueprinter::V2::Context} for more info.
+    #
     class Base
       extend DSL::Config
       extend DSL::Data
@@ -23,6 +88,7 @@ module Blueprinter
         attr_accessor :nodes
 
         # Initialize subclass
+        # @!visibility private
         def inherited(subclass)
           subclass.nodes = []
           subclass.children = { default: subclass }
@@ -33,24 +99,34 @@ module Blueprinter
           subclass.children_mutex = Mutex.new
         end
 
+        # @!visibility private
+        # @return [Blueprinter::V2::Serializer]
         def serializer
           eval! unless evaled?
           @serializer
         end
 
-        # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
+        # A descriptive name for the Blueprint view (`"WidgetBlueprint.extended"`)
         def inspect = blueprint_name
 
-        # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
+        # A descriptive name for the Blueprint view (`"WidgetBlueprint.extended"`)
         def to_s = blueprint_name
 
         #
         # Access a child view.
         #
         #   MyBlueprint[:extended]
-        #   MyBlueprint["extended.plus"] or MyBlueprint[:extended][:plus]
         #
-        # @param name [Symbol|String] Name of the view, e.g. :extended, "extended.plus"
+        # Access nested views using dot syntax or nested Hash syntax.
+        #
+        #   MyBlueprint["extended.plus"]
+        #   MyBlueprint[:extended][:plus]
+        #
+        # The `:default` view is an alias to the Blueprint class itself:
+        #
+        #   MyBluprint[:default] == MyBlueprint
+        #
+        # @param name [Symbol|String] Name of the view (`:extended`, `"extended.plus"`)
         # @return [Class] A descendent of Blueprinter::V2::Base
         #
         def [](name)
@@ -90,6 +166,7 @@ module Blueprinter
         protected
 
         # Apply partials and field exclusions
+        # @!visibility private
         # @api private
         def eval!
           return if evaled? || self == V2::Base
@@ -141,10 +218,10 @@ module Blueprinter
         @options = self.class.spec.options.dup
       end
 
-      # A descriptive name for the Blueprint view, e.g. "#<WidgetBlueprint.extended>"
+      # A descriptive name for the Blueprint view (`"#<WidgetBlueprint.extended>"`)
       def inspect = self.class.to_s
 
-      # A descriptive name for the Blueprint view, e.g. "WidgetBlueprint.extended"
+      # A descriptive name for the Blueprint view (`"WidgetBlueprint.extended"`)
       def to_s = self.class.to_s
     end
   end

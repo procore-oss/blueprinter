@@ -3,9 +3,39 @@
 module Blueprinter
   module V2
     module DSL
+      # Set and unset options, add or remove extensions.
       module Config
         #
-        # Set an option value.
+        # Set an option on the Blueprint, view, or partial.
+        #
+        # ```
+        # class WidgetBlueprint < ApplicationBlueprint
+        #   set :exclude_if_nil, true
+        #   # ...
+        #
+        #   # You can override options in views
+        #   view :extended do
+        #     set :exclude_if_nil, false
+        #     # ...
+        #   end
+        # end
+        # ```
+        #
+        # == Accessing the previous value
+        #
+        # When overriding an option in a child view or Blueprint, sometimes you may want to check,
+        # or incorporate, the previous value. You can do this with a block:
+        #
+        # ```
+        # set :foo, "foo"
+        #
+        # view :extended do
+        #   set :foo do |val|
+        #     # the value will be "foobar"
+        #     "#{val}bar"
+        #   end
+        # end
+        # ```
         #
         # @param key [Symbol] Option name
         # @param value [Object | nil] Object value
@@ -19,7 +49,7 @@ module Blueprinter
         #
         # Clear the given options.
         #
-        # @param *keys [Symbol]
+        # @param keys [Symbol]
         #
         def unset(*keys)
           keys.each { |key| nodes << Nodes::UnsetOpt.new(key) }
@@ -28,7 +58,17 @@ module Blueprinter
         #
         # Adds one or more extensions.
         #
-        # @param *extensions [Blueprinter::Extension] Extension instances to add
+        # ```
+        # class WidgetBlueprint < ApplicationBlueprint
+        #   add MyExtension.new
+        #
+        #   view :extended do
+        #     add OtherExtension.new
+        #   end
+        # end
+        # ```
+        #
+        # @param extensions [Blueprinter::Extension] Extension instances to add
         # @param prepend [true | false] Add this extension before all others
         #
         def add(*extensions, prepend: false)
@@ -46,7 +86,12 @@ module Blueprinter
         #
         # Removes extensions of the given classes, or that satisfy the given block.
         #
-        # @param *klasses [Class]
+        # ```
+        # remove ExtensionIDontWant
+        # remove { |ext| ext.is_a? ExtensionIDontWant }
+        # ```
+        #
+        # @param klasses [Class]
         # @yield [Blueprinter::Extension] Return true if the given extension should be removed
         #
         def remove(*klasses, &reject)
@@ -57,15 +102,22 @@ module Blueprinter
         #
         # Define an anonymous extension and add it to the current context.
         #
-        #   class WidgetBlueprint < ApplicationBlueprint
-        #     extension do
-        #       # modify every object before serialization
-        #       def around_serialize_object(ctx)
-        #         object = modify ctx.object
-        #         yield object
-        #       end
+        # ```
+        # class WidgetBlueprint < ApplicationBlueprint
+        #   extension do
+        #     # Decorate Blueprint output
+        #     def around_blueprint(ctx)
+        #       hash = yield ctx
+        #       hash[:meta] = metadata ctx.object
+        #       hash
+        #     end
+        #
+        #     def metadata(object)
+        #       # ...
         #     end
         #   end
+        # end
+        # ```
         #
         def extension(&block)
           bp_name = blueprint_name

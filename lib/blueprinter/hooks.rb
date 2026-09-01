@@ -2,6 +2,7 @@
 
 module Blueprinter
   # An interface for running extension hooks efficiently
+  # @!visibility private
   class Hooks
     # @param extensions [Array<Blueprinter::Extension>] The extensions we're going to run
     def initialize(extensions)
@@ -17,7 +18,7 @@ module Blueprinter
     # Checks if any hooks of the given name are registered.
     #
     # @param hook [Symbol] Name of hook to call
-    # @return [Boolean]
+    # @return [True | False]
     #
     def registered?(hook)
       @hooks.fetch(hook).any?
@@ -34,7 +35,7 @@ module Blueprinter
     #
     # @param hook [Symbol] Name of hook to call
     # @param ctx [Blueprinter::V2::Context] The argument to the hooks
-    # @param require_yield [Boolean] Throw an exception if a hook doesn't yield
+    # @param require_yield [True | False] Throw an exception if a hook doesn't yield
     # @return [Object] Object returned from the outer hook (or from the given block, if there are no hooks)
     #
     def around(hook, ctx, require_yield: false, &)

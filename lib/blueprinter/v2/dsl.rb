@@ -1,17 +1,23 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module Blueprinter
   module V2
-    # Methods for defining Blueprint fields and views
     #
-    # Modules may extend this module to gain acces to the DSL. Blueprints may then include such modules to
-    # pull in their functionality.
+    # Methods for defining your Blueprints and views.
     #
-    # ```ruby
+    # For readability, DSL methods have been organized into the following modules:
+    #
+    # * {Blueprinter::V2::DSL::Data} - Define fields, associations, and formatting.
+    # * {Blueprinter::V2::DSL::Views} - Create and use views and partials.
+    # * {Blueprinter::V2::DSL::Config} - Set options and add extensions.
+    #
+    # == Using the DSL in your own modules
+    #
+    # You can also use the Blueprinter DSL in your own Ruby modules, then include them in your Blueprints:
+    #
+    # ```
     # module MySharedBlueprinterCode
-    #   extend Blueprinter::DSL
+    #   extend Blueprinter::V2::DSL
     #
     #   set :some_option, true
     #

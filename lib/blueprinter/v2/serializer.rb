@@ -5,7 +5,7 @@ require 'blueprinter/hooks'
 
 module Blueprinter
   module V2
-    # rubocop:disable Metrics/ClassLength
+    # rubocop:disable-next Metrics/ClassLength
     # @!visibility private
     class Serializer
       SIGNAL = :_blueprinter_signal
@@ -123,11 +123,11 @@ module Blueprinter
       end
 
       # Long and ugly for performance
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+      # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
       def _serialize(config, object, instances:, store:, depth:, ctx: nil)
         ctx&.object = object
         parent = nil
-        # rubocop:disable Metrics/BlockLength
+        # rubocop:disable-next Metrics/BlockLength
         config.fields.each_with_object({}) do |field, result|
           ctx&.field = field
           next if field._has_conditional && FieldLogic.skip?(ctx, field)
@@ -160,9 +160,7 @@ module Blueprinter
                                                                                   depth: depth + 1)
             end
         end
-        # rubocop:enable Metrics/BlockLength
       end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
 
       # Runs any `around_blueprint_init` hooks on this Blueprint and returns the configuration that should be used.
       # The `around_blueprint_init` hooks may modify the blueprint's options or fields (for that render only).
@@ -214,7 +212,7 @@ module Blueprinter
       end
 
       # Skip Context::Field allocation when no field hooks, conditionals, callable defaults, or Proc extractors are in play
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def needs_field_ctx?(fields)
         @field_hooks.values.any? || fields.any? do |f|
           default = f._merged_options[:default]
@@ -222,9 +220,8 @@ module Blueprinter
             (!!f.block && f.block.arity != 0 && f.block.arity != 1)
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
-      # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+      # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def finalize_fields!(fields, blueprint_opts)
         fields.each do |field|
           next if field.frozen?
@@ -251,7 +248,6 @@ module Blueprinter
           field.freeze
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
       def field_serializer(field)
         if field.blueprint.is_a? Proc
@@ -263,6 +259,5 @@ module Blueprinter
         end
       end
     end
-    # rubocop:enable Metrics/ClassLength
   end
 end

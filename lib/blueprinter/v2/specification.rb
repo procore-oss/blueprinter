@@ -53,7 +53,7 @@ module Blueprinter
       end
 
       # Returns the declared extensions for this blueprint/view
-      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable-next Metrics/CyclomaticComplexity
       def extensions
         initial_val = exclusions.extensions ? [] : parent.extensions.dup
         nodes.each_with_object(initial_val) do |node, acc|
@@ -69,7 +69,6 @@ module Blueprinter
           end
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       # Returns the declared formatters for this blueprint/view
       def formatters

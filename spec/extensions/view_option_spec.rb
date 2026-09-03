@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-describe Blueprinter::Extensions::ViewOption do
+describe Blueprinter::Extensions::LegacyOptions do
   subject { described_class.new }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do

@@ -1,14 +1,10 @@
 # Extractor option
 
-V2 does not have a specific "extractor" concept. But you can allow your existing extractors to continue working by enabling the `LegacyExtractorOption` extension.
+V2 does not have a specific "extractor" concept, but the `LegacyOptions` extension allows your existing extractors to continue working.
 
 ```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyExtractorOption.new
-end
+field :foo, extractor: MyExtractor
 ```
-
-It works on field options as well as Blueprint/view/partial options.
 
 ## V2 style
 

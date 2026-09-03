@@ -4,12 +4,12 @@ Associations in legacy/V1 provided an `:options` option on associations. It allo
 
 It was provided as a work-around when legacy/V1 began freezing options, since options could no longer be used as an arbitrary "store" in field blocks, etc.
 
-In V2 it's provided using the `LegacyDynamicOptions` extension:
+In V2 it's enabled by the `LegacyDynamicOptions` extension. It's recommended to only add this extension to specific blueprints that need it:
 
 ```ruby
 class WidgetBlueprint < ApplicationBlueprint
   add Blueprinter::Extensions::LegacyDynamicOptions.new
-    
+
   association :category, CategoryBlueprint, options: ->(widget) {
     # Will be merged into `ctx.options`
     { foo: widget.foo }

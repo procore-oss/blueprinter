@@ -1,16 +1,6 @@
 # If/unless options
 
-V2's `if` and `unless` options have different Proc arguments than legacy/V1.
-
-You can maintain backwards compatibility using the bundled `LegacyConditionals` extension:
-
-```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyConditionals.new
-end
-```
-
-`if`/`unless` Procs with three arguments will continue to work like they did in V1:
+V2's `if` and `unless` options have different Proc arguments than legacy/V1. If you enable the `LegacyOptions` extension, `if`/`unless` Procs with three arguments will continue to work like they did in V1:
 
 ```ruby
 field :a, if: ->(field_name, object, options) { object.active? }

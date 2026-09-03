@@ -2,7 +2,7 @@
 
 require 'blueprinter/empty_types'
 
-describe Blueprinter::Extensions::LegacyDefaultIf do
+describe Blueprinter::Extensions::LegacyOptions do
   subject { described_class.new }
   let(:blueprint) do
     Class.new(Blueprinter::V2::Base) do

@@ -3,7 +3,7 @@
 describe "Blueprinter::V2 Exclusions" do
   let(:application_blueprint) do
     Class.new(Blueprinter::V2::Base) do
-      add Blueprinter::Extensions::ViewOption.new
+      add Blueprinter::Extensions::LegacyOptions.new
       set :my_opt, true
       format(TrueClass) { "Y" }
       fields :id, :created_at, :updated_at
@@ -37,7 +37,7 @@ describe "Blueprinter::V2 Exclusions" do
     ref = blueprint.reflections[:default]
     expect(ref.fields.keys).to eq %i[id created_at updated_at name]
     expect(ref.options).to eq({ my_opt: true, foo: "foo" })
-    expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::ViewOption Blueprinter::Extensions::FieldOrder]
+    expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::LegacyOptions Blueprinter::Extensions::FieldOrder]
     expect(blueprint.spec.formatters.keys).to match_array [TrueClass]
   end
 

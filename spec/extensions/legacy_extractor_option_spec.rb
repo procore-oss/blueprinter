@@ -2,7 +2,7 @@
 
 require 'blueprinter/empty_types'
 
-describe Blueprinter::Extensions::LegacyExtractorOption do
+describe Blueprinter::Extensions::LegacyOptions do
   subject { described_class.new }
   let(:extractor) do
     Class.new do

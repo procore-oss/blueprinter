@@ -20,8 +20,14 @@ The `around_field_value` hook and friends are the simplest way to implement it:
 
 ```ruby
 class CamelCaseSource < Blueprinter::Extension
+  def initialize
+    around_field_value :camelize
+    around_object_value :camelize
+    around_collection_value :camelize
+  end
+
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def camelize(ctx)
     attr = ctx.field.source_str.camelize
     if ctx.object.is_a? Hash
       ctx.object.key?(attr) ? ctx.object[attr] : ctx.object[attr.to_sym]
@@ -29,9 +35,6 @@ class CamelCaseSource < Blueprinter::Extension
       ctx.object.public_send(attr)
     end
   end
-
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
 end
 ```
 
@@ -74,8 +77,12 @@ What if we could alter the field definitions programatically, before anything is
 
 ```ruby
 class CamelCaseSource < Blueprinter::Extension
+  def initialize
+    around_blueprint_init :camelize
+  end
+
   # @param ctx [Blueprinter::V2::Context::Init]
-  def around_blueprint_init(ctx)
+  def camelize(ctx)
     ctx.fields.each do |field|
       field.source = field.source_str.camelize.to_sym
     end

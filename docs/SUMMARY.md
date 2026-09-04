@@ -32,5 +32,6 @@
   - [Telemetry](./extensions/telemetry.md)
   - [Camelize Fields](./extensions/camelize-fields.md)
   - [YAML Serializer](./extensions/yaml-serializer.md)
+  - [Performance](./extensions/performance.md)
 
 - [Legacy/V1 Docs](./v1.md)

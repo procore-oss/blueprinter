@@ -12,6 +12,7 @@ module Blueprinter
       end
       @hooks.freeze
       @hook_around_hook = registered? :around_hook
+      @around_hooks = @hooks[:around_hook]
     end
 
     #
@@ -40,10 +41,28 @@ module Blueprinter
     #
     def around(hook, ctx, require_yield: false, &)
       hooks = @hooks.fetch(hook)
-      _around(hooks, hook, 0, ctx, ctx.class, require_yield:, &)
+      if !@hook_around_hook && !require_yield
+        _around_direct(hooks, hook, 0, ctx, ctx.class, &)
+      else
+        _around(hooks, hook, 0, ctx, ctx.class, require_yield:, &)
+      end
     end
 
     private
+
+    # Fast path: no around_hook wrapping, no require_yield
+    def _around_direct(hooks, hook, idx, ctx, klass, &)
+      ext = hooks[idx]
+      return yield ctx if ext.nil?
+
+      ext.public_send(hook, ctx) do |yctx|
+        unless yctx.is_a?(klass)
+          raise Errors::ExtensionHook.new(ext, hook, "should yield `#{klass.name}` but yielded `#{yctx.inspect}`")
+        end
+
+        _around_direct(hooks, hook, idx + 1, yctx || ctx, klass, &)
+      end
+    end
 
     # Runs hooks recursively
     def _around(hooks, hook, idx, ctx, expected_yield, require_yield: false, &)
@@ -70,7 +89,6 @@ module Blueprinter
     def call(ext, hook, ctx, &)
       return ext.public_send(hook, ctx, &) if !@hook_around_hook || ext.hidden? || hook == :around_hook
 
-      hooks = @hooks.fetch(:around_hook)
       # Hacky, but re-using this context object saves tons of time
       hook_ctx = Thread.current[:_blueprinter_hook_ctx] ||= V2::Context::Hook.new
       hook_ctx.blueprint = ctx.blueprint
@@ -81,7 +99,7 @@ module Blueprinter
       hook_ctx.store = ctx.store
       hook_ctx.depth = ctx.depth
       result = nil
-      _around(hooks, :around_hook, 0, hook_ctx, NilClass, require_yield: true) do
+      _around(@around_hooks, :around_hook, 0, hook_ctx, NilClass, require_yield: true) do
         # return the inner hook's value, not around_hook's
         result = ext.public_send(hook, ctx, &)
       end

@@ -84,4 +84,27 @@ describe 'Extraction' do
     result = blueprint.serializer.object(object, {}, instances:, store:, depth: 1)
     expect(result).to eq({ foo: 'Foo!' })
   end
+
+  context 'manual extraction' do
+    let(:field) { blueprint.reflections[:default].fields.fetch(:foo) }
+
+    it 'extracts Symbol keys from a Hash' do
+      value = field.extract({ foo: 'Foo', 'foo' => 'foo' })
+      expect(value).to eq 'Foo'
+    end
+
+    it 'extracts String keys from a Hash' do
+      value = field.extract({ 'foo' => 'foo' })
+      expect(value).to eq 'foo'
+    end
+
+    it 'extracts from an object' do
+      klass = Class.new do
+        attr_reader :foo
+        def initialize(val) = @foo = val
+      end
+      value = field.extract(klass.new('Foo'))
+      expect(value).to eq 'Foo'
+    end
+  end
 end

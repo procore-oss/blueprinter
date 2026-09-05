@@ -64,7 +64,6 @@ module Blueprinter
     autoload :Context, 'blueprinter/v2/context'
     autoload :DSL, 'blueprinter/v2/dsl'
     autoload :Extensions, 'blueprinter/v2/extensions'
-    autoload :Extractors, 'blueprinter/v2/extractors'
     autoload :FieldLogic, 'blueprinter/v2/field_logic'
     autoload :FieldSerializers, 'blueprinter/v2/field_serializers'
     autoload :Formatter, 'blueprinter/v2/formatter'

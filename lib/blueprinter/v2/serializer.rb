@@ -136,13 +136,13 @@ module Blueprinter
           if (field_hook = @field_hooks[field.type])
             value = catch SIGNAL do
               @hooks.around(field_hook, ctx) do
-                val = field._extractor.extract(field, object, ctx:)
+                val = field.block ? field.block.call(object, ctx) : field.extract(object)
                 field._has_default ? FieldLogic.value_or_default(field, val, ctx:) : val
               end
             end
             next if value == SIG_SKIP
           else
-            value = field._extractor.extract(field, object, ctx:)
+            value = field.block ? field.block.call(object, ctx) : field.extract(object)
             value = FieldLogic.value_or_default(field, value, ctx:) if field._has_default
           end
 
@@ -219,7 +219,7 @@ module Blueprinter
         @field_hooks.values.any? || fields.any? do |f|
           default = f._merged_options[:default]
           f._has_conditional || !!f._merged_options[:default_if] || default.is_a?(Proc) || default.is_a?(Symbol) ||
-            (!!f.value_proc && f.value_proc.arity != 0 && f.value_proc.arity != 1)
+            (!!f.block && f.block.arity != 0 && f.block.arity != 1)
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
@@ -240,7 +240,6 @@ module Blueprinter
                                                                                       !field.options.key?(:exclude_if_nil)
 
           # precompute some checks
-          field._extractor = field.value_proc ? Extractors::Proc : Extractors::Property
           field._has_conditional = field._merged_options.key?(:if) || field._merged_options.key?(:unless)
           field._has_default = field._merged_options.key?(:default)
           field._serializer = field_serializer(field) if field.association?

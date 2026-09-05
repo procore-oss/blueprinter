@@ -29,7 +29,7 @@ module Blueprinter
       #   @return [Symbol] Method name/Hash key to pull the field value from
       # @!attribute [r] source_str
       #   @return [String] Same as `source` but a string
-      # @!attribute [r] value_proc
+      # @!attribute [r] block
       #   @return [Proc | nil] A proc to extract the value
       # @!attribute [r] options
       #   @return [Hash] Options defined on the field
@@ -41,8 +41,6 @@ module Blueprinter
       #   @return Internal - DO NOT USE
       # @!attribute [r] _has_default
       #   @return Internal - DO NOT USE
-      # @!attribute [r] _extractor
-      #   @return Internal - DO NOT USE
       # @!attribute [r] _serializer
       #   @return Internal - DO NOT USE
       Field = Struct.new(
@@ -51,21 +49,31 @@ module Blueprinter
         :source,
         :source_str,
         :options,
-        :value_proc,
+        :block,
         :blueprint,
         :_merged_options,
         :_has_conditional,
         :_has_default,
-        :_extractor,
         :_serializer,
         keyword_init: true
       ) do
         include Helpers
 
+        # Extract the field value from object
+        # @param object [Object]
+        # @return [Object]
+        def extract(object)
+          if object.is_a?(Hash)
+            object.key?(source) ? object[source] : object[source_str]
+          else
+            object.public_send(source)
+          end
+        end
+
         # Returns a copy of this field that extensions can modify
         # @!visibility private
         def to_configurable
-          Configurable.new(type, name, source, options.dup, value_proc, blueprint, self)
+          Configurable.new(type, name, source, options.dup, block, blueprint, self)
         end
       end
 
@@ -81,13 +89,13 @@ module Blueprinter
       #   @return [Symbol] Method name/Hash key to pull the field value from
       # @!attribute [rw] options
       #   @return [Hash] Options defined on the field
-      # @!attribute [rw] value_proc
+      # @!attribute [rw] block
       #   @return [Proc | nil] A proc to extract the value
       # @!attribute [r] blueprint
       #   @return [Class | nil] Blueprint to serialize with (objects and collections only)
       # @!attribute [r] _original
       #   @return Internal - DO NOT USE
-      Configurable = Struct.new(:type, :name, :source, :options, :value_proc, :blueprint, :_original) do
+      Configurable = Struct.new(:type, :name, :source, :options, :block, :blueprint, :_original) do
         include Helpers
 
         # Remove setters from field that shouldn't be changed
@@ -108,7 +116,7 @@ module Blueprinter
             source: source.to_sym,
             source_str: source == _original.source ? _original.source_str : source.to_s,
             options:,
-            value_proc:,
+            block:,
             blueprint:
           )
         end

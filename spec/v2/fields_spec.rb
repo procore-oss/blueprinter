@@ -19,7 +19,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.fields[:description].source).to eq :desc
       expect(ref.fields[:description].options[:if].class.name).to eq "Proc"
       expect(ref.fields[:foo].name).to eq :foo
-      expect(ref.fields[:foo].value_proc.class.name).to eq "Proc"
+      expect(ref.fields[:foo].block.class.name).to eq "Proc"
     end
 
     it 'adds multiple fields with options' do
@@ -43,7 +43,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.fields[:status].name).to eq :status
       expect(ref.fields[:status].source).to eq :status
       expect(ref.fields[:status].options).to eq({})
-      expect(ref.fields[:status].value_proc).to_not be nil
+      expect(ref.fields[:status].block).to_not be nil
     end
   end
 
@@ -68,7 +68,7 @@ describe "Blueprinter::V2 Fields" do
       expect(ref.collections[:widgets].options[:if].class.name).to eq "Proc"
       expect(ref.objects[:foo].name).to eq :foo
       expect(ref.objects[:foo].blueprint).to eq widget_blueprint
-      expect(ref.objects[:foo].value_proc.class.name).to eq "Proc"
+      expect(ref.objects[:foo].block.class.name).to eq "Proc"
     end
   end
 

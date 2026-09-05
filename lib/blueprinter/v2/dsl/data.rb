@@ -92,7 +92,7 @@ module Blueprinter
             name: name,
             source: source.to_sym,
             source_str: source.to_s,
-            value_proc: definition,
+            block: definition,
             options: options.dup
           )
         end
@@ -127,7 +127,7 @@ module Blueprinter
               source: name,
               source_str: name.to_s,
               options: options,
-              value_proc: definition
+              block: definition
             )
           end
         end
@@ -185,7 +185,7 @@ module Blueprinter
             blueprint: blueprint_class,
             source: source.to_sym,
             source_str: source.to_s,
-            value_proc: definition,
+            block: definition,
             options: options.dup
           )
         end

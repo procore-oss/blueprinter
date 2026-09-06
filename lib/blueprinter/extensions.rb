@@ -18,6 +18,7 @@ module Blueprinter
   # == V1 Compatibility Extensions
   #
   # - {Blueprinter::Extensions::LegacyOptions} Enables some V1-compatible options
+  # - {Blueprinter::Extensions::LegacyDynamicOptions} Enables V1-compatible dynamic options on associations
   # - {Blueprinter::Extensions::LegacyTransformer} Add V1-compatible transformers
   #
   # == Community extensions

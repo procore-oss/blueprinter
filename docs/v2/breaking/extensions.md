@@ -9,17 +9,22 @@ Here's an example of an extension that supports both V1 and V2:
 
 ```ruby
 class MyExtension < Blueprinter::Extension
-  # V1 API
-  def pre_render(object, blueprint_class, view, options)
-    modify(object, blueprint_class, view, options)
+  def initialize
+    # Register 'modify_object' as a V2 around_result hook
+    around_result :modify_object
   end
 
   # V2 API
-  def around_result(ctx)
+  def modify_object(ctx)
     blueprint_class = ctx.blueprint.class
     view = blueprint_class.view_name
     ctx.object = modify(ctx.object, blueprint_class, view, ctx.options)
     yield ctx
+  end
+  
+  # V1 API
+  def pre_render(object, blueprint_class, view, options)
+    modify(object, blueprint_class, view, options)
   end
 
   private

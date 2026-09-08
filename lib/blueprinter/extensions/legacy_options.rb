@@ -157,7 +157,7 @@ module Blueprinter
           next if extractor_class.nil?
 
           field.block = proc do |_obj, ctx|
-            extractor_class.new.extract(field.source, ctx.object, ctx.options, field.options)
+            extractor_class.new.extract(ctx.field.source, ctx.object, ctx.options, ctx.field.options)
           end
         end
         yield ctx

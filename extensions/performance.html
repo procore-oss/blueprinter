@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Rendering views - Blueprinter</title>
+        <title>Performance - Blueprinter</title>
 
 
         <!-- Custom HTML head -->
@@ -12,34 +12,34 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="../../favicon-bc91b3a9.svg">
-        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../../css/general-2459343d.css">
-        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
-        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../favicon-bc91b3a9.svg">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="../../theme/hljs-overrides-ac35c0bd.css">
-        <link rel="stylesheet" href="../../theme/custom-e18203ad.css">
+        <link rel="stylesheet" href="../theme/hljs-overrides-ac35c0bd.css">
+        <link rel="stylesheet" href="../theme/custom-e18203ad.css">
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "../../";
+            const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-171ecc20.js"></script>
+        <script src="../toc-171ecc20.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +106,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +141,7 @@
                     <h1 class="menu-title">Blueprinter</h1>
 
                     <div class="right-buttons">
-                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
                         <a href="https://github.com/procore-oss/blueprinter" title="Git repository" aria-label="Git repository">
@@ -178,23 +178,77 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="rendering-views"><a class="header" href="#rendering-views">Rendering views</a></h1>
-<p>V2’s method of rendering a view is:</p>
-<pre><code class="language-ruby">WidgetBlueprint[:my_view].render(widget).to_json
+                        <h1 id="performance"><a class="header" href="#performance">Performance</a></h1>
+<p>Any use of extensions has <em>some</em> performance implications, irrespective of what the extension code is doing. This can range anywhere from “essentially zero” to “noticible”. (See <code>Blueprinter::Extension</code> for documentation about which hooks are the most and least expensive.)</p>
+<p>Given the number of extension hooks available, there are frequently multiple ways to implement a given behavior. Some of these will be more efficient than others.</p>
+<h2 id="example-camel-case-converter"><a class="header" href="#example-camel-case-converter">Example: Camel case converter</a></h2>
+<p>Let’s say your source objects store fields in camelCase, but you want to serialize them using snake_case. You could define every field in your Blueprints like this:</p>
+<pre><code class="language-ruby">field :some_field, source: :someField
 </code></pre>
-<p>However, with the <code>LegacyOptions</code> extension you may continue using V1-style view rendering:</p>
-<pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :my_view).to_json
+<p>But that’s tedious and error-prone. Let’s write an extension to do it for us.</p>
+<h3 id="manually-extract-each-field"><a class="header" href="#manually-extract-each-field">Manually extract each field</a></h3>
+<p>The <code>around_field_value</code> hook and friends are the simplest way to implement it:</p>
+<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def around_field_value(ctx)
+    attr = ctx.field.source_str.camelize
+    if ctx.object.is_a? Hash
+      ctx.object.key?(attr) ? ctx.object[attr] : ctx.object[attr.to_sym]
+    else
+      ctx.object.public_send(attr)
+    end
+  end
+
+  alias around_object_value around_field_value
+  alias around_collection_value around_field_value
+end
 </code></pre>
+<p>But what about the performance? These hooks will run for <em>every field</em> on the Blueprint. If you’re adding this extension only to specific Blueprints that might be fine.
+But what if someone adds it to <code>ApplicationBlueprint</code>? Then it will run for <em>every field in every Blueprint</em> in your application!</p>
+<h3 id="transform-each-blueprints-result"><a class="header" href="#transform-each-blueprints-result">Transform each Blueprint’s result</a></h3>
+<p>The <code>around_blueprint</code> hook allows you to intercept and modify the serialized hash output of each Blueprint. If we define our Blueprints in camel case:</p>
+<pre><code class="language-ruby">field :someField
+</code></pre>
+<p>Then we can convert the output to snake case:</p>
+<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_blueprint(ctx)
+    # Get the serialized output from Blueprinter
+    result = yield ctx
+    # Convert it
+    snake_case result
+    result
+  end
+
+  def snake_case(hash)
+    hash.transform_keys! { |k| k.to_s.underscore }
+    hash.each_value { |v| snake_case v if v.is_a? Hash }
+  end
+end
+</code></pre>
+<p>This runs only once per serialized object, so it’s a big improvement. But that could still be hundreds of times, or more, in a large result. Can we do better?</p>
+<h3 id="change-field-config-before-render"><a class="header" href="#change-field-config-before-render">Change field config before render</a></h3>
+<p>What if we could alter the field definitions programatically, before anything is serialized? The <code>around_blueprint_init</code> hook runs only <em>once per Blueprint</em> during a render. It’s quite cheap, and it can alter field definitions.</p>
+<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Init]
+  def around_blueprint_init(ctx)
+    ctx.fields.each do |field|
+      field.source = field.source_str.camelize.to_sym
+    end
+    yield ctx
+  end
+</code></pre>
+<p>This is effectively the same as setting <code>source</code> on each field in the Blueprint. There’s essentially zero runtime cost.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../v2/compatible/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../extensions/yaml-serializer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../v2/compatible/if-unless-options.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../v1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -204,11 +258,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../v2/compatible/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../extensions/yaml-serializer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../v2/compatible/if-unless-options.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../v1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
@@ -228,13 +282,13 @@
         </script>
 
 
-        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
-        <script src="../../mark-09e88c2c.min.js"></script>
-        <script src="../../searcher-c2a407aa.js"></script>
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
 
-        <script src="../../clipboard-1626706a.min.js"></script>
-        <script src="../../highlight-cacfe08c.js"></script>
-        <script src="../../book-a0b12cfe.js"></script>
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-cacfe08c.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 

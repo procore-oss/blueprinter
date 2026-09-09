@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-08ae324d.js";
+            window.path_to_searchindex_js = "../../searchindex-ca05eb7f.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-1e3b5a67.js"></script>
+        <script src="../../toc-171ecc20.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -179,13 +179,7 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="ifunless-options"><a class="header" href="#ifunless-options">If/unless options</a></h1>
-<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1.</p>
-<p>You can maintain backwards compatibility using the bundled <code>LegacyConditionals</code> extension:</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyConditionals.new
-end
-</code></pre>
-<p><code>if</code>/<code>unless</code> Procs with three arguments will continue to work like they did in V1:</p>
+<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1. If you enable the <code>LegacyOptions</code> extension, <code>if</code>/<code>unless</code> Procs with three arguments will continue to work like they did in V1:</p>
 <pre><code class="language-ruby">field :a, if: -&gt;(field_name, object, options) { object.active? }
 </code></pre>
 <h2 id="v2-style"><a class="header" href="#v2-style">V2 style</a></h2>

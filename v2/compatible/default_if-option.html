@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-08ae324d.js";
+            window.path_to_searchindex_js = "../../searchindex-ca05eb7f.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-1e3b5a67.js"></script>
+        <script src="../../toc-171ecc20.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -179,11 +179,7 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="default_if-option"><a class="header" href="#default_if-option">default_if option</a></h1>
-<p>V2 has a much more flexible <code>default_if</code> option. You can maintain backwards compatibility with V1 using the <code>LegacyDefaultIf</code> extension.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyDefaultIf.new
-end
-</code></pre>
+<p>V2 has a much more flexible <code>default_if</code> option, but you can maintain backwards compatibility with V1 using the <code>LegacyOptions</code> extension.</p>
 <p>The old <code>default_if</code> values will continue to work (until a future Blueprinter removes the constants).</p>
 <pre><code class="language-ruby">field :name, default: "N/A", default_if: Blueprinter::EMPTY_STRING
 </code></pre>

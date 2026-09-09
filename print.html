@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-08ae324d.js";
+            window.path_to_searchindex_js = "searchindex-ca05eb7f.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-1e3b5a67.js"></script>
+        <script src="toc-171ecc20.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -490,7 +490,11 @@ end
 <p>See <code>Blueprinter::Extension</code> for the full V2 extension API, or read the <a href="#extension-guide">Extension Guide</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="compatible-changes"><a class="header" href="#compatible-changes">Compatible Changes</a></h1>
-<p>When you migrate a Blueprint to V2, you can enable several bundled extensions to maintain backwards-compatibility with certain features.</p>
+<p>When you migrate a Blueprint to V2 you can enable the <code>LegacyOptions</code> extension to maintain backwards-compatibility with many V1 options.</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  add Blueprinter::Extensions::LegacyOptions.new
+end
+</code></pre>
 <blockquote class="blockquote-tag blockquote-tag-note">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
 <p>These extensions don’t <em>replace</em> V2’s native behavior. Instead, they detect and convert V1-style options. This allows your application
@@ -501,22 +505,12 @@ to migrate to V2 at a gradual pace.</p>
 <p>V2’s method of rendering a view is:</p>
 <pre><code class="language-ruby">WidgetBlueprint[:my_view].render(widget).to_json
 </code></pre>
-<p>However, the bundled <code>ViewOption</code> extension can be enabled to allow V1-style view rendering:</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::ViewOption.new
-end
-
-WidgetBlueprint.render(widget, view: :my_view).to_json
+<p>However, with the <code>LegacyOptions</code> extension you may continue using V1-style view rendering:</p>
+<pre><code class="language-ruby">WidgetBlueprint.render(widget, view: :my_view).to_json
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="ifunless-options"><a class="header" href="#ifunless-options">If/unless options</a></h1>
-<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1.</p>
-<p>You can maintain backwards compatibility using the bundled <code>LegacyConditionals</code> extension:</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyConditionals.new
-end
-</code></pre>
-<p><code>if</code>/<code>unless</code> Procs with three arguments will continue to work like they did in V1:</p>
+<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1. If you enable the <code>LegacyOptions</code> extension, <code>if</code>/<code>unless</code> Procs with three arguments will continue to work like they did in V1:</p>
 <pre><code class="language-ruby">field :a, if: -&gt;(field_name, object, options) { object.active? }
 </code></pre>
 <h2 id="v2-style-1"><a class="header" href="#v2-style-1">V2 style</a></h2>
@@ -530,11 +524,7 @@ end
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="default_if-option"><a class="header" href="#default_if-option">default_if option</a></h1>
-<p>V2 has a much more flexible <code>default_if</code> option. You can maintain backwards compatibility with V1 using the <code>LegacyDefaultIf</code> extension.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyDefaultIf.new
-end
-</code></pre>
+<p>V2 has a much more flexible <code>default_if</code> option, but you can maintain backwards compatibility with V1 using the <code>LegacyOptions</code> extension.</p>
 <p>The old <code>default_if</code> values will continue to work (until a future Blueprinter removes the constants).</p>
 <pre><code class="language-ruby">field :name, default: "N/A", default_if: Blueprinter::EMPTY_STRING
 </code></pre>
@@ -552,48 +542,18 @@ def empty_string?(ctx, val) = val.empty?
 <pre><code class="language-ruby"># V1: Here's a field called "description". It pulls from "desc".
 field :desc, name: :description
 </code></pre>
-<p>To allow this to continue working, enable the <code>LegacyRenameField</code> extension:</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyRenameField.new
-end
-</code></pre>
+<p>The <code>LegacyOptions</code> extension allows this to continue working.</p>
 <h2 id="v2-style-3"><a class="header" href="#v2-style-3">V2 style</a></h2>
 <p>Since Blueprinter is a serializer, the DSL should describe the serialized result, not the source object. V2 reads much more naturally:</p>
 <pre><code class="language-ruby"># V2: Here's a field called "description". It pulls from "desc".
 field :description, source: :desc
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="dynamic-options"><a class="header" href="#dynamic-options">Dynamic options</a></h1>
-<p>Associations in legacy/V1 provided an <code>:options</code> option on associations. It allowed you to define a Hash or Proc that would be merged into the render options.</p>
-<p>It was provided as a work-around when legacy/V1 began freezing options, since options could no longer be used as an arbitrary “store” in field blocks, etc.</p>
-<p>In V2 it’s provided using the <code>LegacyDynamicOptions</code> extension:</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  add Blueprinter::Extensions::LegacyDynamicOptions.new
-    
-  association :category, CategoryBlueprint, options: -&gt;(widget) {
-    # Will be merged into `ctx.options`
-    { foo: widget.foo }
-  }
-end
+<h1 id="extractor-option"><a class="header" href="#extractor-option">Extractor option</a></h1>
+<p>V2 does not have a specific “extractor” concept, but the <code>LegacyOptions</code> extension allows your existing extractors to continue working.</p>
+<pre><code class="language-ruby">field :foo, extractor: MyExtractor
 </code></pre>
 <h2 id="v2-style-4"><a class="header" href="#v2-style-4">V2 style</a></h2>
-<p>V2 provides the <code>ctx.store</code> Hash for Blueprints and extensions to share information.</p>
-<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
-  association :category, CategoryBlueprint do |widget, ctx|
-    cxt.store[:foo] = widget.foo
-    widget.category
-  end
-end
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="extractor-option"><a class="header" href="#extractor-option">Extractor option</a></h1>
-<p>V2 does not have a specific “extractor” concept. But you can allow your existing extractors to continue working by enabling the <code>LegacyExtractorOption</code> extension.</p>
-<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyExtractorOption.new
-end
-</code></pre>
-<p>It works on field options as well as Blueprint/view/partial options.</p>
-<h2 id="v2-style-5"><a class="header" href="#v2-style-5">V2 style</a></h2>
 <p>In V2 you can override Blueprinter’s field extraction using field blocks or the <code>around_field_value</code>, <code>around_object_value</code>, and <code>around_collection_value</code> extension hooks.</p>
 <pre><code class="language-ruby">class MyExtractorExtension &lt; Blueprinter::Extension
   # @param ctx [Blueprinter::V2::Context::Field]
@@ -607,6 +567,29 @@ end
   alias around_field_value extract
   alias around_object_value extract
   alias around_collection_value extract
+end
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="dynamic-options"><a class="header" href="#dynamic-options">Dynamic options</a></h1>
+<p>Associations in legacy/V1 provided an <code>:options</code> option on associations. It allowed you to define a Hash or Proc that would be merged into the render options.</p>
+<p>It was provided as a work-around when legacy/V1 began freezing options, since options could no longer be used as an arbitrary “store” in field blocks, etc.</p>
+<p>In V2 it’s enabled by the <code>LegacyDynamicOptions</code> extension. It’s recommended to only add this extension to specific blueprints that need it:</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  add Blueprinter::Extensions::LegacyDynamicOptions.new
+
+  association :category, CategoryBlueprint, options: -&gt;(widget) {
+    # Will be merged into `ctx.options`
+    { foo: widget.foo }
+  }
+end
+</code></pre>
+<h2 id="v2-style-5"><a class="header" href="#v2-style-5">V2 style</a></h2>
+<p>V2 provides the <code>ctx.store</code> Hash for Blueprints and extensions to share information.</p>
+<pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
+  association :category, CategoryBlueprint do |widget, ctx|
+    cxt.store[:foo] = widget.foo
+    widget.category
+  end
 end
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -827,12 +810,8 @@ exclude extensions: true
 <h3 id="v1-compatibility-extensions"><a class="header" href="#v1-compatibility-extensions">V1 Compatibility Extensions</a></h3>
 <p>These extensions offer V1-compatibility for some options. They’re covered under the <a href="#compatible-changes">Compatible Changes</a> section.</p>
 <ul>
-<li><code>Blueprinter::Extensions::LegacyConditionals</code></li>
-<li><code>Blueprinter::Extensions::LegacyDefaultIf</code></li>
-<li><code>Blueprinter::Extensions::LegacyDynamicOptions</code></li>
-<li><code>Blueprinter::Extensions::LegacyExtractorOption</code></li>
-<li><code>Blueprinter::Extensions::LegacyRenameField</code></li>
-<li><code>Blueprinter::Extensions::ViewOption</code></li>
+<li><code>Blueprinter::Extensions::LegacyOptions</code></li>
+<li><code>Blueprinter::Extensions::LegacyTransformer</code></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="extension-guide"><a class="header" href="#extension-guide">Extension Guide</a></h1>
@@ -1041,6 +1020,68 @@ end
   add YamlSerializerExtension.new, OtherExtension.new
 end
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="performance"><a class="header" href="#performance">Performance</a></h1>
+<p>Any use of extensions has <em>some</em> performance implications, irrespective of what the extension code is doing. This can range anywhere from “essentially zero” to “noticible”. (See <code>Blueprinter::Extension</code> for documentation about which hooks are the most and least expensive.)</p>
+<p>Given the number of extension hooks available, there are frequently multiple ways to implement a given behavior. Some of these will be more efficient than others.</p>
+<h2 id="example-camel-case-converter"><a class="header" href="#example-camel-case-converter">Example: Camel case converter</a></h2>
+<p>Let’s say your source objects store fields in camelCase, but you want to serialize them using snake_case. You could define every field in your Blueprints like this:</p>
+<pre><code class="language-ruby">field :some_field, source: :someField
+</code></pre>
+<p>But that’s tedious and error-prone. Let’s write an extension to do it for us.</p>
+<h3 id="manually-extract-each-field"><a class="header" href="#manually-extract-each-field">Manually extract each field</a></h3>
+<p>The <code>around_field_value</code> hook and friends are the simplest way to implement it:</p>
+<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def around_field_value(ctx)
+    attr = ctx.field.source_str.camelize
+    if ctx.object.is_a? Hash
+      ctx.object.key?(attr) ? ctx.object[attr] : ctx.object[attr.to_sym]
+    else
+      ctx.object.public_send(attr)
+    end
+  end
+
+  alias around_object_value around_field_value
+  alias around_collection_value around_field_value
+end
+</code></pre>
+<p>But what about the performance? These hooks will run for <em>every field</em> on the Blueprint. If you’re adding this extension only to specific Blueprints that might be fine.
+But what if someone adds it to <code>ApplicationBlueprint</code>? Then it will run for <em>every field in every Blueprint</em> in your application!</p>
+<h3 id="transform-each-blueprints-result"><a class="header" href="#transform-each-blueprints-result">Transform each Blueprint’s result</a></h3>
+<p>The <code>around_blueprint</code> hook allows you to intercept and modify the serialized hash output of each Blueprint. If we define our Blueprints in camel case:</p>
+<pre><code class="language-ruby">field :someField
+</code></pre>
+<p>Then we can convert the output to snake case:</p>
+<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Object]
+  def around_blueprint(ctx)
+    # Get the serialized output from Blueprinter
+    result = yield ctx
+    # Convert it
+    snake_case result
+    result
+  end
+
+  def snake_case(hash)
+    hash.transform_keys! { |k| k.to_s.underscore }
+    hash.each_value { |v| snake_case v if v.is_a? Hash }
+  end
+end
+</code></pre>
+<p>This runs only once per serialized object, so it’s a big improvement. But that could still be hundreds of times, or more, in a large result. Can we do better?</p>
+<h3 id="change-field-config-before-render"><a class="header" href="#change-field-config-before-render">Change field config before render</a></h3>
+<p>What if we could alter the field definitions programatically, before anything is serialized? The <code>around_blueprint_init</code> hook runs only <em>once per Blueprint</em> during a render. It’s quite cheap, and it can alter field definitions.</p>
+<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+  # @param ctx [Blueprinter::V2::Context::Init]
+  def around_blueprint_init(ctx)
+    ctx.fields.each do |field|
+      field.source = field.source_str.camelize.to_sym
+    end
+    yield ctx
+  end
+</code></pre>
+<p>This is effectively the same as setting <code>source</code> on each field in the Blueprint. There’s essentially zero runtime cost.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>

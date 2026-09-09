@@ -17,13 +17,8 @@ module Blueprinter
   #
   # == V1 Compatibility Extensions
   #
-  # - {Blueprinter::Extensions::LegacyConditionals} Allows V1-style `if`/`unless` Procs
-  # - {Blueprinter::Extensions::LegacyDefaultIf} Allows V1-style `default_if` options
-  # - {Blueprinter::Extensions::LegacyDynamicOptions} Adds V1's `options` option to associations
-  # - {Blueprinter::Extensions::LegacyExtractorOption} Adds V1's `extractor` field option
-  # - {Blueprinter::Extensions::LegacyRenameField} Adds V1's `name` field option
-  # - {Blueprinter::Extensions::LegacyTransformer} Adds V1's `name` field option
-  # - {Blueprinter::Extensions::ViewOption} Adds a `view` option to `render`
+  # - {Blueprinter::Extensions::LegacyOptions} Enables some V1-compatible options
+  # - {Blueprinter::Extensions::LegacyTransformer} Add V1-compatible transformers
   #
   # == Community extensions
   #
@@ -38,14 +33,10 @@ module Blueprinter
   # @api public
   module Extensions
     autoload :FieldOrder, 'blueprinter/extensions/field_order'
-    autoload :LegacyConditionals, 'blueprinter/extensions/legacy_conditionals'
-    autoload :LegacyDefaultIf, 'blueprinter/extensions/legacy_default_if'
     autoload :LegacyDynamicOptions, 'blueprinter/extensions/legacy_dynamic_options'
-    autoload :LegacyExtractorOption, 'blueprinter/extensions/legacy_extractor_option'
-    autoload :LegacyRenameField, 'blueprinter/extensions/legacy_rename_field'
+    autoload :LegacyOptions, 'blueprinter/extensions/legacy_options'
     autoload :LegacyTransformer, 'blueprinter/extensions/legacy_transformer'
     autoload :MultiJson, 'blueprinter/extensions/multi_json'
     autoload :OpenTelemetry, 'blueprinter/extensions/open_telemetry'
-    autoload :ViewOption, 'blueprinter/extensions/view_option'
   end
 end

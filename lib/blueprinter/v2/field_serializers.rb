@@ -3,7 +3,7 @@
 module Blueprinter
   module V2
     # @!visibility private
-    # rubocop:disable Lint/UnusedMethodArgument
+    # rubocop:disable-next Lint/UnusedMethodArgument
     module FieldSerializers
       # Serializer for V2 objects
       module Object
@@ -51,6 +51,5 @@ module Blueprinter
         end
       end
     end
-    # rubocop:enable Lint/UnusedMethodArgument
   end
 end

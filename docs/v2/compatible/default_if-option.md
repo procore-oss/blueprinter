@@ -1,12 +1,6 @@
 # default_if option
 
-V2 has a much more flexible `default_if` option. You can maintain backwards compatibility with V1 using the `LegacyDefaultIf` extension.
-
-```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyDefaultIf.new
-end
-```
+V2 has a much more flexible `default_if` option, but you can maintain backwards compatibility with V1 using the `LegacyOptions` extension.
 
 The old `default_if` values will continue to work (until a future Blueprinter removes the constants).
 

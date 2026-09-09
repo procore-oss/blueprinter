@@ -59,7 +59,7 @@ module Blueprinter
       ) do
         include Helpers
 
-        # Extract the field value from object
+        # Extract 'source' from object
         # @param object [Object]
         # @return [Object]
         def extract(object)

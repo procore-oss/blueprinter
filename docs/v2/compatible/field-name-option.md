@@ -7,13 +7,7 @@ In Blueprinter Legacy/V1, when a field's serialized name differs from the source
 field :desc, name: :description
 ```
 
-To allow this to continue working, enable the `LegacyRenameField` extension:
-
-```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
-  add Blueprinter::Extensions::LegacyRenameField.new
-end
-```
+The `LegacyOptions` extension allows this to continue working.
 
 ## V2 style
 

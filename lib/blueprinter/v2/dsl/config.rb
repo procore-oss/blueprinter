@@ -105,8 +105,10 @@ module Blueprinter
         # ```
         # class WidgetBlueprint < ApplicationBlueprint
         #   extension do
+        #     def initialize = around_blueprint :decorate
+        #
         #     # Decorate Blueprint output
-        #     def around_blueprint(ctx)
+        #     def decorate(ctx)
         #       hash = yield ctx
         #       hash[:meta] = metadata ctx.object
         #       hash

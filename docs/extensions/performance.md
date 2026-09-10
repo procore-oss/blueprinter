@@ -16,27 +16,26 @@ But that's tedious and error-prone. Let's write an extension to do it for us.
 
 ### Manually extract each field
 
-The `around_field_value` hook and friends are the simplest way to implement it:
+The `around_field_value` hook and friends are the simplest way to implement it, by extracting the value ourselves:
 
 ```ruby
-class CamelCaseSource < Blueprinter::Extension
-  # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
-    attr = ctx.field.source_str.camelize
-    if ctx.object.is_a? Hash
-      ctx.object.key?(attr) ? ctx.object[attr] : ctx.object[attr.to_sym]
-    else
-      ctx.object.public_send(attr)
-    end
+class CamelCaseExtractor < Blueprinter::Extension
+  def initialize
+    around_field_value :extract
+    around_object_value :extract
+    around_collection_value :extract
   end
 
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def extract(ctx)
+    attr = ctx.field.source_str.camelize
+    ctx.object.public_send(attr)
+  end
 end
 ```
 
 But what about the performance? These hooks will run for _every field_ on the Blueprint. If you're adding this extension only to specific Blueprints that might be fine.
-But what if someone adds it to `ApplicationBlueprint`? Then it will run for _every field in every Blueprint_ in your application!
+But what if your entire application needs it? That's a lot of overhead for something so basic.
 
 ### Transform each Blueprint's result
 
@@ -49,12 +48,14 @@ field :someField
 Then we can convert the output to snake case:
 
 ```ruby
-class CamelCaseSource < Blueprinter::Extension
+class SnakeCaseTransformer < Blueprinter::Extension
+  def initialize
+    around_blueprint :transform
+  end
+  
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
-    # Get the serialized output from Blueprinter
+  def transform(ctx)
     result = yield ctx
-    # Convert it
     snake_case result
     result
   end
@@ -73,14 +74,18 @@ This runs only once per serialized object, so it's a big improvement. But that c
 What if we could alter the field definitions programatically, before anything is serialized? The `around_blueprint_init` hook runs only _once per Blueprint_ during a render. It's quite cheap, and it can alter field definitions.
 
 ```ruby
-class CamelCaseSource < Blueprinter::Extension
+class SourceCamelizer < Blueprinter::Extension
+  def initialize
+    around_blueprint_init :camelize_sources
+  end
+
   # @param ctx [Blueprinter::V2::Context::Init]
-  def around_blueprint_init(ctx)
+  def camelize_sources(ctx)
     ctx.fields.each do |field|
-      field.source = field.source_str.camelize.to_sym
+      # Camelize the `source` attribute of each field
+      field.source = field.source_str.camelize(:lower).to_sym
     end
     yield ctx
   end
+end
 ```
-
-This is effectively the same as setting `source` on each field in the Blueprint. There's essentially zero runtime cost.

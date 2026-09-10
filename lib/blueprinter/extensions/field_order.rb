@@ -22,11 +22,12 @@ module Blueprinter
       #        return -1, 0, or 1
       def initialize(&sorter)
         @sorter = sorter
+        around_blueprint_init :sort_fields
       end
 
       # @param ctx [Blueprinter::V2::Context::Init]
       # @!visibility private
-      def around_blueprint_init(ctx)
+      def sort_fields(ctx)
         ctx.fields = ctx.fields.sort(&@sorter)
         yield ctx
       end

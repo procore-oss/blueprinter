@@ -37,7 +37,8 @@ class ApplicationBlueprint < Blueprinter::V2::Base
 
     # Add an inline extension to skip blank fields
     extension do
-      def around_field_value(ctx)
+      def initialize = around_field_value :skip_blank
+      def skip_blank(ctx)
         val = yield ctx
         skip! if val.blank?
         val

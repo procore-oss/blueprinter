@@ -86,34 +86,26 @@ module Blueprinter
       # @!visibility private
       V1_COND_ARITY = 3
 
-      # @param ctx [Blueprinter::V2::Context::Result]
-      # @!visibility private
-      def around_result(ctx)
-        apply_render_view_option ctx
-        yield ctx
+      def initialize
+        around_result :apply_render_view_option
+        around_blueprint_init :init_legacy_conditionals
+        around_blueprint_init :init_legacy_default_ifs
+        around_blueprint_init :init_legacy_field_names
+        around_blueprint_init :init_legacy_extractors
       end
 
-      # @param ctx [Blueprinter::V2::Context::Init]
-      # @!visibility private
-      def around_blueprint_init(ctx)
-        init_legacy_conditionals ctx
-        init_legacy_default_ifs ctx
-        init_legacy_field_names ctx
-        init_legacy_extractors ctx
-        yield ctx
-      end
-
-      private
-
       # @param ctx [Blueprinter::V2::Context::Result]
+      # @!visibility private
       def apply_render_view_option(ctx)
         if (view = ctx.options[:view])
           ctx.blueprint = ctx.blueprint.class[view].new
           ctx.options = ctx.options.except(:view).freeze
         end
+        yield ctx
       end
 
       # @param ctx [Blueprinter::V2::Context::Init]
+      # @!visibility private
       def init_legacy_conditionals(ctx)
         # Convert blueprint if/unless options
         ctx.blueprint.options[:if] = wrap_v1_cond(ctx.blueprint.options[:if]) if ctx.blueprint.options[:if]
@@ -124,9 +116,11 @@ module Blueprinter
           field.options[:if] = wrap_v1_cond(field.options[:if]) if field.options[:if]
           field.options[:unless] = wrap_v1_cond(field.options[:unless]) if field.options[:unless]
         end
+        yield ctx
       end
 
       # @param ctx [Blueprinter::V2::Context::Init]
+      # @!visibility private
       def init_legacy_default_ifs(ctx)
         # Convert blueprint default_if option
         if (default_if = ctx.blueprint.options[:default_if])
@@ -139,9 +133,11 @@ module Blueprinter
             field.options[:default_if] = wrap_v1_default_if(default_if)
           end
         end
+        yield ctx
       end
 
       # @param ctx [Blueprinter::V2::Context::Init]
+      # @!visibility private
       def init_legacy_field_names(ctx)
         ctx.fields.each do |field|
           if (name = field.options[:name])
@@ -149,9 +145,11 @@ module Blueprinter
             field.name = name
           end
         end
+        yield ctx
       end
 
       # @param ctx [Blueprinter::V2::Context::Init]
+      # @!visibility private
       def init_legacy_extractors(ctx)
         default_extractor = ctx.blueprint.options[:extractor]
         ctx.fields.each do |field|
@@ -159,10 +157,13 @@ module Blueprinter
           next if extractor_class.nil?
 
           field.block = proc do |_obj, ctx|
-            extractor_class.new.extract(field.source, ctx.object, ctx.options, field.options)
+            extractor_class.new.extract(ctx.field.source, ctx.object, ctx.options, ctx.field.options)
           end
         end
+        yield ctx
       end
+
+      private
 
       def wrap_v1_cond(cond)
         if cond.is_a?(Proc) && cond.arity == V1_COND_ARITY

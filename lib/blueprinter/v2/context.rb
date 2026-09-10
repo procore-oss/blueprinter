@@ -31,13 +31,15 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields::Field>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>] All fields that will be serialized
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] extension
       #   @return [Blueprinter::Extension] Instance of the extension running
       # @!attribute [r] hook
-      #   @return [Symbol] Name of the symbol being called
+      #   @return [Symbol] Name of the hook being called
+      # @!attribute [r] target
+      #   @return [Symbol] Name of the extension method being called
       # @!attribute [r] depth
       #   @return [Integer] Blueprint depth (1-indexed)
       # @!attribute [r] store
@@ -45,7 +47,7 @@ module Blueprinter
       # @!attribute [r] depth
       #   @return [Integer] Current serialization depth
       #
-      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :store, :depth)
+      Hook = Struct.new(:blueprint, :fields, :options, :extension, :hook, :target, :store, :depth)
 
       #
       # The object or collection currently being serialized.
@@ -53,7 +55,7 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields::Field>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>] All fields that will be serialized
       # @!attribute [rw] options
       #   @return [Hash] Options passed to `render` (frozen but can be replaced)
       # @!attribute [rw] object
@@ -95,7 +97,7 @@ module Blueprinter
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields::Field>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>] All fields that will be serialized
       # @!attribute [r] options
       #   @return [Hash] Options passed to `render` (frozen)
       # @!attribute [r] object
@@ -121,7 +123,7 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class. If replaced, the render is aborted and a
       #           new one begun.
       # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields::Field>]
+      #   @return [Array<Blueprinter::V2::Fields::Field>] All fields that were serialized
       # @!attribute [rw] options
       #   @return [Hash] Options passed to `render`. Can be modified.
       # @!attribute [rw] object

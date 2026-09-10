@@ -1,10 +1,14 @@
 # Basics
 
-An extension will subclass `Blueprinter::Extension` and define one or more hook methods. (See `Blueprinter::Extension` for documentation about all hooks.)
+An extension will subclass `Blueprinter::Extension` then define and register one or more hooks. (See `Blueprinter::Extension` for documentation about all hooks.)
 
 ```ruby
-class ExcludeIfBlankExtension < Blueprinter::Extension
-  def around_field_value(ctx)
+class ExcludeIfBlank < Blueprinter::Extension
+  def initialize
+    around_field_value :skip_blank
+  end
+  
+  def skip_blank(ctx)
     # get the value by yielding to other extensions and Blueprinter's internals
     val = yield ctx
 
@@ -21,7 +25,7 @@ Then add the extension to a blueprint:
 
 ```ruby
 class MyBlueprint < Blueprinter::V2::Base
-  add ExcludeIfBlankExtension.new
+  add ExcludeIfBlank.new
 
   field :name, exclude_if_blank: true
 end

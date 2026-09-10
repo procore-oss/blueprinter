@@ -112,7 +112,8 @@ describe Blueprinter::V2::Render do
   context 'around_result' do
     it 'runs around the entire result' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           result = yield ctx
           result.merge({ foo: 'bar' })
         end
@@ -130,7 +131,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the blueprint (class)' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
           yield ctx
         end
@@ -143,7 +145,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the blueprint (instance)' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }.new
           yield ctx
         end
@@ -156,7 +159,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the object' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           ctx.object = ctx.object.merge({ name: 'Bar' })
           yield ctx
         end
@@ -173,7 +177,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the object (different blueprint)' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
           ctx.object = ctx.object.merge({ name: 'Bar' })
           yield ctx
@@ -187,14 +192,16 @@ describe Blueprinter::V2::Render do
 
     it 'can change the options' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           num = ctx.options[:num] || 0
           ctx.options = ctx.options.merge({ num: num + 1 })
           yield ctx
         end
       end
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           res = yield ctx
           res.merge({ num: ctx.options[:num] })
         end
@@ -212,7 +219,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the options (different blueprint)' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           num = ctx.options[:num] || 0
           ctx.options = ctx.options.merge({ num: num + 1 })
           ctx.blueprint = Class.new(Blueprinter::V2::Base) do
@@ -231,7 +239,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the format' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           ctx.format = :yaml
           yield ctx
         end
@@ -244,7 +253,8 @@ describe Blueprinter::V2::Render do
 
     it 'can change the format (different blueprint)' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           ctx.format = :yaml
           ctx.blueprint = Class.new(Blueprinter::V2::Base) { field :name }
           yield ctx
@@ -258,7 +268,8 @@ describe Blueprinter::V2::Render do
 
     it 'can output a custom format' do
       widget_blueprint.extension do
-        def around_result(ctx)
+        def initialize = around_result :hook
+        def hook(ctx)
           case ctx.format
           when :yaml
             result = yield ctx
@@ -300,40 +311,49 @@ describe Blueprinter::V2::Render do
       it 'uses the same context store throughout' do
         log = []
         ext = Class.new(Blueprinter::Extension) do
-          def initialize(log) = @log = log
+          def initialize(log)
+            @log = log
+            around_result :around_result_hook
+            around_blueprint_init :around_blueprint_init_hook
+            around_serialize_object :around_serialize_object_hook
+            around_serialize_collection :around_serialize_collection_hook
+            around_field_value :around_field_value_hook
+            around_object_value :around_object_value_hook
+            around_collection_value :around_collection_value_hook
+          end
 
-          def around_result(ctx)
+          def around_result_hook(ctx)
             ctx.store[:log] = @log
             ctx.store[:log] << "around_result (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_blueprint_init(ctx)
+          def around_blueprint_init_hook(ctx)
             ctx.store[:log] << "around_blueprint_init (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_serialize_object(ctx)
+          def around_serialize_object_hook(ctx)
             ctx.store[:log] << "around_serialize_object (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_serialize_collection(ctx)
+          def around_serialize_collection_hook(ctx)
             ctx.store[:log] << "around_serialize_collection (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_field_value(ctx)
+          def around_field_value_hook(ctx)
             ctx.store[:log] << "around_field_value (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_object_value(ctx)
+          def around_object_value_hook(ctx)
             ctx.store[:log] << "around_object_value (#{ctx.blueprint})"
             yield ctx
           end
 
-          def around_collection_value(ctx)
+          def around_collection_value_hook(ctx)
             ctx.store[:log] << "around_collection_value (#{ctx.blueprint})"
             yield ctx
           end

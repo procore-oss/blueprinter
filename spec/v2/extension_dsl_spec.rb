@@ -7,10 +7,12 @@ describe "Blueprinter::V2 Extension DSL" do
       def self.blueprint_name = "NameBlueprint"
       field :name
       extension do
-        def around_field_value(ctx) = yield(ctx).upcase
+        def initialize = around_field_value :field_value
+        def field_value(ctx) = yield(ctx).upcase
       end
       extension do
-        def around_serialize_object(ctx)
+        def initialize = around_serialize_object :serialize_object
+        def serialize_object(ctx)
           res = yield ctx
           { data: res }
         end

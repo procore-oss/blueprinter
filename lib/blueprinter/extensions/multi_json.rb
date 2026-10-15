@@ -27,11 +27,12 @@ module Blueprinter
       # @param options [Hash] Any options you pass here will be passed through to `MultiJson.dump`
       def initialize(options = {})
         @options = options
+        around_result :serialize
       end
 
       # @param ctx [Blueprinter::V2::Context::Result]
       # @!visibility private
-      def around_result(ctx)
+      def serialize(ctx)
         result = yield ctx
         return result unless ctx.format == :json
 

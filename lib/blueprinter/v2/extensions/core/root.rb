@@ -9,8 +9,12 @@ module Blueprinter
         # @!visibility private
         #
         class Root < Extension
+          def initialize
+            around_result :wrap_root
+          end
+
           # @param ctx [Blueprinter::V2::Context::Result]
-          def around_result(ctx)
+          def wrap_root(ctx)
             result = yield ctx
             root_name = ctx.options[:root]
             return result if serialized?(result) || !root_name

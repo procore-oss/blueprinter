@@ -98,35 +98,6 @@ module Blueprinter
           klasses.each { |klass| nodes << Nodes::RemExt.new(klass) }
           nodes << Nodes::RemDynamicExt.new(reject) if reject
         end
-
-        #
-        # Define an anonymous extension and add it to the current context.
-        #
-        # ```
-        # class WidgetBlueprint < ApplicationBlueprint
-        #   extension do
-        #     # Decorate Blueprint output
-        #     def around_blueprint(ctx)
-        #       hash = yield ctx
-        #       hash[:meta] = metadata ctx.object
-        #       hash
-        #     end
-        #
-        #     def metadata(object)
-        #       # ...
-        #     end
-        #   end
-        # end
-        # ```
-        #
-        def extension(&block)
-          bp_name = blueprint_name
-          add Class.new(Extension) {
-            @blueprint_name = bp_name
-            def self.name = "#{@blueprint_name} extension"
-            class_eval(&block)
-          }.new
-        end
       end
     end
   end

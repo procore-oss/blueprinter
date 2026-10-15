@@ -27,13 +27,17 @@ module Blueprinter
       # Initialize the extension with the tracer's name.
       #
       # @param tracer_name [String]
-      def initialize(tracer_name)
+      # @param trace_extensions [Boolean] Trace hooks registered by extensions (adds overhead)
+      def initialize(tracer_name, trace_extensions: true)
         @tracer_name = tracer_name
+        around_serialize_object :trace_object
+        around_serialize_collection :trace_collection
+        around_hook :trace_hook if trace_extensions
       end
 
       # @param ctx [Blueprinter::V2::Context::Object]
       # @!visibility private
-      def around_serialize_object(ctx)
+      def trace_object(ctx)
         tracer.in_span('blueprinter.object', attributes: attributes(ctx)) do
           yield ctx
         end
@@ -41,7 +45,7 @@ module Blueprinter
 
       # @param ctx [Blueprinter::V2::Context::Object]
       # @!visibility private
-      def around_serialize_collection(ctx)
+      def trace_collection(ctx)
         tracer.in_span('blueprinter.collection', attributes: attributes(ctx)) do
           yield ctx
         end
@@ -49,9 +53,10 @@ module Blueprinter
 
       # @param ctx [Blueprinter::V2::Context::Hook]
       # @!visibility private
-      def around_hook(ctx)
+      def trace_hook(ctx)
         extension = ctx.extension.class.name
-        attributes = { extension:, hook: ctx.hook, 'library.name' => 'Blueprinter', 'library.version' => VERSION }
+        attributes = { extension:, method: ctx.target, hook: ctx.hook, 'library.name' => 'Blueprinter',
+                       'library.version' => VERSION }
         tracer.in_span('blueprinter.extension', attributes:) { |_| yield }
       end
 

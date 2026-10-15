@@ -17,11 +17,12 @@ module Blueprinter
       # @param transformers [Class] One or more transformers (Blueprinter::Transformer)
       def initialize(*transformers)
         @transformers = transformers
+        around_blueprint :transform
       end
 
       # @param ctx [Blueprinter::V2::Context::Object]
       # @!visibility private
-      def around_blueprint(ctx)
+      def transform(ctx)
         hash = yield ctx
         @transformers.each do |klass|
           transformer = ctx.store[klass.object_id] ||= klass.new

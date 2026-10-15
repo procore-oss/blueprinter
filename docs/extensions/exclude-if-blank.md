@@ -6,9 +6,13 @@ It works just like the built-in `exclude_if_nil` option, but checks for `blank?`
 options first, then allows fields to override it.
 
 ```ruby
-class ExcludeIfBlankExtension < Blueprinter::Extension
+class ExcludeIfBlank < Blueprinter::Extension
+  def initialize
+    around_field_value :skip_blank
+  end
+  
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def skip_blank(ctx)
     val = yield ctx
 
     exclude = ctx.blueprint.options[:exclude_if_blank]
@@ -24,7 +28,7 @@ Add it to your `ApplicationBlueprint` and use it in your blueprints.
 
 ```ruby
 class ApplicationBlueprint < Blueprinter::V2::Base
-  add ExcludeIfBlankExtension.new
+  add ExcludeIfBlank.new
 end
 ```
 

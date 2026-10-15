@@ -8,9 +8,12 @@ module Blueprinter
     def initialize(extensions)
       @hooks = Extension::HOOKS.to_h { |hook| [hook, []] }
       extensions.each do |ext|
-        ext.class.hooks.each { |hook| @hooks[hook] << ext }
+        ext.finalize_hooks.each { |hook| @hooks[hook.name] << hook }
+        # V1 doesn't have to register its hooks
+        @hooks[:pre_render] << Extension::Hook.new(:pre_render, ext, :pre_render).freeze if ext.respond_to?(:pre_render)
       end
       @hooks.freeze
+      @hooks.each(&:freeze)
       @hook_around_hook = registered? :around_hook
       @around_hooks = @hooks[:around_hook]
     end
@@ -42,66 +45,68 @@ module Blueprinter
     def around(hook, ctx, require_yield: false, &)
       hooks = @hooks.fetch(hook)
       if !@hook_around_hook && !require_yield
-        _around_direct(hooks, hook, 0, ctx, ctx.class, &)
+        _around_direct(hooks, 0, ctx, ctx.class, &)
       else
-        _around(hooks, hook, 0, ctx, ctx.class, require_yield:, &)
+        _around(hooks, 0, ctx, ctx.class, require_yield:, &)
       end
     end
 
     private
 
     # Fast path: no around_hook wrapping, no require_yield
-    def _around_direct(hooks, hook, idx, ctx, klass, &)
-      ext = hooks[idx]
-      return yield ctx if ext.nil?
+    def _around_direct(hooks, idx, ctx, klass, &)
+      hook = hooks[idx]
+      return yield ctx if hook.nil?
 
-      ext.public_send(hook, ctx) do |yctx|
+      hook.ext.public_send(hook.target, ctx) do |yctx|
         unless yctx.is_a?(klass)
-          raise Errors::ExtensionHook.new(ext, hook, "should yield `#{klass.name}` but yielded `#{yctx.inspect}`")
+          msg = "should yield `#{klass.name}` but yielded `#{yctx.inspect}`"
+          raise Errors::ExtensionHook.new(hook.ext, hook.name, hook.target, msg)
         end
 
-        _around_direct(hooks, hook, idx + 1, yctx || ctx, klass, &)
+        _around_direct(hooks, idx + 1, yctx || ctx, klass, &)
       end
     end
 
     # Runs hooks recursively
-    def _around(hooks, hook, idx, ctx, expected_yield, require_yield: false, &)
-      ext = hooks[idx]
-      return yield ctx if ext.nil?
+    def _around(hooks, idx, ctx, expected_yield, require_yield: false, &)
+      hook = hooks[idx]
+      return yield ctx if hook.nil?
 
       yielded = false
-      result = call(ext, hook, ctx) do |yielded_ctx|
+      result = call(hook, ctx) do |yielded_ctx|
         yielded ||= true
         unless yielded_ctx.is_a? expected_yield
           msg = "should yield `#{expected_yield.name}` but yielded `#{yielded_ctx.inspect}`"
-          raise Errors::ExtensionHook.new(ext, hook, msg)
+          raise Errors::ExtensionHook.new(hook.ext, hook.name, hook.target, msg)
         end
 
         ctx = yielded_ctx if yielded_ctx
-        _around(hooks, hook, idx + 1, ctx, expected_yield, require_yield:, &)
+        _around(hooks, idx + 1, ctx, expected_yield, require_yield:, &)
       end
-      raise Errors::ExtensionHook.new(ext, hook, 'did not yield') if require_yield && !yielded
+      raise Errors::ExtensionHook.new(hook.ext, hook.name, hook.target, 'did not yield') if require_yield && !yielded
 
       result
     end
 
     # Calls a hook on an extension. If the `around_hook` hook is registered it's wrapped around the call.
-    def call(ext, hook, ctx, &)
-      return ext.public_send(hook, ctx, &) if !@hook_around_hook || ext.hidden? || hook == :around_hook
+    def call(hook, ctx, &)
+      return hook.ext.public_send(hook.target, ctx, &) if !@hook_around_hook || hook.ext.hidden? || hook.name == :around_hook
 
       # Hacky, but re-using this context object saves tons of time
       hook_ctx = Thread.current[:_blueprinter_hook_ctx] ||= V2::Context::Hook.new
       hook_ctx.blueprint = ctx.blueprint
       hook_ctx.fields = ctx.fields
       hook_ctx.options = ctx.options
-      hook_ctx.extension = ext
-      hook_ctx.hook = hook
+      hook_ctx.extension = hook.ext
+      hook_ctx.target = hook.target
+      hook_ctx.hook = hook.name
       hook_ctx.store = ctx.store
       hook_ctx.depth = ctx.depth
       result = nil
-      _around(@around_hooks, :around_hook, 0, hook_ctx, NilClass, require_yield: true) do
+      _around(@around_hooks, 0, hook_ctx, NilClass, require_yield: true) do
         # return the inner hook's value, not around_hook's
-        result = ext.public_send(hook, ctx, &)
+        result = hook.ext.public_send(hook.target, ctx, &)
       end
       result
     end

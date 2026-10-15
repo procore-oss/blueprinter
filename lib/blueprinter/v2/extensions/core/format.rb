@@ -11,8 +11,12 @@ module Blueprinter
         # @!visibility private
         #
         class Format < Extension
+          def initialize
+            around_result :format
+          end
+
           # @param ctx [Blueprinter::V2::Context::Result]
-          def around_result(ctx)
+          def format(ctx)
             result = yield ctx
             return result if serialized? result
 

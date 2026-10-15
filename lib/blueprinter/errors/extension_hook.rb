@@ -5,8 +5,8 @@ module Blueprinter
     class ExtensionHook < StandardError
       attr_reader :message
 
-      def initialize(extension, hook, message)
-        @message = "Extension hook error in #{extension.class.name}##{hook}: #{message}"
+      def initialize(extension, hook, target, message)
+        @message = "Extension hook error in #{hook} #{extension.class.name}##{target}: #{message}"
       end
     end
   end

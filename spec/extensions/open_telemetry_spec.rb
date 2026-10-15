@@ -13,14 +13,18 @@ describe Blueprinter::Extensions::OpenTelemetry do
     Class.new(Blueprinter::Extension) do
       def self.name = 'MetaExt'
 
-      def initialize(log) = @log = log
+      def initialize(log)
+        @log = log
+        around_object_value :log_object_value
+        around_hook :log_hook
+      end
 
-      def around_object_value(ctx)
+      def log_object_value(ctx)
         @log << 'around_object_value'
         yield ctx
       end
 
-      def around_hook(ctx)
+      def log_hook(ctx)
         @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): A"
         yield
         @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): B"
@@ -32,7 +36,7 @@ describe Blueprinter::Extensions::OpenTelemetry do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foo_obj: { name: 'Bar' } })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => ctx.blueprint.class.to_s }.merge(attributes)).and_call_original
-    called = subject.around_serialize_object(ctx) { :true }
+    called = subject.trace_object(ctx) { :true }
     expect(called).to eq :true
   end
 
@@ -40,16 +44,16 @@ describe Blueprinter::Extensions::OpenTelemetry do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foos: [{ name: 'Bar' }] })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.collection', attributes: { 'blueprint' => ctx.blueprint.class.to_s }.merge(attributes)).and_call_original
-    called = subject.around_serialize_collection(ctx) { :true }
+    called = subject.trace_collection(ctx) { :true }
     expect(called).to eq :true
   end
 
   it 'creates a blueprinter.extension span with an extension' do
     ctx = prepare(blueprint, {}, Blueprinter::V2::Context::Object, { foos: [{ name: 'Bar' }] })
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :around_field_value }.merge(attributes)).and_call_original
-    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, [], ctx.options, meta_extension.new([]), :around_field_value)
-    called = subject.around_hook(hook_ctx) { :true }
+      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', method: :test, hook: :around_field_value }.merge(attributes)).and_call_original
+    hook_ctx = Blueprinter::V2::Context::Hook.new(ctx.blueprint, [], ctx.options, meta_extension.new([]), :around_field_value, :test)
+    called = subject.trace_hook(hook_ctx) { :true }
     expect(called).to eq :true
   end
 
@@ -60,14 +64,24 @@ describe Blueprinter::Extensions::OpenTelemetry do
     sub_blueprint.add subject, meta_ext
     attributes = { 'library.name' => 'Blueprinter', 'library.version' => Blueprinter::VERSION }
     object = { foo: 'Foo', foo_obj: { name: 'Bar1' }, foos: [{ name: 'Bar2' }] }
+
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => blueprint.to_s }.merge(attributes)).and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.object', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
-      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', hook: :around_object_value }.merge(attributes)).twice.and_call_original
+      to receive(:in_span).with('blueprinter.extension', attributes: { extension: 'MetaExt', method: :log_object_value, hook: :around_object_value }.merge(attributes)).twice.and_call_original
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.collection', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
+
     blueprint.render(object).to_hash
+    expect(log).to eq [
+      'around_hook(MetaExt#around_object_value): A',
+      'around_object_value',
+      'around_hook(MetaExt#around_object_value): B',
+      'around_hook(MetaExt#around_object_value): A',
+      'around_object_value',
+      'around_hook(MetaExt#around_object_value): B'
+    ]
   end
 end

@@ -13,20 +13,20 @@ describe Blueprinter::V2::Extensions::Core::Format do
 
   it 'outputs a Hash' do
     ctx = context.new(blueprint.new, [], {}, { 'name' => 'Foo' }, :hash)
-    result = subject.around_result(ctx) { |ctx| ctx.object }
+    result = subject.format(ctx) { |ctx| ctx.object }
     expect(result).to eq ctx.object
   end
 
   it 'outputs json' do
     ctx = context.new(blueprint.new, [], {}, { 'name' => 'Foo' }, :json)
-    result = subject.around_result(ctx) { |ctx| ctx.object }
+    result = subject.format(ctx) { |ctx| ctx.object }
     expect(result.value).to eq ctx.object.to_json
   end
 
   it 'raises an exception for an unsupported format' do
     ctx = context.new(blueprint.new, [], {}, { 'name' => 'Foo' }, :yaml)
     expect do
-      subject.around_result(ctx) { |ctx| ctx.object }
+      subject.format(ctx) { |ctx| ctx.object }
     end.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
   end
 end

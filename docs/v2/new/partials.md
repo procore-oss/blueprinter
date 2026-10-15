@@ -35,14 +35,8 @@ class ApplicationBlueprint < Blueprinter::V2::Base
     # Enable the built-in "skip if nil" option
     set :exclude_if_nil, true
 
-    # Add an inline extension to skip blank fields
-    extension do
-      def around_field_value(ctx)
-        val = yield ctx
-        skip! if val.blank?
-        val
-      end
-    end
+    # Enable an extension for skipping blank fields
+    add ExcludeIfBlank.new
   end
 end
 ```

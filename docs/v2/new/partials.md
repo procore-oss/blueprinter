@@ -21,9 +21,25 @@ class MyBlueprint < ApplicationBlueprint
 end
 ```
 
-You may only use partials defined in the current Blueprint/view (or a parent). To share code across completely separate Blueprints, use [modules](./modules.md).
+Partials are inherited from parent Blueprints and views, but they may also be defined in Ruby modules.
+Blueprints, views, or other partials can include the module to get access to its partials.
 
-See the `Blueprinter::V2::DSL` docs for more info on `partial` and `use`.
+```ruby
+module MySharedPartials
+  extend Blueprinter::V2::DSL
+
+  partial :my_partial do
+    # ...
+  end
+end
+
+class MyBlueprint < ApplicationBlueprint
+  include MySharedPartials
+
+  use :my_partial
+  # ...
+end
+```
 
 ### More than just fields
 
@@ -48,3 +64,5 @@ class MyBlueprint < ApplicationBlueprint
   use :exclude_nil_or_blank
 end
 ```
+
+See the `Blueprinter::V2::DSL` docs for more info on `partial` and `use`.

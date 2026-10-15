@@ -73,6 +73,7 @@ module Blueprinter
     class Base
       extend DSL::Config
       extend DSL::Data
+      extend DSL::Partials
       extend DSL::Views
       extend Rendering
       extend Reflection

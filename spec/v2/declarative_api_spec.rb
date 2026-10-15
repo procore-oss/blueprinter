@@ -72,13 +72,8 @@ describe "Blueprinter::V2 Declarative API" do
     mod = Module.new do
       extend Blueprinter::V2::DSL
 
-      set :my_option, true
-      field :foo
       partial :my_partial do
         field :description
-      end
-      view :my_view do
-        field :bar
       end
     end
 
@@ -101,9 +96,7 @@ describe "Blueprinter::V2 Declarative API" do
     end
 
     refs = blueprint.reflections
-    expect(refs[:default].options).to eq({ my_option: true})
-    expect(refs[:default].fields.keys).to eq %i[foo zorp]
-    expect(refs[:asdf].fields.keys).to eq %i[foo zorp description]
-    expect(refs[:my_view].fields.keys).to eq %i[foo zorp bar]
+    expect(refs[:default].fields.keys).to eq %i[zorp]
+    expect(refs[:asdf].fields.keys).to eq %i[zorp description]
   end
 end

@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-ae223beb.js";
+            window.path_to_searchindex_js = "../../searchindex-6ca28b75.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-171ecc20.js"></script>
+        <script src="../../toc-a0ca2d9c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -197,8 +197,23 @@
   end
 end
 </code></pre>
-<p>You may only use partials defined in the current Blueprint/view (or a parent). To share code across completely separate Blueprints, use <a href="./modules.html">modules</a>.</p>
-<p>See the <code>Blueprinter::V2::DSL</code> docs for more info on <code>partial</code> and <code>use</code>.</p>
+<p>Partials are inherited from parent Blueprints and views, but they may also be defined in Ruby modules.
+Blueprints, views, or other partials can include the module to get access to its partials.</p>
+<pre><code class="language-ruby">module MySharedPartials
+  extend Blueprinter::V2::DSL
+
+  partial :my_partial do
+    # ...
+  end
+end
+
+class MyBlueprint &lt; ApplicationBlueprint
+  include MySharedPartials
+
+  use :my_partial
+  # ...
+end
+</code></pre>
 <h3 id="more-than-just-fields"><a class="header" href="#more-than-just-fields">More than just fields</a></h3>
 <p>Partials have access to the full DSL, so they can set options, add extensions, formatters, views, and even other partials.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
@@ -216,6 +231,7 @@ end
   use :exclude_nil_or_blank
 end
 </code></pre>
+<p>See the <code>Blueprinter::V2::DSL</code> docs for more info on <code>partial</code> and <code>use</code>.</p>
 
                     </main>
 
@@ -225,7 +241,7 @@ end
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../v2/new/modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../v2/new/extensions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -239,7 +255,7 @@ end
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../v2/new/modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../v2/new/extensions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

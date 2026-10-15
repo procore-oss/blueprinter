@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ae223beb.js";
+            window.path_to_searchindex_js = "searchindex-6ca28b75.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-171ecc20.js"></script>
+        <script src="toc-a0ca2d9c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -708,8 +708,23 @@ end
   end
 end
 </code></pre>
-<p>You may only use partials defined in the current Blueprint/view (or a parent). To share code across completely separate Blueprints, use <a href="#modules">modules</a>.</p>
-<p>See the <code>Blueprinter::V2::DSL</code> docs for more info on <code>partial</code> and <code>use</code>.</p>
+<p>Partials are inherited from parent Blueprints and views, but they may also be defined in Ruby modules.
+Blueprints, views, or other partials can include the module to get access to its partials.</p>
+<pre><code class="language-ruby">module MySharedPartials
+  extend Blueprinter::V2::DSL
+
+  partial :my_partial do
+    # ...
+  end
+end
+
+class MyBlueprint &lt; ApplicationBlueprint
+  include MySharedPartials
+
+  use :my_partial
+  # ...
+end
+</code></pre>
 <h3 id="more-than-just-fields"><a class="header" href="#more-than-just-fields">More than just fields</a></h3>
 <p>Partials have access to the full DSL, so they can set options, add extensions, formatters, views, and even other partials.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
@@ -727,56 +742,7 @@ end
   use :exclude_nil_or_blank
 end
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="modules"><a class="header" href="#modules">Modules</a></h1>
-<p>Any Ruby module can be extended with the Blueprinter DSL:</p>
-<pre><code class="language-ruby">module MySharedBlueprintCode
-  extend Blueprinter::V2::DSL
-
-  set :exclude_if_nil, true
-  add MyExtension.new
-  
-  format Time, :iso8601
-  format Date, :iso8601
-
-  field :foo
-
-  view :full do
-    association :bar, BarBlueprint
-  end
-
-  def iso8601(val) = val.iso8601
-end
-</code></pre>
-<p>Then included into Blueprints:</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  include MySharedBlueprintCode
-
-  # ...
-end
-</code></pre>
-<p>Or views:</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  # ...
-
-  view :my_view do
-    include MySharedBlueprintCode
-    
-    # ...
-  end
-end
-</code></pre>
-<p>Or partials:</p>
-<pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  # ...
-
-  partial :my_partial do
-    include MySharedBlueprintCode
-    
-    # ...
-  end
-end
-</code></pre>
+<p>See the <code>Blueprinter::V2::DSL</code> docs for more info on <code>partial</code> and <code>use</code>.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="extensions-1"><a class="header" href="#extensions-1">Extensions</a></h1>
 <p>Extensions exist in legacy/V1, but they were added late and have limited functionality. Blueprinter V2 has been designed from the

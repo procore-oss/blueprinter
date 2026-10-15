@@ -9,10 +9,13 @@ class CustomExtractor < Blueprinter::Extension
   def initialize(klass, &extractor)
     @klass = klass
     @extractor = extractor
+    around_field_value :extract
+    around_object_value :extract
+    around_collection_value :extract
   end
   
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def extract(ctx)
     if ctx.object.is_a? @klass
       # Use custom extraction
       @extractor.call(ctx.field.source, ctx.object)
@@ -21,10 +24,6 @@ class CustomExtractor < Blueprinter::Extension
       yield ctx
     end
   end
-
-  # Same behavior for associations
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
 end
 ```
 

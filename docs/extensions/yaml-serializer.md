@@ -4,7 +4,11 @@ This example adds YAML to Blueprinter. Why? Because we can.
 
 ```ruby
 class YamlSerializerExtension < Blueprinter::Extension
-  def around_result(ctx)
+  def initialize
+    around_result :serialize
+  end
+  
+  def serialize(ctx)
     case ctx.format
     when :yaml
       # Get the Hash/Array result

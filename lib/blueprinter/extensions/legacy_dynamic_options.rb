@@ -5,7 +5,8 @@ module Blueprinter
     #
     # Support for Legacy/V1's `:options` option on associations.
     #
-    # Add the extension to the Blueprint (or view) that needs dynamic options:
+    # For optimal performance it's recommended to add this extension only to Blueprints/views that use dynamic options,
+    # rather than to `ApplicationBlueprint`.
     #
     # ```
     # class WidgetBlueprint < ApplicationBlueprint
@@ -26,6 +27,13 @@ module Blueprinter
     #
     class LegacyDynamicOptions < Extension
       # @!visibility private
+      def initialize
+        around_serialize_object :apply
+        around_serialize_collection :apply
+      end
+
+      # @param ctx [Blueprinter::V2::Context::Object]
+      # @!visibility private
       def apply(ctx)
         ctx.fields.each do |field|
           additional_opts =
@@ -37,12 +45,6 @@ module Blueprinter
         end
         yield ctx
       end
-
-      # @!visibility private
-      alias around_serialize_object apply
-
-      # @!visibility private
-      alias around_serialize_collection apply
     end
   end
 end

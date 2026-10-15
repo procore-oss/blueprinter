@@ -95,8 +95,8 @@ module Blueprinter
       raise BlueprinterError, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
 
       hooks = Blueprinter.configuration.hooks[:pre_render]
-      object = hooks.reduce(object) do |val, ext|
-        ext.pre_render(val, self, view_name, local_options)
+      object = hooks.reduce(object) do |val, hook|
+        hook.ext.pre_render(val, self, view_name, local_options)
       end
 
       prepare_data(object, view_name, local_options)

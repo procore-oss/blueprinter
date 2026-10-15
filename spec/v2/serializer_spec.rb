@@ -53,24 +53,30 @@ describe Blueprinter::V2::Serializer do
     let(:name_of_extractor) do
       test = self
       Class.new(Blueprinter::Extension) do
-        def initialize(prefix: 'Name') = @tmp_prefix = prefix
+        def initialize(prefix: 'Name')
+          @tmp_prefix = prefix
+          around_blueprint_init :around_blueprint_init_hook
+          around_field_value :around_field_value_hook
+          around_object_value :around_object_value_hook
+          around_collection_value :around_collection_value_hook
+        end
 
-        def around_blueprint_init(ctx)
+        def around_blueprint_init_hook(ctx)
           @prefix = @tmp_prefix
           yield ctx
         end
 
-        def around_field_value(ctx)
+        def around_field_value_hook(ctx)
           name = ctx.object.fetch(ctx.field.source)
           "#{@prefix} of #{name}"
         end
 
-        def around_object_value(ctx)
+        def around_object_value_hook(ctx)
           obj = ctx.object.fetch(ctx.field.source)
           { name: "#{@prefix} of #{obj[:name]}" }
         end
 
-        def around_collection_value(ctx)
+        def around_collection_value_hook(ctx)
           collection = ctx.object.fetch(ctx.field.source)
           collection.each_with_index.map { |_, i| { num: i + 1 } }
         end
@@ -201,10 +207,12 @@ describe Blueprinter::V2::Serializer do
 
   it 'enables custom extensions' do
     ext1 = Class.new(Blueprinter::Extension) do
-      def around_serialize_object(ctx) = yield ctx
+      def initialize = around_serialize_object :hook
+      def hook(ctx) = yield ctx
     end
     ext2 = Class.new(Blueprinter::Extension) do
-      def around_serialize_collection(ctx) = yield ctx
+      def initialize = around_serialize_collection :hook
+      def hook(ctx) = yield ctx
     end
     category_blueprint.add ext1.new, ext2.new
     serializer = category_blueprint.serializer
@@ -226,13 +234,15 @@ describe Blueprinter::V2::Serializer do
 
   it 'calls nested around_field_value hooks, then formatters' do
     ext1 = Class.new(Blueprinter::Extension) do
-      def around_field_value(ctx)
+      def initialize = around_field_value :hook
+      def hook(ctx)
         value = yield ctx
         value == '?' ? skip! : value
       end
     end
     ext2 = Class.new(Blueprinter::Extension) do
-      def around_field_value(ctx)
+      def initialize = around_field_value :hook
+      def hook(ctx)
         value = yield ctx
         value.is_a?(Date) ? value + 10 : '?'
       end
@@ -250,13 +260,15 @@ describe Blueprinter::V2::Serializer do
 
   it 'calls nested around_object_value hooks' do
     ext1 = Class.new(Blueprinter::Extension) do
-      def around_object_value(ctx)
+      def initialize = around_object_value :hook
+      def hook(ctx)
         value = yield ctx
         value[:name] == 'Bar' ? skip! : value
       end
     end
     ext2 = Class.new(Blueprinter::Extension) do
-      def around_object_value(_ctx)
+      def initialize = around_object_value :hook
+      def hook(_ctx)
         { name: 'Bar' }
       end
     end
@@ -269,16 +281,19 @@ describe Blueprinter::V2::Serializer do
 
   it 'calls nested around_collection_value hooks' do
     ext1 = Class.new(Blueprinter::Extension) do
-      def around_collection_value(ctx) = yield(ctx) << { num: 43 }
+      def initialize = around_collection_value :hook
+      def hook(ctx) = yield(ctx) << { num: 43 }
     end
     ext2 = Class.new(Blueprinter::Extension) do
-      def around_collection_value(ctx)
+      def initialize = around_collection_value :hook
+      def hook(ctx)
         value = yield ctx
         value.empty? ? skip! : value
       end
     end
     ext3 = Class.new(Blueprinter::Extension) do
-      def around_collection_value(ctx) = yield(ctx)[1..]
+      def initialize = around_collection_value :hook
+      def hook(ctx) = yield(ctx)[1..]
     end
     widget_blueprint.add ext1.new, ext2.new, ext3.new
 
@@ -333,29 +348,33 @@ describe Blueprinter::V2::Serializer do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
+        around_blueprint_init :around_blueprint_init_hook
+        around_serialize_object :around_serialize_object_hook
+        around_serialize_collection :around_serialize_collection_hook
+        around_blueprint :around_blueprint_hook
       end
 
-      def around_blueprint_init(ctx)
+      def around_blueprint_init_hook(ctx)
         @log << "around_blueprint_init (#{ctx.blueprint.class}): a"
         yield ctx
         @log << "around_blueprint_init (#{ctx.blueprint.class}): b"
       end
 
-      def around_serialize_object(ctx)
+      def around_serialize_object_hook(ctx)
         @log << "around_serialize_object (#{ctx.object[:name]}): a"
         res = yield ctx
         @log << "around_serialize_object (#{ctx.object[:name]}): b"
         res
       end
 
-      def around_serialize_collection(ctx)
+      def around_serialize_collection_hook(ctx)
         @log << "around_serialize_collection (#{ctx.object.size}): a"
         res = yield ctx
         @log << "around_serialize_collection (#{ctx.object.size}): b"
         res
       end
 
-      def around_blueprint(ctx)
+      def around_blueprint_hook(ctx)
         @log << "around_blueprint (#{ctx.object[:name]}): a"
         res = yield ctx
         @log << "around_blueprint (#{ctx.object[:name]}): b"
@@ -415,8 +434,12 @@ describe Blueprinter::V2::Serializer do
   it 'only runs around_blueprint_init once per blueprint' do
     log = []
     ext = Class.new(Blueprinter::Extension) do
-      def initialize(log) = @log = log
-      def around_blueprint_init(ctx)
+      def initialize(log)
+        @log = log
+        around_blueprint_init :hook
+      end
+
+      def hook(ctx)
         @log << "around_blueprint_init (#{ctx.blueprint.class})"
         yield ctx
       end
@@ -443,7 +466,8 @@ describe Blueprinter::V2::Serializer do
 
   it "raises if around_blueprint_init doesn't yield" do
     ext = Class.new(Blueprinter::Extension) do
-      def around_blueprint_init(ctx) = true
+      def initialize = around_blueprint_init :hook
+      def hook(ctx) = true
     end
     application_blueprint.add ext.new
 
@@ -454,7 +478,8 @@ describe Blueprinter::V2::Serializer do
 
   it "allows around_blueprint_init to modify blueprint options and fields" do
     ext = Class.new(Blueprinter::Extension) do
-      def around_blueprint_init(ctx)
+      def initialize = around_blueprint_init :hook
+      def hook(ctx)
         ctx.blueprint.options[:exclude_if_nil] = true
         ctx.fields.sort_by!(&:name)
         ctx.fields.find { |f| f.name == :description }.options[:exclude_if_nil] = false
@@ -526,9 +551,13 @@ describe Blueprinter::V2::Serializer do
 
   it 'passes objects information about the parent' do
     ext = Class.new(Blueprinter::Extension) do
-      def initialize(log) = @log = log
+      def initialize(log)
+        @log = log
+        around_serialize_object :around_serialize_object_hook
+        around_serialize_collection :around_serialize_collection_hook
+      end
 
-      def around_serialize_object(ctx)
+      def around_serialize_object_hook(ctx)
         if ctx.parent
           @log << "Object Parent Blueprint: #{ctx.parent.blueprint}"
           @log << "Object Parent field: #{ctx.parent.field.name}"
@@ -537,7 +566,7 @@ describe Blueprinter::V2::Serializer do
         yield ctx
       end
 
-      def around_serialize_collection(ctx)
+      def around_serialize_collection_hook(ctx)
         if ctx.parent
           @log << "Collection Parent Blueprint: #{ctx.parent.blueprint}"
           @log << "Collection Parent field: #{ctx.parent.field.name}"

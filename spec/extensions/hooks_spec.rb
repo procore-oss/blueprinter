@@ -18,16 +18,18 @@ describe Blueprinter::Hooks do
     Class.new(Blueprinter::Extension) do
       attr_reader :log
 
-      def initialize = @log = []
+      def initialize
+        @log = []
+        around_blueprint_init :init
+        around_serialize_object :serialize
+      end
 
-      def blueprint_setup(_context) = log << 'blueprint_setup'
-
-      def around_blueprint_init(ctx)
+      def init(ctx)
         ctx.fields = ctx.blueprint.class.reflections[:default].ordered
         yield ctx
       end
 
-      def around_serialize_object(context)
+      def serialize(context)
         res = yield context
         res[:n] += 1 if res[:n]
         res
@@ -38,9 +40,12 @@ describe Blueprinter::Hooks do
     Class.new(Blueprinter::Extension) do
       attr_reader :log
 
-      def initialize = @log = []
+      def initialize
+        @log = []
+        around_blueprint_init :init
+      end
 
-      def around_blueprint_init(ctx)
+      def init(ctx)
         log << 'around_blueprint_init'
         ctx.fields = ctx.blueprint.class.reflections[:default].ordered.reverse
         yield ctx
@@ -62,9 +67,10 @@ describe Blueprinter::Hooks do
       Class.new(Blueprinter::Extension) do
         def initialize(log)
           @log = log
+          around_serialize_object :serialize
         end
 
-        def around_serialize_object(ctx)
+        def serialize(ctx)
           @log << "A: #{ctx.object[:n]}"
           ctx.object = { n: ctx.object[:n] + 1 }
           res = yield ctx
@@ -76,7 +82,12 @@ describe Blueprinter::Hooks do
 
     let(:ext_b) do
       Class.new(ext_a) do
-        def around_serialize_object(ctx)
+        def initialize(*args)
+          super
+          around_serialize_object :serialize
+        end
+
+        def serialize(ctx)
           @log << "B: #{ctx.object[:n]}"
           ctx.object = { n: ctx.object[:n] + 1 }
           res = yield ctx
@@ -88,7 +99,12 @@ describe Blueprinter::Hooks do
 
     let(:ext_c) do
       Class.new(ext_a) do
-        def around_serialize_object(ctx)
+        def initialize(*args)
+          super
+          around_serialize_object :serialize
+        end
+
+        def serialize(ctx)
           @log << "C: #{ctx.object[:n]}"
           ctx.object = { n: ctx.object[:n] + 1 }
           res = yield ctx
@@ -100,7 +116,12 @@ describe Blueprinter::Hooks do
 
     let(:cache_ext) do
       Class.new(ext_a) do
-        def around_serialize_object(ctx)
+        def initialize(*args)
+          super
+          around_serialize_object :serialize
+        end
+
+        def serialize(ctx)
           @log << "Cache: #{ctx.object[:n]}"
           res =  { n: 42 }
           @log << "Cache END"
@@ -151,7 +172,8 @@ describe Blueprinter::Hooks do
     it 'bypasses parent hooks with a skip in a nested hook' do
       log = []
       ext = Class.new(Blueprinter::Extension) do
-        def around_serialize_object(_ctx) = skip!
+        def initialize = around_serialize_object :serialize
+        def serialize(_ctx) = skip!
       end
       extensions = [ext_a.new(log), ext_b.new(log), ext.new, ext_c.new(log)]
       ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
@@ -182,7 +204,8 @@ describe Blueprinter::Hooks do
 
     it 'requires that the yielded arg is the same class as the method arg' do
       ext = Class.new(Blueprinter::Extension) do
-        def around_serialize_object(_ctx) = yield "oops"
+        def initialize = around_serialize_object :serialize
+        def serialize(_ctx) = yield "oops"
       end
 
       ctx = object_ctx.new(blueprint.new, serializer.default_fields, {}, { n: 0 })
@@ -196,16 +219,20 @@ describe Blueprinter::Hooks do
   context '#around_hook' do
     let(:ext1) do
       Class.new(Blueprinter::Extension) do
-        def initialize(log) = @log = log
+        def initialize(log)
+          @log = log
+          around_serialize_object :serialize
+          around_hook :hook
+        end
 
-        def around_serialize_object(ctx)
+        def serialize(ctx)
           @log << 'around_serialize_object: A'
           res = yield ctx
           @log << 'around_serialize_object: B'
           res
         end
 
-        def around_hook(ctx)
+        def hook(ctx)
           @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): A"
           yield
           @log << "around_hook(#{ctx.extension.class.name}##{ctx.hook}): B"
@@ -253,7 +280,8 @@ describe Blueprinter::Hooks do
 
     it 'must yield' do
       ext = Class.new(Blueprinter::Extension) do
-        def around_hook(ctx) = nil
+        def initialize = around_hook :hook
+        def hook(ctx) = nil
       end
       log = []
       ctx = field_ctx.new(blueprint.new, serializer.default_fields, {}, {}, { foo: 'Foo' }, field, 42)

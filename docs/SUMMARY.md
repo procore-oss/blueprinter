@@ -21,7 +21,6 @@
     - [Views are Blueprints](./v2/new/views-are-blueprints.md)
     - [Nested views](./v2/new/nested-views.md)
     - [Partials](./v2/new/partials.md)
-    - [Modules](./v2/new/modules.md)
     - [Extensions](./v2/new/extensions.md)
 
 - [Building V2 Extensions](./extensions/index.md)

@@ -8,8 +8,9 @@ module Blueprinter
     # For readability, DSL methods have been organized into the following modules:
     #
     # * {Blueprinter::V2::DSL::Data} - Define fields, associations, and formatting.
-    # * {Blueprinter::V2::DSL::Views} - Create and use views and partials.
     # * {Blueprinter::V2::DSL::Config} - Set options and add extensions.
+    # * {Blueprinter::V2::DSL::Partials} - Create partials.
+    # * {Blueprinter::V2::DSL::Views} - Create views and use partials.
     #
     # == Using the DSL in your own modules
     #
@@ -59,14 +60,13 @@ module Blueprinter
 
       autoload :Config, 'blueprinter/v2/dsl/config'
       autoload :Data, 'blueprinter/v2/dsl/data'
+      autoload :Partials, 'blueprinter/v2/dsl/partials'
       autoload :Views, 'blueprinter/v2/dsl/views'
 
       # @!visibility private
       def self.extended(mod)
         mod.class_eval do
-          extend DSL::Config
-          extend DSL::Data
-          extend DSL::Views
+          extend DSL::Partials
 
           class << self
             attr_reader :nodes

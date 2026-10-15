@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module Blueprinter
   module V2
     module DSL
-      # Create child views and composable partials.
+      # Create child views and use partials.
       module Views
         #
         # Define a child view. It will inherit fields, associations, formatters, options, partials, and extensions from
@@ -57,43 +55,7 @@ module Blueprinter
         end
 
         #
-        # Define a partial. Partials can define anything Blueprints or views can: fields,
-        # associations, formatters, options, extensions, views, and other partials. But they're not
-        # views. Rather, views can `use` partials as shared functionality, similar to how Ruby classes
-        # can include modules.
-        #
-        # Defining a 2nd partial with the same name overrides the first.
-        #
-        # ```
-        # class WidgetBlueprint < ApplicationBlueprint
-        #   fields :id, :name
-        #
-        #   view :short do
-        #     use :associations
-        #     field(:description) { |ctx| ctx.object.description[0..50] }
-        #   end
-        #
-        #   view :expanded do
-        #     use :associations
-        #     field :description
-        #   end
-        #
-        #   partial :associations do
-        #     association :category, CategoryBlueprint
-        #     association :parts, [PartBlueprint]
-        #   end
-        # end
-        # ```
-        #
-        # @param name [Symbol] Name of the partial to create
-        # @yield Define the partial in the block. It has access to the full DSL.
-        #
-        def partial(name, &definition)
-          nodes << Nodes::Partial.new(name.to_sym, definition)
-        end
-
-        #
-        # Include one or more partials in the current context.
+        # Include one or more partials in the current context. It can be in a view, Blueprint, or even in another partial.
         #
         # ```
         # view :foo do
@@ -110,6 +72,27 @@ module Blueprinter
         #
         # Anytime you create a view, a partial of the same name is also created. This allows views to `use`
         # other views just like partials.
+        #
+        # == Including a partial from a module
+        #
+        # You may define partials in external Ruby modules, then use them in your Blueprints and views:
+        #
+        # ```
+        # module MyPartials
+        #   extend Blueprinter::V2::DSL
+        #
+        #   partial :my_partial do
+        #     # ...
+        #   end
+        # end
+        #
+        # class MyBlueprint
+        #   include MyPartials
+        #
+        #   use :my_partial
+        #   # ...
+        # end
+        # ```
         #
         # @param names [Symbol] One or more partial names
         # @param exclude [Array<Symbol>] Names of fields or associations to exclude from the partial(s)

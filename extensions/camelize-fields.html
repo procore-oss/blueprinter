@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -181,9 +181,13 @@
                         <h1 id="camelize-fields"><a class="header" href="#camelize-fields">Camelize Fields</a></h1>
 <p>This example alters the <code>source</code> of each field to use camel case, leaving the serialized name as-is.</p>
 <pre><code class="language-ruby">class CamelizedSourceExtension &lt; Blueprinter::Extension
-  def around_blueprint_init(ctx)
+  def initialize
+    around_blueprint_init :camelize_fields
+  end
+  
+  def camelize_fields(ctx)
     ctx.fields.each do |field|
-      field.source = field.source.to_s.camelize(:lower).to_sym
+      field.source = field.source_str.camelize(:lower).to_sym
     end
     yield ctx
   end

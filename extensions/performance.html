@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -187,35 +187,36 @@
 </code></pre>
 <p>But that’s tedious and error-prone. Let’s write an extension to do it for us.</p>
 <h3 id="manually-extract-each-field"><a class="header" href="#manually-extract-each-field">Manually extract each field</a></h3>
-<p>The <code>around_field_value</code> hook and friends are the simplest way to implement it:</p>
-<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
-  # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
-    attr = ctx.field.source_str.camelize
-    if ctx.object.is_a? Hash
-      ctx.object.key?(attr) ? ctx.object[attr] : ctx.object[attr.to_sym]
-    else
-      ctx.object.public_send(attr)
-    end
+<p>The <code>around_field_value</code> hook and friends are the simplest way to implement it, by extracting the value ourselves:</p>
+<pre><code class="language-ruby">class CamelCaseExtractor &lt; Blueprinter::Extension
+  def initialize
+    around_field_value :extract
+    around_object_value :extract
+    around_collection_value :extract
   end
 
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def extract(ctx)
+    attr = ctx.field.source_str.camelize
+    ctx.object.public_send(attr)
+  end
 end
 </code></pre>
 <p>But what about the performance? These hooks will run for <em>every field</em> on the Blueprint. If you’re adding this extension only to specific Blueprints that might be fine.
-But what if someone adds it to <code>ApplicationBlueprint</code>? Then it will run for <em>every field in every Blueprint</em> in your application!</p>
+But what if your entire application needs it? That’s a lot of overhead for something so basic.</p>
 <h3 id="transform-each-blueprints-result"><a class="header" href="#transform-each-blueprints-result">Transform each Blueprint’s result</a></h3>
 <p>The <code>around_blueprint</code> hook allows you to intercept and modify the serialized hash output of each Blueprint. If we define our Blueprints in camel case:</p>
 <pre><code class="language-ruby">field :someField
 </code></pre>
 <p>Then we can convert the output to snake case:</p>
-<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class SnakeCaseTransformer &lt; Blueprinter::Extension
+  def initialize
+    around_blueprint :transform
+  end
+  
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
-    # Get the serialized output from Blueprinter
+  def transform(ctx)
     result = yield ctx
-    # Convert it
     snake_case result
     result
   end
@@ -229,16 +230,21 @@ end
 <p>This runs only once per serialized object, so it’s a big improvement. But that could still be hundreds of times, or more, in a large result. Can we do better?</p>
 <h3 id="change-field-config-before-render"><a class="header" href="#change-field-config-before-render">Change field config before render</a></h3>
 <p>What if we could alter the field definitions programatically, before anything is serialized? The <code>around_blueprint_init</code> hook runs only <em>once per Blueprint</em> during a render. It’s quite cheap, and it can alter field definitions.</p>
-<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class SourceCamelizer &lt; Blueprinter::Extension
+  def initialize
+    around_blueprint_init :camelize_sources
+  end
+
   # @param ctx [Blueprinter::V2::Context::Init]
-  def around_blueprint_init(ctx)
+  def camelize_sources(ctx)
     ctx.fields.each do |field|
-      field.source = field.source_str.camelize.to_sym
+      # Camelize the `source` attribute of each field
+      field.source = field.source_str.camelize(:lower).to_sym
     end
     yield ctx
   end
+end
 </code></pre>
-<p>This is effectively the same as setting <code>source</code> on each field in the Blueprint. There’s essentially zero runtime cost.</p>
 
                     </main>
 

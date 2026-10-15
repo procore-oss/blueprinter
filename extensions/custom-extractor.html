@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -185,10 +185,13 @@
   def initialize(klass, &amp;extractor)
     @klass = klass
     @extractor = extractor
+    around_field_value :extract
+    around_object_value :extract
+    around_collection_value :extract
   end
   
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def extract(ctx)
     if ctx.object.is_a? @klass
       # Use custom extraction
       @extractor.call(ctx.field.source, ctx.object)
@@ -197,10 +200,6 @@
       yield ctx
     end
   end
-
-  # Same behavior for associations
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
 end
 </code></pre>
 <p>Then add it to your base Blueprint, or to a specific Blueprint:</p>

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -181,7 +181,11 @@
                         <h1 id="yaml-serializer"><a class="header" href="#yaml-serializer">YAML Serializer</a></h1>
 <p>This example adds YAML to Blueprinter. Why? Because we can.</p>
 <pre><code class="language-ruby">class YamlSerializerExtension &lt; Blueprinter::Extension
-  def around_result(ctx)
+  def initialize
+    around_result :serialize
+  end
+  
+  def serialize(ctx)
     case ctx.format
     when :yaml
       # Get the Hash/Array result

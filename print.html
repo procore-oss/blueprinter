@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-171ecc20.js"></script>
@@ -467,17 +467,22 @@ puts field.source # name of field's source
 <p>Legacy/V1 had only one extension hook: <code>pre_render</code>. V2’s closest analog is <code>around_result</code>, which runs once at the beginning of every call to <code>render</code>.</p>
 <p>Here’s an example of an extension that supports both V1 and V2:</p>
 <pre><code class="language-ruby">class MyExtension &lt; Blueprinter::Extension
-  # V1 API
-  def pre_render(object, blueprint_class, view, options)
-    modify(object, blueprint_class, view, options)
+  def initialize
+    # Register 'modify_object' as a V2 around_result hook
+    around_result :modify_object
   end
 
   # V2 API
-  def around_result(ctx)
+  def modify_object(ctx)
     blueprint_class = ctx.blueprint.class
     view = blueprint_class.view_name
     ctx.object = modify(ctx.object, blueprint_class, view, ctx.options)
     yield ctx
+  end
+  
+  # V1 API
+  def pre_render(object, blueprint_class, view, options)
+    modify(object, blueprint_class, view, options)
   end
 
   private
@@ -712,14 +717,8 @@ end
     # Enable the built-in "skip if nil" option
     set :exclude_if_nil, true
 
-    # Add an inline extension to skip blank fields
-    extension do
-      def around_field_value(ctx)
-        val = yield ctx
-        skip! if val.blank?
-        val
-      end
-    end
+    # Enable an extension for skipping blank fields
+    add ExcludeIfBlank.new
   end
 end
 </code></pre>
@@ -822,9 +821,13 @@ the entire API, this guide shows off some of the powerful things you can do.</p>
 or Blueprinter’s bundled extensions (TODO link).</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="basics"><a class="header" href="#basics">Basics</a></h1>
-<p>An extension will subclass <code>Blueprinter::Extension</code> and define one or more hook methods. (See <code>Blueprinter::Extension</code> for documentation about all hooks.)</p>
-<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
-  def around_field_value(ctx)
+<p>An extension will subclass <code>Blueprinter::Extension</code> then define and register one or more hooks. (See <code>Blueprinter::Extension</code> for documentation about all hooks.)</p>
+<pre><code class="language-ruby">class ExcludeIfBlank &lt; Blueprinter::Extension
+  def initialize
+    around_field_value :skip_blank
+  end
+  
+  def skip_blank(ctx)
     # get the value by yielding to other extensions and Blueprinter's internals
     val = yield ctx
 
@@ -838,7 +841,7 @@ end
 </code></pre>
 <p>Then add the extension to a blueprint:</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; Blueprinter::V2::Base
-  add ExcludeIfBlankExtension.new
+  add ExcludeIfBlank.new
 
   field :name, exclude_if_blank: true
 end
@@ -851,9 +854,13 @@ end
 <p>Here’s a more fully formed version of the ExcludeIfBlank extension from the previous section.</p>
 <p>It works just like the built-in <code>exclude_if_nil</code> option, but checks for <code>blank?</code> instead. It checks the Blueprint
 options first, then allows fields to override it.</p>
-<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class ExcludeIfBlank &lt; Blueprinter::Extension
+  def initialize
+    around_field_value :skip_blank
+  end
+  
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def skip_blank(ctx)
     val = yield ctx
 
     exclude = ctx.blueprint.options[:exclude_if_blank]
@@ -866,7 +873,7 @@ end
 </code></pre>
 <p>Add it to your <code>ApplicationBlueprint</code> and use it in your blueprints.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add ExcludeIfBlankExtension.new
+  add ExcludeIfBlank.new
 end
 </code></pre>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint
@@ -889,10 +896,13 @@ end
   def initialize(klass, &amp;extractor)
     @klass = klass
     @extractor = extractor
+    around_field_value :extract
+    around_object_value :extract
+    around_collection_value :extract
   end
   
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def extract(ctx)
     if ctx.object.is_a? @klass
       # Use custom extraction
       @extractor.call(ctx.field.source, ctx.object)
@@ -901,10 +911,6 @@ end
       yield ctx
     end
   end
-
-  # Same behavior for associations
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
 end
 </code></pre>
 <p>Then add it to your base Blueprint, or to a specific Blueprint:</p>
@@ -917,14 +923,15 @@ end
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="blueprint-decorator"><a class="header" href="#blueprint-decorator">Blueprint Decorator</a></h1>
 <p>This example adds metadata to the output of a Blueprint, similar to Legacy/V1’s transformer feature.</p>
-<pre><code class="language-ruby">class DecoratorExtension &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class BlueprintDecorator &lt; Blueprinter::Extension
   def initialize(attr, &amp;decorator)
     @attr = attr
     @decorator = decorator
+    around_blueprint :decorate
   end
 
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
+  def decorate(ctx)
     result = yield ctx
     result[@attr] = @decorator.call(ctx.object)
     result
@@ -933,7 +940,7 @@ end
 </code></pre>
 <p>Add the extension to whatever blueprints need metadata:</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  add DecoratorExtension.new(:metadata) { |object|
+  add BlueprintDecorator.new(:metadata) { |object|
     # extract and return metadata from the object
   }
 end
@@ -942,13 +949,16 @@ end
 <h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
 <p>Blueprinter bundles the <code>Blueprinter::Extensions::OpenTelemetry</code> extension. But if that doesn’t work with your tooling, build your own!</p>
 <pre><code class="language-ruby">class MyTelemetryExtension
-  def initialize(my_tel)
+  def initialize(my_tel, trace_extensions: true)
     @my_tel = my_tel
+    around_serialize_object :trace_object
+    around_serialize_collection :trace_collection
+    around_hook :trace_hook if trace_extensions
   end
 
   # Create a span for object serialization
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_serialize_object(ctx)
+  def trace_object(ctx)
     @my_tel.span("blueprint.object", blueprint: ctx.blueprint.to_s) do
       yield ctx
     end
@@ -956,7 +966,7 @@ end
 
   # Create a span for collection serialization
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_serialize_collection(ctx)
+  def trace_collection(ctx)
     @my_tel.span("blueprint.collection", blueprint: ctx.blueprint.to_s) do
       yield ctx
     end
@@ -964,7 +974,7 @@ end
 
   # Create a span for other extension hooks
   # @param ctx [Blueprinter::V2::Context::Hook]
-  def around_hook(ctx)
+  def trace_hook(ctx)
     @my_tel.span("blueprint.extension", extension: ctx.extension.class.name, hook: ctx.hook) do
       yield
     end
@@ -978,9 +988,13 @@ end
 <h1 id="camelize-fields"><a class="header" href="#camelize-fields">Camelize Fields</a></h1>
 <p>This example alters the <code>source</code> of each field to use camel case, leaving the serialized name as-is.</p>
 <pre><code class="language-ruby">class CamelizedSourceExtension &lt; Blueprinter::Extension
-  def around_blueprint_init(ctx)
+  def initialize
+    around_blueprint_init :camelize_fields
+  end
+  
+  def camelize_fields(ctx)
     ctx.fields.each do |field|
-      field.source = field.source.to_s.camelize(:lower).to_sym
+      field.source = field.source_str.camelize(:lower).to_sym
     end
     yield ctx
   end
@@ -993,7 +1007,11 @@ end
 <h1 id="yaml-serializer"><a class="header" href="#yaml-serializer">YAML Serializer</a></h1>
 <p>This example adds YAML to Blueprinter. Why? Because we can.</p>
 <pre><code class="language-ruby">class YamlSerializerExtension &lt; Blueprinter::Extension
-  def around_result(ctx)
+  def initialize
+    around_result :serialize
+  end
+  
+  def serialize(ctx)
     case ctx.format
     when :yaml
       # Get the Hash/Array result
@@ -1030,35 +1048,36 @@ end
 </code></pre>
 <p>But that’s tedious and error-prone. Let’s write an extension to do it for us.</p>
 <h3 id="manually-extract-each-field"><a class="header" href="#manually-extract-each-field">Manually extract each field</a></h3>
-<p>The <code>around_field_value</code> hook and friends are the simplest way to implement it:</p>
-<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
-  # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
-    attr = ctx.field.source_str.camelize
-    if ctx.object.is_a? Hash
-      ctx.object.key?(attr) ? ctx.object[attr] : ctx.object[attr.to_sym]
-    else
-      ctx.object.public_send(attr)
-    end
+<p>The <code>around_field_value</code> hook and friends are the simplest way to implement it, by extracting the value ourselves:</p>
+<pre><code class="language-ruby">class CamelCaseExtractor &lt; Blueprinter::Extension
+  def initialize
+    around_field_value :extract
+    around_object_value :extract
+    around_collection_value :extract
   end
 
-  alias around_object_value around_field_value
-  alias around_collection_value around_field_value
+  # @param ctx [Blueprinter::V2::Context::Field]
+  def extract(ctx)
+    attr = ctx.field.source_str.camelize
+    ctx.object.public_send(attr)
+  end
 end
 </code></pre>
 <p>But what about the performance? These hooks will run for <em>every field</em> on the Blueprint. If you’re adding this extension only to specific Blueprints that might be fine.
-But what if someone adds it to <code>ApplicationBlueprint</code>? Then it will run for <em>every field in every Blueprint</em> in your application!</p>
+But what if your entire application needs it? That’s a lot of overhead for something so basic.</p>
 <h3 id="transform-each-blueprints-result"><a class="header" href="#transform-each-blueprints-result">Transform each Blueprint’s result</a></h3>
 <p>The <code>around_blueprint</code> hook allows you to intercept and modify the serialized hash output of each Blueprint. If we define our Blueprints in camel case:</p>
 <pre><code class="language-ruby">field :someField
 </code></pre>
 <p>Then we can convert the output to snake case:</p>
-<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class SnakeCaseTransformer &lt; Blueprinter::Extension
+  def initialize
+    around_blueprint :transform
+  end
+  
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
-    # Get the serialized output from Blueprinter
+  def transform(ctx)
     result = yield ctx
-    # Convert it
     snake_case result
     result
   end
@@ -1072,16 +1091,21 @@ end
 <p>This runs only once per serialized object, so it’s a big improvement. But that could still be hundreds of times, or more, in a large result. Can we do better?</p>
 <h3 id="change-field-config-before-render"><a class="header" href="#change-field-config-before-render">Change field config before render</a></h3>
 <p>What if we could alter the field definitions programatically, before anything is serialized? The <code>around_blueprint_init</code> hook runs only <em>once per Blueprint</em> during a render. It’s quite cheap, and it can alter field definitions.</p>
-<pre><code class="language-ruby">class CamelCaseSource &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class SourceCamelizer &lt; Blueprinter::Extension
+  def initialize
+    around_blueprint_init :camelize_sources
+  end
+
   # @param ctx [Blueprinter::V2::Context::Init]
-  def around_blueprint_init(ctx)
+  def camelize_sources(ctx)
     ctx.fields.each do |field|
-      field.source = field.source_str.camelize.to_sym
+      # Camelize the `source` attribute of each field
+      field.source = field.source_str.camelize(:lower).to_sym
     end
     yield ctx
   end
+end
 </code></pre>
-<p>This is effectively the same as setting <code>source</code> on each field in the Blueprint. There’s essentially zero runtime cost.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="legacyv1-docs"><a class="header" href="#legacyv1-docs">Legacy/V1 Docs</a></h1>
 <p>TODO copy from old README</p>

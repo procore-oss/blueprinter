@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -179,9 +179,13 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="basics"><a class="header" href="#basics">Basics</a></h1>
-<p>An extension will subclass <code>Blueprinter::Extension</code> and define one or more hook methods. (See <code>Blueprinter::Extension</code> for documentation about all hooks.)</p>
-<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
-  def around_field_value(ctx)
+<p>An extension will subclass <code>Blueprinter::Extension</code> then define and register one or more hooks. (See <code>Blueprinter::Extension</code> for documentation about all hooks.)</p>
+<pre><code class="language-ruby">class ExcludeIfBlank &lt; Blueprinter::Extension
+  def initialize
+    around_field_value :skip_blank
+  end
+  
+  def skip_blank(ctx)
     # get the value by yielding to other extensions and Blueprinter's internals
     val = yield ctx
 
@@ -195,7 +199,7 @@ end
 </code></pre>
 <p>Then add the extension to a blueprint:</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; Blueprinter::V2::Base
-  add ExcludeIfBlankExtension.new
+  add ExcludeIfBlank.new
 
   field :name, exclude_if_blank: true
 end

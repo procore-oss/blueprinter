@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -182,9 +182,13 @@
 <p>Here’s a more fully formed version of the ExcludeIfBlank extension from the previous section.</p>
 <p>It works just like the built-in <code>exclude_if_nil</code> option, but checks for <code>blank?</code> instead. It checks the Blueprint
 options first, then allows fields to override it.</p>
-<pre><code class="language-ruby">class ExcludeIfBlankExtension &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class ExcludeIfBlank &lt; Blueprinter::Extension
+  def initialize
+    around_field_value :skip_blank
+  end
+  
   # @param ctx [Blueprinter::V2::Context::Field]
-  def around_field_value(ctx)
+  def skip_blank(ctx)
     val = yield ctx
 
     exclude = ctx.blueprint.options[:exclude_if_blank]
@@ -197,7 +201,7 @@ end
 </code></pre>
 <p>Add it to your <code>ApplicationBlueprint</code> and use it in your blueprints.</p>
 <pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
-  add ExcludeIfBlankExtension.new
+  add ExcludeIfBlank.new
 end
 </code></pre>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint

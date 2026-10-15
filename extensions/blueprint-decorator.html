@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -180,14 +180,15 @@
                     <main>
                         <h1 id="blueprint-decorator"><a class="header" href="#blueprint-decorator">Blueprint Decorator</a></h1>
 <p>This example adds metadata to the output of a Blueprint, similar to Legacy/V1’s transformer feature.</p>
-<pre><code class="language-ruby">class DecoratorExtension &lt; Blueprinter::Extension
+<pre><code class="language-ruby">class BlueprintDecorator &lt; Blueprinter::Extension
   def initialize(attr, &amp;decorator)
     @attr = attr
     @decorator = decorator
+    around_blueprint :decorate
   end
 
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_blueprint(ctx)
+  def decorate(ctx)
     result = yield ctx
     result[@attr] = @decorator.call(ctx.object)
     result
@@ -196,7 +197,7 @@ end
 </code></pre>
 <p>Add the extension to whatever blueprints need metadata:</p>
 <pre><code class="language-ruby">class MyBlueprint &lt; ApplicationBlueprint
-  add DecoratorExtension.new(:metadata) { |object|
+  add BlueprintDecorator.new(:metadata) { |object|
     # extract and return metadata from the object
   }
 end

@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ca05eb7f.js";
+            window.path_to_searchindex_js = "../searchindex-ae223beb.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-171ecc20.js"></script>
@@ -181,13 +181,16 @@
                         <h1 id="telemetry"><a class="header" href="#telemetry">Telemetry</a></h1>
 <p>Blueprinter bundles the <code>Blueprinter::Extensions::OpenTelemetry</code> extension. But if that doesn’t work with your tooling, build your own!</p>
 <pre><code class="language-ruby">class MyTelemetryExtension
-  def initialize(my_tel)
+  def initialize(my_tel, trace_extensions: true)
     @my_tel = my_tel
+    around_serialize_object :trace_object
+    around_serialize_collection :trace_collection
+    around_hook :trace_hook if trace_extensions
   end
 
   # Create a span for object serialization
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_serialize_object(ctx)
+  def trace_object(ctx)
     @my_tel.span("blueprint.object", blueprint: ctx.blueprint.to_s) do
       yield ctx
     end
@@ -195,7 +198,7 @@
 
   # Create a span for collection serialization
   # @param ctx [Blueprinter::V2::Context::Object]
-  def around_serialize_collection(ctx)
+  def trace_collection(ctx)
     @my_tel.span("blueprint.collection", blueprint: ctx.blueprint.to_s) do
       yield ctx
     end
@@ -203,7 +206,7 @@
 
   # Create a span for other extension hooks
   # @param ctx [Blueprinter::V2::Context::Hook]
-  def around_hook(ctx)
+  def trace_hook(ctx)
     @my_tel.span("blueprint.extension", extension: ctx.extension.class.name, hook: ctx.hook) do
       yield
     end

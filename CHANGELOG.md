@@ -1,5 +1,5 @@
 ## Unreleased
---
+- 🐛 [BUGFIX] Fixes broken memoization of field-level `:if`/`:unless` conditions. Because `callable_from` returns `false` when no condition is configured, `||=` never memoized it, so conditions were re-resolved (including a global configuration lookup) for every field of every rendered object. Renders are now ~1.6x faster. Note: global `config.if`/`config.unless` are now read once per field on first use, so they must be set before rendering — consistent with `config.sort_fields_by`.
 
 ## 1.3.0 - 2026/04/14
 - 🚀 [FEATURE] Adds support for `Symbol#to_proc` syntax in fields and identifiers. See [#546](https://github.com/procore-oss/blueprinter/pull/546). Thanks to [@tob1k](https://github.com/tob1k).

@@ -4,7 +4,7 @@ type: how-to
 description: "Add or update a doc under `docs/` so readers can find it, trust it, and tell whether it is still current."
 generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:37:33Z" }
 verified:
-  - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
+  - { by: human:lessthanjacob, at: "2026-10-21T23:42:19Z" }
 ---
 
 # Writing Docs

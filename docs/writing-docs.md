@@ -1,7 +1,7 @@
 ---
 title: "Writing Docs"
 type: how-to
-description: "Add or update a contributor doc so readers can find it, trust it, and tell whether it is still current."
+description: "Add or update a doc under `docs/` so readers can find it, trust it, and tell whether it is still current."
 generated: { by: human:lessthanjacob, at: "2026-10-21T21:50:40Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }

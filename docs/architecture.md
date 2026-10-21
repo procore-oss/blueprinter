@@ -88,7 +88,7 @@ sequenceDiagram
   Note over B,VC: false raises Errors::UnknownView
   B->>Ext: pre_render(object, blueprint, view_name, local_options)
   Ext-->>B: object (original, modified, or replaced)
-  B->>B: prepare_data: add view: to local_options; map when array-like
+  B->>B: prepare_data: add view: to local_options, map when array-like
   loop each object
     B->>VC: fields_for(view_name) from the compiled snapshot
     loop each field
@@ -96,14 +96,14 @@ sequenceDiagram
       B->>F: extract(obj, local_options)
       F->>X: extract(method, obj, local_options, field.options)
       alt Association
-        X->>X: read value; apply :default / :default_if
+        X->>X: read value, apply :default / :default_if
         X->>X: merge association :options into local_options
         X->>B: hashify on the associated blueprint and view
         Note over X,B: recursion into the associated blueprint: UnknownView check, pre_render, prepare_data
       else Field
-        X->>X: block, Hash lookup, or public_send; then date formatting and defaults
+        X->>X: block, Hash lookup, or public_send, then date formatting and defaults
       end
-      B->>B: drop when nil and :exclude_if_nil; result[name] = value
+      B->>B: drop when nil and :exclude_if_nil, else result[name] = value
     end
     B->>VC: transformers(view_name)
     B->>T: transform(result_hash, obj, local_options), mutating in place

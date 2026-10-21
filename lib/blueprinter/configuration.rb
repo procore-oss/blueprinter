@@ -8,6 +8,7 @@ module Blueprinter
   class Configuration
     attr_accessor(
       :association_default,
+      :compile_views,
       :custom_array_like_classes,
       :datetime_format,
       :default_transformers,
@@ -37,6 +38,7 @@ module Blueprinter
       @default_transformers = []
       @custom_array_like_classes = []
       @extensions = Extensions.new
+      @compile_views = false
     end
 
     def extensions=(list)

@@ -1,5 +1,6 @@
 ## Unreleased
 - 💅 [ENHANCEMENT] Marks `Transformer`, `AutoExtractor`, and the `AutoExtractor#extractor` override hook as public API, matching the README's subclassing docs. See [#612](https://github.com/procore-oss/blueprinter/pull/612). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
+- 🚀 [FEATURE] Adds opt-in compiled views (`config.compile_views = true`), which compile each view into a plain Ruby method on first render. Output is identical to standard rendering, and rendering is several times faster.
 
 ## 1.3.0 - 2026/04/14
 - 🚀 [FEATURE] Adds support for `Symbol#to_proc` syntax in fields and identifiers. See [#546](https://github.com/procore-oss/blueprinter/pull/546). Thanks to [@tob1k](https://github.com/tob1k).

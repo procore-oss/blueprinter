@@ -5,6 +5,16 @@ require 'blueprinter'
 
 Dir[File.dirname(__FILE__) + '/support/**/*.rb'].each { |file| require file }
 
+# BLUEPRINTER_COMPILE_VIEWS=1 runs the whole suite with compiled views enabled, including after configuration resets
+if ENV['BLUEPRINTER_COMPILE_VIEWS'] == '1'
+  Blueprinter::Configuration.prepend(Module.new do
+    def initialize
+      super
+      @compile_views = true
+    end
+  end)
+end
+
 module SpecHelpers
   def reset_blueprinter_config!
     Blueprinter.reset_configuration!

@@ -2,7 +2,7 @@
 title: "Architecture"
 type: explanation
 description: "Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T22:21:24Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -257,7 +257,7 @@ Changes must keep these invariants:
 
 Downstream gems build on Blueprinter's extension and reflection surfaces ([`blueprinter-activerecord`](https://github.com/procore-oss/blueprinter-activerecord) uses both; [`blueprinter_schema`](https://github.com/thisismydesign/blueprinter_schema) reads `reflections`). A change that alters rendered output, a public signature, an error class, or the reflection shape is **breaking** even when every spec passes.
 
-**Public API** is every public class method on `Blueprinter::Base` (the DSL, `render`, `render_as_hash`, `render_as_json`, `hashify`, `view?`, `view_collection`, `reflections`), every `Configuration` accessor and accepted value, and the base classes `Extension`, `Extractor`, `Transformer`, and `BlueprinterError`. Public means Ruby visibility: a YARD `@api private` tag marks classes that are reachable but not meant for direct use, and is not permission to remove them.
+**Public API** is everything not tagged `@api private` that users call, subclass, or override as the README or YARD documents: every public class method on `Blueprinter::Base` (the DSL, `render`, `render_as_hash`, `render_as_json`, `hashify`, `view?`, `view_collection`, `reflections`), every `Configuration` accessor and accepted value, and the base classes `Extension`, `Extractor`, `AutoExtractor`, `Transformer`, and `BlueprinterError`. Ruby visibility doesn't decide it: `AutoExtractor#extractor` is private but tagged `@api public`, because subclasses override it. Anything tagged `@api private` is internal and can change without a deprecation.
 
 - **MUST NOT** make a breaking change (removing or renaming anything public, or changing the default output of an existing option such as field sort order, nil handling, or `default_if` semantics) in a patch release.
 - **MAY** make one in a minor or major release only when the release's CHANGELOG carries a ‼️ `[BREAKING]` entry for it, and, for a removal, at least one earlier release emitted a `Blueprinter::Deprecation.report` warning naming the replacement. Procedure: [making-changes.md](making-changes.md#add-a-deprecation).
@@ -270,14 +270,14 @@ Surfaces that are public even though they don't look like it:
 - The error class hierarchy. New errors go under `Blueprinter::Errors` as subclasses of `BlueprinterError`, so existing `rescue Blueprinter::BlueprinterError` blocks keep working while callers can rescue the new case separately. `Errors::UnknownView`, for example, lets apps answer a bad view name with a 400 without also catching server faults.
 - Every accepted configuration value, including `:stderror` for `deprecations`, which the README spells `:stderr` ([configuration.md](configuration.md#notes)).
 
-| Area                        | Public                                                                                                                                               | Marked `@api private`                                                                                                     |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Definition DSL              | `Base` DSL methods, `view?`, `view_collection`                                                                                                       | `View`, `ViewCollection`, `Field`, `Association`, `BlueprintValidator`                                                    |
-| Rendering                   | `render`, `render_as_hash`, `render_as_json`, `hashify`, `Extractor`                                                                                 | `AutoExtractor`, `BlockExtractor`, `HashExtractor`, `PublicSendExtractor`, `AssociationExtractor`, `prepare` (deprecated) |
-| Configuration and extension | `Blueprinter.configure`, every `Configuration` accessor, `Extension`, `Transformer` (tagged `@api private` in source yet documented for subclassing) | `Deprecation`                                                                                                             |
-| Reflection                  | `Base.reflections`, `Reflection::View#fields` / `#associations`                                                                                      | none                                                                                                                      |
-| Errors                      | `BlueprinterError` and every class under `Errors`, plus `DateTimeFormatter::InvalidDateTimeFormatterError`                                           | none                                                                                                                      |
-| Rails integration           | `rails g blueprinter:blueprint`                                                                                                                      | none                                                                                                                      |
+| Area                        | Public                                                                                                                           | Marked `@api private`                                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Definition DSL              | `Base` DSL methods, `view?`, `view_collection`                                                                                   | `View`, `ViewCollection`, `Field`, `Association`, `BlueprintValidator`                                   |
+| Rendering                   | `render`, `render_as_hash`, `render_as_json`, `hashify`, `Extractor`, `AutoExtractor` (including its `extractor` override point) | `BlockExtractor`, `HashExtractor`, `PublicSendExtractor`, `AssociationExtractor`, `prepare` (deprecated) |
+| Configuration and extension | `Blueprinter.configure`, every `Configuration` accessor, `Extension`, `Transformer`                                              | `Deprecation`                                                                                            |
+| Reflection                  | `Base.reflections`, `Reflection::View#fields` / `#associations`                                                                  | none                                                                                                     |
+| Errors                      | `BlueprinterError` and every class under `Errors`, plus `DateTimeFormatter::InvalidDateTimeFormatterError`                       | none                                                                                                     |
+| Rails integration           | `rails g blueprinter:blueprint`                                                                                                  | none                                                                                                     |
 
 ## Reference
 

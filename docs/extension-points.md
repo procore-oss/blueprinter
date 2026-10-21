@@ -2,7 +2,7 @@
 title: "Extension Points Reference"
 type: reference
 description: "Know the exact contract before writing or changing an extractor, transformer, extension, or reflection consumer, or raising a new error."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T22:02:01Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -73,7 +73,6 @@ UserBlueprint.render_as_hash(user) # => {id: 1, name: "Ada", type: "User"}
 - `transform(hash, object, options)` edits `hash` in place; its return value is ignored.
 - It runs after every field in the view has been extracted, with `local_options` as `options`. `local_options` isn't frozen, so a transformer _can_ change it to pass derived values downstream.
 - `transform` accepts a class or an instance.
-- `Transformer` is tagged `@api private` in source, but the README documents subclassing it, so treat it as public.
 
 Which transformers run, and in what order: [architecture.md](architecture.md#transformer-order). In the code: `lib/blueprinter/transformer.rb`.
 

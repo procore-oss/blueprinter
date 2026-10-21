@@ -1,5 +1,5 @@
 ## Unreleased
---
+- 💅 [ENHANCEMENT] Documents `Transformer`, `AutoExtractor`, and `AutoExtractor#extractor` as public API by removing their `@api private` tags. See [#612](https://github.com/procore-oss/blueprinter/pull/612). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.3.0 - 2026/04/14
 - 🚀 [FEATURE] Adds support for `Symbol#to_proc` syntax in fields and identifiers. See [#546](https://github.com/procore-oss/blueprinter/pull/546). Thanks to [@tob1k](https://github.com/tob1k).

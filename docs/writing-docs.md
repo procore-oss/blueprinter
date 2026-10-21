@@ -2,7 +2,7 @@
 title: "Writing Docs"
 type: how-to
 description: "Add or update a doc under `docs/` so readers can find it, trust it, and tell whether it is still current."
-generated: { by: human:lessthanjacob, at: "2026-10-21T21:50:40Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:37:33Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -49,13 +49,13 @@ verified:
 ---
 ```
 
-| Field         | Meaning                                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`       | Matches the doc's `#` heading.                                                                                                                                   |
-| `type`        | One of the four types in [Choosing a Type](#choosing-a-type).                                                                                                    |
-| `description` | Why a reader opens the doc: their goal, not a list of its sections.                                                                                              |
+| Field         | Meaning                                                                                                                                                                      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`       | Matches the doc's `#` heading.                                                                                                                                               |
+| `type`        | One of the four types in [Choosing a Type](#choosing-a-type).                                                                                                                |
+| `description` | Why a reader opens the doc: their goal, not a list of its sections.                                                                                                          |
 | `generated`   | Who or what last changed the content, and when. Update it with every change to the doc's claims. Use `human:<github-handle>` for a person and `<tool>/<model>` for an agent. |
-| `verified`    | Who checked the content against the code, and when. Add an entry only after checking; keep earlier entries.                                                      |
+| `verified`    | Who checked the content against the code, and when. One entry per reviewer: a re-review updates that reviewer's `at` instead of adding an entry.                             |
 
 `generated` and `verified` are the trust fields from the [Open Knowledge Format](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) (§5.2). After adding, renaming, or removing a doc, or changing its `title`, `type`, or `description`, update the table in [index.md](index.md) in the same PR.
 
@@ -73,7 +73,7 @@ verified:
 
 A doc counts as **human-reviewed** when its latest `verified` entry from a `human:` actor is at or after `generated.at`. Otherwise nobody has reviewed it, or it changed after the last review, so treat its claims as leads to confirm against the code.
 
-To review a doc, check each claim against the code, run any examples, then add `{ by: human:<github-handle>, at: <now> }` to `verified`. A human author who checked their own change can add both entries at once.
+To review a doc, check each claim against the code, run any examples, then add `{ by: human:<github-handle>, at: <now> }` to `verified`, or update `at` on your existing entry. Earlier review dates stay in the git history. A human author who checked their own change can add both entries at once.
 
 An agent can write the `verified` entry, but only on behalf of a person: when that person says they have reviewed the doc, the agent records it under their `human:` handle. An agent never verifies a doc on its own behalf, since its own check is what `generated` already records.
 

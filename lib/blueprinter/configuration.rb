@@ -44,8 +44,14 @@ module Blueprinter
       @extensions = list
     end
 
+    # Rebuilt whenever `extensions` changes, including in-place changes like `extensions << ext`.
     def hooks
-      @_hooks ||= Blueprinter::Hooks.new(extensions)
+      cached = @_hooks
+      return cached[1] if cached && cached[0] == extensions
+
+      hooks = Blueprinter::Hooks.new(extensions)
+      @_hooks = [extensions.dup.freeze, hooks].freeze
+      hooks
     end
 
     def array_like_classes

@@ -291,5 +291,18 @@ describe Blueprinter::Hooks do
         hooks.around(:around_serialize_object, ctx, &:object)
       end.to raise_error(Blueprinter::Errors::ExtensionHook, /did not yield/)
     end
+
+    it 'raises errors that rescue Blueprinter::BlueprinterError catches' do
+      ext = Class.new(Blueprinter::Extension) do
+        def initialize = around_hook :hook
+        def hook(ctx) = nil
+      end
+      ctx = field_ctx.new(blueprint.new, serializer.default_fields, {}, {}, { foo: 'Foo' }, field, 42)
+      hooks = described_class.new [ext1.new([]), ext.new]
+
+      expect do
+        hooks.around(:around_serialize_object, ctx, &:object)
+      end.to raise_error(Blueprinter::BlueprinterError, /did not yield/)
+    end
   end
 end

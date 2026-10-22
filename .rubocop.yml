@@ -22,6 +22,10 @@ Lint/MissingSuper:
 Metrics/MethodLength:
   Max: 20
 
+Metrics/ClassLength:
+  Exclude:
+    - 'lib/blueprinter/view_collection.rb'
+
 Metrics/AbcSize:
   Enabled: false
 

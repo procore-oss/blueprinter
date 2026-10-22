@@ -8,7 +8,7 @@ module Blueprinter
     def initialize(extensions)
       @hooks = Extension::HOOKS.to_h { |hook| [hook, []] }
       extensions.each do |ext|
-        ext.finalize_hooks.each { |hook| @hooks[hook.name] << hook }
+        ext.finalize_hooks.each { |hook| @hooks[hook.name] << hook } if ext.respond_to?(:finalize_hooks)
         # V1 doesn't have to register its hooks
         @hooks[:pre_render] << Extension::Hook.new(:pre_render, ext, :pre_render).freeze if ext.respond_to?(:pre_render)
       end

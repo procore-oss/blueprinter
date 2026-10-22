@@ -103,4 +103,16 @@ describe 'V1 pre_render hook' do
     Blueprinter.configure { |config| config.extensions << late.new }
     expect(test_blueprint.render_as_hash(obj)[:name]).to eq 'Late'
   end
+
+  it 'runs an extension that only defines pre_render' do
+    duck = Object.new
+    def duck.pre_render(object, _blueprint, _view, _options)
+      obj = object.dup
+      obj.name = 'Duck'
+      obj
+    end
+    Blueprinter.configure { |config| config.extensions = [duck] }
+    obj = OpenStruct.new(id: 42, name: 'Jack')
+    expect(test_blueprint.render_as_hash(obj)[:name]).to eq 'Duck'
+  end
 end

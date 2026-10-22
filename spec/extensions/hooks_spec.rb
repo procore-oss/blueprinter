@@ -53,6 +53,27 @@ describe Blueprinter::Hooks do
     end
   end
 
+  context 'finalizing extensions' do
+    it 'rejects a method named after a hook instead of registering it' do
+      ext = Class.new(Blueprinter::Extension) do
+        def around_result(ctx) = yield(ctx)
+      end
+      expect { described_class.new [ext.new] }
+        .to raise_error(Blueprinter::Errors::ExtensionHook, /defines a method named `around_result`/)
+    end
+
+    it 'rejects a private hook method' do
+      ext = Class.new(Blueprinter::Extension) do
+        def initialize = around_result :result
+
+        private
+
+        def result(ctx) = yield(ctx)
+      end
+      expect { ext.new }.to raise_error(ArgumentError, /must be a public method/)
+    end
+  end
+
   context '#registered?' do
     it 'knows whether it contains certain hooks' do
       hooks = described_class.new [ext1.new, ext2.new]

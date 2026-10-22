@@ -96,6 +96,10 @@ module Blueprinter
       pre_render
     ].freeze
 
+    # Hooks registered by calling the private method of the same name in `initialize`
+    # @!visibility private
+    REGISTRARS = (HOOKS - %i[pre_render]).freeze
+
     # If this returns true, `around_hook` will not be called when this extension's hooks are run.
     #
     # Useful for extensions like {Blueprinter::Extensions::OpenTelemetry} that don't want to measure themselves.
@@ -152,7 +156,17 @@ module Blueprinter
 
     # Freezes hooks and returns registered hooks
     # @!visibility private
-    def finalize_hooks = _hooks.freeze
+    def finalize_hooks
+      overridden = REGISTRARS.find { |hook| self.class.instance_method(hook).owner != Extension }
+      if overridden
+        raise Errors::ExtensionHook.new(self, overridden, overridden,
+                                        "defines a method named `#{overridden}`, which replaces the registrar, " \
+                                        'so the hook never runs. Register a differently named method in ' \
+                                        "`initialize` instead: `def initialize = #{overridden} :my_method`")
+      end
+
+      _hooks.freeze
+    end
 
     private
 
@@ -408,7 +422,7 @@ module Blueprinter
 
     def register_hook(hook_name, method_name)
       raise ArgumentError, "Invalid hook name: #{hook_name.inspect}" unless HOOKS.include? hook_name
-      raise ArgumentError, "Invalid call name: #{method_name.inspect}" unless respond_to? method_name
+      raise ArgumentError, "Hook target #{method_name.inspect} must be a public method" unless respond_to? method_name
 
       _hooks << Hook.new(hook_name, self, method_name).freeze
       _hooks.uniq!

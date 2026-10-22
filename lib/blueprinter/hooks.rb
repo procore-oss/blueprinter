@@ -95,6 +95,18 @@ module Blueprinter
 
       # Hacky, but re-using this context object saves tons of time
       hook_ctx = Thread.current[:_blueprinter_hook_ctx] ||= V2::Context::Hook.new
+      fill_hook_ctx(hook_ctx, hook, ctx)
+      result = nil
+      _around(@around_hooks, 0, hook_ctx, NilClass, require_yield: true) do
+        # return the inner hook's value, not around_hook's
+        result = hook.ext.public_send(hook.target, ctx, &)
+        # nested hooks reuse hook_ctx, so restore it before around_hook resumes
+        fill_hook_ctx(hook_ctx, hook, ctx)
+      end
+      result
+    end
+
+    def fill_hook_ctx(hook_ctx, hook, ctx)
       hook_ctx.blueprint = ctx.blueprint
       hook_ctx.fields = ctx.fields
       hook_ctx.options = ctx.options
@@ -103,12 +115,6 @@ module Blueprinter
       hook_ctx.hook = hook.name
       hook_ctx.store = ctx.store
       hook_ctx.depth = ctx.is_a?(V2::Context::Result) ? 1 : ctx.depth # around_result wraps the root Blueprint
-      result = nil
-      _around(@around_hooks, 0, hook_ctx, NilClass, require_yield: true) do
-        # return the inner hook's value, not around_hook's
-        result = hook.ext.public_send(hook.target, ctx, &)
-      end
-      result
     end
   end
 end

@@ -18,6 +18,7 @@ gem 'yajl-ruby', '~> 1.4'
 
 gem 'activerecord', '>= 5.2'
 gem 'ammeter', '~> 1.1'
+gem 'benchmark' # spec/benchmarks/speedtest.rb; no longer a default gem in Ruby 4.0
 gem 'factory_bot', '~> 6.2'
 gem 'minitest', '~> 5.25'
 gem 'multi_json', '~> 1.0'

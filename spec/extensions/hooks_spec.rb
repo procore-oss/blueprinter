@@ -304,5 +304,27 @@ describe Blueprinter::Hooks do
         hooks.around(:around_serialize_object, ctx, &:object)
       end.to raise_error(Blueprinter::BlueprinterError, /did not yield/)
     end
+
+    it 'wraps around_result hooks' do
+      log = []
+      result_ext = Class.new(Blueprinter::Extension) do
+        def initialize = around_result :result
+        def result(ctx) = yield(ctx)
+      end
+      hook_ext = Class.new(Blueprinter::Extension) do
+        define_method(:initialize) { around_hook :hook }
+        define_method(:hook) do |ctx, &blk|
+          log << [ctx.hook, ctx.depth]
+          blk.call
+        end
+      end
+      bp = Class.new(Blueprinter::V2::Base) do
+        add result_ext.new, hook_ext.new
+        field :name
+      end
+
+      expect(bp.render({ name: 'Foo' }).to_hash).to eq({ name: 'Foo' })
+      expect(log).to eq [[:around_result, 1]]
+    end
   end
 end

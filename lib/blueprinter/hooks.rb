@@ -102,7 +102,7 @@ module Blueprinter
       hook_ctx.target = hook.target
       hook_ctx.hook = hook.name
       hook_ctx.store = ctx.store
-      hook_ctx.depth = ctx.depth
+      hook_ctx.depth = ctx.is_a?(V2::Context::Result) ? 1 : ctx.depth # around_result wraps the root Blueprint
       result = nil
       _around(@around_hooks, 0, hook_ctx, NilClass, require_yield: true) do
         # return the inner hook's value, not around_hook's

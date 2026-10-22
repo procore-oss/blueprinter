@@ -74,6 +74,11 @@ describe Blueprinter::Hooks do
     end
   end
 
+  it 'freezes the hook list for each hook' do
+    hooks = described_class.new [ext1.new]
+    expect(hooks[:around_serialize_object]).to be_frozen
+  end
+
   context '#registered?' do
     it 'knows whether it contains certain hooks' do
       hooks = described_class.new [ext1.new, ext2.new]

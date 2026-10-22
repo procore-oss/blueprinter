@@ -13,7 +13,7 @@ module Blueprinter
         @hooks[:pre_render] << Extension::Hook.new(:pre_render, ext, :pre_render).freeze if ext.respond_to?(:pre_render)
       end
       @hooks.freeze
-      @hooks.each(&:freeze)
+      @hooks.each_value(&:freeze)
       @hook_around_hook = registered? :around_hook
       @around_hooks = @hooks[:around_hook]
     end

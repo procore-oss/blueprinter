@@ -46,8 +46,9 @@ module Blueprinter
       # Serializer for V1 associations
       module V1Association
         def self.serialize(blueprint_class, value, options, parent:, instances:, store:, depth:)
-          opts = { v2_instances: instances, v2_depth: depth, v2_store: store }
-          blueprint_class.hashify(value, view_name: :default, local_options: options.dup.merge(opts))
+          V1Bridge.with(instances:, depth:, store:) do
+            blueprint_class.hashify(value, view_name: :default, local_options: options.dup)
+          end
         end
       end
     end

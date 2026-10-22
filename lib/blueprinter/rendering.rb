@@ -189,11 +189,9 @@ module Blueprinter
     def build_result(object:, options:)
       view_name = options[:view] || :default
 
-      prepared_object = hashify(
-        object,
-        view_name:,
-        local_options: { v2_instances: V2::InstanceCache.new }.merge(options).except(:view, :root, :meta)
-      )
+      prepared_object = V2::V1Bridge.with(instances: V2::InstanceCache.new) do
+        hashify(object, view_name:, local_options: options.except(:view, :root, :meta))
+      end
       object_with_root = apply_root_key(
         object: prepared_object,
         root: options[:root]

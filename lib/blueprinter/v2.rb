@@ -73,5 +73,6 @@ module Blueprinter
     autoload :Rendering, 'blueprinter/v2/rendering'
     autoload :Serializer, 'blueprinter/v2/serializer'
     autoload :Specification, 'blueprinter/v2/specification'
+    autoload :V1Bridge, 'blueprinter/v2/v1_bridge'
   end
 end

@@ -241,6 +241,7 @@ describe 'V1/V2 Compatibility' do
     end
 
     it 'should use the same V2 Blueprint instances from V1' do
+      allow(Blueprinter::V2::InstanceCache).to receive(:new).and_return(instances)
       def instances.blueprints = @instances
       def instances.blueprint_calls = @blueprint_calls ||= {}
       def instances.blueprint(klass)
@@ -269,7 +270,6 @@ describe 'V1/V2 Compatibility' do
         }
       }, {
         view: :extended,
-        v2_instances: instances,
         tag: 'X'
       })
 

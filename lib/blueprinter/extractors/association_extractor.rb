@@ -50,13 +50,12 @@ module Blueprinter
 
     def extract_v2(value, blueprint, local_options, options)
       view = options[:view] || :default
-      store = local_options[:v2_store] || {}
-      depth = local_options[:v2_depth] || 1
-      instances = local_options[:v2_instances] || V2::InstanceCache.new
+      state = V2::V1Bridge.current
+      args = { instances: state.instances, store: state.store || {}, depth: state.depth + 1 }
       if V2::Rendering.collection? value
-        blueprint[view].serializer.collection(value, local_options, instances:, store:, depth: depth + 1)
+        blueprint[view].serializer.collection(value, local_options, **args)
       else
-        blueprint[view].serializer.object(value, local_options, instances:, store:, depth: depth + 1)
+        blueprint[view].serializer.object(value, local_options, **args)
       end
     end
 

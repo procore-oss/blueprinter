@@ -58,9 +58,9 @@ module Blueprinter
         attr_reader :name
         # @return [Hash] Options defined on the view or inherited from the parent
         attr_reader :options
-        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Fields defined on the view
+        # @return [Array<Blueprinter::Extension>] Extensions defined on the view
         attr_reader :extensions
-        # @return [Array<Blueprinter::V2::Extension>] Extensions defined on the view
+        # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Fields defined on the view
         attr_reader :fields
         # @return [Hash<Symbol, Blueprinter::V2::Fields::Field>] Associations to single objects defined on the view
         attr_reader :objects

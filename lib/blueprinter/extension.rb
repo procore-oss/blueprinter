@@ -43,7 +43,7 @@ module Blueprinter
   # Extension instances will live for the duration of your program and may be used across threads. Generally, you should not
   # keep serialization state in your extension instance.
   #
-  # If your extension needs to store and access state specific to the current serialization, use the `ctx.state` Hash. It's
+  # If your extension needs to store and access state specific to the current serialization, use the `ctx.store` Hash. It's
   # available to all extensions during a given `render` call.
   #
   # == Extensions and performance
@@ -116,7 +116,9 @@ module Blueprinter
     # - `around_collection_value`
     #
     # ```
-    # def around_field_value(ctx)
+    # def initialize = around_field_value :skip_blank
+    #
+    # def skip_blank(ctx)
     #   value = yield ctx
     #   skip! if value.blank?
     #   value
@@ -127,7 +129,9 @@ module Blueprinter
     # Helper for `around_result` hooks to declare that a result is "serialized" and should be passed through as-is.
     #
     # ```
-    # def around_result(ctx)
+    # def initialize = around_result :finalize
+    #
+    # def finalize(ctx)
     #   value = yield ctx
     #   value = modify value
     #   serialized value
@@ -142,7 +146,9 @@ module Blueprinter
     # as-is.
     #
     # ```
-    # def around_result(ctx)
+    # def initialize = around_result :finalize
+    #
+    # def finalize(ctx)
     #   value = yield ctx
     #   return value if serialized? value
     #
@@ -190,7 +196,7 @@ module Blueprinter
     # ```
     #
     # By modifying the context, you can alter the object being serialized, the options, the serialization format, and even
-    # the Blueprint. Some extensions may wish to initialize some kind of state in `ctx.state`. And of course you can modify
+    # the Blueprint. Some extensions may wish to initialize some kind of state in `ctx.store`. And of course you can modify
     # the result.
     #
     # The {Blueprinter::Extension#serialized serialized} and {Blueprinter::Extension#serialized? serialized?} helper
@@ -217,7 +223,7 @@ module Blueprinter
     # ```
     #
     # By modifying the context, you can sort, filter, or modify the fields that will be serialized, as well as the
-    # blueprint's options. Some extensions may wish to initialize some kind of state in `ctx.state`.
+    # blueprint's options. Some extensions may wish to initialize some kind of state in `ctx.store`.
     #
     # @param name [Symbol] Name of instance method that implements hook
     # @!visibility public

@@ -86,7 +86,7 @@ module Blueprinter
         #   end
         # end
         #
-        # class MyBlueprint
+        # class MyBlueprint < ApplicationBlueprint
         #   include MyPartials
         #
         #   use :my_partial

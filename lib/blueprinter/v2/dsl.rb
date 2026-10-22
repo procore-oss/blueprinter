@@ -14,28 +14,23 @@ module Blueprinter
     #
     # == Using the DSL in your own modules
     #
-    # You can also use the Blueprinter DSL in your own Ruby modules, then include them in your Blueprints:
+    # You can define partials in your own Ruby modules, then include them in your Blueprints. Modules may only define
+    # partials; put fields, options, and views inside a partial:
     #
     # ```
     # module MySharedBlueprinterCode
     #   extend Blueprinter::V2::DSL
     #
-    #   set :some_option, true
-    #
-    #   field :foo
-    #
     #   partial :my_partial do
-    #     # ...
-    #   end
-    #
-    #   view :my_view do
-    #     # ...
+    #     set :some_option, true
+    #     field :foo
     #   end
     # end
     #
     # class MyBlueprint < ApplicationBlueprint
     #   include MySharedBlueprinterCode
     #
+    #   use :my_partial
     #   # ...
     # end
     # ```

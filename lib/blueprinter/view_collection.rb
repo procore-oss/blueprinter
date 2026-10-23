@@ -11,8 +11,10 @@ module Blueprinter
   # cache for _all_ views (while this isn't the _most_ optimal approach, the overhead is negligible, and allows the
   # caching logic to be quite simple).
   #
-  # Thread Safety: view data is lazily compiled into a frozen snapshot on first access, and is assigned atomically. A
-  # mutex serializes the compilation itself to prevent duplicate work. After compilation, reads bypass the mutex entirely.
+  # Thread Safety: view data is lazily compiled into a frozen snapshot on first access and published by one reference
+  # assignment. The snapshot includes the configuration generation it was built for, so a reader cannot pair a new
+  # generation with an older field list. A mutex serializes compilation. A generation change during compilation
+  # discards that snapshot and compiles again. After publication, reads take no lock.
   #
   # Future optimization: a public compile! method could allow eager compilation at boot time
   # (e.g. in a Rails after_initialize hook) to move the first-render compilation cost (~10µs per
@@ -25,6 +27,8 @@ module Blueprinter
         identifier: View.new(:identifier),
         default: View.new(:default)
       }
+      # Fixed at creation. sort_fields_by is not part of the generation counter: definition order is recorded only
+      # while views are created with :definition, so a later write cannot rebuild this collection correctly.
       @sort_by_definition = Blueprinter.configuration.sort_fields_by.eql?(:definition)
       @cache_mutex = Mutex.new
       @cache = nil
@@ -54,18 +58,27 @@ module Blueprinter
     # @param [String] view_name
     # @return [Array<Field>]
     def fields_for(view_name)
-      ensure_cached!
+      ensure_cached![:fields][view_name]
+    end
 
-      @cache[:fields][view_name]
+    # Returns the compiled fields and transformers for a view from the same cache snapshot.
+    # Rendering must use this instead of separate lookups so a configuration change cannot pair
+    # compiled fields from one generation with transformers from another.
+    #
+    # Each compiled field is a closure from Field#compile that captures the field's per-field
+    # decisions (extractor, datetime formatting, defaults, :if/:unless) resolved once at compile
+    # time, so the render loop just calls each with (result_hash, object, local_options).
+    # @param [String] view_name
+    # @return [Array<(Array<Proc>, Array<Transformer>)>]
+    def render_pipeline(view_name)
+      ensure_cached![:pipelines][view_name]
     end
 
     # Returns an array of Transformer objects for the provided View.
     # @param [String] view_name
     # @return [Array<Transformer>]
     def transformers(view_name)
-      ensure_cached!
-
-      @cache[:transformers][view_name]
+      ensure_cached![:transformers][view_name]
     end
 
     # @param [String] view_name
@@ -88,24 +101,55 @@ module Blueprinter
       views[:identifier].fields.values
     end
 
+    # Fast path: one reference read, then an integer comparison against the generation stored in that
+    # snapshot. Global config baked into the closures (datetime_format, field_default, :if/:unless)
+    # bumps Configuration.generation, which fails this check and forces a rebuild.
     def ensure_cached!
-      # Fast path: no lock needed once the cache is populated (atomic reference read).
-      return if @cache
+      snapshot = @cache
+      return snapshot if current?(snapshot)
 
-      @cache_mutex.synchronize do
-        # Re-check after acquiring the lock; another thread may have built the cache first.
-        return if @cache
+      @cache_mutex.synchronize { compile_snapshot }
+    end
 
-        fields = {}
-        transformers = {}
+    def current?(snapshot)
+      snapshot && snapshot[:generation] == Blueprinter::Configuration.generation
+    end
 
-        views.each_key do |view_name|
-          fields[view_name] = build_fields_for(view_name).freeze
-          transformers[view_name] = build_transformers(view_name).freeze
-        end
+    def compile_snapshot
+      loop do
+        snapshot = @cache
+        return snapshot if current?(snapshot)
 
-        @cache = { fields: fields.freeze, transformers: transformers.freeze }.freeze
+        generation = Blueprinter::Configuration.generation
+        built = build_snapshot(generation)
+        # A writer bumped the generation while the closures were being built. Those closures may
+        # mix the old and new configuration, so discard them and compile against the new value.
+        next if Blueprinter::Configuration.generation != generation
+
+        @cache = built
+        return built
       end
+    end
+
+    def build_snapshot(generation)
+      fields = {}
+      transformers = {}
+      pipelines = {}
+
+      views.each_key do |view_name|
+        view_fields = build_fields_for(view_name).freeze
+        view_transformers = build_transformers(view_name).freeze
+        fields[view_name] = view_fields
+        transformers[view_name] = view_transformers
+        pipelines[view_name] = [view_fields.map(&:compile).freeze, view_transformers].freeze
+      end
+
+      {
+        fields: fields.freeze,
+        transformers: transformers.freeze,
+        pipelines: pipelines.freeze,
+        generation: generation
+      }.freeze
     end
 
     def build_fields_for(view_name)

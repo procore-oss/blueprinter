@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'blueprinter/view'
+require 'blueprinter/view_compiler'
 
 module Blueprinter
   # @api private
@@ -68,6 +69,18 @@ module Blueprinter
       @cache[:transformers][view_name]
     end
 
+    # Returns the compiled form of the provided View (see ViewCompiler). Compiled lazily and kept with the rest of the
+    # cache, so it is rebuilt whenever the cache is invalidated. Two threads may compile the same view at once; both
+    # produce an equivalent module and either one is kept.
+    # @param [String] view_name
+    # @return [Module]
+    def compiled(view_name)
+      ensure_cached!
+
+      cache = @cache
+      cache[:compiled][view_name] ||= ViewCompiler.compile(cache[:fields][view_name], cache[:transformers][view_name])
+    end
+
     # @param [String] view_name
     # @return [View]
     def [](view_name)
@@ -104,7 +117,7 @@ module Blueprinter
           transformers[view_name] = build_transformers(view_name).freeze
         end
 
-        @cache = { fields: fields.freeze, transformers: transformers.freeze }.freeze
+        @cache = { fields: fields.freeze, transformers: transformers.freeze, compiled: {} }.freeze
       end
     end
 

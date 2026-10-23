@@ -8,7 +8,6 @@ require 'blueprinter/extractors/public_send_extractor'
 require 'blueprinter/formatters/date_time_formatter'
 
 module Blueprinter
-  # @api private
   class AutoExtractor < Extractor
     include EmptyTypes
 
@@ -31,6 +30,9 @@ module Blueprinter
       field_options.key?(:default) ? field_options.fetch(:default) : Blueprinter.configuration.field_default
     end
 
+    # Subclasses override this to dispatch to their own extractors (README "Configurable Extractors").
+    #
+    # @api public
     def extractor(object, options)
       if options[:block]
         @block_extractor

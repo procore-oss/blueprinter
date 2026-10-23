@@ -17,8 +17,6 @@ module Blueprinter
   # Future optimization: a public compile! method could allow eager compilation at boot time
   # (e.g. in a Rails after_initialize hook) to move the first-render compilation cost (~10µs per
   # blueprint) out of the request path entirely.
-  #
-  # rubocop:disable Metrics/ClassLength
   class ViewCollection
     attr_reader :views, :sort_by_definition
 
@@ -179,5 +177,4 @@ module Blueprinter
       [*already_included_transformers, *current_view.view_transformers].uniq
     end
   end
-  # rubocop:enable Metrics/ClassLength
 end

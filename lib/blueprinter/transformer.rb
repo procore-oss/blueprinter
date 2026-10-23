@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module Blueprinter
-  # @api private
   class Transformer
     def transform(_result_hash, _primary_obj, _options = {})
       raise NotImplementedError, 'A Transformer must implement #transform'

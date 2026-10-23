@@ -25,12 +25,18 @@ module Blueprinter
 
     private
 
+    # `callable_from` returns false when no callable is configured, which means `||=` would re-run
+    # it on every call. Instead, a `defined?` guard allows falsey values to be memoized as well.
     def if_callable
-      @_if_callable ||= callable_from(:if)
+      return @_if_callable if defined?(@_if_callable)
+
+      @_if_callable = callable_from(:if)
     end
 
     def unless_callable
-      @_unless_callable ||= callable_from(:unless)
+      return @_unless_callable if defined?(@_unless_callable)
+
+      @_unless_callable = callable_from(:unless)
     end
 
     def callable_from(condition)

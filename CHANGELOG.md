@@ -1,4 +1,5 @@
 ## Unreleased
+- 🚜 [REFACTOR] Reduces allocations and repeated lookups on the render path without changing output. See [#616](https://github.com/procore-oss/blueprinter/pull/616). Thanks to [@Hamdy](https://github.com/Hamdy).
 - 💅 [ENHANCEMENT] Marks `Transformer`, `AutoExtractor`, and the `AutoExtractor#extractor` override hook as public API, matching the README's subclassing docs. See [#612](https://github.com/procore-oss/blueprinter/pull/612). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.3.0 - 2026/04/14

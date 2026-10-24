@@ -2,7 +2,7 @@
 title: "Extension Points Reference"
 type: reference
 description: "Know the exact contract before writing or changing an extractor, transformer, extension, or reflection consumer, or raising a new error."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
+generated: { by: cursor/gpt-5.6-sol, at: "2026-10-24T03:42:26Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T23:24:23Z" }
 ---
@@ -40,9 +40,9 @@ UserBlueprint.render_as_hash(user) # => {id: 1, name: "ADA"}
 - Pass an _instance_ to `extractor:`. A class works too, but it builds a new extractor on every extraction (on the hottest path in the gem).
 - Define the class only after something has loaded `Blueprinter::Base` or `Blueprinter.configuration`. `Blueprinter::Extractor` isn't autoloaded, so referencing it straight after `require 'blueprinter'` raises `NameError` ([why](architecture.md#loading-model)).
 
-The default, `AutoExtractor`, calls the field's block if there is one, reads `object[name]` from a `Hash` (symbol keys only), and calls `object.public_send(name)` on anything else. It then formats dates and applies `:default` / `:default_if`. Without `:default_if`, only `nil` gets the default. With it, `Blueprinter::EMPTY_COLLECTION` matches an empty array-like value, `EMPTY_HASH` an empty `Hash`, and `EMPTY_STRING` anything whose `to_s` is empty (including `nil`); any other `:default_if` value never matches.
+The default, `AutoExtractor`, calls the field's block if there is one, reads `object[name]` from a `Hash` (symbol keys only), and calls `object.public_send(name)` on anything else. It applies `:datetime_format` only when the field or `config.datetime_format` sets one, then applies `:default` / `:default_if`. Without `:default_if`, only `nil` gets the default. With it, `Blueprinter::EMPTY_COLLECTION` matches an empty array-like value, `EMPTY_HASH` an empty `Hash`, and `EMPTY_STRING` anything whose `to_s` is empty (including `nil`); any other `:default_if` value never matches.
 
-Associations use `AssociationExtractor` (one per blueprint class), which reads the value, applies defaults, merges the association's `:options` into `local_options`, and renders the value with the association's blueprint and view.
+Associations use `AssociationExtractor` (one per blueprint class), which reads the value, applies defaults, merges the association's `:options` into `local_options`, and renders the value with the association's blueprint and view. The nested render copies `local_options` before its own fields and transformers run.
 
 In the code: `lib/blueprinter/extractor.rb`, `lib/blueprinter/extractors/`, `lib/blueprinter/empty_types.rb`, `lib/blueprinter/formatters/date_time_formatter.rb`.
 
@@ -71,7 +71,7 @@ UserBlueprint.render_as_hash(user) # => {id: 1, name: "Ada", type: "User"}
 ```
 
 - `transform(hash, object, options)` edits `hash` in place; its return value is ignored.
-- It runs after every field in the view has been extracted, with `local_options` as `options`. `local_options` isn't frozen, so a transformer _can_ change it to pass derived values downstream.
+- It runs after every field in the view has been extracted, with `local_options` as `options`. `local_options` isn't frozen, so a transformer can change it for later objects in the same collection render. A nested render has its own copy, so those writes stay there.
 - `transform` accepts a class or an instance.
 
 Which transformers run, and in what order: [architecture.md](architecture.md#transformer-order). In the code: `lib/blueprinter/transformer.rb`.
@@ -95,7 +95,7 @@ UserBlueprint.render_as_hash([user, user]) # => {id: 1, name: "Ada", type: "User
 
 - `pre_render(object, blueprint, view, options)` returns the object to render. The base class returns `object` unchanged.
 - Extensions run in registration order, each receiving the previous one's result. Any object with a `pre_render` method works (it doesn't have to subclass `Extension`).
-- It runs once for the top-level object _and_ once per associated object, with `blueprint` and `view` set to the association's. `options` is the render options minus `:view`, `:root`, and `:meta`; for an associated object, it's the parent's options (which already carry the parent's `:view`) merged with the association's `:options`.
+- It runs once for the top-level object _and_ once per associated object, with `blueprint` and `view` set to the association's. `options` is the render options minus `:view`, `:root`, and `:meta`; for an associated object, it's the parent's options (which already carry the parent's `:view`) merged with the association's `:options`. The nested field loop then runs on a copy.
 - `pre_render` is the only hook. `blueprinter-activerecord` and `blueprinter_schema` build on it and on reflection (README "Gem Extensions").
 
 In the code: `lib/blueprinter/extension.rb`, `lib/blueprinter/extensions.rb`.

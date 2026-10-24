@@ -29,6 +29,8 @@ module Blueprinter
 
     # Runs the object through all Render Extensions and returns the final result
     def pre_render(object, blueprint, view, options = {})
+      return object if @extensions.empty?
+
       @extensions.reduce(object) do |acc, ext|
         ext.pre_render(acc, blueprint, view, options)
       end

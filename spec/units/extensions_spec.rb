@@ -61,6 +61,13 @@ describe Blueprinter::Extensions do
     ]
   end
 
+  context '#pre_render with no extensions' do
+    it 'returns the object unchanged' do
+      obj = OpenStruct.new(id: 42)
+      expect(Blueprinter::Extensions.new.pre_render(obj, Class.new(Blueprinter::Base), :default, {})).to equal(obj)
+    end
+  end
+
   context '#pre_render' do
     before :each do
       Blueprinter.configure do |config|

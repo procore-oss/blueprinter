@@ -126,28 +126,20 @@ module Blueprinter
       # Since we're currently providing the current view in the local_options hash when we extract fields, we can merge
       # it in ahead of time to avoid allocating a new hash for every field extraction.
       local_options_with_view = local_options.merge(view: view_name)
+      fields = view_collection.fields_for(view_name)
+      transformers = view_collection.transformers(view_name)
 
       if array_like?(object)
-        object.map do |obj|
-          object_to_hash(
-            obj,
-            view_name:,
-            local_options: local_options_with_view
-          )
-        end
+        object.map { |obj| object_to_hash(obj, fields, transformers, local_options_with_view) }
       else
-        object_to_hash(
-          object,
-          view_name:,
-          local_options: local_options_with_view
-        )
+        object_to_hash(object, fields, transformers, local_options_with_view)
       end
     end
 
-    def object_to_hash(object, view_name:, local_options:)
+    def object_to_hash(object, fields, transformers, local_options)
       result_hash = {}
 
-      view_collection.fields_for(view_name).each do |field|
+      fields.each do |field|
         next if field.skip?(field.name, object, local_options)
 
         value = field.extract(object, local_options)
@@ -156,7 +148,7 @@ module Blueprinter
         result_hash[field.name] = value
       end
 
-      view_collection.transformers(view_name).each do |transformer|
+      transformers.each do |transformer|
         transformer.transform(result_hash, object, local_options)
       end
 

@@ -2,7 +2,7 @@
 title: "Architecture"
 type: explanation
 description: "Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
+generated: { by: cursor/gpt-5.6-sol, at: "2026-10-24T03:42:26Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T23:24:23Z" }
 ---
@@ -64,7 +64,7 @@ Questions about rendered output (why a field is missing, why an extension saw a 
 
 1. `render(object, view: :extended, root:, meta:, **other)` picks the view (`:default` when none is given), and the remaining options become `local_options` (`Rendering#build_result`).
 2. `Rendering#hashify` raises `Errors::UnknownView` if the blueprint has no such view, then passes the object through every registered extension's `pre_render`, which may return a replacement.
-3. `Rendering#prepare_data` adds `view:` to `local_options`. If the object is **array-like** (`Array`, `ActiveRecord::Relation` when loaded, or anything in `config.custom_array_like_classes`), each element is rendered separately and the result is an `Array`.
+3. `Rendering#prepare_data` merges `view:` into a new `local_options` hash for this `hashify`, including when the view already matches. A nested render therefore gets its own hash. If the object is **array-like** (`Array`, `ActiveRecord::Relation` when loaded, or anything in `config.custom_array_like_classes`), each element is rendered separately and the result is an `Array`.
 4. For each object, each field in the view's compiled list is checked against its `:if` / `:unless` condition, read through its extractor, dropped if `nil` and marked `exclude_if_nil`, and stored under its output name. An association renders its value by calling `hashify` on its own blueprint and view, so steps 2 to 5 repeat for every nested object.
 5. The view's transformers run on the finished `Hash`.
 6. `:root` wraps the result and `:meta` adds a sibling key (top level only). `render` then converts to JSON with the configured generator; `render_as_hash` returns the `Hash`; `render_as_json` calls `.as_json` on it, which requires `ActiveSupport` in the host app.
@@ -88,9 +88,9 @@ sequenceDiagram
   Note over B,VC: false raises Errors::UnknownView
   B->>Ext: pre_render(object, blueprint, view_name, local_options)
   Ext-->>B: object (original, modified, or replaced)
-  B->>B: prepare_data: add view: to local_options, map when array-like
+  B->>B: prepare_data: copy local_options with view:, map when array-like
+  B->>VC: fields_for(view_name) and transformers(view_name) once
   loop each object
-    B->>VC: fields_for(view_name) from the compiled snapshot
     loop each field
       B->>F: skip?(name, obj, local_options) via :if / :unless
       B->>F: extract(obj, local_options)
@@ -105,7 +105,6 @@ sequenceDiagram
       end
       B->>B: drop when nil and :exclude_if_nil, else result[name] = value
     end
-    B->>VC: transformers(view_name)
     B->>T: transform(result_hash, obj, local_options), mutating in place
   end
   B->>B: apply root, then meta
@@ -115,10 +114,10 @@ sequenceDiagram
 
 ### Per-Field Behavior
 
-- `AutoExtractor` is the default extractor. It calls the field's block if there is one (`BlockExtractor`), else reads `object[name]` from a `Hash` (symbol keys only, `HashExtractor`), else calls `object.public_send(name)` (`PublicSendExtractor`). It then applies `:datetime_format` and `:default` / `:default_if`. A field's extractor is chosen when the field is defined.
+- `AutoExtractor` is the default extractor. It calls the field's block if there is one (`BlockExtractor`), else reads `object[name]` from a `Hash` (symbol keys only, `HashExtractor`), else calls `object.public_send(name)` (`PublicSendExtractor`). It applies `:datetime_format` only when the field or `config.datetime_format` sets one, so other values are not asked whether they implement `strftime`, then applies `:default` / `:default_if`. A field's extractor is chosen when the field is defined.
 - Field blocks receive `local_options` as keyword arguments. A block that takes `|obj|` or `|obj, options|` works, but one that names a keyword must also accept `**` (`{ |obj, foo:, **| ... }`), since every render passes `view:` plus all render options. That makes every key in `local_options` is part of the public contract ([public API](#public-api-and-compatibility)). `Symbol#to_proc` blocks (`field :display_name, &:formatted_full_name`) receive only the object, so they call that method on it.
 - `:if` / `:unless` conditions take a `Proc`, called with `(field_name, object, local_options)`, or a `Symbol` naming a method on the blueprint class, so it must be defined with `def self.`. A field-level condition wins over `config.if` / `config.unless`. A field looks up its condition on every check until it finds one, then keeps it.
-- An association runs its own blueprint's `hashify`, so the `UnknownView` check and `pre_render` run for every associated object. `:options` on an association (a `Hash`, or a `Proc` given the parent object) is merged into the nested `local_options`.
+- An association runs its own blueprint's `hashify`, so the `UnknownView` check and `pre_render` run for every associated object. `:options` on an association (a `Hash`, or a `Proc` given the parent object) is merged into the nested `local_options`. The nested `prepare_data` then copies that hash, so a write inside the nested fields or transformers stays there.
 - Transformers mutate the `Hash` in place; their return value is ignored.
 
 ### Render Performance
@@ -127,7 +126,7 @@ Rendering runs once per field per object, so its cost grows with the size of the
 
 Changes to these methods follow three rules:
 
-- Add no allocations on that path (`Hash#merge`, `#except`, `**` splats, `Array#map`, string formatting). The existing ones: `BlockExtractor` splats `**local_options` for each block field; `AssociationExtractor` merges association `:options` into `local_options` once per association value, and copies the field's options without `:default` / `:default_if` when either is set. `local_options` gains `:view` once per `hashify` call, not per field.
+- Add no allocations on that path (`Hash#merge`, `#except`, `**` splats, `Array#map`, string formatting). The existing ones: `BlockExtractor` splats `**local_options` for each block field, and its `Symbol#to_proc` check reads `lambda?` and `arity` first so only a user lambda with arity -2 reaches `source_location`. `AssociationExtractor` merges association `:options` into `local_options` once per association value, and copies the field options without `:default` / `:default_if` before calling a configured extractor when either default key is set. Each `hashify` copies `local_options` with `:view` once in `prepare_data`, not per field, so a nested render does not write through to its parent.
 - Reuse extractor instances (`Configuration#default_extractor`, `Base.association_extractor`); never create one per field or per render.
 - Include before-and-after benchmark numbers in the PR ([testing.md](testing.md#check-performance)).
 

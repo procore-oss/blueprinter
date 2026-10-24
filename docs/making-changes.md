@@ -2,7 +2,7 @@
 title: "Making Changes"
 type: how-to
 description: "Take a change from idea to mergeable PR: what every PR needs, and where each kind of change belongs in the code."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T21:35:53Z" }
+generated: { by: cursor/gpt-5.6-sol, at: "2026-10-24T03:42:26Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -38,7 +38,7 @@ Blueprinter does its work in three **phases** (definition, compilation, and rend
 
 ## Add a Field or Association Option
 
-A field stores _every_ option it's given and hands the whole hash to its extractor on each render, so adding an option is mostly a question of where to read it. `:exclude_if_nil`, for example, is read in `Rendering#object_to_hash`, right after extraction:
+A field stores _every_ option it's given and hands the whole hash to its extractor on each render, so adding an option is mostly a question of where to read it. `:exclude_if_nil`, for example, is read in `Rendering#object_to_hash`, after the extractor has had a chance to change the options:
 
 ```ruby
 value = field.extract(object, local_options)
@@ -46,7 +46,7 @@ next if value.nil? && field.options[:exclude_if_nil]
 ```
 
 1. Pick where to read it using [Where a Change Belongs](#where-a-change-belongs). Other models: `:default_if` is read in the extractors, and `:if` / `:unless` in `Field#skip?`.
-2. Read it without allocating per field (this code runs once per field per object). Anything you can work out once per field goes in an `@_`-prefixed memo, as `Field#if_callable` does (`RuboCop` requires the underscore):
+2. Read it without allocating per field (this code runs once per field per object). Anything you can work out once per field, without hiding later changes from a public extractor, goes in an `@_`-prefixed memo, as `Field#if_callable` does (`RuboCop` requires the underscore):
 
    ```ruby
    def if_callable

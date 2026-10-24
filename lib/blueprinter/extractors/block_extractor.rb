@@ -8,14 +8,9 @@ module Blueprinter
     def extract(_field_name, object, local_options, options = {})
       block = options[:block]
 
-      # Symbol#to_proc creates procs with signature [[:req], [:rest]]
-      # These procs forward ALL arguments to the method, which causes
-      # issues when we call block.call(object, local_options) because
-      # it becomes object.method_name(local_options), and most methods
-      # don't accept extra arguments.
-      #
-      # For Symbol#to_proc, we only pass the object.
-      # For regular blocks, we pass both object and local_options.
+      # Symbol#to_proc blocks forward every argument to the method, so block.call(object, **local_options)
+      # would become object.method_name(**local_options), which most methods don't accept. They get only
+      # the object; regular blocks get the object and local_options.
       if symbol_to_proc?(block)
         block.call(object)
       else
@@ -25,12 +20,11 @@ module Blueprinter
 
     private
 
+    # Symbol#to_proc is a native lambda taking (obj, *args): a lambda with arity -2 and no Ruby source
+    # location. Plain DSL blocks are never lambdas, so they fail the first check without allocating;
+    # only a user lambda with arity -2 reaches source_location, which builds a [file, line] array.
     def symbol_to_proc?(block)
-      # Symbol#to_proc has a characteristic signature:
-      # - Parameters: [[:req], [:rest]] (one required + rest args)
-      # - This is different from regular blocks which typically have
-      #   optional parameters like [[:opt, :obj], [:opt, :options]]
-      block.parameters == [[:req], [:rest]]
+      block.lambda? && block.arity == -2 && block.source_location.nil?
     end
   end
 end

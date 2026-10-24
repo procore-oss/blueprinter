@@ -2,7 +2,7 @@
 title: "Architecture"
 type: explanation
 description: "Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
+generated: { by: cursor/grok-4.7, at: "2026-10-24T02:00:28Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T23:24:23Z" }
 ---
@@ -115,7 +115,7 @@ sequenceDiagram
 
 ### Per-Field Behavior
 
-- `AutoExtractor` is the default extractor. It calls the field's block if there is one (`BlockExtractor`), else reads `object[name]` from a `Hash` (symbol keys only, `HashExtractor`), else calls `object.public_send(name)` (`PublicSendExtractor`). It then applies `:datetime_format` and `:default` / `:default_if`. A field's extractor is chosen when the field is defined.
+- `AutoExtractor` is the default extractor. It calls the field's block if there is one (`BlockExtractor`), else reads `object[name]` from a `Hash` (symbol keys only, `HashExtractor`), else calls `object.public_send(name)` (`PublicSendExtractor`). It applies `:datetime_format` only when the field or `config.datetime_format` sets one, so other values are not asked whether they implement `strftime`, then applies `:default` / `:default_if`. A field's extractor is chosen when the field is defined.
 - Field blocks receive `local_options` as keyword arguments. A block that takes `|obj|` or `|obj, options|` works, but one that names a keyword must also accept `**` (`{ |obj, foo:, **| ... }`), since every render passes `view:` plus all render options. That makes every key in `local_options` is part of the public contract ([public API](#public-api-and-compatibility)). `Symbol#to_proc` blocks (`field :display_name, &:formatted_full_name`) receive only the object, so they call that method on it.
 - `:if` / `:unless` conditions take a `Proc`, called with `(field_name, object, local_options)`, or a `Symbol` naming a method on the blueprint class, so it must be defined with `def self.`. A field-level condition wins over `config.if` / `config.unless`. A field looks up its condition on every check until it finds one, then keeps it.
 - An association runs its own blueprint's `hashify`, so the `UnknownView` check and `pre_render` run for every associated object. `:options` on an association (a `Hash`, or a `Proc` given the parent object) is merged into the nested `local_options`.

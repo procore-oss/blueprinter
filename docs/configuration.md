@@ -2,7 +2,7 @@
 title: "Configuration Reference"
 type: reference
 description: "Find out what a configuration option does and when changing it takes effect."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T22:02:01Z" }
+generated: { by: cursor/grok-4.7, at: "2026-10-24T02:00:28Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -17,7 +17,7 @@ verified:
 |---|---|---|
 | `association_default` | `nil` | `AssociationExtractor`, when an association's value is `nil` (or matches `:default_if`) and the association sets no `:default` |
 | `custom_array_like_classes` | `[]` | `Configuration#array_like_classes`, which treats these classes like `Array` when rendering a collection |
-| `datetime_format` | `nil` | `DateTimeFormatter`, when a field sets no `:datetime_format`. A `String` is passed to `strftime`, a `Proc` is called, and anything else raises `InvalidDateTimeFormatterError` |
+| `datetime_format` | `nil` | `AutoExtractor` on each extract, and `DateTimeFormatter` when a field sets no `:datetime_format`. The extractor calls the formatter only when the field or this value sets a format. A `String` is passed to `strftime`, a `Proc` is called, and anything else raises `InvalidDateTimeFormatterError` |
 | `default_transformers` | `[]` | `ViewCollection#build_transformers`, only when a view has no transformers of its own, including inherited and included ones. Any transformer on the blueprint replaces these rather than adding to them |
 | `deprecations` | `:stderror` | `Deprecation.report`. Accepted values are `:silence`, `:stderror`, and `:raise`; anything else behaves as `:stderror` |
 | `extensions` | empty | `Rendering#hashify`. The writer wraps the given `Array` without copying it, and `<<` appends |

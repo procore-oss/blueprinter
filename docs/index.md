@@ -7,6 +7,7 @@ Developer documentation for Blueprinter. User-facing documentation is in the [RE
 | Doc                                        | Type        | Purpose                                                                                                                                  |
 | ------------------------------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | [architecture.md](architecture.md)         | explanation | Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape.                       |
+| [benchmarking.md](benchmarking.md)         | explanation | Understand what `rake perf` measures, why each number is computed the way it is, and how far to trust a difference between two runs.     |
 | [making-changes.md](making-changes.md)     | how-to      | Take a change from idea to mergeable PR: what every PR needs, and where each kind of change belongs in the code.                         |
 | [configuration.md](configuration.md)       | reference   | Find out what a configuration option does and when changing it takes effect.                                                             |
 | [extension-points.md](extension-points.md) | reference   | Know the exact contract before writing or changing an extractor, transformer, extension, or reflection consumer, or raising a new error. |

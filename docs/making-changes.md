@@ -2,7 +2,7 @@
 title: "Making Changes"
 type: how-to
 description: "Take a change from idea to mergeable PR: what every PR needs, and where each kind of change belongs in the code."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T21:35:53Z" }
+generated: { by: cursor/claude-fable-5.1, at: "2026-10-27T21:01:11Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -19,6 +19,7 @@ Every PR goes through the same gate, so check these before asking for review:
 - Every commit carries a DCO `Signed-off-by` trailer whose email matches your primary GitHub email (`git commit -s`; see [CONTRIBUTING.md](../CONTRIBUTING.md)). Every PR runs a DCO check.
 - Every user-facing change adds a line under `## Unreleased` in `CHANGELOG.md` ([format](releasing.md#changelog-format)), updates YARD for public methods, and updates the matching README `<details>` section for any DSL or configuration change.
 - Text under `docs/` or in `AGENTS.md` that describes the changed behavior is updated in the same PR ([writing-docs.md](writing-docs.md#keeping-docs-current)).
+- A change to the render path (`rendering.rb`, `field.rb`, `extractors/`) comes with before-and-after numbers from `rake perf` ([testing.md](testing.md#check-performance)): the `Changed` table from a run on `main` compared with the branch, on the same machine.
 - Feature PRs _never_ bump `lib/blueprinter/version.rb`, since merging a version change to `main` publishes a gem ([releasing.md](releasing.md)).
 - `Gemfile.lock` is git-ignored and never committed. Actions in `.github/workflows/` are pinned by SHA and bumped by Dependabot, not by hand.
 

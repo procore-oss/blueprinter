@@ -21,9 +21,11 @@ gem 'ammeter', '~> 1.1'
 gem 'factory_bot', '~> 6.2'
 gem 'minitest', '~> 5.25'
 gem 'pry', '~> 0.14'
+gem 'rainbow', '~> 3.1' # rake perf: colored terminal summary
 gem 'rspec', '~> 3.12'
 gem 'rspec-rails', '~> 8.0'
 gem 'rubocop', '~> 1.44'
 gem 'rubocop-rake'
+gem 'ruby-progressbar', '~> 1.13' # rake perf: progress bar
 gem 'sqlite3', '~> 2.1'
 gem 'yard', '>= 0.9.34'

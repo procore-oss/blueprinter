@@ -39,4 +39,16 @@ Rake::TestTask.new(:benchmarks) do |t|
   t.verbose = false
 end
 
+desc 'Time rendering across setups and inputs (QUICK=1, SWEEPS=, BASELINE=; see spec/benchmarks/perf/run.rb)'
+task :perf do
+  ruby '-Ilib', '-Ispec', 'spec/benchmarks/perf/run.rb'
+end
+
+namespace :perf do
+  desc 'Compare two perf results files without re-running (BASELINE=a.json, CURRENT=b.json or the newest)'
+  task :compare do
+    ruby '-Ilib', '-Ispec', 'spec/benchmarks/perf/run.rb', 'compare'
+  end
+end
+
 task default: %i[spec rubocop]

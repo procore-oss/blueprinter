@@ -692,6 +692,117 @@ describe '::Base' do
     end
   end
 
+  # The invalidation caveat: ViewCollection caches a compiled render pipeline per view, and that
+  # pipeline bakes in global config (datetime_format, field_default, :if/:unless) resolved at first
+  # render. The Configuration generation counter is what keeps it honest -- mutating any of those
+  # after a render must still take effect on the next render.
+  describe 'reconfiguring global config after an initial render' do
+    let(:blueprint) do
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        field :first_name
+        field :birthday
+      end
+    end
+
+    after { reset_blueprinter_config! }
+
+    it 'applies a global field_default set after the first render' do
+      object = OpenStruct.new(id: 1, first_name: nil, birthday: nil)
+
+      expect(blueprint.render_as_hash(object)).to eq(id: 1, first_name: nil, birthday: nil)
+
+      Blueprinter.configure { |config| config.field_default = 'N/A' }
+
+      expect(blueprint.render_as_hash(object)).to eq(id: 1, first_name: 'N/A', birthday: 'N/A')
+    end
+
+    it 'applies a global datetime_format set after the first render' do
+      object = OpenStruct.new(id: 1, first_name: 'Meg', birthday: Date.new(1994, 3, 4))
+
+      expect(blueprint.render_as_hash(object)).to eq(id: 1, first_name: 'Meg', birthday: Date.new(1994, 3, 4))
+
+      Blueprinter.configure { |config| config.datetime_format = '%Y' }
+
+      expect(blueprint.render_as_hash(object)).to eq(id: 1, first_name: 'Meg', birthday: '1994')
+    end
+
+    it 'applies a global :if set after the first render' do
+      object = OpenStruct.new(id: 1, first_name: 'Meg', birthday: nil)
+
+      expect(blueprint.render_as_hash(object)).to include(:first_name)
+
+      Blueprinter.configure { |config| config.if = ->(_name, _object, _opts) { false } }
+
+      expect(blueprint.render_as_hash(object)).to eq({})
+    end
+
+    it 'uses one coherent pipeline when configuration changes after lookup' do
+      transformer = Class.new(Blueprinter::Transformer) do
+        def self.transform(hash, _object, _options)
+          hash[:transformed] = true
+        end
+      end
+      collection = blueprint.send(:view_collection)
+      expect(collection).to receive(:render_pipeline).with(:default).and_wrap_original do |original, view_name|
+        pipeline = original.call(view_name)
+        Blueprinter.configure do |config|
+          config.field_default = 'N/A'
+          config.default_transformers = [transformer]
+        end
+        pipeline
+      end
+
+      object = OpenStruct.new(id: 1, first_name: nil, birthday: nil)
+      expect(blueprint.render_as_hash(object)).to eq(id: 1, first_name: nil, birthday: nil)
+    end
+  end
+
+  describe 'plain-field fast path' do
+    after { reset_blueprinter_config! }
+
+    it 'uses an AutoExtractor subclass extractor' do
+      caption = Class.new(Blueprinter::Extractor) do
+        def extract(field_name, object, _local_options, _options = {})
+          value = object.is_a?(Hash) ? object[field_name] : object.public_send(field_name)
+          value.is_a?(String) ? value.upcase : value
+        end
+      end
+      auto = Class.new(Blueprinter::AutoExtractor) do
+        define_method(:initialize) do
+          super()
+          @caption = caption.new
+        end
+
+        define_method(:extractor) do |_object, _options|
+          @caption
+        end
+      end
+
+      Blueprinter.configure { |config| config.extractor_default = auto }
+      blueprint = Class.new(Blueprinter::Base) do
+        field :first_name
+      end
+
+      expect(blueprint.render_as_hash(OpenStruct.new(first_name: 'Meg'))).to eq(first_name: 'MEG')
+      expect(blueprint.render_as_hash({ first_name: 'Meg' })).to eq(first_name: 'MEG')
+    end
+
+    it 'does not resolve an :if symbol on a view that is not rendered' do
+      blueprint = Class.new(Blueprinter::Base) do
+        field :first_name
+
+        view :other do
+          field :last_name, if: :missing_predicate
+        end
+      end
+      object = OpenStruct.new(first_name: 'Meg', last_name: 'Ryan')
+
+      expect(blueprint.render_as_hash(object)).to eq(first_name: 'Meg')
+      expect { blueprint.render_as_hash(object, view: :other) }.to raise_error(NameError)
+    end
+  end
+
   describe 'identifier' do
     let(:rendered) do
       blueprint.render_as_hash(OpenStruct.new(uid: 42))

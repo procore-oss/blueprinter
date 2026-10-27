@@ -2,7 +2,7 @@
 title: "Architecture"
 type: explanation
 description: "Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
+generated: { by: cursor/claude-opus-5-5, at: "2026-10-27T13:39:00Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T23:24:23Z" }
 ---
@@ -169,7 +169,7 @@ Pitfalls:
 
 ## Compilation
 
-Working out a view's final fields (defaults, included views, exclusions, sort order) is too expensive to repeat on every render, so it happens _once_. The first time a blueprint renders, `ViewCollection#ensure_cached!` computes every view's field list and transformer list in one pass and stores them as a frozen **snapshot**. Every later render reads the snapshot.
+Working out a view's final fields (defaults, included views, exclusions, sort order) is too expensive to repeat on every render, so it happens _once_. The first time a blueprint renders, `ViewCollection#ensure_cached!` computes every view's field list, compiled fields, and transformer list in one pass and stores them as a frozen **snapshot**. Every later render reads the snapshot, rebuilding it first if `Configuration.generation` changed.
 
 ### Field Lists
 
@@ -222,7 +222,7 @@ Transformers follow the same inheritance as fields, so a transformer on the defa
 
 An **extension** subclasses `Blueprinter::Extension`, overrides `pre_render(object, blueprint, view, options)`, and returns the object to render. Extensions are registered globally (`config.extensions << MyExtension.new`) and run in registration order, each receiving the previous one's result. `pre_render` is the only hook, and it runs for the top-level object and every associated object. Contract details: [extension-points.md](extension-points.md#extension).
 
-Configuration is global (`Blueprinter.configure { |config| ... }`). When each option is read decides when a change takes effect: some are read once, when a blueprint is defined or on its first render, and others on every render ([configuration.md](configuration.md#when-a-change-takes-effect)).
+Configuration is global (`Blueprinter.configure { |config| ... }`). When each option is read decides when a change takes effect: some are read once, when a blueprint is defined, and others on every render ([configuration.md](configuration.md#when-a-change-takes-effect)).
 
 ### Why Extensions Are Global
 
@@ -242,14 +242,14 @@ Blueprinter loads in two ways for two reasons. **Autoloading** lets an app refer
 
 A blueprint class is shared by every thread in a multi-threaded server, so anything it caches has to be safe to read concurrently.
 
-- The only lock under `lib/` is the `Mutex` in `ViewCollection`. `ensure_cached!` checks for the snapshot without the lock, builds it under the lock with a second check, and publishes it with one reference assignment, so renders after the first take _no_ lock.
+- The only locks under `lib/` are the `Mutex` in `ViewCollection` and the generation `Mutex` in `Configuration`. `ensure_cached!` checks for a current snapshot without the lock, builds it under the lock with a second check, and publishes it with one reference assignment, so renders after the first take _no_ lock.
 - The snapshot's `Hash`es and `Array`s are frozen; the `Field` and transformer objects inside them are not.
 - The DSL is unsynchronized and assumes class bodies run before concurrent renders start.
-- Not safe: DSL calls that invalidate while other threads render. `fields_for` reads the snapshot reference twice and `invalidate_cache!` writes it without the lock.
+- Not safe: DSL calls that invalidate while other threads render. `invalidate_cache!` writes the snapshot reference without the lock.
 
 Changes must keep these invariants:
 
-- `ensure_cached!` keeps its shape: nil-check without the lock, rebuild under the `Mutex` with a second check, publish by one reference assignment. No boolean "finalized" flag: a boolean read without the lock has no visibility guarantee on JRuby, while a frozen object published by one reference assignment is safe on every Ruby engine.
+- `ensure_cached!` keeps its shape: generation check without the lock, rebuild under the `Mutex` with a second check, publish by one reference assignment. No boolean "finalized" flag: a boolean read without the lock has no visibility guarantee on JRuby, while a frozen object published by one reference assignment is safe on every Ruby engine.
 - `fields_for` and `transformers` stay lock-free reads of the snapshot after the first compile.
 - Class-level state written during render must be an idempotent memo, as `Field@_if_callable`, `Configuration@_array_like_classes` and `@_default_extractor`, and the `Reflection` memos are.
 

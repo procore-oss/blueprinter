@@ -127,38 +127,24 @@ module Blueprinter
       # it in ahead of time to avoid allocating a new hash for every field extraction.
       local_options_with_view = local_options.merge(view: view_name)
 
+      # Loop invariants: the compiled render closures and transformers for this view are identical
+      # for every object in a collection, so resolve them once here rather than per object.
+      compiled_fields, transformers = view_collection.render_pipeline(view_name)
+
       if array_like?(object)
         object.map do |obj|
-          object_to_hash(
-            obj,
-            view_name:,
-            local_options: local_options_with_view
-          )
+          object_to_hash(obj, compiled_fields:, transformers:, local_options: local_options_with_view)
         end
       else
-        object_to_hash(
-          object,
-          view_name:,
-          local_options: local_options_with_view
-        )
+        object_to_hash(object, compiled_fields:, transformers:, local_options: local_options_with_view)
       end
     end
 
-    def object_to_hash(object, view_name:, local_options:)
+    def object_to_hash(object, compiled_fields:, transformers:, local_options:)
       result_hash = {}
 
-      view_collection.fields_for(view_name).each do |field|
-        next if field.skip?(field.name, object, local_options)
-
-        value = field.extract(object, local_options)
-        next if value.nil? && field.options[:exclude_if_nil]
-
-        result_hash[field.name] = value
-      end
-
-      view_collection.transformers(view_name).each do |transformer|
-        transformer.transform(result_hash, object, local_options)
-      end
+      compiled_fields.each { |render_field| render_field.call(result_hash, object, local_options) }
+      transformers.each { |transformer| transformer.transform(result_hash, object, local_options) }
 
       result_hash
     end

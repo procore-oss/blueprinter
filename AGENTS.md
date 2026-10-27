@@ -41,7 +41,7 @@ While in the inner-development loop, pass the following gates before pushing cha
 - `view` blocks do not nest; the inner block resets scope to `:default`.
 - Field blocks must accept `**` if they name keywords: every render passes `view:` plus all render options.
 - `if: :symbol` resolves against the class that defined the field, so the method must be `def self.`; an inherited field still resolves against the parent ([how a render works](docs/architecture.md#how-a-render-works)).
-- `sort_fields_by` and `extractor_default` must be set before blueprints are defined, and `custom_array_like_classes` before the first render ([when a change takes effect](docs/configuration.md#when-a-change-takes-effect)).
+- `sort_fields_by` and `extractor_default` must be set before blueprints are defined ([when a change takes effect](docs/configuration.md#when-a-change-takes-effect)).
 - `reflections` is memoized separately from the view cache and never refreshed ([reflection](docs/extension-points.md#reflection)).
 - `pre_render` fires for every association value, not just the top-level object ([extension](docs/extension-points.md#extension)).
 - The README spells the `deprecations` value `:stderr`; the code expects `:stderror` ([configuration.md](docs/configuration.md#notes)). Its "Releasing a New Version" section is out of date ([releasing.md](docs/releasing.md#how-publishing-works)).

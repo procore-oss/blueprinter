@@ -69,6 +69,33 @@ describe 'ViewCollection' do
     end
   end
 
+  describe '#render_pipeline' do
+    it 'returns frozen compiled fields and transformers from one cached pair' do
+      view.add_transformer(default_transformer)
+
+      pipeline = view_collection.render_pipeline(:view)
+
+      expect(pipeline).to be_frozen
+      expect(pipeline[0]).to be_frozen
+      expect(pipeline[0].length).to eq(view_collection.fields_for(:view).length)
+      expect(pipeline[0]).to all(be_a(Proc))
+      expect(pipeline[1]).to equal(view_collection.transformers(:view))
+    end
+
+    it 'keeps an old pipeline coherent when configuration invalidates the cache' do
+      pipeline_before = view_collection.render_pipeline(:view)
+
+      Blueprinter.configure { |config| config.default_transformers = [default_transformer] }
+      pipeline_after = view_collection.render_pipeline(:view)
+
+      expect(pipeline_after).not_to equal(pipeline_before)
+      expect(pipeline_before[1]).to eq([])
+      expect(pipeline_after[1]).to eq([default_transformer])
+    ensure
+      reset_blueprinter_config!
+    end
+  end
+
   describe '#transformers' do
     let(:transformer) { Blueprinter::Transformer.new }
 
@@ -218,6 +245,40 @@ describe 'ViewCollection' do
       fields_after = view_collection.fields_for(:view)
       expect(fields_after).not_to equal(fields_before)
       expect(fields_after).to eq(fields_before)
+    end
+
+    it 'keeps the compiled cache when sort_fields_by changes' do
+      pipeline_before = view_collection.render_pipeline(:view)
+
+      Blueprinter.configure { |config| config.sort_fields_by = :definition }
+
+      expect(view_collection.render_pipeline(:view)).to equal(pipeline_before)
+    ensure
+      reset_blueprinter_config!
+    end
+
+    it 'keeps the compiled cache when custom_array_like_classes changes' do
+      pipeline_before = view_collection.render_pipeline(:view)
+
+      Blueprinter.configure { |config| config.custom_array_like_classes = [Set] }
+
+      expect(view_collection.render_pipeline(:view)).to equal(pipeline_before)
+    ensure
+      reset_blueprinter_config!
+    end
+
+    it 'rebuilds the cache when the configuration generation changes' do
+      fields_before = view_collection.fields_for(:view)
+      pipeline_before = view_collection.render_pipeline(:view)
+
+      # A compiled-attribute writer bumps Configuration.generation; the compiled render pipeline
+      # bakes in global config, so the cache must rebuild rather than serve stale closures.
+      Blueprinter.configure { |config| config.field_default = 'N/A' }
+
+      expect(view_collection.fields_for(:view)).not_to equal(fields_before)
+      expect(view_collection.render_pipeline(:view)).not_to equal(pipeline_before)
+    ensure
+      reset_blueprinter_config!
     end
 
     it 'invalidates cache when invalidate_cache! is called after view mutation' do

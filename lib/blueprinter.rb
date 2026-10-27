@@ -20,8 +20,12 @@ module Blueprinter
     end
 
     # Resets global configuration.
+    #
+    # Bumps the generation counter as well: a fresh Configuration starts with the default values,
+    # which is itself a configuration change as far as any compiled Blueprint cache is concerned.
     def reset_configuration!
       @_configuration = nil
+      Configuration.bump_generation!
     end
   end
 end

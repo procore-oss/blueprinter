@@ -33,7 +33,7 @@ While in the inner-development loop, pass the following gates before pushing cha
 
 1. New or changed behavior has a spec that exercises it, in the place that [testing.md](docs/testing.md#add-a-test) describes. For a bug fix, the spec fails on `main` and passes on the branch.
 2. `bundle exec rake` passes (specs and `RuboCop`). `bundle exec rubocop -a` fixes safe lint offenses.
-3. Render-path changes don't regress performance beyond normal run-to-run variation. Run `bundle exec rake benchmarks` on the branch and on `main`, on the same machine, and put both numbers in the PR ([check performance](docs/testing.md#check-performance)).
+3. Render-path changes don't regress performance beyond normal run-to-run variation. Run `bundle exec rake engines` on `main`, then on the branch with `BASELINE=<main's results file>`, on the same machine, and put the reported changes in the PR ([check performance](docs/testing.md#check-performance)). `bundle exec rake benchmarks` must still pass.
 4. Relevant documentation is created or updated, and each doc under `docs/` whose claims changed has its `generated` field (`by` and `at`) updated ([frontmatter](docs/writing-docs.md#frontmatter)). Typo, link, and formatting fixes leave `generated` alone. Add or update a `verified` entry only when a person says they reviewed the doc, keeping one entry per `human:` handle ([trust](docs/writing-docs.md#trust-signals)).
 
 ## Gotchas

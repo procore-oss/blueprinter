@@ -5,6 +5,7 @@ spec/dummy/db/*.sqlite3
 spec/dummy/db/*.sqlite3-journal
 spec/dummy/log/*.log
 spec/dummy/tmp/
+/benchmarks/results/
 doc/
 .yardoc/
 Gemfile.lock

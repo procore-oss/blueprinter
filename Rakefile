@@ -39,4 +39,9 @@ Rake::TestTask.new(:benchmarks) do |t|
   t.verbose = false
 end
 
+desc 'Time rendering across setups and inputs (SWEEPS=, SAMPLES=, SIZES=, BASELINE=; see spec/benchmarks/engines/run.rb)'
+task :engines do
+  ruby '-Ilib', '-Ispec', 'spec/benchmarks/engines/run.rb'
+end
+
 task default: %i[spec rubocop]

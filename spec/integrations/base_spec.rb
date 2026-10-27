@@ -661,6 +661,200 @@ describe '::Base' do
         end
       end
     end
+
+    context 'Given an array of objects' do
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          transform(Class.new(Blueprinter::Transformer) do
+            def transform(hash, _obj, _opts)
+              hash[:seen] = true
+            end
+          end)
+        end
+      end
+      let(:objs) { Array.new(3) { |i| OpenStruct.new(id: i) } }
+
+      it 'looks up the view fields and transformers once per render', aggregate_failures: true do
+        expect(blueprint.view_collection).to receive(:fields_for).with(:default).once.and_call_original
+        expect(blueprint.view_collection).to receive(:transformers).with(:default).once.and_call_original
+
+        expect(blueprint.render_as_hash(objs)).to eq(objs.map { |o| { id: o.id, seen: true } })
+      end
+
+      it 'allocates only the result hash per object', skip: (RUBY_ENGINE != 'ruby' && 'needs MRI GC.stat') do
+        child = Class.new(Blueprinter::Base) { identifier :id }
+        blueprint = Class.new(Blueprinter::Base) do
+          identifier :id
+          field :name, exclude_if_nil: true
+          field :display, &:name
+          association :child, blueprint: child
+        end
+        row = Struct.new(:id, :name, :child)
+        allocations = lambda do |count|
+          objects = Array.new(count) { |i| row.new(i, nil, nil) }
+          blueprint.render_as_hash(objects)
+          before = GC.stat(:total_allocated_objects)
+          blueprint.render_as_hash(objects)
+          GC.stat(:total_allocated_objects) - before
+        end
+
+        expect(((allocations.call(101) - allocations.call(1)) / 100.0).round).to eq(1)
+      end
+    end
+
+    context 'Given render options' do
+      let(:blueprint) do
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          field(:opts) { |_obj, **opts| opts }
+          view(:extended) { field :id }
+        end
+      end
+      let(:obj) { OpenStruct.new(id: 1) }
+
+      it 'gives fields the view but leaves the render options untouched', aggregate_failures: true do
+        render_options = { root: :data, meta: { page: 1 }, flag: true }
+
+        result = blueprint.render_as_hash(obj, render_options)
+
+        expect(result).to eq(data: { id: 1, opts: { view: :default, flag: true } }, meta: { page: 1 })
+        expect(render_options).to eq(root: :data, meta: { page: 1 }, flag: true)
+      end
+
+      it 'gives top-level pre_render the options without :view, :root, and :meta' do
+        seen = []
+        extension = Class.new(Blueprinter::Extension) do
+          define_method(:pre_render) do |object, blueprint, _view, options|
+            seen << [blueprint, options]
+            object
+          end
+        end
+        child = Class.new(Blueprinter::Base) { identifier :id }
+        parent = Class.new(Blueprinter::Base) do
+          identifier :id
+          view(:extended) { association :child, blueprint: child }
+        end
+        Blueprinter.configure { |config| config.extensions << extension.new }
+
+        parent.render_as_hash(
+          OpenStruct.new(id: 1, child: OpenStruct.new(id: 2)),
+          view: :extended, root: :data, meta: { page: 1 }, flag: true
+        )
+
+        expect(seen).to eq([[parent, { flag: true }], [child, { flag: true, view: :extended }]])
+      ensure
+        reset_blueprinter_config!
+      end
+
+      it 'passes the given view in local_options' do
+        expect(blueprint.render_as_hash(obj, view: :extended)[:opts]).to eq(view: :extended)
+      end
+    end
+
+    context 'Given an association' do
+      let(:recorder) do
+        Class.new(Blueprinter::Transformer) do
+          def self.seen
+            @seen ||= []
+          end
+
+          def transform(_hash, _obj, opts)
+            self.class.seen << opts
+          end
+        end
+      end
+      let(:child_blueprint) do
+        recorder = self.recorder
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          transform recorder
+          view(:extended) { field :name }
+        end
+      end
+      let(:obj) { OpenStruct.new(id: 1, child: OpenStruct.new(id: 2, name: 'Kid')) }
+
+      def parent_blueprint(child_blueprint, **association_options)
+        Class.new(Blueprinter::Base) do
+          identifier :id
+          view(:extended) { association :child, blueprint: child_blueprint, **association_options }
+        end
+      end
+
+      def seen_options
+        recorder.seen.map { |opts| opts.slice(:view, :flag) }
+      end
+
+      it 'passes the nested blueprint its own view when it differs from the parent view' do
+        blueprint = parent_blueprint(child_blueprint)
+
+        expect(blueprint.render_as_hash(obj, view: :extended, flag: 1)).to eq(id: 1, child: { id: 2 })
+        expect(seen_options).to eq([{ view: :default, flag: 1 }])
+      end
+
+      it 'passes the nested blueprint the same view as the parent when they match' do
+        blueprint = parent_blueprint(child_blueprint, view: :extended)
+
+        expect(blueprint.render_as_hash(obj, view: :extended, flag: 1)).
+          to eq(id: 1, child: { id: 2, name: 'Kid' })
+        expect(seen_options).to eq([{ view: :extended, flag: 1 }])
+      end
+
+      it 'merges association options over the parent options' do
+        blueprint = parent_blueprint(child_blueprint, view: :extended, options: { flag: 2 })
+
+        blueprint.render_as_hash(obj, view: :extended, flag: 1)
+        expect(seen_options).to eq([{ view: :extended, flag: 2 }])
+      end
+
+      it 'keeps a nested options write off later parent fields when the views match' do
+        child = Class.new(Blueprinter::Base) do
+          identifier :id
+          transform(Class.new(Blueprinter::Transformer) do
+            def transform(_hash, _obj, opts)
+              opts[:flag] = :from_child
+            end
+          end)
+        end
+        parent = Class.new(Blueprinter::Base) do
+          field(:before) { |_obj, flag:, **| flag }
+          association :child, blueprint: child
+          field(:later) { |_obj, flag:, **| flag }
+        end
+        rendered = OpenStruct.new(id: 1, child: OpenStruct.new(id: 2))
+
+        expect(parent.render_as_hash(rendered, flag: :from_parent)).to eq(
+          before: :from_parent,
+          child: { id: 2 },
+          later: :from_parent
+        )
+      end
+
+      it 'keeps a nested options write off later parent fields when the views differ' do
+        child = Class.new(Blueprinter::Base) do
+          identifier :id
+          transform(Class.new(Blueprinter::Transformer) do
+            def transform(_hash, _obj, opts)
+              opts[:flag] = :from_child
+            end
+          end)
+        end
+        parent = Class.new(Blueprinter::Base) do
+          view :extended do
+            field(:before) { |_obj, flag:, **| flag }
+            association :child, blueprint: child
+            field(:later) { |_obj, flag:, **| flag }
+          end
+        end
+        rendered = OpenStruct.new(id: 1, child: OpenStruct.new(id: 2))
+
+        expect(parent.render_as_hash(rendered, view: :extended, flag: :from_parent)).to eq(
+          before: :from_parent,
+          child: { id: 2 },
+          later: :from_parent
+        )
+      end
+    end
   end
 
   describe '.prepare' do

@@ -2,7 +2,7 @@
 title: "Architecture"
 type: explanation
 description: "Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
+generated: { by: cursor/claude-opus-5-5, at: "2026-10-27T13:30:00Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T23:24:23Z" }
 ---
@@ -89,8 +89,8 @@ sequenceDiagram
   B->>Ext: pre_render(object, blueprint, view_name, local_options)
   Ext-->>B: object (original, modified, or replaced)
   B->>B: prepare_data: add view: to local_options, map when array-like
+  B->>VC: fields_for(view_name) and transformers(view_name) from the compiled snapshot, once
   loop each object
-    B->>VC: fields_for(view_name) from the compiled snapshot
     loop each field
       B->>F: skip?(name, obj, local_options) via :if / :unless
       B->>F: extract(obj, local_options)
@@ -105,7 +105,6 @@ sequenceDiagram
       end
       B->>B: drop when nil and :exclude_if_nil, else result[name] = value
     end
-    B->>VC: transformers(view_name)
     B->>T: transform(result_hash, obj, local_options), mutating in place
   end
   B->>B: apply root, then meta

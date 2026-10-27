@@ -2,7 +2,7 @@
 title: "Making Changes"
 type: how-to
 description: "Take a change from idea to mergeable PR: what every PR needs, and where each kind of change belongs in the code."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T21:35:53Z" }
+generated: { by: cursor/claude-opus-5-5, at: "2026-10-27T13:30:00Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
 ---
@@ -90,6 +90,8 @@ end
 
 # lib/blueprinter/extensions.rb: pass the object through each extension in turn
 def pre_render(object, blueprint, view, options = {})
+  return object if @extensions.empty?
+
   @extensions.reduce(object) do |acc, ext|
     ext.pre_render(acc, blueprint, view, options)
   end

@@ -17,11 +17,15 @@ the current object, and a lot more.
 set :default, ->(ctx) {
   case ctx.field.type
   when :field then "N/A"
-  when :object then {}
-  when :collection then []
+  when :object, :collection then {}
   end
 }
 ```
+
+> [!NOTE]
+Legacy/V1 used the single `association_default` value for *both* objects and collections, so the
+example above is a faithful translation. If you'd rather a defaulted empty collection render as `[]`,
+split the branch — but be aware that changes the serialized output.
 
 ### `if` / `unless`
 
@@ -59,11 +63,11 @@ hash = WidgetBlueprint.render_object(arg).to_hash
 "Extractors" are not a discrete concept in V2, but they can be implemented using the `around_field_value`, `around_object_value`, and `around_collection_value`
 extension hooks.
 
-The bundled `LegacyExtractorOption` extension can be enabled to offer backwards-compatibility with legacy/V1's extractors:
+The bundled `LegacyOptions` extension can be enabled to offer backwards-compatibility with legacy/V1's extractors:
 
 ```ruby
 # Add the extension
-add Blueprinter::Extensions::LegacyExtractorOption.new
+add Blueprinter::Extensions::LegacyOptions.new
 
 # Set the `extractor` option
 set :extractor, MyExtractor
@@ -113,7 +117,11 @@ If `multi_json` doesn't support your serializer, you can create your own extensi
 
 ```ruby
 class MyJsonExtension < Blueprinter::Extension
-  def around_result(ctx)
+  def initialize
+    around_result :serialize
+  end
+
+  def serialize(ctx)
     case ctx.format
     when :json
       result = yield ctx

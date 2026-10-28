@@ -341,6 +341,10 @@ module Blueprinter
     # If you want to handle object extraction on your own, omit the `yield` and extract the value yourself using
     # {Blueprinter::V2::Context::Field#field ctx.field} and {Blueprinter::V2::Context::Field#object ctx.object}.
     #
+    # By replacing {Blueprinter::V2::Context::Field#options ctx.options} you can change the options used to serialize this
+    # association. They apply to the association and anything nested beneath it, but not to the rest of the current
+    # Blueprint. The {Blueprinter::Extensions::LegacyDynamicOptions LegacyDynamicOptions} extension works this way.
+    #
     # @param name [Symbol] Name of instance method that implements hook
     # @!visibility public
     def around_object_value(name) = register_hook(:around_object_value, name)
@@ -368,6 +372,10 @@ module Blueprinter
     #
     # If you want to handle collection extraction on your own, omit the `yield` and extract the value yourself using
     # {Blueprinter::V2::Context::Field#field ctx.field} and {Blueprinter::V2::Context::Field#object ctx.object}.
+    #
+    # By replacing {Blueprinter::V2::Context::Field#options ctx.options} you can change the options used to serialize this
+    # association. They apply to the association and anything nested beneath it, but not to the rest of the current
+    # Blueprint. The {Blueprinter::Extensions::LegacyDynamicOptions LegacyDynamicOptions} extension works this way.
     #
     # @param name [Symbol] Name of instance method that implements hook
     # @!visibility public

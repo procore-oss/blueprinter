@@ -46,7 +46,10 @@ module Blueprinter
       # @param parent [Blueprinter::V2::Context::Parent] Reference to the parent object (if depth > 1)
       # @return [Hash] The serialized value for `object`
       def object(object, options, instances:, store:, depth: 1, parent: nil)
+        # The Config is built once per Blueprint per render, but extensions may change the options between objects,
+        # so refresh them when the caller hands down a different Hash.
         config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options, store:, depth:)
+        config.options = options.freeze unless config.options.equal? options
         field_ctx = config.needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
         blueprint_ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
 
@@ -54,7 +57,7 @@ module Blueprinter
           ctx = build_object_ctx(config, object:, parent:, store:, depth:)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
             config.options = ctx.options.freeze
-            blueprint_ctx&.options = config.options
+            refresh_options(config.options, blueprint_ctx, field_ctx)
             serialize(config, ctx.object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
           end
         else
@@ -72,7 +75,9 @@ module Blueprinter
       # @param parent [Blueprinter::V2::Context::Parent] Reference to the parent object (if depth > 1)
       # @return [Array<Hash>] The serialized value for `objects`
       def collection(objects, options, instances:, store:, depth: 1, parent: nil)
+        # See the note in `object` about refreshing options
         config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options, store:, depth:)
+        config.options = options.freeze unless config.options.equal? options
         if @hook_around_serialize_collection
           ctx = build_object_ctx(config, object: objects, parent:, store:, depth:)
           @hooks.around(:around_serialize_collection, ctx) do |ctx|
@@ -102,6 +107,12 @@ module Blueprinter
         end.to_a
       end
 
+      # Context objects hold their own reference to the options, so they must be refreshed when a hook changes them
+      def refresh_options(options, ctx_a, ctx_b = nil)
+        ctx_a&.options = options
+        ctx_b&.options = options
+      end
+
       def build_field_ctx(config, store:, depth:)
         Context::Field.new(config.blueprint, config.fields, config.options, nil, nil, store, depth)
       end
@@ -115,6 +126,7 @@ module Blueprinter
           ctx.object = object
           @hooks.around(:around_blueprint, ctx) do |ctx|
             config.options = ctx.options.freeze
+            refresh_options(config.options, field_ctx)
             _serialize(config, ctx.object, instances:, store:, depth:, ctx: field_ctx)
           end
         else
@@ -167,8 +179,11 @@ module Blueprinter
               parent ||= Context::Parent.new(@blueprint_class)
               parent.field = field
               parent.object = object
-              field._serializer.serialize(field.blueprint, value, config.options, parent:, instances:, store:,
-                                                                                  depth: depth + 1)
+              # A field hook may have replaced the options for this association only, so hand those down and reset
+              assoc_options = ctx ? ctx.options : config.options
+              ctx.options = config.options unless assoc_options.equal? config.options
+              field._serializer.serialize(field.blueprint, value, assoc_options, parent:, instances:, store:,
+                                                                                 depth: depth + 1)
             end
         end
       end

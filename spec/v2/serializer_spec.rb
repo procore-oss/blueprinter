@@ -532,6 +532,128 @@ describe Blueprinter::V2::Serializer do
     ]
   end
 
+  it 'hands options changed by an extension down to nested blueprints' do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize = around_blueprint :hook
+
+      def hook(ctx)
+        options = ctx.options
+        ctx.options = ctx.options.merge(widget_name: ctx.object[:name])
+        yield ctx
+      ensure
+        ctx.options = options
+      end
+    end
+    widget_blueprint.add ext.new
+    category_blueprint.field(:widget_name) { |_, ctx| ctx.options[:widget_name] }
+
+    result = widget_blueprint.serializer.collection(
+      [
+        { name: 'A', category: { name: 'Cat A' }, parts: [] },
+        { name: 'B', category: { name: 'Cat B' }, parts: [] },
+      ],
+      {},
+      instances:,
+      store:,
+      depth: 1
+    )
+
+    expect(result.map { |widget| widget[:category] }).to eq [
+      { name: 'Cat A', widget_name: 'A' },
+      { name: 'Cat B', widget_name: 'B' },
+    ]
+  end
+
+  it 'scopes options changed by a field hook to that association' do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize = around_object_value :hook
+
+      def hook(ctx)
+        ctx.options = ctx.options.merge(scoped: ctx.field.name)
+        yield ctx
+      end
+    end
+    widget_blueprint.add ext.new
+    widget_blueprint.field(:scoped) { |_, ctx| ctx.options[:scoped] }
+    category_blueprint.field(:scoped) { |_, ctx| ctx.options[:scoped] }
+    part_blueprint.field(:scoped) { |_, ctx| ctx.options[:scoped] }
+
+    result = widget_blueprint.serializer.object(
+      { name: 'A', category: { name: 'Cat' }, parts: [{ num: 42 }] },
+      {},
+      instances:,
+      store:,
+      depth: 1
+    )
+
+    # The category sees them, but the widget's own fields and its other associations don't
+    expect(result).to eq(
+      name: 'A',
+      category: { name: 'Cat', scoped: :category },
+      parts: [{ num: 42, scoped: nil }],
+      scoped: nil
+    )
+  end
+
+  it "applies options changed by around_serialize_object to the blueprint's own fields" do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize = around_serialize_object :hook
+
+      def hook(ctx)
+        ctx.options = ctx.options.merge(injected: 'yes')
+        yield ctx
+      end
+    end
+    widget_blueprint.add ext.new
+    # An arity 2 block means the Blueprint needs a field context, which holds its own reference to the options
+    widget_blueprint.field(:injected) { |_, ctx| ctx.options[:injected] }
+    category_blueprint.field(:injected) { |_, ctx| ctx.options[:injected] }
+
+    result = widget_blueprint.serializer.object(
+      { name: 'A', category: { name: 'Cat' }, parts: [] },
+      {},
+      instances:,
+      store:,
+      depth: 1
+    )
+
+    expect(result).to eq(
+      name: 'A',
+      category: { name: 'Cat', injected: 'yes' },
+      parts: [],
+      injected: 'yes'
+    )
+  end
+
+  it "applies options changed by around_blueprint to the blueprint's own fields" do
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize = around_blueprint :hook
+
+      def hook(ctx)
+        ctx.options = ctx.options.merge(injected: 'yes')
+        yield ctx
+      end
+    end
+    widget_blueprint.add ext.new
+    widget_blueprint.field(:injected) { |_, ctx| ctx.options[:injected] }
+    category_blueprint.field(:injected) { |_, ctx| ctx.options[:injected] }
+
+    result = widget_blueprint.serializer.object(
+      { name: 'A', category: { name: 'Cat' }, parts: [] },
+      {},
+      instances:,
+      store:,
+      depth: 1
+    )
+
+    expect(result).to eq(
+      name: 'A',
+      category: { name: 'Cat', injected: 'yes' },
+      parts: [],
+      injected: 'yes'
+    )
+  end
+
   it "raises if around_blueprint_init doesn't yield" do
     ext = Class.new(Blueprinter::Extension) do
       def initialize = around_blueprint_init :hook

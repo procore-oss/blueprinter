@@ -195,6 +195,74 @@ describe Blueprinter::V2::Serializer do
     })
   end
 
+  it "doesn't run default values through formatters" do
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      format(Date) { |date| date.strftime('%a %b %e, %Y') }
+      field :created_on, default: Date.new(2024, 11, 10)
+      field :updated_on, default: ->(_ctx) { Date.new(2024, 11, 11) }, default_if: ->(_ctx, val) { val.year < 2000 }
+    end
+
+    result = widget_blueprint.serializer.object({ updated_on: Date.new(1999, 1, 1) }, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ created_on: Date.new(2024, 11, 10), updated_on: Date.new(2024, 11, 11) })
+
+    result = widget_blueprint.serializer.object({ created_on: Date.new(2024, 11, 9), updated_on: Date.new(2024, 11, 10) },
+                                                {}, instances:, store:, depth: 1)
+    expect(result).to eq({ created_on: 'Sat Nov  9, 2024', updated_on: 'Sun Nov 10, 2024' })
+  end
+
+  it "doesn't run association default values through the association's blueprint" do
+    test = self
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name
+      association :category, test.category_blueprint, default: { name: 'Default', extra: true }
+      association :parts, [test.part_blueprint], default: ['none']
+    end
+
+    result = widget_blueprint.serializer.object({ name: 'Foo' }, {}, instances:, store:, depth: 1)
+    expect(result).to eq({
+      name: 'Foo',
+      category: { name: 'Default', extra: true },
+      parts: ['none']
+    })
+  end
+
+  it "doesn't run association default_if values through the association's blueprint" do
+    test = self
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      association :category, test.category_blueprint, default: 'Default', default_if: ->(_ctx, val) { val[:name] == 'X' }
+    end
+
+    result = widget_blueprint.serializer.object({ category: { name: 'X' } }, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ category: 'Default' })
+
+    result = widget_blueprint.serializer.object({ category: { name: 'Y' } }, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ category: { name: 'Y' } })
+  end
+
+  it "doesn't run association default values through the association's blueprint with hooks" do
+    test = self
+    ext = Class.new(Blueprinter::Extension) do
+      def initialize
+        around_object_value :hook
+        around_collection_value :hook
+      end
+
+      def hook(ctx) = yield(ctx)
+    end
+    widget_blueprint = Class.new(Blueprinter::V2::Base) do
+      association :category, test.category_blueprint, default: { name: 'Default', extra: true }
+      association :parts, [test.part_blueprint], default: ['none']
+    end
+    widget_blueprint.add ext.new
+
+    result = widget_blueprint.serializer.object({}, {}, instances:, store:, depth: 1)
+    expect(result).to eq({ category: { name: 'Default', extra: true }, parts: ['none'] })
+
+    result = widget_blueprint.serializer.object({ category: { name: 'Cat', extra: true }, parts: [{ num: 1, x: 2 }] },
+                                                {}, instances:, store:, depth: 1)
+    expect(result).to eq({ category: { name: 'Cat' }, parts: [{ num: 1 }] })
+  end
+
   it 'respects the exclude_if_nil option' do
     widget_blueprint = Class.new(Blueprinter::V2::Base) do
       field :name, exclude_if_nil: true

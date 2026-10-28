@@ -133,23 +133,34 @@ module Blueprinter
           next if field._has_conditional && FieldLogic.skip?(ctx, field)
 
           # extract value
+          defaulted = false
           if (field_hook = @field_hooks[field.type])
             value = catch SIGNAL do
               @hooks.around(field_hook, ctx) do
                 val = field.block ? field.block.call(object, ctx) : field.extract(object)
-                field._has_default ? FieldLogic.value_or_default(field, val, ctx:) : val
+                if field._has_default && FieldLogic.default?(field, val, ctx:)
+                  defaulted = true
+                  FieldLogic.default_value(field, ctx:)
+                else
+                  val
+                end
               end
             end
             next if value == SIG_SKIP
           else
             value = field.block ? field.block.call(object, ctx) : field.extract(object)
-            value = FieldLogic.value_or_default(field, value, ctx:) if field._has_default
+            if field._has_default && FieldLogic.default?(field, value, ctx:)
+              defaulted = true
+              value = FieldLogic.default_value(field, ctx:)
+            end
           end
 
           # format/serialize and set value
           result[field.name] =
             if value.nil?
               field._merged_options[:exclude_if_nil] ? next : nil
+            elsif defaulted
+              value
             elsif field.type == :field
               @format ? @formatter.call(config.blueprint, value) : value
             else

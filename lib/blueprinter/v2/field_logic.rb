@@ -25,7 +25,8 @@ module Blueprinter
       end
 
       # Returns the given value or a default value. Default values are pulled from the field-level or Blueprint-level
-      # "default" option. It will be used if the given value is nil or if the "default_if" option evaluates truthy.
+      # "default" option. It will be used if the "default_if" option evaluates truthy, or, when there is no
+      # "default_if" option, if the given value is nil.
       #
       # @param field [Blueprinter::V2::Fields::Field]
       # @param value [Object] The current field value
@@ -35,18 +36,18 @@ module Blueprinter
         default?(field, value, ctx:) ? default_value(field, ctx:) : value
       end
 
-      # Returns true if the default value should be used. It will be used if the given value is nil or if the
-      # "default_if" option evaluates truthy.
+      # Returns true if the default value should be used. It will be used if the "default_if" option evaluates
+      # truthy, or, when there is no "default_if" option, if the given value is nil.
       #
       # @param field [Blueprinter::V2::Fields::Field]
       # @param value [Object] The current field value
       # @param ctx [Blueprinter::V2::Context::Field | nil]
       # @return [true | false]
       def self.default?(field, value, ctx: nil)
-        return true if value.nil?
-
         default_if = field._merged_options[:default_if]
-        default_if ? !!use_default?(default_if, ctx, value) : false
+        return value.nil? unless default_if
+
+        !!use_default?(default_if, ctx, value)
       end
 
       # Returns the field's default value, pulled from the field-level or Blueprint-level "default" option.

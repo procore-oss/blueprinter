@@ -11,8 +11,8 @@ module Blueprinter
         #
         # Add a formatter for field values of a given class.
         #
-        # When a field (not an association) returns a value of the given class, it will be passed through
-        # the formatter.
+        # When a field (not an association) returns a value of the given class (including child classes), it will be
+        # passed through the formatter.
         #
         # If a block is used, it will be executed in the context of the Blueprint instance, allowing the block to call
         # instance methods.

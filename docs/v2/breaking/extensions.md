@@ -3,7 +3,11 @@
 > [!NOTE]
 Most applications don't use extensions (yet) and can skip this section.
 
-Legacy/V1 had only one extension hook: `pre_render`. V2's closest analog is `around_result`, which runs once at the beginning of every call to `render`.
+Legacy/V1 had only one extension hook: `pre_render`. Depending on what it was doing, V2 has several possible replacements:
+
+* `around_result`: runs once at the beginning of every `render`.
+* `around_serialize_object`: runs on every object serialization (`render` and associations).
+* `around_serialize_collection`: runs on every collection serialization (`render` and associations).
 
 Here's an example of an extension that supports both V1 and V2:
 

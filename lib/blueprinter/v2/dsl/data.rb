@@ -76,6 +76,9 @@ module Blueprinter
         # def blank?(ctx, val) = val.blank?
         # ```
         #
+        # NOTE: Default values are not passed through formatters (for regular fields) or serialized as Blueprints (for
+        # associations).
+        #
         # @param name [Symbol] Name of the field
         # @param source [Symbol] Optionally specify a different method/Hash key to call to get the value for "name"
         # @option default [Object | Symbol | Proc] Value to use if the field is nil, or if `default_if` returns true

@@ -88,4 +88,26 @@ describe Blueprinter::V2::FieldLogic do
       expect(value).to eq 'Bar'
     end
   end
+
+  context "default?" do
+    let(:field) { blueprint.reflections[:default].fields.fetch(:foo) }
+    let(:object) { { foo: 'Foo' } }
+    let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, {}) }
+
+    it 'is true for nil' do
+      blueprint.field :foo, default: 'Bar'
+      expect(subject.default?(field, nil, ctx:)).to be true
+    end
+
+    it 'is false for non-nil without default_if' do
+      blueprint.field :foo, default: 'Bar'
+      expect(subject.default?(field, 'Foo', ctx:)).to be false
+    end
+
+    it 'checks default_if' do
+      blueprint.field :foo, default: 'Bar', default_if: ->(_ctx, val) { val == 'Foo' }
+      expect(subject.default?(field, 'Foo', ctx:)).to be true
+      expect(subject.default?(field, 'Zorp', ctx:)).to be false
+    end
+  end
 end

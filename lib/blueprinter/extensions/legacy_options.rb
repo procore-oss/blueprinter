@@ -26,7 +26,22 @@ module Blueprinter
     # field :bar, if: ->(ctx) { ctx.object.show_bar? }
     # ```
     #
-    # In the V2 example, `ctx` is a {Blueprinter::V2::Context::Field}.
+    # Method names are treated like V1 when the Blueprint has a *class* method of that name which takes three
+    # arguments. V2 if/unless methods are *instance* methods which take a single argument.
+    #
+    # ```
+    # # V1 style
+    # field :foo, if: :show_foo?
+    #
+    # def self.show_foo?(_field_name, object, _options) = object.show_foo?
+    #
+    # # V2 style
+    # field :bar, if: :show_bar?
+    #
+    # def show_bar?(ctx) = ctx.object.show_bar?
+    # ```
+    #
+    # In the V2 examples, `ctx` is a {Blueprinter::V2::Context::Field}.
     #
     # === default_if
     #
@@ -107,14 +122,17 @@ module Blueprinter
       # @param ctx [Blueprinter::V2::Context::Init]
       # @!visibility private
       def init_legacy_conditionals(ctx)
+        blueprint = ctx.blueprint.class
+        opts = ctx.blueprint.options
+
         # Convert blueprint if/unless options
-        ctx.blueprint.options[:if] = wrap_v1_cond(ctx.blueprint.options[:if]) if ctx.blueprint.options[:if]
-        ctx.blueprint.options[:unless] = wrap_v1_cond(ctx.blueprint.options[:unless]) if ctx.blueprint.options[:unless]
+        opts[:if] = wrap_v1_cond(opts[:if], blueprint) if opts[:if]
+        opts[:unless] = wrap_v1_cond(opts[:unless], blueprint) if opts[:unless]
 
         # Convert field if/unless options
         ctx.fields.each do |field|
-          field.options[:if] = wrap_v1_cond(field.options[:if]) if field.options[:if]
-          field.options[:unless] = wrap_v1_cond(field.options[:unless]) if field.options[:unless]
+          field.options[:if] = wrap_v1_cond(field.options[:if], blueprint) if field.options[:if]
+          field.options[:unless] = wrap_v1_cond(field.options[:unless], blueprint) if field.options[:unless]
         end
         yield ctx
       end
@@ -165,12 +183,24 @@ module Blueprinter
 
       private
 
-      def wrap_v1_cond(cond)
-        if cond.is_a?(Proc) && cond.arity == V1_COND_ARITY
-          ->(ctx) { cond.call(ctx.field.source, ctx.object, ctx.options) }
-        else
-          cond
-        end
+      def wrap_v1_cond(cond, blueprint)
+        v1_callable =
+          case cond
+          when Proc then cond if cond.arity == V1_COND_ARITY
+          when Symbol, String then v1_cond_method(cond, blueprint)
+          end
+        return cond if v1_callable.nil?
+
+        ->(ctx) { v1_callable.call(ctx.field.source, ctx.object, ctx.options) }
+      end
+
+      # V1 if/unless method names refer to class methods which take the field name, object, and options.
+      # V2's refer to instance methods which take a single Context::Field.
+      def v1_cond_method(name, blueprint)
+        return nil unless blueprint.respond_to?(name)
+
+        method = blueprint.method(name)
+        method if method.arity == V1_COND_ARITY
       end
 
       def wrap_v1_default_if(cond)

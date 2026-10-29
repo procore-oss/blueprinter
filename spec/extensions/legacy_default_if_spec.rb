@@ -26,4 +26,30 @@ describe Blueprinter::Extensions::LegacyOptions do
     result = blueprint.render({ name: nil, desc: nil }).to_hash
     expect(result).to eq({ name: nil, desc: 'No desc' })
   end
+
+  it 'defaults to nil when there is no default, like V1' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name, default_if: Blueprinter::EMPTY_STRING
+      field :desc, default_if: ->(_ctx, val) { val.empty? }
+    end
+    blueprint.add subject
+    # V2's default_if is still ignored when there's no default
+    expect(blueprint.render({ name: '', desc: '' }).to_hash).to eq({ name: nil, desc: '' })
+  end
+
+  it "ignores V1's global field_default config" do
+    blueprint = Class.new(Blueprinter::V2::Base) { field :name, default_if: Blueprinter::EMPTY_STRING }
+    blueprint.add subject
+    allow(Blueprinter.configuration).to receive(:field_default).and_return('N/A')
+    expect(blueprint.render({ name: '' }).to_hash).to eq({ name: nil })
+  end
+
+  it "doesn't override a blueprint-level default" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      set :default, 'None'
+      field :name, default_if: Blueprinter::EMPTY_STRING
+    end
+    blueprint.add subject
+    expect(blueprint.render({ name: '' }).to_hash).to eq({ name: 'None' })
+  end
 end

@@ -11,3 +11,5 @@ However, with the `LegacyOptions` extension you may continue using V1-style view
 ```ruby
 WidgetBlueprint.render(widget, view: :my_view).to_json
 ```
+
+As in V1, the option remains in the options hash that's passed to conditionals, extractors, and field blocks.

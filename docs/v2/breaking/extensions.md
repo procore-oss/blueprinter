@@ -5,17 +5,18 @@ Most applications don't use extensions (yet) and can skip this section.
 
 Legacy/V1 had only one extension hook: `pre_render`. Depending on what it was doing, V2 has several possible replacements:
 
-* `around_result`: runs once at the beginning of every `render`.
 * `around_serialize_object`: runs on every object serialization (`render` and associations).
 * `around_serialize_collection`: runs on every collection serialization (`render` and associations).
+* `around_result`: runs once at the beginning of every `render`. (While this isn't how `pre_render` ran, it's what some extensions like `blueprinter-activerecord` actually wanted.)
 
 Here's an example of an extension that supports both V1 and V2:
 
 ```ruby
 class MyExtension < Blueprinter::Extension
   def initialize
-    # Register 'modify_object' as a V2 around_result hook
-    around_result :modify_object
+    # Register 'modify_object' as V2 hooks
+    around_serialize_object :modify_object
+    around_serialize_collection :modify_object
   end
 
   # V2 API
@@ -34,7 +35,7 @@ class MyExtension < Blueprinter::Extension
   private
 
   def modify(object, blueprint_class, view, options)
-    # return a modified or new object
+    # return a modified or new object or collection
   end
 end
 ```

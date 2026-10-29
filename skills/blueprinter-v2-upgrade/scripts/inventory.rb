@@ -41,6 +41,50 @@ module BlueprinterInventory
 
   V1_COND_ARITY = 3
 
+  # Field options reported verbatim (via inspect) when present.
+  INSPECTED_OPTS = %i[name datetime_format default default_if exclude_if_nil options].freeze
+
+  # V1 global settings that V2 ignores, paired with a test for whether the app actually set one.
+  # Anything listed here silently stops applying the moment a Blueprint moves to V2.
+  MIGRATION_NOTES = {
+    'sort_fields_by is not :definition — V2 uses definition order, so JSON key order will change' =>
+      ->(c) { c.sort_fields_by != :definition },
+    'field_default is set — V2 ignores it; port with `set :default`' =>
+      ->(c) { !c.field_default.nil? },
+    'association_default is set — V2 ignores it; port with `set :default`' =>
+      ->(c) { !c.association_default.nil? },
+    'global if is set — V2 ignores it; port with `set :if`' =>
+      ->(c) { !c.if.nil? },
+    'global unless is set — V2 ignores it; port with `set :unless`' =>
+      ->(c) { !c.unless.nil? },
+    'datetime_format is set — V2 ignores it; port with `format Date/Time/DateTime`' =>
+      ->(c) { !c.datetime_format.nil? },
+    'default_transformers is set — V2 ignores it; port with LegacyTransformer' =>
+      ->(c) { c.default_transformers.any? },
+    'extractor_default is customized — port with LegacyOptions + `set :extractor`' =>
+      ->(c) { !BUILTIN_EXTRACTORS.include?(c.extractor_default.to_s) },
+    'a custom JSON generator is set — V2 ignores it; port with MultiJson or an around_result extension' =>
+      ->(c) { c.generator.to_s != 'JSON' || c.method != :generate },
+    'custom_array_like_classes is set — V2 ignores it; use render_collection at call sites' =>
+      ->(c) { c.custom_array_like_classes.any? },
+    'global extensions are set — V2 ignores config.extensions, and V1 pre_render hooks never run in V2' =>
+      ->(c) { c.extensions.any? }
+  }.freeze
+
+  # V1-only field features, keyed by the label reported in `v1_features`.
+  FIELD_FEATURES = {
+    'name_option' => ->(f) { f[:opt_name] },
+    'extractor_option' => ->(f) { f[:extractor] },
+    'datetime_format' => ->(f) { f[:opt_datetime_format] },
+    'dynamic_association_options' => ->(f) { f[:opt_options] },
+    'default_if' => ->(f) { f[:opt_default_if] },
+    'association_view_option' => ->(f) { f[:view] },
+    'field_block' => ->(f) { f[:block] && !f[:association] },
+    'v1_conditional' => lambda { |f|
+      [f[:opt_if], f[:opt_unless]].compact.any? { |c| c.include?('V1 style') || c.include?('CLASS method') }
+    }
+  }.freeze
+
   class << self
     def run
       abort 'Blueprinter is not loaded. Require your application first.' unless defined?(::Blueprinter)
@@ -124,24 +168,7 @@ module BlueprinterInventory
     end
 
     def changed_defaults(config)
-      notes = []
-      notes << 'sort_fields_by is not :definition — V2 uses definition order, so JSON key order will change' \
-        unless config.sort_fields_by == :definition
-      notes << 'field_default is set — V2 ignores it; port with `set :default`' unless config.field_default.nil?
-      notes << 'association_default is set — V2 ignores it; port with `set :default`' unless config.association_default.nil?
-      notes << 'global if is set — V2 ignores it; port with `set :if`' if config.if
-      notes << 'global unless is set — V2 ignores it; port with `set :unless`' if config.unless
-      notes << 'datetime_format is set — V2 ignores it; port with `format Date/Time/DateTime`' if config.datetime_format
-      notes << 'default_transformers is set — V2 ignores it; port with LegacyTransformer' if config.default_transformers.any?
-      notes << 'extractor_default is customized — port with LegacyOptions + `set :extractor`' \
-        unless BUILTIN_EXTRACTORS.include?(config.extractor_default.to_s)
-      notes << 'a custom JSON generator is set — V2 ignores it; port with MultiJson or an around_result extension' \
-        unless config.generator.to_s == 'JSON' && config.method == :generate
-      notes << 'custom_array_like_classes is set — V2 ignores it; use render_collection at call sites' \
-        if config.custom_array_like_classes.any?
-      notes << 'global extensions are set — V2 ignores config.extensions, and V1 pre_render hooks never run in V2' \
-        if config.extensions.any?
-      notes
+      MIGRATION_NOTES.filter_map { |note, applies| note if applies.call(config) }
     end
 
     def describe(klass)
@@ -206,20 +233,27 @@ module BlueprinterInventory
     # actually declares — that's the difference between "needs work" and "nothing to do here".
     def describe_views(klass)
       klass.view_collection.views.each_with_object({}) do |(view_name, view), out|
-        parent = parent_view(klass, view_name)
-        inherited_fields = parent ? parent.fields.keys : []
-        inherited_includes = parent ? parent.included_view_names : []
-        inherited_transformers = parent ? parent.view_transformers : []
-
-        out[view_name] = {
-          own_fields: view.fields.each_value.reject { |f| inherited_fields.include?(f.name) }.map { |f| describe_field(f) },
-          inherited_field_count: view.fields.each_value.count { |f| inherited_fields.include?(f.name) },
-          include_views: (view.included_view_names - inherited_includes).map(&:to_s),
-          excludes: view.excluded_field_names.map(&:to_s),
-          transformers: (view.view_transformers - inherited_transformers).map(&:to_s),
-          inherited_transformers: inherited_transformers.map(&:to_s)
-        }
+        out[view_name] = describe_view(view, inherited_from_parent(klass, view_name))
       end
+    end
+
+    def describe_view(view, inherited)
+      own, shared = view.fields.each_value.partition { |f| !inherited[:fields].include?(f.name) }
+      {
+        own_fields: own.map { |f| describe_field(f) },
+        inherited_field_count: shared.size,
+        include_views: (view.included_view_names - inherited[:includes]).map(&:to_s),
+        excludes: view.excluded_field_names.map(&:to_s),
+        transformers: (view.view_transformers - inherited[:transformers]).map(&:to_s),
+        inherited_transformers: inherited[:transformers].map(&:to_s)
+      }
+    end
+
+    def inherited_from_parent(klass, view_name)
+      view = parent_view(klass, view_name)
+      return { fields: [], includes: [], transformers: [] } if view.nil?
+
+      { fields: view.fields.keys, includes: view.included_view_names, transformers: view.view_transformers }
     end
 
     def parent_view(klass, view_name)
@@ -233,22 +267,28 @@ module BlueprinterInventory
 
     def describe_field(field)
       opts = field.options || {}
-      out = {
+      base = {
         name: field.name.to_s,
         source: field.method.to_s,
-        association: opts[:association] ? true : false,
-        block: opts[:block] ? true : false
+        association: !opts[:association].nil?,
+        block: !opts[:block].nil?
       }
+      base.merge(field_target(field, opts), field_opts(opts))
+    end
+
+    # Where the field's value comes from: an associated Blueprint/view, or a custom extractor.
+    def field_target(field, opts)
+      out = {}
       out[:blueprint] = opts[:blueprint].to_s if opts[:blueprint]
       out[:view] = opts[:view].to_s if opts[:view] && opts[:view] != :default
       out[:extractor] = field.extractor.class.to_s unless builtin_extractor?(field.extractor)
-      %i[name datetime_format default default_if exclude_if_nil].each do |key|
-        out[:"opt_#{key}"] = opts[key].inspect if opts.key?(key)
-      end
-      %i[if unless].each do |key|
-        out[:"opt_#{key}"] = describe_conditional(opts[key]) if opts.key?(key)
-      end
-      out[:opt_options] = opts[:options].inspect if opts.key?(:options)
+      out
+    end
+
+    def field_opts(opts)
+      out = {}
+      INSPECTED_OPTS.each { |key| out[:"opt_#{key}"] = opts[key].inspect if opts.key?(key) }
+      %i[if unless].each { |key| out[:"opt_#{key}"] = describe_conditional(opts[key]) if opts.key?(key) }
       out
     end
 
@@ -282,18 +322,13 @@ module BlueprinterInventory
       views.each_value do |view|
         found << 'include_view' if view[:include_views].any?
         found << 'transform' if view[:transformers].any?
-        view[:own_fields].each do |field|
-          found << 'name_option' if field[:opt_name]
-          found << 'extractor_option' if field[:extractor]
-          found << 'datetime_format' if field[:opt_datetime_format]
-          found << 'dynamic_association_options' if field[:opt_options]
-          found << 'v1_conditional' if [field[:opt_if], field[:opt_unless]].compact.any? { |c| c.include?('V1 style') || c.include?('CLASS method') }
-          found << 'default_if' if field[:opt_default_if]
-          found << 'association_view_option' if field[:view]
-          found << 'field_block' if field[:block] && !field[:association]
-        end
+        view[:own_fields].each { |field| found.concat(field_features(field)) }
       end
       found.uniq
+    end
+
+    def field_features(field)
+      FIELD_FEATURES.filter_map { |feature, present| feature if present.call(field) }
     end
   end
 end

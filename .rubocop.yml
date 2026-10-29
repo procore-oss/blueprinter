@@ -27,9 +27,15 @@ Lint/MissingSuper:
 
 Metrics/ClassLength:
   Max: 120
+  # Bundled Agent Skill scripts are single-file programs run standalone (e.g. via `rails runner`)
+  # inside a user's app. Splitting them across files to satisfy a size cop would break that.
+  Exclude:
+    - 'skills/**/*'
 
 Metrics/ModuleLength:
   Max: 120
+  Exclude:
+    - 'skills/**/*'
 
 Metrics/MethodLength:
   Max: 20

@@ -58,41 +58,40 @@ module BlueprinterSnapshot
   class << self
     def run(argv)
       fixtures_path, output_dir = argv
-      usage! unless fixtures_path && output_dir
-      abort "Fixtures file not found: #{fixtures_path}" unless File.exist?(fixtures_path)
-      abort 'Blueprinter is not loaded. Require your application first.' unless defined?(::Blueprinter)
+      check_usage!(fixtures_path, output_dir)
 
-      specs = load_fixtures(fixtures_path)
       FileUtils.mkdir_p(output_dir)
-
-      manifest = []
-      errors = 0
-
-      specs.each do |spec|
-        blueprint = spec.fetch(:blueprint)
-        options = spec[:options] || {}
-        views = spec[:views] || default_views(blueprint)
-
-        views.each do |view|
-          spec.fetch(:samples).each do |sample_name, sample|
-            key = "#{blueprint_label(blueprint)}.#{view}.#{sample_name}"
-            result = capture(blueprint, view, sample, options)
-            errors += 1 if result.is_a?(Hash) && result.key?('__error__')
-            File.write(File.join(output_dir, "#{filename(key)}.json"), JSON.pretty_generate(result))
-            manifest << { key: key, api: api_of(blueprint), file: "#{filename(key)}.json" }
-          end
-        end
-      end
+      manifest = load_fixtures(fixtures_path).flat_map { |spec| write_spec(spec, output_dir) }
 
       File.write(File.join(output_dir, '_manifest.json'), JSON.pretty_generate(manifest))
       warn "Wrote #{manifest.size} snapshot(s) to #{output_dir}."
+      errors = manifest.count { |entry| entry[:error] }
       warn "#{errors} render(s) raised — see the __error__ entries." if errors.positive?
+    end
+
+    # Renders every view x sample combination for one fixture entry, returning manifest rows.
+    def write_spec(spec, output_dir)
+      blueprint = spec.fetch(:blueprint)
+      options = spec[:options] || {}
+      views = spec[:views] || default_views(blueprint)
+
+      views.flat_map do |view|
+        spec.fetch(:samples).map do |sample_name, sample|
+          key = "#{blueprint_label(blueprint)}.#{view}.#{sample_name}"
+          result = capture(blueprint, view, sample, options)
+          File.write(File.join(output_dir, "#{filename(key)}.json"), JSON.pretty_generate(result))
+          { key: key, api: api_of(blueprint), file: "#{filename(key)}.json",
+            error: result.is_a?(Hash) && result.key?('__error__') }
+        end
+      end
     end
 
     private
 
-    def usage!
-      abort 'Usage: snapshot.rb FIXTURES_FILE OUTPUT_DIR'
+    def check_usage!(fixtures_path, output_dir)
+      abort 'Usage: snapshot.rb FIXTURES_FILE OUTPUT_DIR' unless fixtures_path && output_dir
+      abort "Fixtures file not found: #{fixtures_path}" unless File.exist?(fixtures_path)
+      abort 'Blueprinter is not loaded. Require your application first.' unless defined?(::Blueprinter)
     end
 
     def load_fixtures(path)

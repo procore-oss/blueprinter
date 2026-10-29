@@ -71,6 +71,19 @@ describe 'V1/V2 Compatibility' do
         }.to_json)
       end
 
+      it 'should serialize a Struct as a V2 object' do
+        struct = Struct.new(:name, :description, :extra)
+        res = blueprint.render_as_hash(full_input.merge(category: struct.new('Foo', 'Baz', 'Zorp')))
+        expect(res).to eq({
+          name: 'Foo',
+          category: { description: 'Baz' },
+          parts: [
+            { description: 'Baz' },
+            { description: 'Baz' }
+          ]
+        })
+      end
+
       it 'should serialize nil V2 objects and collections' do
         res = blueprint.render_as_hash(nil_input)
         expect(res).to eq({ name: 'Foo', category: nil, parts: nil })

@@ -46,4 +46,39 @@ describe Blueprinter::Extensions::LegacyOptions do
       legacy_desc_unless_method: nil
     })
   end
+
+  it "passes the field's result name, like V1" do
+    names = []
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :description, name: :desc, if: ->(field, _object, _options) { names << field }
+    end
+    blueprint.add subject
+    blueprint.render({ description: 'Foo' }).to_hash
+    expect(names).to eq [:desc]
+  end
+
+  it 'treats callables with optional and splat args as V1' do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :optional, if: ->(_field, object, _options = {}) { object[:name] == 'Foo' }
+      field :splat, if: ->(*args) { args[1][:name] == 'Foo' }
+      field :optional_method, if: :show?
+      field :private_method, if: :also_show?
+
+      def self.show?(_field, object, _options = {}) = object[:name] == 'Foo'
+      def self.also_show?(_field, object, _options) = object[:name] == 'Foo'
+      private_class_method :also_show?
+    end
+    blueprint.add subject
+    result = blueprint.render({ name: 'Foo', optional: 1, splat: 2, optional_method: 3, private_method: 4 }).to_hash
+    expect(result).to eq({ optional: 1, splat: 2, optional_method: 3, private_method: 4 })
+  end
+
+  it "doesn't treat the class methods every Blueprint has as V1 conditionals" do
+    blueprint = Class.new(Blueprinter::V2::Base) do
+      field :name, if: :format
+      def format(_ctx) = true
+    end
+    blueprint.add subject
+    expect(blueprint.render({ name: 'Foo' }).to_hash).to eq({ name: 'Foo' })
+  end
 end

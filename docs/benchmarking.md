@@ -4,6 +4,7 @@ type: explanation
 description: "Understand what `rake perf` measures, why each number is computed the way it is, and how far to trust a difference between two runs."
 generated: { by: cursor/claude-fable-5.1, at: "2026-10-27T22:02:30Z" }
 verified:
+  - { by: human:lessthanjacob, at: "2026-10-27T23:26:31Z" }
 ---
 
 # Benchmarking

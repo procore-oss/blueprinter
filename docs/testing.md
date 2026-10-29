@@ -4,7 +4,7 @@ type: how-to
 description: "Run the checks CI runs, and know where a new test belongs."
 generated: { by: cursor/claude-fable-5.1, at: "2026-10-27T21:01:11Z" }
 verified:
-  - { by: human:lessthanjacob, at: "2026-10-21T22:30:20Z" }
+  - { by: human:lessthanjacob, at: "2026-10-29T13:16:45Z" }
 ---
 
 # Running and Writing Tests

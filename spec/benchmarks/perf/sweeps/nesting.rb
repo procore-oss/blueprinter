@@ -52,10 +52,11 @@ module PerfBench
     }.each do |label, (objects, collections, children)|
       scenario label do
         input = lambda do
-          Fixtures.widgets(BASELINE_SIZE, parts: nil, company: false).each do |w|
+          list = Fixtures.widgets(BASELINE_SIZE, parts: nil, company: false, kind: :hash).each do |w|
             objects.times { |i| w[:"company_#{i}"] = Fixtures.company(w[:id] + i) }
             collections.times { |i| w[:"parts_#{i}"] = Array.new(children) { |c| Fixtures.part(w[:id], (i * 10) + c) } }
           end
+          Fixtures.convert(list, :poro)
         end
         company = Blueprints.company
         part = Blueprints.part

@@ -32,7 +32,9 @@ module PerfBench
     { 'default_if, not applied' => 'value', 'default_if, applied (empty string)' => '' }.each do |label, value|
       scenario label, note: '`default_if: Blueprinter::EMPTY_STRING`.' do
         input = lambda do
-          Fixtures.widgets(BASELINE_SIZE, type: :string).each { |w| NAMES.each { |n| w[n] = value.empty? ? +'' : w[n] } }
+          list = Fixtures.widgets(BASELINE_SIZE, type: :string, kind: :hash)
+          list.each { |w| NAMES.each { |n| w[n] = +'' } } if value.empty?
+          Fixtures.convert(list, :poro)
         end
         blueprint = Blueprints.widget(fields: false) do
           NAMES.each { |n| field n, default: 'n/a', default_if: Blueprinter::EMPTY_STRING }

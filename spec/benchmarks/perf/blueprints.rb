@@ -57,7 +57,7 @@ module PerfBench
     end
   end
 
-  # Baseline: 100 Symbol-keyed Hash widgets, each with an id, 20 plain fields (strings and integers), one company
+  # Baseline: 100 plain-object (attr_reader) widgets, each with an id, 20 plain fields (strings and integers), one company
   # (object association, 3 fields), and 3 parts (collection association, 3 fields each); default view; render to a
   # Hash; warm classes. Every sweep varies one of these from the baseline.
   BASELINE_SIZE = 100

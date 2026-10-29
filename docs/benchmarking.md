@@ -2,9 +2,9 @@
 title: "Benchmarking"
 type: explanation
 description: "Understand what `rake perf` measures, why each number is computed the way it is, and how far to trust a difference between two runs."
-generated: { by: cursor/claude-fable-5.1, at: "2026-10-27T22:02:30Z" }
+generated: { by: cursor/claude-fable-5.1, at: "2026-10-29T13:49:45Z" }
 verified:
-  - { by: human:lessthanjacob, at: "2026-10-27T23:26:31Z" }
+  - { by: human:lessthanjacob, at: "2026-10-29T13:49:45Z" }
 ---
 
 # Benchmarking
@@ -13,7 +13,7 @@ Blueprinter's render path runs once per field of every rendered object, so a sma
 
 ## One Factor at a Time
 
-A single "render 100 records" number can't say where time goes or which change moved it. The suite instead fixes a **baseline shape** and varies one thing at a time from it. The baseline is 100 `Symbol`-keyed `Hash` widgets, each with an id, 20 plain fields (alternating strings and integers), one company (an object association with 3 fields), and 3 parts (a collection association with 3 fields each), rendered to a `Hash` through the default view with warm classes ([`blueprints.rb`](../spec/benchmarks/perf/blueprints.rb)).
+A single "render 100 records" number can't say where time goes or which change moved it. The suite instead fixes a **baseline shape** and varies one thing at a time from it. The baseline is 100 plain Ruby objects with `attr_reader`s, each with an id, 20 plain fields (alternating strings and integers), one company (an object association with 3 fields), and 3 parts (a collection association with 3 fields each), rendered to a `Hash` through the default view with warm classes ([`blueprints.rb`](../spec/benchmarks/perf/blueprints.rb)). Objects rather than `Hash`es, because most applications render objects, and `Hash` input takes its own extractor path (`HashExtractor`) that a render-path change may not touch; `input_kind` keeps a `Hash` row, and one profile renders `Hash` rows.
 
 Each **sweep** under [`sweeps/`](../spec/benchmarks/perf/sweeps/) changes one axis of that shape and holds everything else: the kind of input object (`input_kind`), collection size, fields per object, nesting depth and fan-out, the kind of association, repeated child objects, nil values and `exclude_if_nil`, defaults, value types and date formatting, how a field is defined (plain, renamed, block, `Symbol#to_proc`, custom extractor), conditions, views, transformers, extensions, render options, the output path (`Hash`, `JSON` from the standard library, `Oj`, `render_as_json`), and the lifecycle (first render, definition, boot). Reading down a sweep's table shows the cost of that axis alone; reading the same row across two runs shows what a change did to it.
 
@@ -31,7 +31,7 @@ A scenario that needs an optional gem declares `requires:`; when the gem isn't l
 
 ## The Gate
 
-Before anything is timed, each engine renders the scenario once ([`Gate`](../spec/benchmarks/perf/runner.rb)). An engine that raises is excluded with the exception; an engine that issues SQL during the render is excluded with the query count, because a render that lazy-loads associations measures the database, not Blueprinter. The gate also records two facts the timing needs: the number of `Hash`es in the output, which is the **rendered objects** that allocations are normalized by, and a SHA-256 digest of the output with `Hash` keys sorted. Field order doesn't affect the digest, so a change that only reorders keys compares as the same output, while a change that alters a value or drops a field is reported even when it made rendering faster.
+Before anything is timed, each engine renders the scenario once ([`Gate`](../spec/benchmarks/perf/runner.rb)). An engine that raises is excluded with the exception; an engine that issues SQL during the render is excluded with the query count, because a render that lazy-loads associations measures the database, not Blueprinter. The gate also records two facts the timing needs: the number of `Hash`es in the output, which is the **rendered objects** that allocations are normalized by, and a SHA-256 digest of the output in rendered order. Field order is part of the output users see (`sort_fields_by` controls it), so a change that only reorders fields is reported as changed output, as is one that alters a value or drops a field, even when it made rendering faster.
 
 ## How a Scenario Is Timed
 

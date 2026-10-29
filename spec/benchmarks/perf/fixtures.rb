@@ -44,20 +44,22 @@ module PerfBench
     # The baseline shape: `width` plain fields, one object association (company), one collection (parts).
     #
     # @param companies [Integer, nil] when set, widgets share this many company objects (repeated children)
-    def widgets(count, width: 20, parts: 3, type: :mixed, nil_ratio: 0.0, companies: nil, company: true)
+    # @param kind [Symbol] see `convert`; `:hash` for callers that edit the tree before converting it
+    def widgets(count, width: 20, parts: 3, type: :mixed, nil_ratio: 0.0, companies: nil, company: true, kind: :poro)
       shared = companies && Array.new(companies) { |c| company(c + 1) }
-      Array.new(count) do |idx|
+      list = Array.new(count) do |idx|
         n = idx + 1
         widget = { id: n }.merge!(attributes(n, width:, type:, nil_ratio:))
         widget[:company] = shared ? shared[idx % companies] : company(n) if company
         widget[:parts] = Array.new(parts) { |i| part(n, i + 1) } if parts
         widget
       end
+      convert(list, kind)
     end
 
     # A tree `depth` levels deep: each node has 5 fields and `fanout` children (a collection association).
-    def tree(count, depth:, fanout:)
-      Array.new(count) { |idx| node(idx + 1, depth, fanout) }
+    def tree(count, depth:, fanout:, kind: :poro)
+      convert(Array.new(count) { |idx| node(idx + 1, depth, fanout) }, kind)
     end
 
     def node(n, depth, fanout)

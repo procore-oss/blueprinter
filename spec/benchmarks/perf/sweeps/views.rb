@@ -2,16 +2,16 @@
 
 module PerfBench
   sweep 'views', 'Views', 'Baseline (widgets carry 10 extra fields for the views to add).' do
-    hashes = -> { Fixtures.widgets(BASELINE_SIZE, width: 30) }
+    widgets = -> { Fixtures.widgets(BASELINE_SIZE, width: 30) }
 
     scenario 'default view' do
-      Setup.new(input: hashes, engines: PerfBench.baseline_engines)
+      Setup.new(input: widgets, engines: PerfBench.baseline_engines)
     end
 
     scenario 'named view (+5 fields)' do
       extra = EXTRA.first(5)
       blueprint = Blueprints.widget { view(:extended) { fields(*extra) } }
-      Setup.new(input: hashes, engines: [engine { |input| blueprint.render_as_hash(input, view: :extended) }])
+      Setup.new(input: widgets, engines: [engine { |input| blueprint.render_as_hash(input, view: :extended) }])
     end
 
     scenario '3-level include_view chain, 2 exclusions' do
@@ -28,7 +28,7 @@ module PerfBench
           excludes :f00, :f01
         end
       end
-      Setup.new(input: hashes, engines: [engine { |input| blueprint.render_as_hash(input, view: :c) }])
+      Setup.new(input: widgets, engines: [engine { |input| blueprint.render_as_hash(input, view: :c) }])
     end
 
     scenario '3 included views, 2 exclusions' do
@@ -40,7 +40,7 @@ module PerfBench
           excludes :f00, :f01
         end
       end
-      Setup.new(input: hashes, engines: [engine { |input| blueprint.render_as_hash(input, view: :full) }])
+      Setup.new(input: widgets, engines: [engine { |input| blueprint.render_as_hash(input, view: :full) }])
     end
   end
 end

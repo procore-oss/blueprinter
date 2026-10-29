@@ -217,10 +217,11 @@ module PerfBench
 
     def parse(out) = out.is_a?(String) ? JSON.parse(out) : out
 
-    # Hashes become key-sorted pair lists, so the digest doesn't depend on field order. Keys keep their type.
+    # Hashes become pair lists in rendered order: field order is visible to users (`sort_fields_by`), so a reordering
+    # counts as changed output. Pair lists rather than `Hash#inspect`, whose format changed in Ruby 3.4.
     def canonical(value)
       case value
-      when Hash then value.map { |k, v| [k, canonical(v)] }.sort_by { |(k, _)| k.to_s }
+      when Hash then value.map { |k, v| [k, canonical(v)] }
       when Array then value.map { |v| canonical(v) }
       else value
       end

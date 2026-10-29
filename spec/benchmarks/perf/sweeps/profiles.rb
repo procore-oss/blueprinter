@@ -96,13 +96,13 @@ module PerfBench
         field(:summary) { |w, _opts| "#{w[:f00]}/#{w[:f01]}" }
         field(:odd) { |w, _opts| w[:f01].odd? }
       end
-      Setup.new(input: -> { Fixtures.widgets(5_000, width: 10, parts: nil, company: false) },
+      Setup.new(input: -> { Fixtures.widgets(5_000, width: 10, parts: nil, company: false, kind: :hash) },
                 engines: PerfBench.hash_engines(blueprint))
     end
 
     scenario 'Options-heavy: plain objects, rename, if, default_if, association options, transformer' do
       input = lambda do
-        list = Fixtures.widgets(BASELINE_SIZE)
+        list = Fixtures.widgets(BASELINE_SIZE, kind: :hash)
         list.each { |w| w[:f12] = +'' if (w[:id] % 3).zero? }
         Fixtures.convert(list, :poro)
       end

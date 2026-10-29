@@ -24,3 +24,19 @@ The initial release of V2 is included *alongside* legacy/V1 code, allowing you t
 legacy/V1 Blueprints in associations, and vice versa.
 
 Eventually the legacy/V1 code will be removed, necessitating a complete switch to V2.
+
+## Upgrading with an AI agent
+
+The gem ships an [Agent Skill](https://code.claude.com/docs/en/skills) that walks an AI coding
+agent through the upgrade — taking an inventory of your Blueprints, porting global configuration,
+converting the DSL, and verifying the result with a before/after diff of rendered output. It
+handles both upgrading a whole codebase and upgrading a selected subset.
+
+To make it available, symlink it into your project (or copy it):
+
+```bash
+mkdir -p .claude/skills
+ln -s "$(bundle show blueprinter)/skills/blueprinter-v2-upgrade" .claude/skills/
+```
+
+Then ask your agent to upgrade your Blueprints to V2.

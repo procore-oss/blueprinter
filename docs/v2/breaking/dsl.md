@@ -76,7 +76,7 @@ add Blueprinter::Extensions::LegacyTransformer.new(MyTransformer)
 You can easily replicate legacy/V1's `identifier` field and view in your base Blueprint:
 
 ```ruby
-class ApplicationBlueprint < Blueprinter::Extension
+class ApplicationBlueprint < Blueprinter::V2::Base
   # The id field will be added to all Blueprints and views
   field :id
 

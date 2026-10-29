@@ -44,7 +44,7 @@ set :if, ->(ctx) {
 
 ### `custom_array_like_classes`
 
-`render` has sensible heuristics for detecting what's a "collection" or not: any `Enumerable` except for `Hash`.
+`render` has sensible heuristics for detecting what's a "collection" or not: any `Enumerable` except for `Hash` and `Struct`.
 
 If that logic doesn't work for something, use one of these methods in place of `render`:
 

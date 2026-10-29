@@ -17,6 +17,10 @@ class WidgetBlueprint < ApplicationBlueprint
 end
 ```
 
+As in V1, the Proc is called once per widget and receives the widget (not the category). The merged options are only
+visible to the association they're defined on, and to anything nested beneath it. `WidgetBlueprint`'s own fields and
+its other associations won't see them.
+
 ## V2 style
 
 V2 provides the `ctx.store` Hash for Blueprints and extensions to share information.

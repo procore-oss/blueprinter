@@ -26,6 +26,8 @@ describe "Blueprinter::V2 Rendering" do
 
   let(:widget) { { name: 'Foo', description: 'About Foo', category: { name: 'Bar' }, parts: [{ num: 42 }, { num: 43 }] } }
 
+  let(:widget_struct) { Struct.new(:name, :description, :category, :parts) }
+
   it 'auto-detects an object' do
     result = widget_blueprint.render(widget, {}).to_hash
     expect(result).to eq({
@@ -37,6 +39,27 @@ describe "Blueprinter::V2 Rendering" do
 
   it 'auto-detects array collections' do
     result = widget_blueprint.render([widget], {}).to_hash
+    expect(result).to eq([
+      {
+        name: 'Foo',
+        cat: { name: 'Bar' },
+        parts: [{ num: 42 }, { num: 43 }]
+      }
+    ])
+  end
+
+  it 'auto-detects a Struct as an object' do
+    result = widget_blueprint.render(widget_struct.new(*widget.values_at(:name, :description, :category, :parts))).to_hash
+    expect(result).to eq({
+      name: 'Foo',
+      cat: { name: 'Bar' },
+      parts: [{ num: 42 }, { num: 43 }]
+    })
+  end
+
+  it 'auto-detects a collection of Structs' do
+    struct = widget_struct.new(*widget.values_at(:name, :description, :category, :parts))
+    result = widget_blueprint.render([struct]).to_hash
     expect(result).to eq([
       {
         name: 'Foo',

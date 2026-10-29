@@ -7,6 +7,18 @@ module Blueprinter
   module V2
     # Render methods for V2
     module Rendering
+      # Enumerable classes that `render` treats as objects instead of collections
+      NON_COLLECTIONS = [Hash, Struct].freeze
+
+      # True if `object` should be rendered as a collection instead of an object
+      #
+      # @param object [Object]
+      # @return [true | false]
+      #
+      def self.collection?(object)
+        object.is_a?(Enumerable) && NON_COLLECTIONS.none? { |klass| object.is_a?(klass) }
+      end
+
       #
       # Serialize an object or collection (Enumerable) using this Blueprint.
       #
@@ -26,7 +38,7 @@ module Blueprinter
       # @return [Blueprinter::V2::Render]
       #
       def render(object, options = {})
-        if object.is_a?(Enumerable) && !object.is_a?(Hash)
+        if Rendering.collection? object
           render_collection(object, options)
         else
           render_object(object, options)

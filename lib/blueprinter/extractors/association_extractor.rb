@@ -53,7 +53,7 @@ module Blueprinter
       store = local_options[:v2_store] || {}
       depth = local_options[:v2_depth] || 1
       instances = local_options[:v2_instances] || V2::InstanceCache.new
-      if value.is_a?(Enumerable) && !value.is_a?(Hash)
+      if V2::Rendering.collection? value
         blueprint[view].serializer.collection(value, local_options, instances:, store:, depth: depth + 1)
       else
         blueprint[view].serializer.object(value, local_options, instances:, store:, depth: depth + 1)

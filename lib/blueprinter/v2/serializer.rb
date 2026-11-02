@@ -170,7 +170,7 @@ module Blueprinter
           # format/serialize and set value
           result[field.name] =
             if value.nil?
-              field._merged_options[:exclude_if_nil] ? next : nil
+              field._exclude_if_nil ? next : nil
             elsif defaulted
               value
             elsif field.type == :field
@@ -241,8 +241,7 @@ module Blueprinter
       # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def needs_field_ctx?(fields)
         @field_hooks.values.any? || fields.any? do |f|
-          default = f._merged_options[:default]
-          f._has_conditional || !!f._merged_options[:default_if] || default.is_a?(Proc) || default.is_a?(Symbol) ||
+          f._has_conditional || !!f._default_if || f._default.is_a?(Proc) || f._default.is_a?(Symbol) ||
             (!!f.block && f.block.arity != 0 && f.block.arity != 1)
         end
       end
@@ -252,24 +251,21 @@ module Blueprinter
         fields.each do |field|
           next if field.frozen?
 
-          # copy blueprint options down to each field (faster b/c we can check exactly one Hash)
-          field._merged_options = field.options.dup
-          field._merged_options[:if] ||= blueprint_opts[:if] if blueprint_opts.key? :if
-          field._merged_options[:unless] ||= blueprint_opts[:unless] if blueprint_opts.key? :unless
-          field._merged_options[:default_if] ||= blueprint_opts[:default_if] if blueprint_opts.key? :default_if
-          field._merged_options[:default] = blueprint_opts[:default] if blueprint_opts.key?(:default) &&
-                                                                        !field.options.key?(:default)
-          field._merged_options[:exclude_if_nil] = blueprint_opts[:exclude_if_nil] if blueprint_opts.key?(:exclude_if_nil) &&
-                                                                                      !field.options.key?(:exclude_if_nil)
+          # copy field or blueprint options into struct members (faster than Hash lookups)
+          opts = field.options
+          field._if = opts[:if] || blueprint_opts[:if]
+          field._unless = opts[:unless] || blueprint_opts[:unless]
+          field._default_if = opts[:default_if] || blueprint_opts[:default_if]
+          field._has_default = opts.key?(:default) || blueprint_opts.key?(:default)
+          field._default = opts.key?(:default) ? opts[:default] : blueprint_opts[:default]
+          field._exclude_if_nil = opts.key?(:exclude_if_nil) ? opts[:exclude_if_nil] : blueprint_opts[:exclude_if_nil]
 
           # precompute some checks
-          field._has_conditional = field._merged_options.key?(:if) || field._merged_options.key?(:unless)
-          field._has_default = field._merged_options.key?(:default)
+          field._has_conditional = !!(field._if || field._unless)
           field._serializer = field_serializer(field) if field.association?
 
           # freeze everything
           field.options.freeze
-          field._merged_options.freeze
           field.source_str.freeze
           field.freeze
         end

@@ -2,9 +2,9 @@
 title: "Benchmarking"
 type: explanation
 description: "Understand what `rake perf` measures, why each number is computed the way it is, and how far to trust a difference between two runs."
-generated: { by: cursor/claude-fable-5.1, at: "2026-10-29T13:49:45Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-11-02T20:34:46Z" }
 verified:
-  - { by: human:lessthanjacob, at: "2026-10-29T13:49:45Z" }
+  - { by: human:lessthanjacob, at: "2026-11-02T20:34:46Z" }
 ---
 
 # Benchmarking
@@ -53,24 +53,24 @@ Every run writes its results as JSON next to the markdown report. `BASELINE=` (a
 
 A time change is reported as within noise (`~`) when it is no larger than the larger of the two runs' IQR ratios. A difference that size already shows up between batches inside a single run, so seeing it between two runs is not evidence of anything. The threshold is a plain cutoff rather than a significance test. The batch means aren't independent samples, and the bigger risks (a load spike, a different machine, YJIT on in one run) are better handled by the warnings the comparison prints when the Ruby version, YJIT setting, machine, load, sample count, or working-tree cleanliness differ between the runs.
 
-The comparison leads with the scenarios that changed, which is any of: a time change beyond noise, an allocation change of more than two objects per render, or a different output digest. The full per-sweep tables follow, collapsed. The cutoff scales with each run's own spread, so a scenario with a tight IQR gets a small threshold: on identical code at full samples, two back-to-back runs flagged 5 of 104 rows, none by more than 6.3%, with every allocation count and digest unchanged. A single-digit time change with no allocation change is a lead to confirm with a second run, not a result. Under `QUICK=1` the `Changed` table fills with time rows on identical code, because three batches give a poor IQR, and the comparison says so.
+The comparison leads with the scenarios that changed, which is any of: a time change beyond noise, an allocation change of more than two objects per render, or a different output digest. The full per-sweep tables follow, collapsed. The cutoff scales with each run's own spread, so a scenario with a tight IQR gets a small threshold: on identical code at full samples, two back-to-back runs flagged 7 of 104 rows, none by more than 7.5%, with every allocation count and digest unchanged. A single-digit time change with no allocation change is a lead to confirm with a second run, not a result. Under `QUICK=1` the `Changed` table fills with time rows on identical code, because three batches give a poor IQR, and the comparison says so.
 
 ## Reading an Example
 
-Commit 29069ec fixed `||=` memoization of a field's `:if`/`:unless` callables, which returned `false` for fields without a condition and so re-ran the lookup on every field of every object. Running the suite with that hunk reversed as the baseline and the fixed code as current, on one laptop with the before run under somewhat higher load (1-minute average 9.9 against 7.7, so the magnitudes are indicative), gives:
+Commit 29069ec fixed `||=` memoization of a field's `:if`/`:unless` callables, which returned `false` for fields without a condition and so re-ran the lookup on every field of every object. Running the suite with that hunk reversed as the baseline and the fixed code as current gives:
 
-> 104 scenarios compared, 94 changed: 94 faster and 0 slower beyond noise, 0 with a different allocation count, 0 with different output.
+> 104 scenarios compared, 100 changed: 100 faster and 0 slower beyond noise, 0 with a different allocation count, 0 with different output.
 
 | scenario | ms | time | CPU | alloc/obj | alloc | output |
 | --- | --- | --- | --- | --- | --- | --- |
-| size / 100 | 2.49 -> 1.65 | −34% | −34% | 2.81 -> 2.81 | 0% | same |
-| width / 50 | 4.47 -> 2.72 | −39% | −39% | 2.81 -> 2.81 | 0% | same |
-| breakdown / + 20 plain fields | 1.62 -> 0.81 | −50% | −47% | 1.06 -> 1.06 | 0% | same |
-| conditions / Proc if, 0% skipped | 2.44 -> 1.78 | −27% | −28% | 2.81 -> 2.81 | 0% | same |
-| input_kind / ActiveRecord | 6.26 -> 5.09 | −19% | −18% | 11.3 -> 11.3 | 0% | same |
-| profiles / AR orders: 100 orders to a Hash, depth 4 | 16.0 -> 13.7 | −15% | −15% | 9.95 -> 9.95 | 0% | same |
+| size / 100 | 2.77 -> 1.75 | −37% | −37% | 2.81 -> 2.81 | 0% | same |
+| width / 50 | 4.75 -> 3.05 | −36% | −36% | 2.81 -> 2.81 | 0% | same |
+| breakdown / + 20 plain fields | 1.40 -> 0.89 | −36% | −36% | 1.06 -> 1.06 | 0% | same |
+| conditions / Proc if, 0% skipped | 2.52 -> 1.95 | −23% | −23% | 2.81 -> 2.81 | 0% | same |
+| input_kind / ActiveRecord | 6.26 -> 5.10 | −18% | −18% | 11.3 -> 11.3 | 0% | same |
+| profiles / AR orders: 100 orders to a Hash, depth 4 | 16.0 -> 13.5 | −16% | −16% | 9.95 -> 9.95 | 0% | same |
 
-The sweeps say more than the headline. The gain is largest where plain fields dominate (`breakdown / + 20 plain fields`, `width / 50`) and smaller where other work does (`ActiveRecord` attribute casting, the deep order tree), which matches the fix's mechanism. Allocations and output digests are unchanged everywhere, so the change is pure CPU and didn't alter what is rendered. One row, `conditions / none`, showed wall `~ +12%` against CPU `~ −11%` and was marked within noise: wall and CPU disagreeing with a wide IQR is what a load spike on one scenario looks like, and the `~` kept it out of the `Changed` table.
+The sweeps say more than the headline. The gain is largest where plain fields dominate (about −36% on `breakdown / + 20 plain fields`, `width / 50`, and `size / 100`) and smaller where other work does (`ActiveRecord` attribute casting, the deep order tree), which matches the fix's mechanism. Allocations and output digests are unchanged everywhere, so the change is pure CPU and didn't alter what is rendered.
 
 ## What the Suite Doesn't Tell You
 

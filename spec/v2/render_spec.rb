@@ -48,7 +48,7 @@ describe Blueprinter::V2::Render do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
     render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-    expect(render.to_hash).to eq({
+    expect(render.render(:hash)).to eq({
       name: 'Foo',
       desc: 'About',
       category: { name: 'Bar' }
@@ -62,7 +62,7 @@ describe Blueprinter::V2::Render do
     ]
     render = described_class.new(widgets, {}, blueprint: widget_blueprint, collection: true, instances:)
 
-    expect(render.to_hash).to eq([
+    expect(render.render(:hash)).to eq([
       {
         name: 'Foo',
         desc: 'About',
@@ -80,7 +80,7 @@ describe Blueprinter::V2::Render do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
     render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-    expect(render.to_json).to eq({
+    expect(render.render(:json)).to eq({
       name: 'Foo',
       desc: 'About',
       category: { name: 'Bar' }
@@ -91,18 +91,7 @@ describe Blueprinter::V2::Render do
     widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
     render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true, instances:)
 
-    expect(render.to_json).to eq([{
-      name: 'Foo',
-      desc: 'About',
-      category: { name: 'Bar' }
-    }].to_json)
-  end
-
-  it 'renders to JSON and ignores the arg (for Rails `render json:`)' do
-    widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-    render = described_class.new([widget], {}, blueprint: widget_blueprint, collection: true, instances:)
-
-    expect(render.to_json({ junk: 'junk' })).to eq([{
+    expect(render.render(:json)).to eq([{
       name: 'Foo',
       desc: 'About',
       category: { name: 'Bar' }
@@ -122,7 +111,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_json).to eq({
+      expect(render.render(:json)).to eq({
         name: 'Foo',
         desc: 'About',
         category: { name: 'Bar' },
@@ -142,7 +131,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_json).to eq({ name: 'Foo' }.to_json)
+      expect(render.render(:json)).to eq({ name: 'Foo' }.to_json)
     end
 
     it 'can change the blueprint (instance)' do
@@ -157,7 +146,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_json).to eq({ name: 'Foo' }.to_json)
+      expect(render.render(:json)).to eq({ name: 'Foo' }.to_json)
     end
 
     it 'can change the object' do
@@ -172,7 +161,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_json).to eq({
+      expect(render.render(:json)).to eq({
         name: 'Bar',
         desc: 'About',
         category: { name: 'Bar' },
@@ -192,7 +181,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, {}, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_json).to eq({ name: 'Bar' }.to_json)
+      expect(render.render(:json)).to eq({ name: 'Bar' }.to_json)
     end
 
     it 'can change the options' do
@@ -215,7 +204,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_hash).to eq({
+      expect(render.render(:hash)).to eq({
         name: 'Foo',
         desc: 'About',
         category: { name: 'Bar' },
@@ -241,7 +230,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect(render.to_hash).to eq({ name: 'Foo 43' })
+      expect(render.render(:hash)).to eq({ name: 'Foo 43' })
     end
 
     it 'can change the format' do
@@ -256,7 +245,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect { render.to_hash }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
+      expect { render.render(:hash) }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
     end
 
     it 'can change the format (different blueprint)' do
@@ -272,7 +261,7 @@ describe Blueprinter::V2::Render do
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
 
-      expect { render.to_hash }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
+      expect { render.render(:hash) }.to raise_error(Blueprinter::BlueprinterError, 'Unrecognized serialization format `:yaml`')
     end
 
     it 'can output a custom format' do
@@ -292,32 +281,10 @@ describe Blueprinter::V2::Render do
 
       widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
       render = described_class.new(widget, { num: 42 }, blueprint: widget_blueprint, collection: false, instances:)
-      expect(render.to(:yaml)).to eq({ name: 'Foo', desc: 'About', category: { name: 'Bar' } }.to_yaml)
+      expect(render.render(:yaml)).to eq({ name: 'Foo', desc: 'About', category: { name: 'Bar' } }.to_yaml)
     end
 
     context '#store' do
-      let(:blueprint) do
-        Class.new(application_blueprint) do
-          field(:foo) { |_obj, ctx| ctx.store[:foo] }
-        end
-      end
-
-      it 'can set store before render' do
-        widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-        render = described_class.new(widget, { num: 42 }, blueprint: blueprint, collection: false, instances:)
-        render.store = { foo: 'Foo' }
-
-        expect(render.to_hash).to eq({ foo: 'Foo' })
-      end
-
-      it 'can set store values before render' do
-        widget = { name: 'Foo', description: 'About', category: { n: 'Bar' } }
-        render = described_class.new(widget, { num: 42 }, blueprint: blueprint, collection: false, instances:)
-        render.store[:foo] = 'Foo'
-
-        expect(render.to_hash).to eq({ foo: 'Foo' })
-      end
-
       it 'uses the same context store throughout' do
         log = []
         ext = Class.new(Blueprinter::Extension) do
@@ -375,7 +342,7 @@ describe Blueprinter::V2::Render do
           description: 'A widget',
           category: { n: 'Stuff' },
           parts: [{ number: 42 }, { number: 101 }]
-        }).to_hash
+        }, format: :hash)
 
         expect(log).to eq [
           'around_result (WidgetBlueprint.with_parts)',

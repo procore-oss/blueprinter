@@ -162,7 +162,7 @@ describe "Blueprinter::V2 Views" do
           name: 'Bar',
           description: 'About Bar'
         }
-      }).to_h
+      }, format: :hash)
 
       expect(result).to eq({
         name: 'Foo',

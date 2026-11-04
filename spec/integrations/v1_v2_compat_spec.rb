@@ -137,7 +137,7 @@ describe 'V1/V2 Compatibility' do
 
     context 'default views' do
       it 'should serialize V1 objects and collections' do
-        res = blueprint.render(full_input).to_hash
+        res = blueprint.render(full_input, format: :hash)
         expect(res).to eq({
           name: 'Foo',
           category: { description: 'Baz' },
@@ -149,7 +149,7 @@ describe 'V1/V2 Compatibility' do
       end
 
       it 'should serialize V1 objects and collections to JSON' do
-        res = blueprint.render(full_input).to_json
+        res = blueprint.render(full_input)
         expect(res).to eq({
           name: 'Foo',
           category: { description: 'Baz' },
@@ -161,19 +161,19 @@ describe 'V1/V2 Compatibility' do
       end
 
       it 'should serialize nil V1 objects and collections' do
-        res = blueprint.render(nil_input).to_hash
+        res = blueprint.render(nil_input, format: :hash)
         expect(res).to eq({ name: 'Foo', category: nil, parts: nil })
       end
 
       it 'should serialize empty V1 collections' do
-        res = blueprint.render(empty_input).to_hash
+        res = blueprint.render(empty_input, format: :hash)
         expect(res).to eq({ name: 'Foo', category: nil, parts: [] })
       end
     end
 
     context 'specified views' do
       it 'should serialize V1 objects and collections' do
-        res = blueprint[:extra].render(full_input).to_hash
+        res = blueprint[:extra].render(full_input, format: :hash)
         expect(res).to eq({
           name: 'Foo',
           category: { description: 'Baz', extra: 'Zorp' },

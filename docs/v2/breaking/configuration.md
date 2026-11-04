@@ -50,12 +50,12 @@ If that logic doesn't work for something, use one of these methods in place of `
 
 ```ruby
 # Force `arg` to be treated like a collection (must respond to `map` with an Enumerable)
-array = WidgetBlueprint.render_collection(arg).to_hash
+array = WidgetBlueprint.render_collection(arg, format: :hash)
 ```
 
 ```ruby
 # Force `arg` to be treated like an object
-hash = WidgetBlueprint.render_object(arg).to_hash
+hash = WidgetBlueprint.render_object(arg, format: :hash)
 ```
 
 ### `extractor_default`

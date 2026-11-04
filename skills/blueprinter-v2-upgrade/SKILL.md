@@ -1,6 +1,6 @@
 ---
 name: blueprinter-v2-upgrade
-description: Upgrade Blueprinter Legacy/V1 Blueprints (Blueprinter::Base) to the V2 DSL (Blueprinter::V2::Base), across a whole codebase or a selected subset, with V1 and V2 running side by side. Use this skill whenever someone mentions migrating, upgrading, porting, or converting Blueprints or Blueprinter serializers to V2; asks what a V1 Blueprint would look like in V2; is moving a `Blueprinter.configure` block onto a base Blueprint; hits a V2 breaking change (include_view, identifier, transform, the `name:` option, V1-style if/unless Procs, extractors, `view?` being undefined, `render` returning something that isn't a String); or asks how to adopt Blueprinter V2 gradually. Use it even when they don't say "V2" or "migration" explicitly — "modernize our serializers" and "get us off the old Blueprinter DSL" are both this skill. Do not use it for Blueprinter work unrelated to V2 — writing new V2 Blueprints, adding views or fields to existing V1 Blueprints, performance tuning, or debugging V1 behavior where nothing has moved to V2 yet.
+description: Upgrade Blueprinter Legacy/V1 Blueprints (Blueprinter::Base) to the V2 DSL (Blueprinter::V2::Base), across a whole codebase or a selected subset, with V1 and V2 running side by side. Use this skill whenever someone mentions migrating, upgrading, porting, or converting Blueprints or Blueprinter serializers to V2; asks what a V1 Blueprint would look like in V2; is moving a `Blueprinter.configure` block onto a base Blueprint; hits a V2 breaking change (include_view, identifier, transform, the `name:` option, V1-style if/unless Procs, extractors, `view?` being undefined, field order changing); or asks how to adopt Blueprinter V2 gradually. Use it even when they don't say "V2" or "migration" explicitly — "modernize our serializers" and "get us off the old Blueprinter DSL" are both this skill. Do not use it for Blueprinter work unrelated to V2 — writing new V2 Blueprints, adding views or fields to existing V1 Blueprints, performance tuning, or debugging V1 behavior where nothing has moved to V2 yet.
 ---
 
 # Upgrading Blueprinter V1 Blueprints to V2
@@ -75,7 +75,9 @@ Start from what the user named, then close the set:
   this trade-off rather than silently expanding scope.
 - **Associations are *not* in scope.** This is the main thing that keeps partial migrations
   small. Leave them.
-- **Call sites are in scope.** `render` changed shape (step 7).
+- **Call sites are mostly out of scope.** V2's `render` is backwards-compatible with V1's, so
+  controllers, jobs, and specs keep working untouched. Only a few narrow cases need a look
+  (step 7).
 
 Write the resulting list down and show it to the user before converting, especially when
 ancestors or descendants pulled extra Blueprints in.
@@ -117,8 +119,8 @@ a small fixtures file naming the Blueprints, views, and sample objects to exerci
 `scripts/snapshot.rb` to dump rendered output to a baseline directory.
 
 The script deliberately renders through whichever API the Blueprint currently has (V1
-`render_as_hash(obj, view:)` or V2 `Blueprint[view].render(obj).to_hash`), so the *same fixtures
-file* works unchanged before and after conversion. That's what makes the diff meaningful.
+`render_as_hash(obj, view:)` or V2 `Blueprint[view].render(obj, format: :hash)`), so the *same
+fixtures file* works unchanged before and after conversion. That's what makes the diff meaningful.
 
 Fixtures must be deterministic — hand-built Hashes or Structs, or `Model.find(fixed_id)`. Random
 factory data produces a diff full of noise and hides the real changes. Cover, for each Blueprint:
@@ -196,48 +198,57 @@ Two structural changes that aren't a line-for-line swap:
   option; V2 does, and you get correct nil/collection handling for free.
 
 Add `Blueprinter::Extensions::LegacyOptions` to the V2 base only if something in scope needs it —
-after native conversion that's usually just extractors, plus V1-style `render(obj, view:)` if you
-chose to leave call sites alone.
+after native conversion that's usually just extractors, plus V1-style `render(obj, view:)` at call
+sites (step 7).
 
 Convert ancestors before descendants, and the base before everything.
 
-### 7. Update call sites
+### 7. Call sites
 
-In V2, `render` returns a `Blueprinter::V2::Render`, not a String.
-
-```ruby
-MyBlueprint.render(widget)                 # V1: a JSON String
-MyBlueprint.render(widget).to_json         # V2: a JSON String
-MyBlueprint.render(widget).to_hash         # V2: a Hash (or Array)
-MyBlueprint.render(widget, view: :x)       # V1
-MyBlueprint[:x].render(widget).to_json     # V2
-```
-
-`render json: MyBlueprint.render(widget)` in a Rails controller needs **no change** — Rails calls
-`to_json` for you. Leave those alone; changing them adds diff noise for nothing.
-
-`render_as_hash` and `render_as_json` still exist and still work. They're soft-deprecated, so
-prefer `.to_hash` / `.to_json` in code you're already touching, but don't go hunting for them.
-
-`MyBlueprint.view?(:extended)` is gone in V2. The replacement is reflection, which V1 also has:
+V2's `render` is backwards-compatible: it returns a JSON String, same as V1. `render_as_hash` and
+`render_as_json` still exist and still behave the way they did.
 
 ```ruby
-MyBlueprint.view?(:extended)               # V1 only
-MyBlueprint.reflections.key?(:extended)    # V1 and V2 — identical results
+MyBlueprint.render(widget)                  # JSON String, in both V1 and V2
+MyBlueprint.render(widget, format: :hash)   # Hash (or Array) — V2's spelling of render_as_hash
 ```
 
-Do this one *first*, before converting any Blueprint. Because the reflection form works on both
-base classes, a single edit covers a partial migration where the same code path sees V1 Blueprints
-and V2 Blueprints — a helper like `def view?(bp, name) = bp.reflections.key?(name)` never has to
-ask which version it got, and you don't revisit it when the remaining Blueprints convert.
+So **the normal case is that there is nothing to do in this step**. Don't sweep controllers,
+jobs, presenters, and specs looking for `render` calls, and don't rewrite the ones you happen to
+walk past. This is a migration whose value comes from proving the output didn't change; call-site
+churn buries that diff in noise and risks breaking something the Blueprint work didn't.
 
-One difference to watch: V1 has an implicit `:identifier` view, so `view?(:identifier)` is true
-there even though nobody declared it. In V2 it exists only if you defined one (step 5).
+Four narrow cases are worth an actual grep, because they're the exceptions:
 
-Search beyond controllers: serializer specs, jobs, presenters, GraphQL resolvers, and anywhere a
-Blueprint's output is string-interpolated or compared are the places that break. Grep for
-`.view?` too — it tends to live in a generic "render with the view the request asked for" helper
-rather than next to any particular Blueprint.
+- **`MyBlueprint.view?(:extended)`.** Gone in V2. The replacement is reflection, which V1 also
+  has:
+
+  ```ruby
+  MyBlueprint.view?(:extended)               # V1 only
+  MyBlueprint.reflections.key?(:extended)    # V1 and V2 — identical results
+  ```
+
+  Do this one *first*, before converting any Blueprint. Because the reflection form works on both
+  base classes, a single edit covers a partial migration where the same code path sees V1
+  Blueprints and V2 Blueprints — a helper like `def view?(bp, name) = bp.reflections.key?(name)`
+  never has to ask which version it got, and you don't revisit it when the remaining Blueprints
+  convert.
+
+  Search beyond controllers — serializer specs, jobs, presenters, and GraphQL resolvers all call
+  it, and it tends to live in a generic "render with the view the request asked for" helper rather
+  than next to any particular Blueprint.
+- **`render(obj, view: :x)`.** V2's native form is `MyBlueprint[:x].render(obj)`, but the better
+  move is usually to add `Blueprinter::Extensions::LegacyOptions` to the V2 base and leave the
+  call sites alone. The extension keeps the V1 form working *and* keeps `:view` in `ctx.options`,
+  which V1-era conditionals and field blocks may be reading. If you do convert the call sites,
+  you have to audit for `options[:view]` readers too (`ctx.blueprint.class.view_name` replaces
+  them).
+- **An app that passes its own `format:` render option.** V2 consumes `:format` to pick the
+  output format, so a custom one no longer reaches fields and conditionals. V1 didn't reserve the
+  name, so this is possible, if rare. Rename the app's option.
+- **`custom_array_like_classes` was configured.** V2 ignores the setting and treats any
+  `Enumerable` except `Hash` as a collection. Anything it covered that *isn't* `Enumerable` now
+  needs an explicit `render_collection` (`references/configuration.md`).
 
 ### 8. Verify
 
@@ -253,8 +264,8 @@ bugs unless you can explain them) from **key-order-only differences** (expected 
 the user chose definition order in step 3; a bug if they chose to preserve order).
 
 Then run the project's test suite. The snapshot diff and the suite catch different things: the
-diff catches silent output changes in untested Blueprints, the suite catches call sites and
-integration breakage.
+diff catches silent output changes in untested Blueprints, the suite catches integration
+breakage — reflection over Blueprints, custom extensions, anything that depended on V1 internals.
 
 Do not report the migration as done while the diff has unexplained entries.
 

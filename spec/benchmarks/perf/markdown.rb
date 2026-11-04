@@ -11,8 +11,8 @@ module PerfBench
 
     def cells(row) = row.map { |c| escape(c.to_s) }.join(' | ')
 
-    # Backslashes first, so an escaped pipe isn't re-escaped
-    def escape(text) = text.gsub('\\', '\\\\\\\\').gsub('|', '\\|')
+    # Escapes backslashes and pipes in one pass, so an escaped pipe isn't re-escaped
+    def escape(text) = text.gsub(/[\\|]/) { "\\#{$&}" }
 
     def num(value)
       return 'n/a' if value.nil?

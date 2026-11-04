@@ -1,6 +1,6 @@
 ---
 name: blueprinter-v2-upgrade
-description: Upgrade Blueprinter Legacy/V1 Blueprints (Blueprinter::Base) to the V2 DSL (Blueprinter::V2::Base), across a whole codebase or a selected subset, with V1 and V2 running side by side. Use this skill whenever someone mentions migrating, upgrading, porting, or converting Blueprints or Blueprinter serializers to V2; asks what a V1 Blueprint would look like in V2; is moving a `Blueprinter.configure` block onto a base Blueprint; hits a V2 breaking change (include_view, identifier, transform, the `name:` option, V1-style if/unless Procs, extractors, `render` returning something that isn't a String); or asks how to adopt Blueprinter V2 gradually. Use it even when they don't say "V2" or "migration" explicitly — "modernize our serializers" and "get us off the old Blueprinter DSL" are both this skill. Do not use it for Blueprinter work unrelated to V2 — writing new V2 Blueprints, adding views or fields to existing V1 Blueprints, performance tuning, or debugging V1 behavior where nothing has moved to V2 yet.
+description: Upgrade Blueprinter Legacy/V1 Blueprints (Blueprinter::Base) to the V2 DSL (Blueprinter::V2::Base), across a whole codebase or a selected subset, with V1 and V2 running side by side. Use this skill whenever someone mentions migrating, upgrading, porting, or converting Blueprints or Blueprinter serializers to V2; asks what a V1 Blueprint would look like in V2; is moving a `Blueprinter.configure` block onto a base Blueprint; hits a V2 breaking change (include_view, identifier, transform, the `name:` option, V1-style if/unless Procs, extractors, `view?` being undefined, `render` returning something that isn't a String); or asks how to adopt Blueprinter V2 gradually. Use it even when they don't say "V2" or "migration" explicitly — "modernize our serializers" and "get us off the old Blueprinter DSL" are both this skill. Do not use it for Blueprinter work unrelated to V2 — writing new V2 Blueprints, adding views or fields to existing V1 Blueprints, performance tuning, or debugging V1 behavior where nothing has moved to V2 yet.
 ---
 
 # Upgrading Blueprinter V1 Blueprints to V2
@@ -219,8 +219,25 @@ MyBlueprint[:x].render(widget).to_json     # V2
 `render_as_hash` and `render_as_json` still exist and still work. They're soft-deprecated, so
 prefer `.to_hash` / `.to_json` in code you're already touching, but don't go hunting for them.
 
+`MyBlueprint.view?(:extended)` is gone in V2. The replacement is reflection, which V1 also has:
+
+```ruby
+MyBlueprint.view?(:extended)               # V1 only
+MyBlueprint.reflections.key?(:extended)    # V1 and V2 — identical results
+```
+
+Do this one *first*, before converting any Blueprint. Because the reflection form works on both
+base classes, a single edit covers a partial migration where the same code path sees V1 Blueprints
+and V2 Blueprints — a helper like `def view?(bp, name) = bp.reflections.key?(name)` never has to
+ask which version it got, and you don't revisit it when the remaining Blueprints convert.
+
+One difference to watch: V1 has an implicit `:identifier` view, so `view?(:identifier)` is true
+there even though nobody declared it. In V2 it exists only if you defined one (step 5).
+
 Search beyond controllers: serializer specs, jobs, presenters, GraphQL resolvers, and anywhere a
-Blueprint's output is string-interpolated or compared are the places that break.
+Blueprint's output is string-interpolated or compared are the places that break. Grep for
+`.view?` too — it tends to live in a generic "render with the view the request asked for" helper
+rather than next to any particular Blueprint.
 
 ### 8. Verify
 
@@ -261,6 +278,6 @@ Read these as you need them; don't front-load them.
   `default_if`, `extractor`, `datetime_format`, `exclude_if_nil`, dynamic association options.
 - `references/configuration.md` — every `Blueprinter.configure` setting and where it goes in V2,
   including the exact `FieldOrder` replication of V1's field sorting.
-- `references/extensions.md` — porting custom V1 `pre_render` extensions to V2's hook system, and
-  what each bundled extension does.
+- `references/extensions.md` — porting custom V1 `pre_render` extensions to V2's hook system,
+  what each bundled extension does, and the reflection API, including the `view?` replacement.
 - `references/verifying.md` — how to write the fixtures file and run the golden-output diff.

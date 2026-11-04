@@ -193,3 +193,42 @@ field.source        # => :description     (source)
 Anything generating API docs or JSON schema from Blueprints needs updating alongside the
 Blueprints themselves, and `field.name` is the dangerous one — it still exists and still returns
 a symbol, just a different one.
+
+### `view?` is gone — use reflection
+
+V1's `MyBlueprint.view?(:extended)` has no V2 equivalent; V2 Blueprints simply don't respond to
+it. Apps hit this when they let a request name the view and validate it before rendering:
+
+```ruby
+view = params[:view]&.to_sym
+raise ActionController::BadRequest unless WidgetBlueprint.view?(view)   # NoMethodError on V2
+```
+
+Reflection answers the same question, and V1 answers it too:
+
+```ruby
+WidgetBlueprint.reflections.key?(view)
+```
+
+`reflections` returns a Hash of views keyed by name on both base classes, so this is an exact
+swap — in V1, `reflections.key?(x)` and `view?(x)` agree on every input.
+
+That version-neutrality is the reason to make this edit **before** converting any Blueprint. In a
+partial migration the lookup usually sits in shared code — a controller concern, a `render_view`
+helper, a param validator — that receives V1 and V2 Blueprints interchangeably. Written against
+reflection, that code works for both and needs no second pass when the rest of the Blueprints
+convert:
+
+```ruby
+# works regardless of which base class `blueprint` descends from
+def valid_view?(blueprint, name) = blueprint.reflections.key?(name.to_sym)
+```
+
+One case where the keys differ: V1 defines an implicit `:identifier` view, so `view?(:identifier)`
+is true there even though nobody declared it. In V2 it's present only if you defined one on the
+base Blueprint (see `configuration.md`). This matters if the app ever exposes `:identifier` as a
+user-selectable view.
+
+If you need the view object rather than a yes/no, `MyBlueprint.reflections[:extended]` gives it in
+both versions; just note the V2 object exposes `fields`, `objects`, `collections`, `associations`,
+and `ordered`, while the V1 one has only `fields` and `associations`.

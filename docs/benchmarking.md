@@ -2,14 +2,14 @@
 title: "Benchmarking"
 type: explanation
 description: "Understand what `rake perf` measures, why each number is computed the way it is, and how far to trust a difference between two runs."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-11-02T20:34:46Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-11-04T18:36:48Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-11-02T20:34:46Z" }
 ---
 
 # Benchmarking
 
-Blueprinter's render path runs once per field of every rendered object, so a small cost there is multiplied by the size of every response an application serializes. CI guards that path with two floors (`spec/benchmarks/ips_test.rb` and `big_o_test.rb`, run by `rake benchmarks`), but a floor only catches a large regression. `bundle exec rake perf` (`spec/benchmarks/perf/`) exists to answer the finer question a render-path change raises: what got faster or slower, by how much, for which inputs, and is the difference larger than the measurement's own noise. The commands are in [testing.md](testing.md#check-performance).
+Blueprinter's render path runs once per field of every rendered object, so a small cost there is multiplied by the size of every response an application serializes. CI guards that path with an iterations-per-second floor (`spec/benchmarks/ips_test.rb`) and a growth-rate ceiling (`big_o_test.rb`), both run by `rake benchmarks`, but each only catches a large regression. `bundle exec rake perf` (`spec/benchmarks/perf/`) exists to answer the finer question a render-path change raises: what got faster or slower, by how much, for which inputs, and is the difference larger than the measurement's own noise. The commands are in [testing.md](testing.md#check-performance).
 
 ## One Factor at a Time
 

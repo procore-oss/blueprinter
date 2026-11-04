@@ -2,7 +2,7 @@
 title: "Running and Writing Tests"
 type: how-to
 description: "Run the checks CI runs, and know where a new test belongs."
-generated: { by: cursor/claude-fable-5.1, at: "2026-10-27T21:01:11Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-11-04T18:36:48Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-29T13:16:45Z" }
 ---
@@ -86,7 +86,7 @@ Define each blueprint inside a `let` with `Class.new(Blueprinter::Base)` (as abo
 
 ## Check Performance
 
-The **benchmarks** guard the render path, since that path runs once per field of every rendered object. `bundle exec rake benchmarks` fails if rendering a 10-object array drops below 2,500 iterations per second (`spec/benchmarks/ips_test.rb`), or if render time stops scaling linearly (`big_o_test.rb`). The `ActiveRecord` versions run the same checks against database records, with a lower floor (2,000 iterations per second) and a looser linearity threshold.
+The **benchmarks** guard the render path, since that path runs once per field of every rendered object. `bundle exec rake benchmarks` fails if rendering a 10-object array drops below 2,500 iterations per second (`spec/benchmarks/ips_test.rb`), or if render time grows clearly faster than linearly: the fastest of five timings at each size from 1,000 to 10,000 objects is fitted to a power curve, and the exponent must stay below 1.3 (`big_o_test.rb`). That fails growth steeper than about n^1.3 across the range, such as a quadratic term that is already a sizeable share of the cost at 10,000 objects; n log n fits at about 1.12 and passes. The `ActiveRecord` versions run the same checks against database records, with a lower floor (2,000 iterations per second).
 
 CI only checks those floors, though. A change that makes rendering slower but stays above them will pass, so for any change to the render path, show before and after with `rake perf`. What it measures and how to weigh the numbers is in [benchmarking.md](benchmarking.md).
 

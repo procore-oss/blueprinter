@@ -47,4 +47,5 @@ Customizes the field order in the serialized output. See `Blueprinter::Extension
 These extensions offer V1-compatibility for some options. They're covered under the [Compatible Changes](../compatible/index.md) section.
 
 * `Blueprinter::Extensions::LegacyOptions`
+* `Blueprinter::Extensions::LegacyDynamicOptions`
 * `Blueprinter::Extensions::LegacyTransformer`

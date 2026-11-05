@@ -6,8 +6,8 @@
 #
 # The whole point is that the *same fixtures file* works before and after conversion: this script
 # renders through whichever API each Blueprint currently has (V1 `render_as_hash(obj, view:)` or
-# V2 `Blueprint[view].render(obj).to_hash`). So you capture a baseline, convert, re-run with the
-# same fixtures, and diff.
+# V2 `Blueprint[view].render(obj, format: :hash)`). So you capture a baseline, convert, re-run
+# with the same fixtures, and diff.
 #
 # Usage
 # -----
@@ -105,7 +105,7 @@ module BlueprinterSnapshot
     def capture(blueprint, view, sample, options)
       object = sample.respond_to?(:call) ? sample.call : sample
       if v2?(blueprint)
-        blueprint[view].render(object, options).to_hash
+        blueprint[view].render(object, options.merge(format: :hash))
       else
         blueprint.render_as_hash(object, options.merge(view: view))
       end

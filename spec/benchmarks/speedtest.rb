@@ -59,8 +59,8 @@ results = Benchmark.bmbm do |x|
     end
 
     x.report "#{fmt_n} widgets #{M}x: V2" do
-      M.times { WidgetBlueprintV2.render(list).to_hash }
-      # M.times { list.each { |w| WidgetBlueprintV2.render(w).to_hash } }
+      M.times { WidgetBlueprintV2.render(list, format: :hash) }
+      # M.times { list.each { |w| WidgetBlueprintV2.render(w, format: :hash) } }
     end
   end
 end

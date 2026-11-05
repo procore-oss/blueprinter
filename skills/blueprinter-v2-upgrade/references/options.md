@@ -257,12 +257,19 @@ The native alternative is `ctx.store`, which is a different mechanism with diffe
 
 ## The `view:` option on `render`
 
-Covered in SKILL.md step 7 — `MyBlueprint.render(obj, view: :x)` becomes
-`MyBlueprint[:x].render(obj)`. `LegacyOptions` keeps the V1 form working if the view name is
-computed somewhere awkward, and when it does, the `:view` key stays in `ctx.options` exactly as
-V1 left it — so conditionals and blocks that read `options[:view]` keep working. If you convert
-the call sites instead, check for anything reading `options[:view]`, because it will now be
-absent. `ctx.blueprint.class.view_name` is the replacement.
+Covered in SKILL.md step 7. This is the one `render` form V2 doesn't accept natively —
+`MyBlueprint.render(obj, view: :x)` becomes `MyBlueprint[:x].render(obj)`. `LegacyOptions` keeps
+the V1 form working, and when it does, the `:view` key stays in `ctx.options` exactly as V1 left
+it, so conditionals and blocks that read `options[:view]` keep working. That makes adding the
+extension the low-risk choice, and it's what to reach for when the view name is computed
+somewhere awkward or the call sites are many. If you convert the call sites instead, check for
+anything reading `options[:view]`, because it will now be absent —
+`ctx.blueprint.class.view_name` is the replacement.
+
+Everything else about `render` is backwards-compatible: it returns a JSON String like V1's did,
+and `render_as_hash` / `render_as_json` still work. The V2 spelling for a Hash is
+`MyBlueprint.render(obj, format: :hash)`. One consequence: `:format` is now a reserved render
+option, so an app passing its own `format:` through to fields or conditionals has to rename it.
 
 ## Where options can be set
 

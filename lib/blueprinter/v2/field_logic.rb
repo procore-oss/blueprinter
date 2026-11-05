@@ -11,12 +11,12 @@ module Blueprinter
       # @param field [Blueprinter::V2::Fields] Internal field definition (has extra, private, attrs)
       # @return [true | false]
       def self.skip?(ctx, field)
-        if (cond = field._merged_options[:if])
+        if (cond = field._if)
           result = cond.is_a?(Proc) ? cond.call(ctx) : ctx.blueprint.public_send(cond, ctx)
           return true unless result
         end
 
-        if (cond = field._merged_options[:unless])
+        if (cond = field._unless)
           result = cond.is_a?(Proc) ? cond.call(ctx) : ctx.blueprint.public_send(cond, ctx)
           return true if result
         end
@@ -25,17 +25,38 @@ module Blueprinter
       end
 
       # Returns the given value or a default value. Default values are pulled from the field-level or Blueprint-level
-      # "default" option. It will be used if the given value is nil or if the "default_if" option evaluates truthy.
+      # "default" option. It will be used if the "default_if" option evaluates truthy, or, when there is no
+      # "default_if" option, if the given value is nil.
       #
       # @param field [Blueprinter::V2::Fields::Field]
       # @param value [Object] The current field value
       # @param ctx [Blueprinter::V2::Context::Field | nil]
       # @return [Object] The final field value
       def self.value_or_default(field, value, ctx: nil)
-        default_if = field._merged_options[:default_if]
-        return value unless value.nil? || (default_if && use_default?(default_if, ctx, value))
+        default?(field, value, ctx:) ? default_value(field, ctx:) : value
+      end
 
-        case (default_value = field._merged_options[:default])
+      # Returns true if the default value should be used. It will be used if the "default_if" option evaluates
+      # truthy, or, when there is no "default_if" option, if the given value is nil.
+      #
+      # @param field [Blueprinter::V2::Fields::Field]
+      # @param value [Object] The current field value
+      # @param ctx [Blueprinter::V2::Context::Field | nil]
+      # @return [true | false]
+      def self.default?(field, value, ctx: nil)
+        default_if = field._default_if
+        return value.nil? unless default_if
+
+        !!use_default?(default_if, ctx, value)
+      end
+
+      # Returns the field's default value, pulled from the field-level or Blueprint-level "default" option.
+      #
+      # @param field [Blueprinter::V2::Fields::Field]
+      # @param ctx [Blueprinter::V2::Context::Field | nil]
+      # @return [Object] The default value
+      def self.default_value(field, ctx: nil)
+        case (default_value = field._default)
         when Proc then default_value.call(ctx)
         when Symbol then ctx.blueprint.public_send(default_value, ctx)
         else default_value

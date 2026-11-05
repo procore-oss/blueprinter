@@ -5,6 +5,7 @@ require 'set'
 module Blueprinter
   module V2
     # Evaluates a Blueprint's AST nodes
+    # rubocop:disable-next Metrics/ClassLength
     # @!visibility private
     class Specification
       Spec = Struct.new(:nodes, :options, :extensions, :formatters, :schema, :view_defs, keyword_init: true)

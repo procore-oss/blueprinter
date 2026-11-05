@@ -35,7 +35,15 @@ module Blueprinter
       #   @return [Hash] Options defined on the field
       # @!attribute [r] blueprint
       #   @return [Class | nil] Blueprint to serialize with (objects and collections only)
-      # @!attribute [r] _merged_options
+      # @!attribute [r] _if
+      #   @return Internal - DO NOT USE
+      # @!attribute [r] _unless
+      #   @return Internal - DO NOT USE
+      # @!attribute [r] _default
+      #   @return Internal - DO NOT USE
+      # @!attribute [r] _default_if
+      #   @return Internal - DO NOT USE
+      # @!attribute [r] _exclude_if_nil
       #   @return Internal - DO NOT USE
       # @!attribute [r] _has_conditional
       #   @return Internal - DO NOT USE
@@ -51,7 +59,11 @@ module Blueprinter
         :options,
         :block,
         :blueprint,
-        :_merged_options,
+        :_if,
+        :_unless,
+        :_default,
+        :_default_if,
+        :_exclude_if_nil,
         :_has_conditional,
         :_has_default,
         :_serializer,

@@ -98,8 +98,9 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of the current Blueprint class
       # @!attribute [r] fields
       #   @return [Array<Blueprinter::V2::Fields::Field>] All fields that will be serialized
-      # @!attribute [r] options
-      #   @return [Hash] Options passed to `render` (frozen)
+      # @!attribute [rw] options
+      #   @return [Hash] Options passed to `render` (frozen but can be replaced). If an object/collection field hook
+      #           replaces it, the new options are used for that association and everything nested beneath it only.
       # @!attribute [r] object
       #   @return [Object] The object or collection that's currently being serialized
       # @!attribute [r] field
@@ -110,7 +111,7 @@ module Blueprinter
       #   @return [Integer] Blueprint depth (1-indexed)
       #
       Field = Struct.new(:blueprint, :fields, :options, :object, :field, :store, :depth) do
-        (members - %i[field object]).each do |attr|
+        (members - %i[field object options]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }
         end

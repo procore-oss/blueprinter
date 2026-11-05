@@ -36,6 +36,13 @@ describe Blueprinter::V2::FieldLogic do
       expect(value).to be_nil
     end
 
+    it 'passes nil through when default_if is given and returns false' do
+      object[:foo] = nil
+      blueprint.field :foo, default: 'Bar', default_if: ->(_ctx, val) { val == 'Foo' }
+      value = subject.value_or_default(field, nil, ctx:)
+      expect(value).to be_nil
+    end
+
     it 'uses field options default' do
       object[:foo] = nil
       blueprint.field :foo, default: 'Bar'
@@ -86,6 +93,38 @@ describe Blueprinter::V2::FieldLogic do
       blueprint.field :foo
       value = subject.value_or_default(field, 'Foo', ctx:)
       expect(value).to eq 'Bar'
+    end
+  end
+
+  context "default?" do
+    let(:field) { blueprint.reflections[:default].fields.fetch(:foo) }
+    let(:object) { { foo: 'Foo' } }
+    let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, {}) }
+
+    it 'is true for nil without default_if' do
+      blueprint.field :foo, default: 'Bar'
+      expect(subject.default?(field, nil, ctx:)).to be true
+    end
+
+    it 'is false for non-nil without default_if' do
+      blueprint.field :foo, default: 'Bar'
+      expect(subject.default?(field, 'Foo', ctx:)).to be false
+    end
+
+    it 'checks default_if' do
+      blueprint.field :foo, default: 'Bar', default_if: ->(_ctx, val) { val == 'Foo' }
+      expect(subject.default?(field, 'Foo', ctx:)).to be true
+      expect(subject.default?(field, 'Zorp', ctx:)).to be false
+    end
+
+    it 'defers to default_if for nil, skipping the nil check' do
+      blueprint.field :foo, default: 'Bar', default_if: ->(_ctx, val) { val == 'Foo' }
+      expect(subject.default?(field, nil, ctx:)).to be false
+    end
+
+    it 'passes nil to default_if' do
+      blueprint.field :foo, default: 'Bar', default_if: ->(_ctx, val) { val.nil? }
+      expect(subject.default?(field, nil, ctx:)).to be true
     end
   end
 end

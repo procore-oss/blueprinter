@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6ca28b75.js";
+            window.path_to_searchindex_js = "../../searchindex-e99e181b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-a0ca2d9c.js"></script>
@@ -190,11 +190,16 @@ the current object, and a lot more.</p>
 <pre><code class="language-ruby">set :default, -&gt;(ctx) {
   case ctx.field.type
   when :field then "N/A"
-  when :object then {}
-  when :collection then []
+  when :object, :collection then {}
   end
 }
 </code></pre>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Legacy/V1 used the single <code>association_default</code> value for <em>both</em> objects and collections, so the
+example above is a faithful translation. If you’d rather a defaulted empty collection render as <code>[]</code>,
+split the branch — but be aware that changes the serialized output.</p>
+</blockquote>
 <h3 id="if--unless"><a class="header" href="#if--unless"><code>if</code> / <code>unless</code></a></h3>
 <p>Set the <code>:if</code> and <code>:unless</code> options in your base Blueprint. They will be passed a <code>Blueprinter::V2::Context::Field</code> object, containing the
 current field, the current object, and a lot more.</p>
@@ -207,7 +212,7 @@ current field, the current object, and a lot more.</p>
 }
 </code></pre>
 <h3 id="custom_array_like_classes"><a class="header" href="#custom_array_like_classes"><code>custom_array_like_classes</code></a></h3>
-<p><code>render</code> has sensible heuristics for detecting what’s a “collection” or not: any <code>Enumerable</code> except for <code>Hash</code>.</p>
+<p><code>render</code> has sensible heuristics for detecting what’s a “collection” or not: any <code>Enumerable</code> except for <code>Hash</code> and <code>Struct</code>.</p>
 <p>If that logic doesn’t work for something, use one of these methods in place of <code>render</code>:</p>
 <pre><code class="language-ruby"># Force `arg` to be treated like a collection (must respond to `map` with an Enumerable)
 array = WidgetBlueprint.render_collection(arg).to_hash
@@ -218,9 +223,9 @@ hash = WidgetBlueprint.render_object(arg).to_hash
 <h3 id="extractor_default"><a class="header" href="#extractor_default"><code>extractor_default</code></a></h3>
 <p>“Extractors” are not a discrete concept in V2, but they can be implemented using the <code>around_field_value</code>, <code>around_object_value</code>, and <code>around_collection_value</code>
 extension hooks.</p>
-<p>The bundled <code>LegacyExtractorOption</code> extension can be enabled to offer backwards-compatibility with legacy/V1’s extractors:</p>
+<p>The bundled <code>LegacyOptions</code> extension can be enabled to offer backwards-compatibility with legacy/V1’s extractors:</p>
 <pre><code class="language-ruby"># Add the extension
-add Blueprinter::Extensions::LegacyExtractorOption.new
+add Blueprinter::Extensions::LegacyOptions.new
 
 # Set the `extractor` option
 set :extractor, MyExtractor
@@ -253,7 +258,11 @@ add Blueprinter::Extensions::MultiJson.new
 </code></pre>
 <p>If <code>multi_json</code> doesn’t support your serializer, you can create your own extension using the <code>around_result</code> hook:</p>
 <pre><code class="language-ruby">class MyJsonExtension &lt; Blueprinter::Extension
-  def around_result(ctx)
+  def initialize
+    around_result :serialize
+  end
+
+  def serialize(ctx)
     case ctx.format
     when :json
       result = yield ctx

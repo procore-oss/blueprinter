@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6ca28b75.js";
+            window.path_to_searchindex_js = "../../searchindex-e99e181b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-a0ca2d9c.js"></script>
@@ -191,6 +191,9 @@
   }
 end
 </code></pre>
+<p>As in V1, the Proc is called once per widget and receives the widget (not the category). The merged options are only
+visible to the association they’re defined on, and to anything nested beneath it. <code>WidgetBlueprint</code>’s own fields and
+its other associations won’t see them.</p>
 <h2 id="v2-style"><a class="header" href="#v2-style">V2 style</a></h2>
 <p>V2 provides the <code>ctx.store</code> Hash for Blueprints and extensions to share information.</p>
 <pre><code class="language-ruby">class WidgetBlueprint &lt; ApplicationBlueprint

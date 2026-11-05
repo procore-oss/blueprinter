@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6ca28b75.js";
+            window.path_to_searchindex_js = "../../searchindex-e99e181b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-a0ca2d9c.js"></script>
@@ -182,6 +182,14 @@
 <p>V2 has a much more flexible <code>default_if</code> option, but you can maintain backwards compatibility with V1 using the <code>LegacyOptions</code> extension.</p>
 <p>The old <code>default_if</code> values will continue to work (until a future Blueprinter removes the constants).</p>
 <pre><code class="language-ruby">field :name, default: "N/A", default_if: Blueprinter::EMPTY_STRING
+</code></pre>
+<p>Also like V1, a <code>default_if</code> with no <code>default</code> option defaults to <code>nil</code>:</p>
+<pre><code class="language-ruby">field :name, default_if: Blueprinter::EMPTY_STRING
+</code></pre>
+<p>V2 never reads V1’s global configuration, so <code>Blueprinter.configuration.field_default</code> is ignored. Declare the default on a Blueprint instead — on an <code>ApplicationBlueprint</code> that the rest of your Blueprints inherit from, if you want it applied everywhere:</p>
+<pre><code class="language-ruby">class ApplicationBlueprint &lt; Blueprinter::V2::Base
+  set :default, "N/A"
+end
 </code></pre>
 <h2 id="v2-style"><a class="header" href="#v2-style">V2 style</a></h2>
 <p>The native V2 option allows for Procs or symbols (method names). The logic is up to you.</p>

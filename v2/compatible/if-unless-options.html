@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-6ca28b75.js";
+            window.path_to_searchindex_js = "../../searchindex-e99e181b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-a0ca2d9c.js"></script>
@@ -179,9 +179,11 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="ifunless-options"><a class="header" href="#ifunless-options">If/unless options</a></h1>
-<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1. If you enable the <code>LegacyOptions</code> extension, <code>if</code>/<code>unless</code> Procs with three arguments will continue to work like they did in V1:</p>
+<p>V2’s <code>if</code> and <code>unless</code> options have different Proc arguments than legacy/V1. If you enable the <code>LegacyOptions</code> extension, <code>if</code>/<code>unless</code> Procs that can accept three arguments will continue to work like they did in V1:</p>
 <pre><code class="language-ruby">field :a, if: -&gt;(field_name, object, options) { object.active? }
+field :b, if: -&gt;(field_name, object, options = {}) { object.active? }
 </code></pre>
+<p>As in V1, <code>field_name</code> is the field’s name in the result, which is its <code>name</code> option if it has one.</p>
 <h2 id="v2-style"><a class="header" href="#v2-style">V2 style</a></h2>
 <p>V2-style <code>if</code>/<code>unless</code> Procs will continue to work. They accept a single <code>Blueprinter::V2::Context::Field</code> argument:</p>
 <pre><code class="language-ruby">field :a, if: -&gt;(ctx) {

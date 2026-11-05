@@ -2,7 +2,7 @@
 title: "Running and Writing Tests"
 type: how-to
 description: "Run the checks CI runs, and know where a new test belongs."
-generated: { by: cursor/claude-fable-5.1, at: "2026-10-27T21:01:11Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-11-05T14:14:23Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-29T13:16:45Z" }
 ---
@@ -15,7 +15,8 @@ CI runs the same two commands on every supported Ruby (see `.github/workflows/te
 
 ```sh
 bundle install
-bundle exec rake                                       # specs, then RuboCop
+bundle exec rake                                       # specs, specs with compiled views, then RuboCop
+bundle exec rake spec:compiled                         # only the specs with compiled views (BLUEPRINTER_COMPILE_VIEWS=1)
 bundle exec rake benchmarks                            # after touching the render path
 LIST=1 bundle exec rake perf                          # render scenarios (not run by CI)
 bundle exec rspec spec/integrations/base_spec.rb:51    # one example

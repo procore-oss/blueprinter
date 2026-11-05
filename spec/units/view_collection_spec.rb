@@ -235,4 +235,51 @@ describe 'ViewCollection' do
       expect(fields_after).to include(view_field)
     end
   end
+
+  describe '#compiled' do
+    def cache = view_collection.instance_variable_get(:@cache)
+
+    before do
+      allow(Blueprinter::ViewCompiler).to receive(:compile) { Module.new }
+    end
+
+    it 'compiles each view once and publishes it in a new frozen snapshot' do
+      view_collection.fields_for(:view)
+      snapshot = cache
+
+      compiled = view_collection.compiled(:view)
+
+      expect(view_collection.compiled(:view)).to equal(compiled)
+      expect(Blueprinter::ViewCompiler).to have_received(:compile).once
+      expect(cache).not_to equal(snapshot)
+      expect(cache).to be_frozen
+      expect(cache[:compiled]).to be_frozen
+      expect(snapshot[:compiled]).to be_empty
+    end
+
+    it 'keeps every view when threads compile different views at once' do
+      view_names = (1..8).map { |i| :"view_#{i}" }
+      view_names.each { |name| view_collection[name] }
+      allow(Blueprinter::ViewCompiler).to receive(:compile) do
+        sleep 0.001
+        Module.new
+      end
+
+      results = view_names.map { |name| Thread.new { [name, view_collection.compiled(name)] } }.map(&:value).to_h
+
+      expect(cache[:compiled]).to eq(results)
+      expect(Blueprinter::ViewCompiler).to have_received(:compile).exactly(view_names.size).times
+    end
+
+    it 'returns the module without storing it when the cache is invalidated during compilation' do
+      compiled = Module.new
+      allow(Blueprinter::ViewCompiler).to receive(:compile) do
+        view_collection.invalidate_cache!
+        compiled
+      end
+
+      expect(view_collection.compiled(:view)).to equal(compiled)
+      expect(cache).to be_nil
+    end
+  end
 end

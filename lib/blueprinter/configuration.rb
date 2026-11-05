@@ -8,6 +8,7 @@ module Blueprinter
   class Configuration
     attr_accessor(
       :association_default,
+      :compile_views,
       :custom_array_like_classes,
       :datetime_format,
       :default_transformers,
@@ -37,6 +38,7 @@ module Blueprinter
       @default_transformers = []
       @custom_array_like_classes = []
       @extensions = Extensions.new
+      @compile_views = false
     end
 
     def extensions=(list)
@@ -57,6 +59,14 @@ module Blueprinter
 
     def valid_callable?(callable_name)
       VALID_CALLABLES.include?(callable_name)
+    end
+
+    # @api private
+    # Whether renders can use compiled views (see ViewCompiler): compile_views is on and none of the global settings that
+    # compiled views don't handle is set.
+    def views_compilable?
+      compile_views && datetime_format.nil? && field_default.nil? && association_default.nil? &&
+        self.if.nil? && self.unless.nil?
     end
 
     # @param extractor [Class<Blueprinter::AutoExtractor>]

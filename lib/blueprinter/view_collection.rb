@@ -14,6 +14,8 @@ module Blueprinter
   #
   # Thread Safety: view data is lazily compiled into a frozen snapshot on first access, and is assigned atomically. A
   # mutex serializes the compilation itself to prevent duplicate work. After compilation, reads bypass the mutex entirely.
+  # Compiled views (see #compiled) are added the same way: under the mutex, by publishing a new frozen snapshot, never by
+  # writing into a published one.
   #
   # Future optimization: a public compile! method could allow eager compilation at boot time
   # (e.g. in a Rails after_initialize hook) to move the first-render compilation cost (~10µs per
@@ -21,7 +23,9 @@ module Blueprinter
   class ViewCollection
     attr_reader :views, :sort_by_definition
 
-    def initialize
+    # @param blueprint [Class, nil] the Blueprint these views belong to, used to name compiled views in backtraces
+    def initialize(blueprint: nil)
+      @blueprint = blueprint
       @views = {
         identifier: View.new(:identifier),
         default: View.new(:default)
@@ -69,16 +73,16 @@ module Blueprinter
       @cache[:transformers][view_name]
     end
 
-    # Returns the compiled form of the provided View (see ViewCompiler). Compiled lazily and kept with the rest of the
-    # cache, so it is rebuilt whenever the cache is invalidated. Two threads may compile the same view at once; both
-    # produce an equivalent module and either one is kept.
+    # Returns the compiled form of the provided View (see ViewCompiler). Compiled lazily under the mutex and published
+    # like the rest of the cache: a new frozen snapshot, assigned in one step, so reads take no lock. It is rebuilt
+    # whenever the cache is invalidated.
     # @param [String] view_name
     # @return [Module]
     def compiled(view_name)
       ensure_cached!
 
       cache = @cache
-      cache[:compiled][view_name] ||= ViewCompiler.compile(cache[:fields][view_name], cache[:transformers][view_name])
+      cache[:compiled][view_name] || compile_view(cache, view_name)
     end
 
     # @param [String] view_name
@@ -117,8 +121,37 @@ module Blueprinter
           transformers[view_name] = build_transformers(view_name).freeze
         end
 
-        @cache = { fields: fields.freeze, transformers: transformers.freeze, compiled: {} }.freeze
+        @cache = { fields: fields.freeze, transformers: transformers.freeze, compiled: {}.freeze }.freeze
       end
+    end
+
+    # Compiles the view from the given snapshot and publishes a copy of the current snapshot that includes it, keeping
+    # views other threads compiled meanwhile. The mutex can't be re-entered, so this can't call ensure_cached!; if the
+    # cache was invalidated meanwhile, the module is returned without being stored, since it was compiled from the
+    # snapshot this render is already using.
+    def compile_view(cache, view_name)
+      @cache_mutex.synchronize do
+        # Re-check after acquiring the lock; another thread may have compiled this view first.
+        existing = same_snapshot?(@cache, cache) && @cache[:compiled][view_name]
+        return existing if existing
+
+        compiled_view = ViewCompiler.compile(
+          fields: cache[:fields][view_name],
+          transformers: cache[:transformers][view_name],
+          blueprint: @blueprint,
+          view: view_name
+        )
+        current = @cache
+        if same_snapshot?(current, cache)
+          @cache = current.merge(compiled: current[:compiled].merge(view_name => compiled_view).freeze).freeze
+        end
+        compiled_view
+      end
+    end
+
+    # Publishing a compiled view replaces the snapshot but keeps its fields; only a rebuild replaces them
+    def same_snapshot?(current, cache)
+      !current.nil? && current[:fields].equal?(cache[:fields])
     end
 
     def build_fields_for(view_name)

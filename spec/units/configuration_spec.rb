@@ -110,4 +110,37 @@ describe 'Blueprinter::Configuration' do
       expect(actual).to be(false)
     end
   end
+
+  describe '#views_compilable?' do
+    after { reset_blueprinter_config! }
+
+    it 'is true when compile_views is on and no unsupported global setting is set' do
+      Blueprinter.configure { |config| config.compile_views = true }
+
+      expect(Blueprinter.configuration.views_compilable?).to be(true)
+    end
+
+    it 'is false when compile_views is off' do
+      Blueprinter.configure { |config| config.compile_views = false }
+
+      expect(Blueprinter.configuration.views_compilable?).to be_falsey
+    end
+
+    {
+      datetime_format: '%Y-%m-%d',
+      field_default: 'N/A',
+      association_default: {},
+      if: ->(_field_name, _object, _options) { true },
+      unless: ->(_field_name, _object, _options) { false }
+    }.each do |setting, value|
+      it "is false when the global #{setting} is set" do
+        Blueprinter.configure do |config|
+          config.compile_views = true
+          config.public_send(:"#{setting}=", value)
+        end
+
+        expect(Blueprinter.configuration.views_compilable?).to be(false)
+      end
+    end
+  end
 end

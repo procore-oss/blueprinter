@@ -135,26 +135,20 @@ module Blueprinter
           object_to_hash(obj, view_name:, local_options: local_options_with_view)
         end
       else
-        hash_for(object, view_name, local_options_with_view, compiled)
+        hash_for(object, view_name:, local_options: local_options_with_view, compiled:)
       end
     end
 
     # Hashes always use the standard path: the compiled view reads values with method calls
-    def hash_for(object, view_name, local_options, compiled)
+    def hash_for(object, view_name:, local_options:, compiled:)
       return compiled.call(object, local_options) if compiled && !object.is_a?(Hash)
 
       object_to_hash(object, view_name:, local_options:)
     end
 
-    # The compiled view (see ViewCompiler), or nil when compiled views are off or a global setting that compiled views
-    # don't handle is set
+    # The compiled view (see ViewCompiler), or nil when Configuration#views_compilable? is false
     def compiled_view(view_name)
-      config = Blueprinter.configuration
-      return unless config.compile_views
-      return unless config.datetime_format.nil? && config.field_default.nil? && config.association_default.nil? &&
-                    config.if.nil? && config.unless.nil?
-
-      view_collection.compiled(view_name)
+      view_collection.compiled(view_name) if Blueprinter.configuration.views_compilable?
     end
 
     def object_to_hash(object, view_name:, local_options:)

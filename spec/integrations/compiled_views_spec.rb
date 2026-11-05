@@ -294,6 +294,39 @@ describe 'Compiled views' do
     include_examples 'the same output', [{}]
   end
 
+  context 'with an associated Blueprint that overrides hashify' do
+    let(:blueprint) do
+      vehicles = Class.new(vehicle_blueprint) do
+        def self.hashify(object, view_name:, local_options:)
+          result = super
+          result.is_a?(Array) ? result.map { |item| item.merge(wrapped: true) } : result.merge(wrapped: true)
+        end
+      end
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        association :vehicles, blueprint: vehicles
+      end
+    end
+
+    include_examples 'the same output', [{}]
+  end
+
+  context 'with an associated Blueprint that writes to options' do
+    let(:blueprint) do
+      vehicles = Class.new(Blueprinter::Base) do
+        identifier :id
+        field :make, if: ->(_name, _vehicle, options) { options[:written_by_association] = true }
+      end
+      Class.new(Blueprinter::Base) do
+        identifier :id
+        association :vehicles, blueprint: vehicles
+        field(:written_by_association) { |_user, options| options[:written_by_association] }
+      end
+    end
+
+    include_examples 'the same output', [{}]
+  end
+
   context 'with a custom extractor' do
     let(:upcase_extractor) do
       Class.new(Blueprinter::Extractor) do

@@ -21,10 +21,6 @@ module Blueprinter
       @extensions.dup
     end
 
-    def empty?
-      @extensions.empty?
-    end
-
     # Appends an extension
     def <<(ext)
       @extensions << ext

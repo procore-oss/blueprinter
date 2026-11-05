@@ -23,8 +23,6 @@ module Blueprinter
       unless_callable && unless_callable.call(field_name, object, local_options)
     end
 
-    private
-
     # `callable_from` returns false when no callable is configured, which means `||=` would re-run
     # it on every call. Instead, a `defined?` guard allows falsey values to be memoized as well.
     def if_callable
@@ -38,6 +36,8 @@ module Blueprinter
 
       @_unless_callable = callable_from(:unless)
     end
+
+    private
 
     def callable_from(condition)
       config = Blueprinter.configuration

@@ -5,19 +5,21 @@ require 'blueprinter'
 require 'ostruct'
 
 class Blueprinter::BigOTest < Minitest::Benchmark
+  include BenchmarkHelper
+
+  def self.bench_range = bench_linear(1_000, 10_000, 1_000)
+
   def setup
     @blueprinter = Class.new(Blueprinter::Base) do
       field :id
       field :name
     end
-    @prepared_objects = self.class.bench_range.inject({}) do |hash, n|
-      hash.merge n => n.times.map {|i| OpenStruct.new(id: i, name: "obj #{i}")}
-    end
+    @objects = 10_000.times.map {|i| OpenStruct.new(id: i, name: "obj #{i}")}
   end
 
   def bench_render_basic
-    assert_performance_linear(0.98) do |n|
-      @blueprinter.render(@prepared_objects[n])
+    assert_scales_linearly do |n|
+      @blueprinter.render(@objects.first(n))
     end
   end
 end

@@ -6,6 +6,9 @@ AllCops:
     - 'tmp/**/*'
     - 'spec/**/*'
     - 'vendor/**/*' # added by github actions
+    # Bundled Agent Skill scripts are single-file programs run standalone (e.g. via `rails runner`)
+    # inside a user's app, so the gem's own style rules don't apply to them.
+    - 'skills/blueprinter-v2-upgrade/scripts/**/*'
 
 Style/Documentation:
   Enabled: false

@@ -7,8 +7,6 @@ field :foo, extractor: MyExtractor
 field :bar, extractor: MyExtractor.new
 ```
 
-As in V1, the extractor is instantiated at most once per render, and the field's block (if it has one) is passed to it in the `block` option.
-
 ## V2 style
 
 In V2 you can override Blueprinter's field extraction using field blocks or the `around_field_value`, `around_object_value`, and `around_collection_value` extension hooks.

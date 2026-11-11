@@ -7,7 +7,18 @@ field :a, if: ->(field_name, object, options) { object.active? }
 field :b, if: ->(field_name, object, options = {}) { object.active? }
 ```
 
-As in V1, `field_name` is the field's name in the result, which is its `name` option if it has one.
+Method names (Symbols or Strings) also keep working. As in V1, they refer to *class* methods that accept the same three arguments, including private ones:
+
+```ruby
+class WidgetBlueprint < ApplicationBlueprint
+  field :a, if: :active?
+  field :b, unless: :hidden?
+
+  def self.active?(field_name, object, options) = object.active?
+
+  def self.hidden?(field_name, object, options = {}) = object.hidden?
+end
+```
 
 ## V2 style
 
@@ -20,4 +31,17 @@ field :a, if: ->(ctx) {
   options = ctx.options
   object.active?
 }
+```
+
+V2 method names refer to *public instance* methods that take the same single argument:
+
+```ruby
+class WidgetBlueprint < ApplicationBlueprint
+  field :a, if: :active?
+  field :b, unless: :hidden?
+
+  def active?(ctx) = ctx.object.active?
+
+  def hidden?(ctx) = ctx.object.hidden?
+end
 ```

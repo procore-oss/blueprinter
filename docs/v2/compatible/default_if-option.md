@@ -14,14 +14,6 @@ Also like V1, a `default_if` with no `default` option defaults to `nil`:
 field :name, default_if: Blueprinter::EMPTY_STRING
 ```
 
-V2 never reads V1's global configuration, so `Blueprinter.configuration.field_default` is ignored. Declare the default on a Blueprint instead — on an `ApplicationBlueprint` that the rest of your Blueprints inherit from, if you want it applied everywhere:
-
-```ruby
-class ApplicationBlueprint < Blueprinter::V2::Base
-  set :default, "N/A"
-end
-```
-
 ## V2 style
 
 The native V2 option allows for Procs or symbols (method names). The logic is up to you.

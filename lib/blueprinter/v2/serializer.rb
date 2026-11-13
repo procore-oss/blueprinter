@@ -146,7 +146,7 @@ module Blueprinter
 
           # extract value
           defaulted = false
-          if (field_hook = @field_hooks[field.type])
+          if @any_field_hooks && (field_hook = @field_hooks[field.type])
             value = catch SIGNAL do
               @hooks.around(field_hook, ctx) do
                 val = field.block ? field.block.call(object, ctx) : field.extract(object)
@@ -235,12 +235,14 @@ module Blueprinter
           object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,
           collection: @hooks.registered?(:around_collection_value) ? :around_collection_value : nil
         }.freeze
+        # Lets the render path skip the per-field lookup above when no field hooks are registered (the common case)
+        @any_field_hooks = @field_hooks.each_value.any?
       end
 
       # Skip Context::Field allocation when no field hooks, conditionals, callable defaults, or Proc extractors are in play
       # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
       def needs_field_ctx?(fields)
-        @field_hooks.values.any? || fields.any? do |f|
+        @any_field_hooks || fields.any? do |f|
           f._has_conditional || !!f._default_if || f._default.is_a?(Proc) || f._default.is_a?(Symbol) ||
             (!!f.block && f.block.arity != 0 && f.block.arity != 1)
         end

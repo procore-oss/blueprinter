@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'set'
+require 'blueprinter/hooks'
 
 module Blueprinter
   module V2
@@ -24,17 +25,39 @@ module Blueprinter
 
       # Returns the full specification for a Blueprint/view
       def generate
+        exts = extensions
+        fields, opts = run_init_hooks(exts, schema, options)
+
         Spec.new(
           nodes:,
-          options: options.freeze,
-          extensions: extensions.freeze,
+          options: opts.freeze,
+          extensions: exts.freeze,
           formatters: formatters.freeze,
-          schema: schema.freeze,
+          schema: fields.freeze,
           view_defs: view_defs.freeze
         ).freeze
       end
 
       private
+
+      # Runs any `around_blueprint_init` hooks over this Blueprint/view's fields and options.
+      #
+      # These run once, here, rather than on every render, so anything they decide is baked into the spec and costs
+      # nothing at render time.
+      #
+      # @param exts [Array<Blueprinter::Extension>]
+      # @param fields [Hash<Symbol, Blueprinter::V2::Fields::Field>]
+      # @param opts [Hash]
+      # @return [Array(Hash, Hash)] The fields and options to use
+      def run_init_hooks(exts, fields, opts)
+        hooks = Hooks.new(exts)
+        return [fields, opts] unless hooks.registered? :around_blueprint_init
+
+        ctx = Context::Init.new(blueprint, fields.each_value.map(&:to_configurable), opts)
+        final = nil
+        hooks.around(:around_blueprint_init, ctx, require_yield: true) { |c| final = c }
+        [final.fields.to_h { |f| [f.name.to_sym, f.changed? ? f.to_internal : f._original] }, final.options]
+      end
 
       attr_accessor :blueprint, :parent, :nodes
 

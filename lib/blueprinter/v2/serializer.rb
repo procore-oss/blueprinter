@@ -139,8 +139,10 @@ module Blueprinter
       def _serialize(config, object, instances:, store:, depth:, ctx: nil)
         ctx&.object = object
         parent = nil
+        # `each_with_object` would allocate an extra object per serialized object, so build the Hash by hand
+        result = {}
         # rubocop:disable-next Metrics/BlockLength
-        config.fields.each_with_object({}) do |field, result|
+        config.fields.each do |field|
           ctx&.field = field
           next if field._has_conditional && FieldLogic.skip?(ctx, field)
 
@@ -186,6 +188,7 @@ module Blueprinter
                                                                                  depth: depth + 1)
             end
         end
+        result
       end
 
       # Runs any `around_blueprint_init` hooks on this Blueprint and returns the configuration that should be used.

@@ -1,4 +1,5 @@
 ## Unreleased
+- 💅 [ENHANCEMENT] Halves V2's per-object allocations during a render by building the result `Hash` directly instead of with `each_with_object`, which allocates an extra object per call.
 - 💅 [ENHANCEMENT] Marks `Transformer`, `AutoExtractor`, and the `AutoExtractor#extractor` override hook as public API, matching the README's subclassing docs. See [#612](https://github.com/procore-oss/blueprinter/pull/612). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.3.0 - 2026/04/14

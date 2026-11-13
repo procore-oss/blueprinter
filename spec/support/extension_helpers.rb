@@ -50,6 +50,12 @@ module ExtensionHelpers
     end
   end
 
+  # The Serializer's copy of a field, with the Blueprint's options merged in. `spec.schema` and `reflections`
+  # hold the field as it was declared, which is shared with the parent Blueprint and every other view.
+  def finalized_field(blueprint_class, name)
+    blueprint_class.serializer.default_fields.find { |f| f.name == name }
+  end
+
   def prepare(blueprint_class, options, ctx_type, *args)
     serializer = blueprint_class.serializer
     blueprint = instances.blueprint(blueprint_class)

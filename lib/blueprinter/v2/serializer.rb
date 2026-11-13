@@ -31,7 +31,7 @@ module Blueprinter
         @formatter = Formatter.new(spec.formatters)
         @format = @formatter.any?
         @hooks = Hooks.new([Extensions::Core::Format.new, *spec.extensions, Extensions::Core::Root.new])
-        finalize_fields! spec.schema.each_value.freeze, spec.options
+        @default_fields = finalize_fields(spec.schema.values, spec.options)
         find_used_hooks!
         @needs_field_ctx = needs_field_ctx? default_fields
       end
@@ -92,9 +92,7 @@ module Blueprinter
       # The fields defined on this Blueprint/view in the order they were defined.
       #
       # @return [Array<Blueprinter::V2::Fields>]
-      def default_fields
-        @_default_fields ||= @blueprint_class.spec.schema.values.freeze
-      end
+      attr_reader :default_fields
 
       private
 
@@ -217,7 +215,7 @@ module Blueprinter
             end.freeze
 
             if changed
-              finalize_fields! config.fields, config.blueprint.options
+              config.fields = finalize_fields(config.fields, config.blueprint.options)
               config.needs_field_ctx = needs_field_ctx? config.fields
             end
           end
@@ -251,29 +249,36 @@ module Blueprinter
         end
       end
 
-      # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-      def finalize_fields!(fields, blueprint_opts)
-        fields.each do |field|
-          next if field.frozen?
+      # Returns frozen copies of `fields` with `blueprint_opts` merged into them.
+      #
+      # The Field objects in `spec.schema` are the same objects the parent Blueprint and its other views
+      # inherited, and each of those has its own options, so the merged values can't be written back onto them.
+      # Every Serializer gets its own copies instead.
+      def finalize_fields(fields, blueprint_opts)
+        fields.map { |field| finalize_field(field, blueprint_opts) }.freeze
+      end
 
-          # copy field or blueprint options into struct members (faster than Hash lookups)
-          opts = field.options
-          field._if = opts[:if] || blueprint_opts[:if]
-          field._unless = opts[:unless] || blueprint_opts[:unless]
-          field._default_if = opts[:default_if] || blueprint_opts[:default_if]
-          field._has_default = opts.key?(:default) || blueprint_opts.key?(:default)
-          field._default = opts.key?(:default) ? opts[:default] : blueprint_opts[:default]
-          field._exclude_if_nil = opts.key?(:exclude_if_nil) ? opts[:exclude_if_nil] : blueprint_opts[:exclude_if_nil]
+      # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Style/DoubleNegation
+      def finalize_field(field, blueprint_opts)
+        opts = field.options
+        final = field.dup
 
-          # precompute some checks
-          field._has_conditional = !!(field._if || field._unless)
-          field._serializer = field_serializer(field) if field.association?
+        # copy field or blueprint options into struct members (faster than Hash lookups)
+        final._if = opts[:if] || blueprint_opts[:if]
+        final._unless = opts[:unless] || blueprint_opts[:unless]
+        final._default_if = opts[:default_if] || blueprint_opts[:default_if]
+        final._has_default = opts.key?(:default) || blueprint_opts.key?(:default)
+        final._default = opts.key?(:default) ? opts[:default] : blueprint_opts[:default]
+        final._exclude_if_nil = opts.key?(:exclude_if_nil) ? opts[:exclude_if_nil] : blueprint_opts[:exclude_if_nil]
 
-          # freeze everything
-          field.options.freeze
-          field.source_str.freeze
-          field.freeze
-        end
+        # precompute some checks
+        final._has_conditional = !!(final._if || final._unless)
+        final._serializer = field_serializer(final) if final.association?
+
+        # freeze everything (`options` and `source_str` are shared with the declared field)
+        final.options.freeze
+        final.source_str.freeze
+        final.freeze
       end
 
       def field_serializer(field)

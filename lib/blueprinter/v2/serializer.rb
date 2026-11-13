@@ -11,17 +11,14 @@ module Blueprinter
       SIGNAL = :_blueprinter_signal
       SIG_SKIP = :_blueprinter_signal_skip
 
-      # Blueprint instance & config for a given render. Fields and options may be modified by around_blueprint_init hooks.
+      # Blueprint instance & options for a given render. The fields are fixed when the Blueprint is evaluated, so
+      # they're held on the Serializer rather than here.
       #
       # @!attribute [r] blueprint
       #   @return [Blueprinter::V2::Base] Instance of Blueprint to use during a render
-      # @!attribute [r] fields
-      #   @return [Array<Blueprinter::V2::Fields>] Fields to use
       # @!attribute [r] options
       #   @return [Hash] Options Hash given to `render`
-      # @!attribute [r] needs_field_ctx
-      #   @return [true | false] True if we'll need to allocate a field context for this render
-      Config = Struct.new(:blueprint, :fields, :options, :needs_field_ctx, keyword_init: true)
+      Config = Struct.new(:blueprint, :options, keyword_init: true)
 
       attr_reader :hooks
 
@@ -33,7 +30,7 @@ module Blueprinter
         @hooks = Hooks.new([Extensions::Core::Format.new, *spec.extensions, Extensions::Core::Root.new])
         @default_fields = finalize_fields(spec.schema.values, spec.options)
         find_used_hooks!
-        @needs_field_ctx = needs_field_ctx? default_fields
+        @needs_field_ctx = needs_field_ctx? @default_fields
       end
 
       # Serialize a single object.
@@ -48,9 +45,9 @@ module Blueprinter
       def object(object, options, instances:, store:, depth: 1, parent: nil)
         # The Config is built once per Blueprint per render, but extensions may change the options between objects,
         # so refresh them when the caller hands down a different Hash.
-        config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options, store:, depth:)
+        config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options)
         config.options = options.freeze unless config.options.equal? options
-        field_ctx = config.needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
+        field_ctx = @needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
         blueprint_ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
 
         if @hook_around_serialize_object
@@ -76,7 +73,7 @@ module Blueprinter
       # @return [Array<Hash>] The serialized value for `objects`
       def collection(objects, options, instances:, store:, depth: 1, parent: nil)
         # See the note in `object` about refreshing options
-        config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options, store:, depth:)
+        config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options)
         config.options = options.freeze unless config.options.equal? options
         if @hook_around_serialize_collection
           ctx = build_object_ctx(config, object: objects, parent:, store:, depth:)
@@ -98,7 +95,7 @@ module Blueprinter
 
       def serialize_collection(config, objects, parent:, instances:, store:, depth:)
         ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
-        field_ctx = config.needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
+        field_ctx = @needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
 
         objects.map do |object|
           serialize(config, object, instances:, store:, depth:, field_ctx:, ctx:)
@@ -112,11 +109,11 @@ module Blueprinter
       end
 
       def build_field_ctx(config, store:, depth:)
-        Context::Field.new(config.blueprint, config.fields, config.options, nil, nil, store, depth)
+        Context::Field.new(config.blueprint, @default_fields, config.options, nil, nil, store, depth)
       end
 
       def build_object_ctx(config, store:, depth:, object: nil, parent: nil)
-        Context::Object.new(config.blueprint, config.fields, config.options, object, parent, store, depth)
+        Context::Object.new(config.blueprint, @default_fields, config.options, object, parent, store, depth)
       end
 
       def serialize(config, object, instances:, store:, depth:, ctx: nil, field_ctx: nil)
@@ -140,7 +137,7 @@ module Blueprinter
         # `each_with_object` would allocate an extra object per serialized object, so build the Hash by hand
         result = {}
         # rubocop:disable-next Metrics/BlockLength
-        config.fields.each do |field|
+        @default_fields.each do |field|
           ctx&.field = field
           next if field._has_conditional && FieldLogic.skip?(ctx, field)
 
@@ -189,40 +186,15 @@ module Blueprinter
         result
       end
 
-      # Runs any `around_blueprint_init` hooks on this Blueprint and returns the configuration that should be used.
-      # The `around_blueprint_init` hooks may modify the blueprint's options or fields (for that render only).
+      # Builds the configuration for this Blueprint for a given render.
       #
       # Only runs the FIRST time a given Blueprint is used during a given render.
       #
       # @param instances [Blueprinter::V2::InstanceCache]
       # @param options [Hash] Options given to `render`
-      # @param store [Hash] The context store for this render
-      # @param depth [Integer] Current serialization depth
       # @return [Blueprinter::V2::Serializer::Config]
-      def blueprint_init(instances, options, store:, depth:)
-        blueprint = instances.blueprint(@blueprint_class)
-        config = Config.new(blueprint:, fields: default_fields, options:, needs_field_ctx: @needs_field_ctx)
-
-        if @hook_around_blueprint_init
-          fields = config.fields.map(&:to_configurable)
-          ctx = Context::Init.new(blueprint, fields, options, store, depth)
-          @hooks.around(:around_blueprint_init, ctx, require_yield: true) do |ctx|
-            changed = ctx.blueprint.options != @blueprint_class.spec.options
-            config.blueprint.options.freeze
-            config.fields = ctx.fields.map do |f|
-              changed ||= f.changed?
-              changed ? f.to_internal : f._original
-            end.freeze
-
-            if changed
-              config.fields = finalize_fields(config.fields, config.blueprint.options)
-              config.needs_field_ctx = needs_field_ctx? config.fields
-            end
-          end
-        end
-
-        config.options.freeze
-        config
+      def blueprint_init(instances, options)
+        Config.new(blueprint: instances.blueprint(@blueprint_class), options: options.freeze)
       end
 
       # Save time by skipping hooks that aren't used
@@ -230,7 +202,6 @@ module Blueprinter
         @hook_around_serialize_object = @hooks.registered? :around_serialize_object
         @hook_around_serialize_collection = @hooks.registered? :around_serialize_collection
         @hook_around_blueprint = @hooks.registered? :around_blueprint
-        @hook_around_blueprint_init = @hooks.registered? :around_blueprint_init
         @field_hooks = {
           field: @hooks.registered?(:around_field_value) ? :around_field_value : nil,
           object: @hooks.registered?(:around_object_value) ? :around_object_value : nil,

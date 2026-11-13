@@ -35,7 +35,8 @@ describe "Blueprinter::V2 Exclusions" do
     end
 
     ref = blueprint.reflections[:default]
-    expect(ref.fields.keys).to eq %i[id created_at updated_at name]
+    # match_array, not eq: FieldOrder is an `around_blueprint_dsl` hook, so it has already sorted these
+    expect(ref.fields.keys).to match_array %i[id created_at updated_at name]
     expect(ref.options).to eq({ my_opt: true, foo: "foo" })
     expect(ref.extensions.map(&:class).map(&:name)).to eq %w[Blueprinter::Extensions::LegacyOptions Blueprinter::Extensions::FieldOrder]
     expect(blueprint.spec.formatters.keys).to match_array [TrueClass]

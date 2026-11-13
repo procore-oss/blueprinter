@@ -71,7 +71,7 @@ This runs only once per serialized object, so it's a big improvement. But that c
 
 ### Change field config before render
 
-What if we could alter the field definitions programatically, before anything is serialized? The `around_blueprint_init` hook runs only _once per Blueprint_ during a render. It's quite cheap, and it can alter field definitions.
+What if we could alter the field definitions programatically, before anything is serialized? The `around_blueprint_init` hook runs _once per Blueprint_, when the Blueprint class is evaluated. It isn't part of a render at all, so it costs nothing per render no matter how much work it does, and it can alter field definitions.
 
 ```ruby
 class SourceCamelizer < Blueprinter::Extension
@@ -83,7 +83,7 @@ class SourceCamelizer < Blueprinter::Extension
   def camelize_sources(ctx)
     ctx.fields.each do |field|
       # Camelize the `source` attribute of each field
-      field.source = field.source_str.camelize(:lower).to_sym
+      field.source = field.source.to_s.camelize(:lower).to_sym
     end
     yield ctx
   end

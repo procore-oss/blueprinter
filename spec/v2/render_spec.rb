@@ -291,7 +291,6 @@ describe Blueprinter::V2::Render do
           def initialize(log)
             @log = log
             around_result :around_result_hook
-            around_blueprint_init :around_blueprint_init_hook
             around_serialize_object :around_serialize_object_hook
             around_serialize_collection :around_serialize_collection_hook
             around_field_value :around_field_value_hook
@@ -302,11 +301,6 @@ describe Blueprinter::V2::Render do
           def around_result_hook(ctx)
             ctx.store[:log] = @log
             ctx.store[:log] << "around_result (#{ctx.blueprint})"
-            yield ctx
-          end
-
-          def around_blueprint_init_hook(ctx)
-            ctx.store[:log] << "around_blueprint_init (#{ctx.blueprint})"
             yield ctx
           end
 
@@ -346,16 +340,13 @@ describe Blueprinter::V2::Render do
 
         expect(log).to eq [
           'around_result (WidgetBlueprint.with_parts)',
-          'around_blueprint_init (WidgetBlueprint.with_parts)',
           'around_serialize_object (WidgetBlueprint.with_parts)',
           'around_field_value (WidgetBlueprint.with_parts)',
           'around_field_value (WidgetBlueprint.with_parts)',
           'around_object_value (WidgetBlueprint.with_parts)',
-          'around_blueprint_init (CategoryBlueprint)',
           'around_serialize_object (CategoryBlueprint)',
           'around_field_value (CategoryBlueprint)',
           'around_collection_value (WidgetBlueprint.with_parts)',
-          'around_blueprint_init (PartBlueprint)',
           'around_serialize_collection (PartBlueprint)',
           'around_field_value (PartBlueprint)',
           'around_field_value (PartBlueprint)'

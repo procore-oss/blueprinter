@@ -7,19 +7,28 @@ module Blueprinter
   #
   # = V2 Hooks
   #
-  # V2 hooks follow a nested structure, allowing extensions to integrate deeply into the serialization lifecycle. The call
-  # order of hooks looks like:
+  # V2 hooks come in two classes. *Init hooks* run once, when a Blueprint class is evaluated, and see only the
+  # Blueprint's definition. *Render hooks* run during a render and see the objects, options, and results.
+  #
+  # == Init hooks
+  #
+  # - [around_blueprint_init](#around_blueprint_init-instance_method)
+  #
+  # == Render hooks
+  #
+  # Render hooks follow a nested structure, allowing extensions to integrate deeply into the serialization lifecycle. The
+  # call order of hooks looks like:
   #
   # - [around_result](#around_result-instance_method)
-  #   - [around_blueprint_init](#around_blueprint_init-instance_method)
-  #     - [around_serialize_object](#around_serialize_object-instance_method) |
-  #       [around_serialize_collection](#around_serialize_collection-instance_method)
-  #       - [around_blueprint](#around_blueprint-instance_method)
-  #         - [around_field_value](#around_field_value-instance_method) |
-  #           [around_object_value](#around_object_value-instance_method) |
-  #           [around_collection_value](#around_collection_value-instance_method)
-  #           - [around_blueprint_init](#around_blueprint_init-instance_method)
-  #             - …
+  #   - [around_serialize_object](#around_serialize_object-instance_method) |
+  #     [around_serialize_collection](#around_serialize_collection-instance_method)
+  #     - [around_blueprint](#around_blueprint-instance_method)
+  #       - [around_field_value](#around_field_value-instance_method) |
+  #         [around_object_value](#around_object_value-instance_method) |
+  #         [around_collection_value](#around_collection_value-instance_method)
+  #         - [around_serialize_object](#around_serialize_object-instance_method) |
+  #           [around_serialize_collection](#around_serialize_collection-instance_method)
+  #           - …
   # - [around_hook](#around_hook-instance_method)
   #
   # == Extension hook arguments
@@ -82,11 +91,17 @@ module Blueprinter
     # @!visibility private
     Hook = Struct.new(:name, :ext, :target)
 
+    # Hooks that run once, when a Blueprint class is evaluated.
     # @!visibility private
-    HOOKS = %i[
+    INIT_HOOKS = %i[
+      around_blueprint_init
+    ].freeze
+
+    # Hooks that run during a render.
+    # @!visibility private
+    RENDER_HOOKS = %i[
       around_hook
       around_result
-      around_blueprint_init
       around_serialize_object
       around_serialize_collection
       around_blueprint
@@ -95,6 +110,9 @@ module Blueprinter
       around_collection_value
       pre_render
     ].freeze
+
+    # @!visibility private
+    HOOKS = (INIT_HOOKS + RENDER_HOOKS).freeze
 
     # If this returns true, `around_hook` will not be called when this extension's hooks are run.
     #
@@ -186,12 +204,13 @@ module Blueprinter
     # @!visibility public
     def around_result(name) = register_hook(:around_result, name)
 
-    # Registers an `around_blueprint_init` hook. Called the first time each Blueprint is encountered during a serialization.
+    # Registers an `around_blueprint_init` hook. Called once per Blueprint and per view, when the class is evaluated,
+    # before anything has been rendered.
     #
     # - Argument: {Blueprinter::V2::Context::Init}
     # - Yield: Required
     # - Return: N/A
-    # - Perf Impact: Low (run once per blueprint per render)
+    # - Perf Impact: None at render time (run once, when the Blueprint is evaluated)
     #
     # ```
     # def initialize = around_blueprint_init :my_init_hook
@@ -202,8 +221,12 @@ module Blueprinter
     # end
     # ```
     #
-    # By modifying the context, you can sort, filter, or modify the fields that will be serialized, as well as the
-    # blueprint's options. Some extensions may wish to initialize some kind of state in `ctx.state`.
+    # By modifying the context, you can sort, filter, add to, or rewrite the fields the Blueprint will serialize, as
+    # well as the Blueprint's options. Whatever it decides is baked into the Blueprint, so it costs nothing per render
+    # and is visible through {Blueprinter::V2::Reflection reflection}.
+    #
+    # This is the only hook that runs outside a render. There is no object, no `render` options, and no Blueprint
+    # instance, because none of them exist yet. A hook that needs any of those wants a render hook instead.
     #
     # @param name [Symbol] Name of instance method that implements hook
     # @!visibility public

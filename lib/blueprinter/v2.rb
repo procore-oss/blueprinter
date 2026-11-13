@@ -61,6 +61,7 @@ module Blueprinter
   # @api public
   module V2
     autoload :Base, 'blueprinter/v2/base'
+    autoload :Compiler, 'blueprinter/v2/compiler'
     autoload :Context, 'blueprinter/v2/context'
     autoload :DSL, 'blueprinter/v2/dsl'
     autoload :Extensions, 'blueprinter/v2/extensions'

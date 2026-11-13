@@ -18,7 +18,15 @@ module Blueprinter
       #   @return [Blueprinter::V2::Base] Instance of Blueprint to use during a render
       # @!attribute [r] options
       #   @return [Hash] Options Hash given to `render`
-      Config = Struct.new(:blueprint, :options, keyword_init: true)
+      # @!attribute [r] frames
+      #   @return [Hash<Integer, Frame>] This Blueprint's Frame, by depth
+      Config = Struct.new(:blueprint, :options, :frames, keyword_init: true)
+
+      # Everything a compiled field proc needs that doesn't change between the objects of a collection. One is
+      # built per Blueprint per depth per render and handed to every field proc.
+      #
+      # @!visibility private
+      Frame = Struct.new(:config, :blueprint, :ctx, :instances, :store, :depth, :parent)
 
       attr_reader :hooks
 
@@ -31,6 +39,10 @@ module Blueprinter
         @default_fields = finalize_fields(spec.schema.values, spec.options)
         find_used_hooks!
         @needs_field_ctx = needs_field_ctx? @default_fields
+        @procs = Compiler
+                 .new(blueprint_class: @blueprint_class, formatter: @formatter, hooks: @hooks,
+                      field_hooks: @field_hooks)
+                 .compile(@default_fields)
       end
 
       # Serialize a single object.
@@ -47,18 +59,18 @@ module Blueprinter
         # so refresh them when the caller hands down a different Hash.
         config = store[@blueprint_class.object_id] ||= blueprint_init(instances, options)
         config.options = options.freeze unless config.options.equal? options
-        field_ctx = @needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
+        frame = frame_for(config, instances, store, depth)
         blueprint_ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
 
         if @hook_around_serialize_object
           ctx = build_object_ctx(config, object:, parent:, store:, depth:)
           @hooks.around(:around_serialize_object, ctx) do |ctx|
             config.options = ctx.options.freeze
-            refresh_options(config.options, blueprint_ctx, field_ctx)
-            serialize(config, ctx.object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
+            refresh_options(config.options, blueprint_ctx, frame.ctx)
+            serialize(frame, ctx.object, ctx: blueprint_ctx)
           end
         else
-          serialize(config, object, instances:, store:, depth:, field_ctx:, ctx: blueprint_ctx)
+          serialize(frame, object, ctx: blueprint_ctx)
         end
       end
 
@@ -95,11 +107,21 @@ module Blueprinter
 
       def serialize_collection(config, objects, parent:, instances:, store:, depth:)
         ctx = @hook_around_blueprint ? build_object_ctx(config, parent:, store:, depth:) : nil
-        field_ctx = @needs_field_ctx ? build_field_ctx(config, store:, depth:) : nil
+        frame = frame_for(config, instances, store, depth)
 
-        objects.map do |object|
-          serialize(config, object, instances:, store:, depth:, field_ctx:, ctx:)
-        end.to_a
+        objects.map { |object| serialize(frame, object, ctx:) }.to_a
+      end
+
+      # The Frame for this Blueprint at this depth. One per Blueprint per depth per render: everything on it is
+      # invariant across the objects of a collection, and the field context it holds is reused the same way.
+      def frame_for(config, instances, store, depth)
+        frame = config.frames[depth] ||=
+          Frame.new(config, config.blueprint, nil, instances, store, depth, nil)
+        if @needs_field_ctx
+          ctx = frame.ctx ||= build_field_ctx(config, store:, depth:)
+          ctx.options = config.options unless ctx.options.equal? config.options
+        end
+        frame
       end
 
       # Context objects hold their own reference to the options, so they must be refreshed when a hook changes them
@@ -116,73 +138,25 @@ module Blueprinter
         Context::Object.new(config.blueprint, @default_fields, config.options, object, parent, store, depth)
       end
 
-      def serialize(config, object, instances:, store:, depth:, ctx: nil, field_ctx: nil)
+      def serialize(frame, object, ctx: nil)
         if @hook_around_blueprint
           ctx.object = object
           @hooks.around(:around_blueprint, ctx) do |ctx|
-            config.options = ctx.options.freeze
-            refresh_options(config.options, field_ctx)
-            _serialize(config, ctx.object, instances:, store:, depth:, ctx: field_ctx)
+            frame.config.options = ctx.options.freeze
+            refresh_options(frame.config.options, frame.ctx)
+            _serialize(frame, ctx.object)
           end
         else
-          _serialize(config, object, instances:, store:, depth:, ctx: field_ctx)
+          _serialize(frame, object)
         end
       end
 
-      # Long and ugly for performance
-      # rubocop:disable-next Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-      def _serialize(config, object, instances:, store:, depth:, ctx: nil)
-        ctx&.object = object
-        parent = nil
+      def _serialize(frame, object)
+        ctx = frame.ctx
+        ctx.object = object if ctx
         # `each_with_object` would allocate an extra object per serialized object, so build the Hash by hand
         result = {}
-        # rubocop:disable-next Metrics/BlockLength
-        @default_fields.each do |field|
-          ctx&.field = field
-          next if field._has_conditional && FieldLogic.skip?(ctx, field)
-
-          # extract value
-          defaulted = false
-          if @any_field_hooks && (field_hook = @field_hooks[field.type])
-            value = catch SIGNAL do
-              @hooks.around(field_hook, ctx) do
-                val = field.block ? field.block.call(object, ctx) : field.extract(object)
-                if field._has_default && FieldLogic.default?(field, val, ctx:)
-                  defaulted = true
-                  FieldLogic.default_value(field, ctx:)
-                else
-                  val
-                end
-              end
-            end
-            next if value == SIG_SKIP
-          else
-            value = field.block ? field.block.call(object, ctx) : field.extract(object)
-            if field._has_default && FieldLogic.default?(field, value, ctx:)
-              defaulted = true
-              value = FieldLogic.default_value(field, ctx:)
-            end
-          end
-
-          # format/serialize and set value
-          result[field.name] =
-            if value.nil?
-              field._exclude_if_nil ? next : nil
-            elsif defaulted
-              value
-            elsif field.type == :field
-              @format ? @formatter.call(config.blueprint, value) : value
-            else
-              parent ||= Context::Parent.new(@blueprint_class)
-              parent.field = field
-              parent.object = object
-              # A field hook may have replaced the options for this association only, so hand those down and reset
-              assoc_options = ctx ? ctx.options : config.options
-              ctx.options = config.options unless assoc_options.equal? config.options
-              field._serializer.serialize(field.blueprint, value, assoc_options, parent:, instances:, store:,
-                                                                                 depth: depth + 1)
-            end
-        end
+        @procs.each { |field_proc| field_proc.call(result, object, frame) }
         result
       end
 
@@ -194,7 +168,7 @@ module Blueprinter
       # @param options [Hash] Options given to `render`
       # @return [Blueprinter::V2::Serializer::Config]
       def blueprint_init(instances, options)
-        Config.new(blueprint: instances.blueprint(@blueprint_class), options: options.freeze)
+        Config.new(blueprint: instances.blueprint(@blueprint_class), options: options.freeze, frames: {})
       end
 
       # Save time by skipping hooks that aren't used

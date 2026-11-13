@@ -6,7 +6,7 @@ describe Blueprinter::V2::FieldLogic do
   let(:subject) { described_class }
 
   context "value_or_default" do
-    let(:field) { blueprint.reflections[:default].fields.fetch(:foo) }
+    let(:field) { finalized_field(blueprint, :foo) }
     let(:object) { { foo: 'Foo' } }
     let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, {}) }
 
@@ -97,7 +97,7 @@ describe Blueprinter::V2::FieldLogic do
   end
 
   context "default?" do
-    let(:field) { blueprint.reflections[:default].fields.fetch(:foo) }
+    let(:field) { finalized_field(blueprint, :foo) }
     let(:object) { { foo: 'Foo' } }
     let(:ctx) { prepare(blueprint, {}, Blueprinter::V2::Context::Field, object, field, {}) }
 

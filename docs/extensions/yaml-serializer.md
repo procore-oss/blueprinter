@@ -27,10 +27,10 @@ class YamlSerializerExtension < Blueprinter::Extension
 end
 ```
 
-You can serialize to your custom format using the `to` method:
+You can serialize to your custom format using the `format` option:
 
 ```ruby
-MyBlueprint.render(object).to(:yaml)
+MyBlueprint.render(object, format: :yaml)
 ```
 
 ### Extensions that serialize should be added FIRST

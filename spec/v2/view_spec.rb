@@ -84,6 +84,46 @@ describe "Blueprinter::V2 Views" do
       expect(ref[:extended].options).to eq({ exclude_if_nil: true })
     end
 
+    it "applies a view's own options to fields inherited from the Blueprint" do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        field :name
+
+        view :defaulted do
+          set :default, 'N/A'
+        end
+
+        view :conditional do
+          set :if, ->(_ctx) { false }
+        end
+      end
+
+      expect(blueprint.render({ name: nil }, format: :hash)).to eq({ name: nil })
+      expect(blueprint[:defaulted].render({ name: nil }, format: :hash)).to eq({ name: 'N/A' })
+      expect(blueprint[:conditional].render({ name: 'Foo' }, format: :hash)).to eq({})
+    end
+
+    it "lets a view turn off an option the Blueprint set" do
+      blueprint = Class.new(Blueprinter::V2::Base) do
+        set :exclude_if_nil, true
+        field :name
+
+        view :keeps_nils do
+          set :exclude_if_nil, false
+        end
+      end
+
+      expect(blueprint.render({ name: nil }, format: :hash)).to eq({})
+      expect(blueprint[:keeps_nils].render({ name: nil }, format: :hash)).to eq({ name: nil })
+    end
+
+    it "applies a subclass's own options to fields inherited from the parent Blueprint" do
+      parent = Class.new(Blueprinter::V2::Base) { field :name }
+      child = Class.new(parent) { set :default, 'N/A' }
+
+      expect(parent.render({ name: nil }, format: :hash)).to eq({ name: nil })
+      expect(child.render({ name: nil }, format: :hash)).to eq({ name: 'N/A' })
+    end
+
     it "inherits extensions" do
       ref = blueprint.reflections
       expect(ref[:default].extensions.size).to eq 1
@@ -162,7 +202,7 @@ describe "Blueprinter::V2 Views" do
           name: 'Bar',
           description: 'About Bar'
         }
-      }).to_h
+      }, format: :hash)
 
       expect(result).to eq({
         name: 'Foo',

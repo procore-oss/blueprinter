@@ -68,7 +68,8 @@ module Blueprinter
     # === extractor
     #
     # Support for Legacy/V1's `extractor` option. Like V1, the extractor may be a class or an instance, it's
-    # instantiated at most once per render, and the field's block (if any) is passed to it in the `block` option.
+    # instantiated at most once per field when the Blueprint is evaluated, and the field's block (if any) is
+    # passed to it in the `block` option.
     #
     # ```
     # field :weird_object, extractor: MyWeirdExtractor
@@ -140,11 +141,11 @@ module Blueprinter
       V1_COND_ARITY = 3
 
       def initialize
-        around_result :apply_render_view_option
         around_blueprint_init :init_legacy_conditionals
         around_blueprint_init :init_legacy_default_ifs
         around_blueprint_init :init_legacy_field_names
         around_blueprint_init :init_legacy_extractors
+        around_result :apply_render_view_option
       end
 
       # @param ctx [Blueprinter::V2::Context::Result]
@@ -160,8 +161,8 @@ module Blueprinter
       # @param ctx [Blueprinter::V2::Context::Init]
       # @!visibility private
       def init_legacy_conditionals(ctx)
-        blueprint = ctx.blueprint.class
-        opts = ctx.blueprint.options
+        blueprint = ctx.blueprint
+        opts = ctx.options
 
         # Convert blueprint if/unless options
         opts[:if] = wrap_v1_cond(opts[:if], blueprint) if opts[:if]
@@ -178,7 +179,7 @@ module Blueprinter
       # @param ctx [Blueprinter::V2::Context::Init]
       # @!visibility private
       def init_legacy_default_ifs(ctx)
-        blueprint_opts = ctx.blueprint.options
+        blueprint_opts = ctx.options
 
         # Convert blueprint default_if option
         apply_v1_default_if(blueprint_opts, blueprint_opts)
@@ -203,7 +204,7 @@ module Blueprinter
       # @param ctx [Blueprinter::V2::Context::Init]
       # @!visibility private
       def init_legacy_extractors(ctx)
-        default_extractor = ctx.blueprint.options[:extractor]
+        default_extractor = ctx.options[:extractor]
         ctx.fields.each do |field|
           extractor = field.options[:extractor] || default_extractor
           next if extractor.nil?

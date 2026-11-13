@@ -49,7 +49,11 @@ object alone.
 | inspected or reordered the field list | `around_blueprint_init` |
 | instrumented everything | `around_hook` |
 
-Hooks nest outermost-first: `around_result` → `around_blueprint_init` → `around_serialize_*` →
+`around_blueprint_init` is the odd one out: it's an *init hook*, not a render hook. It runs once
+per Blueprint and per view, when the Blueprint class is evaluated, and gets no object and no
+render options. Whatever it does to the fields or options is baked into the Blueprint.
+
+The render hooks nest outermost-first: `around_result` → `around_serialize_*` →
 `around_blueprint` → `around_*_value`.
 
 ## Shape of a V2 hook

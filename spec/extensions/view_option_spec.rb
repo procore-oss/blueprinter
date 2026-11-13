@@ -15,13 +15,13 @@ describe Blueprinter::Extensions::LegacyOptions do
 
   it 'does nothing by default' do
     blueprint.add subject
-    result = blueprint.render({}).to_hash
+    result = blueprint.render({}, format: :hash)
     expect(result).to eq({})
   end
 
   it 'finds a nested view' do
     blueprint.add subject
-    result = blueprint.render({}, view: 'foo.bar').to_hash
+    result = blueprint.render({}, view: 'foo.bar', format: :hash)
     expect(result).to eq({ foo: nil, bar: nil })
   end
 
@@ -33,7 +33,7 @@ describe Blueprinter::Extensions::LegacyOptions do
       end
     end
     blueprint.add subject
-    blueprint.render({}, view: :foo).to_hash
+    blueprint.render({}, view: :foo, format: :hash)
     expect(options).to eq [:foo]
   end
 end

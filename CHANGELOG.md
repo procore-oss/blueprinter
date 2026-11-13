@@ -1,4 +1,6 @@
 ## Unreleased
+- 🐛 [BUGFIX] Applies a V2 view's or subclass's own `default`, `default_if`, `if`, `unless`, and `exclude_if_nil` options to fields it inherited from its parent Blueprint. The inherited fields kept the parent's values, so a view could neither set these options nor turn off one the parent had set.
+- 💅 [ENHANCEMENT] Halves V2's per-object allocations during a render by building the result `Hash` directly instead of with `each_with_object`, which allocates an extra object per call.
 - 💅 [ENHANCEMENT] Marks `Transformer`, `AutoExtractor`, and the `AutoExtractor#extractor` override hook as public API, matching the README's subclassing docs. See [#612](https://github.com/procore-oss/blueprinter/pull/612). Thanks to [@lessthanjacob](https://github.com/lessthanjacob).
 
 ## 1.3.0 - 2026/04/14

@@ -405,27 +405,20 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'uses the core root extension' do
-    result = category_blueprint.render({ name: 'Foo' }, { root: :data }).to_hash
+    result = category_blueprint.render({ name: 'Foo' }, { root: :data, format: :hash })
     expect(result).to eq({ data: { name: 'Foo' } })
 
-    result = category_blueprint.render({ name: 'Foo' }, { root: :data, meta: { links: [] } }).to_hash
+    result = category_blueprint.render({ name: 'Foo' }, { root: :data, meta: { links: [] }, format: :hash })
     expect(result).to eq({ data: { name: 'Foo' }, meta: { links: [] } })
   end
 
-  it 'runs around_blueprint_init, around_serialize_object, around_serialize_collection, and around_blueprint' do
+  it 'runs around_serialize_object, around_serialize_collection, and around_blueprint' do
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
         @log = log
-        around_blueprint_init :around_blueprint_init_hook
         around_serialize_object :around_serialize_object_hook
         around_serialize_collection :around_serialize_collection_hook
         around_blueprint :around_blueprint_hook
-      end
-
-      def around_blueprint_init_hook(ctx)
-        @log << "around_blueprint_init (#{ctx.blueprint.class}): a"
-        yield ctx
-        @log << "around_blueprint_init (#{ctx.blueprint.class}): b"
       end
 
       def around_serialize_object_hook(ctx)
@@ -456,18 +449,12 @@ describe Blueprinter::V2::Serializer do
     result = widget_blueprint.serializer.object(widget, {}, instances:, store:, depth: 1)
     expect(result).to eq(widget)
     expect(log).to eq [
-      "around_blueprint_init (WidgetBlueprint): a",
-      "around_blueprint_init (WidgetBlueprint): b",
       "around_serialize_object (Foo): a",
         "around_blueprint (Foo): a",
-          "around_blueprint_init (CategoryBlueprint): a",
-          "around_blueprint_init (CategoryBlueprint): b",
           "around_serialize_object (Bar): a",
             "around_blueprint (Bar): a",
             "around_blueprint (Bar): b",
           "around_serialize_object (Bar): b",
-          "around_blueprint_init (PartBlueprint): a",
-          "around_blueprint_init (PartBlueprint): b",
           "around_serialize_collection (2): a",
             "around_blueprint (): a",
             "around_blueprint (): b",
@@ -499,7 +486,30 @@ describe Blueprinter::V2::Serializer do
       }.to_json)
   end
 
-  it 'only runs around_blueprint_init once per blueprint' do
+  it 'allocates only the result Hash per serialized object' do
+    blueprint = Class.new(application_blueprint) do
+      field :name
+      field :description
+    end
+    objects = ->(n) { Array.new(n) { |i| { name: "Widget #{i}", description: 'A widget' } } }
+    allocations = lambda do |n|
+      objs = objects[n]
+      blueprint.render(objs, format: :hash)
+      GC.disable
+      before = GC.stat(:total_allocated_objects)
+      blueprint.render(objs, format: :hash)
+      GC.stat(:total_allocated_objects) - before
+    ensure
+      GC.enable
+    end
+
+    allocations[10] # absorb one-time costs that the first measured render would otherwise be charged for
+
+    # Comparing two sizes cancels out the fixed per-render cost, leaving only the per-object cost
+    expect(allocations[110] - allocations[10]).to eq(100)
+  end
+
+  it 'runs around_blueprint_init once for each Blueprint in a nested tree, however many renders' do
     log = []
     ext = Class.new(Blueprinter::Extension) do
       def initialize(log)
@@ -508,28 +518,33 @@ describe Blueprinter::V2::Serializer do
       end
 
       def hook(ctx)
-        @log << "around_blueprint_init (#{ctx.blueprint.class})"
+        @log << ctx.blueprint.blueprint_name
         yield ctx
       end
     end
+    application_blueprint.blueprint_name = 'ApplicationBlueprint'
     application_blueprint.add ext.new(log)
 
-    widget_blueprint.serializer.collection(
-      [
-        { name: 'A', description: 'Widget A', category: { name: 'Cat' }, parts: [{ num: 42 }, { num: 43 }] },
-        { name: 'B', description: 'Widget B', category: { name: 'Cat' }, parts: [{ num: 43 }, { num: 44 }] },
-      ],
-      {},
-      instances:,
-      store:,
-      depth: 1
-    )
+    2.times do
+      widget_blueprint.serializer.collection(
+        [
+          { name: 'A', description: 'Widget A', category: { name: 'Cat' }, parts: [{ num: 42 }, { num: 43 }] },
+          { name: 'B', description: 'Widget B', category: { name: 'Cat' }, parts: [{ num: 43 }, { num: 44 }] },
+        ],
+        {},
+        instances:,
+        store: {},
+        depth: 1
+      )
+    end
 
-    expect(log).to eq [
-      'around_blueprint_init (WidgetBlueprint)',
-      'around_blueprint_init (CategoryBlueprint)',
-      'around_blueprint_init (PartBlueprint)',
-    ]
+    # ApplicationBlueprint is never rendered, but it is evaluated, so it gets the hook too
+    expect(log.tally).to eq({
+      'ApplicationBlueprint' => 1,
+      'WidgetBlueprint' => 1,
+      'CategoryBlueprint' => 1,
+      'PartBlueprint' => 1
+    })
   end
 
   it 'hands options changed by an extension down to nested blueprints' do
@@ -664,33 +679,6 @@ describe Blueprinter::V2::Serializer do
     expect do
       widget_blueprint.serializer.object({}, {}, instances:, store:, depth: 1)
     end.to raise_error(Blueprinter::Errors::ExtensionHook, /did not yield/)
-  end
-
-  it "allows around_blueprint_init to modify blueprint options and fields" do
-    ext = Class.new(Blueprinter::Extension) do
-      def initialize = around_blueprint_init :hook
-      def hook(ctx)
-        ctx.blueprint.options[:exclude_if_nil] = true
-        ctx.fields.sort_by!(&:name)
-        ctx.fields.find { |f| f.name == :description }.options[:exclude_if_nil] = false
-        yield ctx
-      end
-    end
-
-    blueprint = Class.new(application_blueprint) do
-      add ext.new
-      fields :id, :name, :summary, :description
-    end
-
-    result = blueprint.render({ id: 42, name: nil, summary: 'foo', description: nil }).to_json
-    expect(result).to eq({
-      description: nil,
-      id: 42,
-      summary: 'foo'
-    }.to_json)
-
-    expect(blueprint.reflections[:default].options).to eq({})
-    expect(blueprint.reflections[:default].fields[:description].options).to eq({})
   end
 
   it 'uses the same blueprint instance throughout' do

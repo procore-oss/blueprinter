@@ -499,6 +499,29 @@ describe Blueprinter::V2::Serializer do
       }.to_json)
   end
 
+  it 'allocates only the result Hash per serialized object' do
+    blueprint = Class.new(application_blueprint) do
+      field :name
+      field :description
+    end
+    objects = ->(n) { Array.new(n) { |i| { name: "Widget #{i}", description: 'A widget' } } }
+    allocations = lambda do |n|
+      objs = objects[n]
+      blueprint.render(objs, format: :hash)
+      GC.disable
+      before = GC.stat(:total_allocated_objects)
+      blueprint.render(objs, format: :hash)
+      GC.stat(:total_allocated_objects) - before
+    ensure
+      GC.enable
+    end
+
+    allocations[10] # absorb one-time costs that the first measured render would otherwise be charged for
+
+    # Comparing two sizes cancels out the fixed per-render cost, leaving only the per-object cost
+    expect(allocations[110] - allocations[10]).to eq(100)
+  end
+
   it 'only runs around_blueprint_init once per blueprint' do
     log = []
     ext = Class.new(Blueprinter::Extension) do

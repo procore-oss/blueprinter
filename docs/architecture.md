@@ -2,7 +2,7 @@
 title: "Architecture"
 type: explanation
 description: "Build a working model of how a blueprint is defined, compiled, and rendered, and why each mechanism has its shape."
-generated: { by: claude-code/claude-opus-5-5, at: "2026-10-21T23:22:41Z" }
+generated: { by: claude-code/claude-opus-5-5, at: "2026-11-05T14:00:41Z" }
 verified:
   - { by: human:lessthanjacob, at: "2026-10-21T23:24:23Z" }
 ---
@@ -243,6 +243,7 @@ Blueprinter loads in two ways for two reasons. **Autoloading** lets an app refer
 A blueprint class is shared by every thread in a multi-threaded server, so anything it caches has to be safe to read concurrently.
 
 - The only lock under `lib/` is the `Mutex` in `ViewCollection`. `ensure_cached!` checks for the snapshot without the lock, builds it under the lock with a second check, and publishes it with one reference assignment, so renders after the first take _no_ lock.
+- With `compile_views` on, `ViewCollection#compiled` adds each compiled view the same way: it looks the view up without the lock, compiles it under the lock with a second check, and publishes a _new_ frozen snapshot that includes it. A published snapshot is never written to, because JRuby needs external synchronization for a `Hash` write that overlaps another thread's read or write, including two threads compiling different views. A compile whose snapshot was invalidated meanwhile returns its module without storing it; publishing a compiled view keeps the snapshot's `fields` `Hash`, so only a rebuild counts as invalidation.
 - The snapshot's `Hash`es and `Array`s are frozen; the `Field` and transformer objects inside them are not.
 - The DSL is unsynchronized and assumes class bodies run before concurrent renders start.
 - Not safe: DSL calls that invalidate while other threads render. `fields_for` reads the snapshot reference twice and `invalidate_cache!` writes it without the lock.
@@ -250,7 +251,8 @@ A blueprint class is shared by every thread in a multi-threaded server, so anyth
 Changes must keep these invariants:
 
 - `ensure_cached!` keeps its shape: nil-check without the lock, rebuild under the `Mutex` with a second check, publish by one reference assignment. No boolean "finalized" flag: a boolean read without the lock has no visibility guarantee on JRuby, while a frozen object published by one reference assignment is safe on every Ruby engine.
-- `fields_for` and `transformers` stay lock-free reads of the snapshot after the first compile.
+- `fields_for`, `transformers`, and `compiled` stay lock-free reads of the snapshot after the first compile.
+- Nothing writes into a published snapshot, the compiled views included: a change publishes a new frozen snapshot under the `Mutex`.
 - Class-level state written during render must be an idempotent memo, as `Field@_if_callable`, `Configuration@_array_like_classes` and `@_default_extractor`, and the `Reflection` memos are.
 
 ## Public API and Compatibility

@@ -8,6 +8,8 @@ module Blueprinter
   class AssociationExtractor < Extractor
     include EmptyTypes
 
+    attr_reader :extractor
+
     def initialize
       @extractor = Blueprinter.configuration.default_extractor
     end

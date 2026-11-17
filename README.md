@@ -1154,6 +1154,51 @@ Gems can be created that enrich `blueprinter`'s core functionality via extension
 </details>
 
 <details>
+<summary>Compiled Views</summary>
+
+
+Blueprinter can compile each view into a plain Ruby method on first render, which can improve rendering performance.
+Output is identical to standard rendering. It is opt-in:
+
+```ruby
+Blueprinter.configure do |config|
+  config.compile_views = true
+end
+```
+
+A compiled view builds each object's Hash directly, much like a hand-written serializer would:
+
+```ruby
+# class UserBlueprint < Blueprinter::Base
+#   identifier :id
+#   fields :first_name, :last_name
+# end
+#
+# compiles to (roughly):
+{ id: object.id, first_name: object.first_name, last_name: object.last_name }
+```
+
+Fields, blocks, `name`, `if`/`unless` and `exclude_if_nil` are compiled, as are associations with a fixed
+`:blueprint` (extensions still run for them). Everything else (`default`, `default_if`, `datetime_format`, custom
+extractors, associations with a Proc `:blueprint` or `:options`, and any other option) uses standard rendering within
+the compiled view.
+
+How much it helps depends on the blueprint and the objects: views made mostly of compiled fields gain the most, fields
+that use standard rendering gain little, and the cost of reading values from the objects themselves (for example
+ActiveRecord attributes or queries they trigger) is unchanged.
+
+Things to know:
+- While `datetime_format`, `field_default`, `association_default`, `if` or `unless` is set in the global configuration,
+  renders use standard rendering. Hash objects are also always rendered the standard way.
+- Compiled views are stored with Blueprinter's view cache and rebuilt whenever it is refreshed (e.g. after a `view`
+  block).
+- Compiled fields read values directly (`object.name`), so patches applied directly to Blueprinter's internal
+  `AutoExtractor`, `PublicSendExtractor` or `AssociationExtractor` classes are not used for them. Custom extractors
+  configured with `extractor_default` or `extractor:` are always used.
+
+</details>
+
+<details>
 <summary>Deprecations</summary>
 
 

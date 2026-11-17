@@ -25,6 +25,17 @@ RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = '--pattern spec/**/*_spec.rb --warnings'
 end
 
+namespace :spec do
+  desc 'Run the specs with compiled views enabled'
+  task :compiled do
+    ENV['BLUEPRINTER_COMPILE_VIEWS'] = '1'
+    Rake::Task[:spec].reenable
+    Rake::Task[:spec].invoke
+  ensure
+    ENV.delete('BLUEPRINTER_COMPILE_VIEWS')
+  end
+end
+
 RuboCop::RakeTask.new
 
 YARD::Rake::YardocTask.new do |t|
@@ -51,4 +62,4 @@ namespace :perf do
   end
 end
 
-task default: %i[spec rubocop]
+task default: %i[spec spec:compiled rubocop]

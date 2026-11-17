@@ -67,6 +67,7 @@ module Blueprinter
       # @param format [Symbol]
       # @return [Object]
       def to(format)
+        Blueprinter.configuration.hooks # nested V1 blueprints read the cached hooks
         blueprint = @instances.blueprint(@blueprint_class)
         result =
           if @serializer.hooks.registered? :around_result

@@ -54,6 +54,10 @@ module Blueprinter
       hooks
     end
 
+    # The hooks as of the last `hooks` call, without re-checking `extensions`. Renders call `hooks` once at the start.
+    # @api private
+    def current_hooks = @_hooks&.at(1) || hooks
+
     def array_like_classes
       @_array_like_classes ||= [
         Array,

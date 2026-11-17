@@ -95,7 +95,7 @@ module Blueprinter
       view_name = @forced_view_name if @forced_view_name # V2-forward compatibility
       raise Errors::UnknownView, "View '#{view_name}' is not defined" unless view_collection.view?(view_name)
 
-      hooks = Blueprinter.configuration.hooks[:pre_render]
+      hooks = Blueprinter.configuration.current_hooks[:pre_render]
       object = hooks.reduce(object) do |val, hook|
         hook.ext.pre_render(val, self, view_name, local_options)
       end
@@ -188,6 +188,7 @@ module Blueprinter
 
     def build_result(object:, options:)
       view_name = options[:view] || :default
+      Blueprinter.configuration.hooks
 
       prepared_object = V2::V1Bridge.with(instances: V2::InstanceCache.new) do
         hashify(object, view_name:, local_options: options.except(:view, :root, :meta))

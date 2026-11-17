@@ -184,6 +184,19 @@ describe 'V1/V2 Compatibility' do
         })
       end
     end
+
+    context 'V1 pre_render extensions' do
+      after { Blueprinter.configure { |config| config.extensions = [] } }
+
+      it 'runs an extension appended after the first render' do
+        blueprint.render(full_input).to_hash
+        late = Class.new(Blueprinter::Extension) do
+          def pre_render(object, _blueprint, _view, _options) = object.is_a?(Hash) ? object.merge(description: 'Late') : object
+        end
+        Blueprinter.configure { |config| config.extensions << late.new }
+        expect(blueprint.render(full_input).to_hash[:category]).to eq({ description: 'Late' })
+      end
+    end
   end
 
   context 'instance cache' do

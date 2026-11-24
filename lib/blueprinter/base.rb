@@ -368,7 +368,7 @@ module Blueprinter
       end
 
       def view_collection
-        @_view_collection ||= ViewCollection.new
+        @_view_collection ||= ViewCollection.new(blueprint: self)
       end
 
       private

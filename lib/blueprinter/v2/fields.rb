@@ -89,9 +89,9 @@ module Blueprinter
         end
       end
 
-      # Representation of a field that's modifiable inside `around_blueprint_init` hooks.
+      # Representation of a field that an `around_blueprint_init` hook can modify when the Blueprint is evaluated.
       #
-      # Altering a configurable field will change how it behaves during the current render.
+      # Altering a configurable field changes how the Blueprint behaves from then on.
       #
       # @!attribute [r] type
       #   @return [:field | :object | :collection] The type of field
@@ -117,7 +117,7 @@ module Blueprinter
 
         # @!visibility private
         def changed?
-          @changed || options != _original.options
+          _original.nil? || @changed || options != _original.options
         end
 
         # @!visibility private
@@ -126,7 +126,7 @@ module Blueprinter
             type:,
             name: name.to_sym,
             source: source.to_sym,
-            source_str: source == _original.source ? _original.source_str : source.to_s,
+            source_str: _original && source == _original.source ? _original.source_str : source.to_s,
             options:,
             block:,
             blueprint:

@@ -211,7 +211,7 @@ module Blueprinter
       self.view_path = :default
       self.view_name = :default
 
-      # @return [Hash] Copy of options set on the class. Frozen after `around_blueprint_init` hooks run.
+      # @return [Hash] Copy of options set on the class
       attr_reader :options
 
       # @!visibility private

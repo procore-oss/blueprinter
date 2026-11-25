@@ -5,20 +5,21 @@ module Blueprinter
     # Structs passed to if/unless/default Procs, field definition blocks, and extension hooks.
     module Context
       #
-      # The blueprint being serialized along with options passed to render/render_object/render_collection.
+      # A Blueprint or view being evaluated. Passed to `around_blueprint_init` hooks.
+      #
+      # Unlike the render contexts there is no object, no `render` options, and no Blueprint instance. This runs once,
+      # when the Blueprint class is evaluated, so whatever it decides is baked into the Blueprint and costs nothing at
+      # render time.
       #
       # @!attribute [r] blueprint
-      #   @return [Blueprinter::V2::Base] Instance of the outer Blueprint class. You may modify the `blueprint.options` Hash.
+      #   @return [Class] The Blueprint or view class being evaluated
       # @!attribute [rw] fields
-      #   @return [Array<Blueprinter::V2::Fields::Configurable>] The fields to serialize, in the order they'll be serialized
+      #   @return [Array<Blueprinter::V2::Fields::Configurable>] The fields to serialize, in the order they'll be
+      #           serialized
       # @!attribute [r] options
-      #   @return [Hash] Options passed to `render`
-      # @!attribute [r] store
-      #   @return [Hash] Arbitrary store available for this render
-      # @!attribute [r] depth
-      #   @return [Integer] Current serialization depth
+      #   @return [Hash] Options set on the Blueprint or view. You may modify this Hash.
       #
-      Init = Struct.new(:blueprint, :fields, :options, :store, :depth) do
+      Init = Struct.new(:blueprint, :fields, :options) do
         (members - %i[fields]).each do |attr|
           remove_method("#{attr}=")
           define_method("#{attr}=") { |_| raise BlueprinterError, "Context field `#{attr}` is immutable" }

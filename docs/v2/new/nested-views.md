@@ -25,11 +25,11 @@ end
 You can render nested views using dot syntax:
 
 ```ruby
-MyBlueprint["extended.with_foo"].render(widget).to_json
+MyBlueprint["extended.with_foo"].render(widget)
 ```
 
 or nested Hash syntax:
 
 ```ruby
-MyBlueprint[:extended][:with_bar].render(widget).to_json
+MyBlueprint[:extended][:with_bar].render(widget)
 ```

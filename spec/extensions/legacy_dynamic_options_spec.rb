@@ -16,7 +16,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :category, test.category_blueprint, options: { dynamic_val: 42 }
     end
 
-    result = blueprint.render({ category: { name: 'Foo' } }).to_hash
+    result = blueprint.render({ category: { name: 'Foo' } }, format: :hash)
     expect(result).to eq({ category: { name: 'Foo', val: 42 } })
   end
 
@@ -27,7 +27,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :categories, [test.category_blueprint], options: { dynamic_val: 42 }
     end
 
-    result = blueprint.render({ categories: [{ name: 'Foo' }, { name: 'Bar' }] }).to_hash
+    result = blueprint.render({ categories: [{ name: 'Foo' }, { name: 'Bar' }] }, format: :hash)
     expect(result).to eq({ categories: [{ name: 'Foo', val: 42 }, { name: 'Bar', val: 42 }] })
   end
 
@@ -37,7 +37,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       add test.subject
       association :category, test.category_blueprint, options: ->(widget) { { dynamic_val: widget.fetch(:id) + 1 } }
     end
-    result = blueprint.render({ id: 41, category: { name: 'Foo' } }).to_hash
+    result = blueprint.render({ id: 41, category: { name: 'Foo' } }, format: :hash)
     expect(result).to eq({ category: { name: 'Foo', val: 42 } })
   end
 
@@ -47,7 +47,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       add test.subject
       association :categories, [test.category_blueprint], options: ->(widget) { { dynamic_val: widget.fetch(:id) + 1 } }
     end
-    result = blueprint.render({ id: 41, categories: [{ name: 'Foo' }] }).to_hash
+    result = blueprint.render({ id: 41, categories: [{ name: 'Foo' }] }, format: :hash)
     expect(result).to eq({ categories: [{ name: 'Foo', val: 42 }] })
   end
 
@@ -58,7 +58,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :category, test.category_blueprint, options: ->(widget) { { dynamic_val: widget.fetch(:id) + 1 } }
     end
 
-    result = blueprint.render([{ id: 41, category: { name: 'Foo' } }, { id: 99, category: { name: 'Bar' } }]).to_hash
+    result = blueprint.render([{ id: 41, category: { name: 'Foo' } }, { id: 99, category: { name: 'Bar' } }], format: :hash)
     expect(result).to eq([
       { category: { name: 'Foo', val: 42 } },
       { category: { name: 'Bar', val: 100 } }
@@ -75,7 +75,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
     result = blueprint.render([
       { id: 41, categories: [{ name: 'Foo' }, { name: 'Bar' }] },
       { id: 99, categories: [{ name: 'Baz' }] }
-    ]).to_hash
+    ], format: :hash)
     expect(result).to eq([
       { categories: [{ name: 'Foo', val: 42 }, { name: 'Bar', val: 42 }] },
       { categories: [{ name: 'Baz', val: 100 }] }
@@ -95,7 +95,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
     result = blueprint.render([
       { id: 41, widgets: [{ category: { name: 'Foo' } }] },
       { id: 99, widgets: [{ category: { name: 'Bar' } }] }
-    ]).to_hash
+    ], format: :hash)
     expect(result).to eq([
       { widgets: [{ category: { name: 'Foo', val: 42 } }] },
       { widgets: [{ category: { name: 'Bar', val: 100 } }] }
@@ -111,7 +111,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :category_c, test.category_blueprint
     end
 
-    result = blueprint.render({ category_a: { name: 'A' }, category_b: { name: 'B' }, category_c: { name: 'C' } }).to_hash
+    result = blueprint.render({ category_a: { name: 'A' }, category_b: { name: 'B' }, category_c: { name: 'C' } }, format: :hash)
     expect(result).to eq(
       category_a: { name: 'A', val: 42 },
       category_b: { name: 'B', val: 43 },
@@ -127,7 +127,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :category, test.category_blueprint, options: { dynamic_val: 42 }
     end
 
-    result = blueprint.render({ category: { name: 'Foo' } }).to_hash
+    result = blueprint.render({ category: { name: 'Foo' } }, format: :hash)
     expect(result).to eq({ val: nil, category: { name: 'Foo', val: 42 } })
   end
 
@@ -141,7 +141,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :category, category_blueprint, options: { dynamic_val: 42 }
     end
 
-    result = blueprint.render({ category: {} }, from_render: 'foo', dynamic_val: 0).to_hash
+    result = blueprint.render({ category: {} }, from_render: 'foo', dynamic_val: 0, format: :hash)
     expect(result).to eq({ category: { val: [42, 'foo'] } })
   end
 
@@ -153,7 +153,7 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       association :category, test.category_blueprint
     end
 
-    result = blueprint.render({ name: 'Foo', category: {} }).to_hash
+    result = blueprint.render({ name: 'Foo', category: {} }, format: :hash)
     expect(result).to eq({ name: 'Foo', category: { name: nil, val: nil } })
   end
 
@@ -180,6 +180,6 @@ describe Blueprinter::Extensions::LegacyDynamicOptions do
       { id: 41, categories: [{ name: 'Foo' }, { name: 'Bar' }], other: { name: 'Other' } },
       { id: 99, categories: [{ name: 'Baz' }], other: { name: 'Other' } }
     ]
-    expect(v2.render(objects).to_hash).to eq(v1.render_as_hash(objects))
+    expect(v2.render(objects, format: :hash)).to eq(v1.render_as_hash(objects))
   end
 end

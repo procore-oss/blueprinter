@@ -16,7 +16,7 @@ describe Blueprinter::Extensions::LegacyOptions do
       name: 'Foo',
       description_v2: 'Desc V2',
       description_v1: 'Desc V1'
-    }).to_hash
+    }, format: :hash)
 
     expect(result).to eq({
       name: 'Foo',

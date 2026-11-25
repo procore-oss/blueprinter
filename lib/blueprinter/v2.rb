@@ -31,11 +31,11 @@ module Blueprinter
   # = Rendering
   #
   # Call {Blueprinter::V2::Rendering#render render}, {Blueprinter::V2::Rendering#render_object render_object}, or
-  # {Blueprinter::V2::Rendering#render_collection render_collection} on your Blueprints to begin serializaing.
-  # Then call {Blueprinter::V2::Render#to_json to_json} or {Blueprinter::V2::Render#to_hash to_hash} on the
-  # result.
+  # {Blueprinter::V2::Rendering#render_collection render_collection} on your Blueprints to serialize to JSON.
+  # Pass `format: :hash` to get a Hash (or Array of Hashes) instead.
   #
-  #   WidgetBlueprint.render(widget).to_json
+  #   WidgetBlueprint.render(widget)
+  #   WidgetBlueprint.render(widget, format: :hash)
   #
   # = Reflection
   #

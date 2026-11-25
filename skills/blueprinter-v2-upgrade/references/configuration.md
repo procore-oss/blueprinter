@@ -187,8 +187,8 @@ covers most of what this setting existed for. For anything that isn't `Enumerabl
 the call site:
 
 ```ruby
-WidgetBlueprint.render_collection(weird_thing).to_json
-WidgetBlueprint.render_object(weird_thing).to_json
+WidgetBlueprint.render_collection(weird_thing)
+WidgetBlueprint.render_object(weird_thing)
 ```
 
 This also affects `EMPTY_COLLECTION` conversions — see `options.md`.

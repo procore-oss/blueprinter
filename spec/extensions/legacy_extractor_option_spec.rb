@@ -36,13 +36,13 @@ describe Blueprinter::Extensions::LegacyOptions do
 
   it 'respects the field option' do
     blueprint.add subject
-    result = blueprint.render({ name: 'foo', desc: 'bar' }).to_hash
+    result = blueprint.render({ name: 'foo', desc: 'bar' }, format: :hash)
     expect(result).to eq({ name: 'foo', desc: 'Extracted: bar' })
   end
 
   it 'respects the blueprint option' do
     blueprint.add subject
-    result = blueprint[:with_extractor].render({ name: 'foo', desc: 'bar', foo: 'asdf' }).to_hash
+    result = blueprint[:with_extractor].render({ name: 'foo', desc: 'bar', foo: 'asdf' }, format: :hash)
     expect(result).to eq({
       name: 'Extracted: foo',
       desc: 'Extracted: bar',
@@ -55,7 +55,7 @@ describe Blueprinter::Extensions::LegacyOptions do
     blueprint = Class.new(Blueprinter::V2::Base) { field :name }
     blueprint.field :name, extractor: instance
     blueprint.add subject
-    expect(blueprint.render({ name: 'foo' }).to_hash).to eq({ name: 'Extracted: foo' })
+    expect(blueprint.render({ name: 'foo' }, format: :hash)).to eq({ name: 'Extracted: foo' })
   end
 
   it 'instantiates the extractor once per render, like V1' do
@@ -67,7 +67,7 @@ describe Blueprinter::Extensions::LegacyOptions do
     blueprint = Class.new(Blueprinter::V2::Base) { field :name }
     blueprint.set :extractor, counter
     blueprint.add subject
-    blueprint.render([{ name: 'a' }, { name: 'b' }, { name: 'c' }]).to_hash
+    blueprint.render([{ name: 'a' }, { name: 'b' }, { name: 'c' }], format: :hash)
     expect(counter.count).to eq 1
   end
 
@@ -80,6 +80,6 @@ describe Blueprinter::Extensions::LegacyOptions do
       end
     end
     blueprint.add subject
-    expect(blueprint.render({ name: 'foo' }).to_hash).to eq({ name: 'foo', computed: 'Computed: foo' })
+    expect(blueprint.render({ name: 'foo' }, format: :hash)).to eq({ name: 'foo', computed: 'Computed: foo' })
   end
 end

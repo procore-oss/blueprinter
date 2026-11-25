@@ -25,7 +25,7 @@ python3 $SKILL/scripts/compare_snapshots.py tmp/bp-before tmp/bp-after
 
 The fixtures file works on both sides because `snapshot.rb` renders through whichever API each
 Blueprint currently has — V1's `render_as_hash(obj, view:)` or V2's
-`Blueprint[view].render(obj).to_hash`. You don't rewrite it mid-migration, and you shouldn't:
+`Blueprint[view].render(obj, format: :hash)`. You don't rewrite it mid-migration, and you shouldn't:
 rewriting it is how you accidentally make the diff agree with itself.
 
 Keep the fixtures file and both output directories out of version control (`tmp/` is a good
@@ -126,9 +126,9 @@ it's acceptable is the decision from SKILL.md step 3:
 ## Then run the test suite
 
 The snapshot diff and the test suite catch different things. The diff catches silent output
-changes in Blueprints nothing tests. The suite catches call sites — `render` now returning a
-`Render` object rather than a String is the big one — plus controllers, jobs, and anything that
-reflects over Blueprints.
+changes in Blueprints nothing tests. The suite catches everything structural the diff can't see:
+custom extensions that no longer run, code that reflects over Blueprints, and call sites using
+the few `render` forms that didn't survive (SKILL.md step 7).
 
 Run both. Don't report the migration as done while either is failing or while the diff has
 differences you can't account for.

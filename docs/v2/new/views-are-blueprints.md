@@ -1,8 +1,8 @@
 # Views are Blueprints
 
-A view is an anonymous subclass of its Blueprint. There is little practical or technical distinction between "blueprints" and "views".
+A view is an anonymous subclass of its Blueprint. It inherits everything from its parent: fields, formatters, options, and extensions.
 
-This has two important consequences:
+There is little practical or technical distinction between "blueprints" and "views". This means that:
 
 1. The DSL is *recursive*: views can do anything Blueprints can do.
 2. Views are *Ruby classes*: views can do anything Ruby classes can do.

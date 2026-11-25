@@ -22,7 +22,7 @@ describe Blueprinter::Extensions::MultiJson do
     end
     widget = { id: 42, name: 'Foo', junk: true }
 
-    res = mj_blueprint.render(widget).to_json
+    res = mj_blueprint.render(widget)
     expect(res).to eq '{"id":42,"name":"Foo"}'
   end
 
@@ -33,7 +33,7 @@ describe Blueprinter::Extensions::MultiJson do
     widget = { id: 42, name: 'Foo', junk: true }
 
     expect(MultiJson).to receive(:dump).with({ id: 42, name: 'Foo' }, { pretty: true })
-    mj_blueprint.render(widget).to_json
+    mj_blueprint.render(widget)
   end
 
   it 'passes local options to MultiJson.dump' do
@@ -43,6 +43,6 @@ describe Blueprinter::Extensions::MultiJson do
     widget = { id: 42, name: 'Foo', junk: true }
 
     expect(MultiJson).to receive(:dump).with({ id: 42, name: 'Foo' }, { pretty: true, foo: true })
-    mj_blueprint.render(widget, { multi_json: { foo: true } }).to_json
+    mj_blueprint.render(widget, { multi_json: { foo: true } })
   end
 end

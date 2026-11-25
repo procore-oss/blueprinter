@@ -25,7 +25,7 @@ set :default, ->(ctx) {
 > [!NOTE]
 Legacy/V1 used the single `association_default` value for *both* objects and collections, so the
 example above is a faithful translation. If you'd rather a defaulted empty collection render as `[]`,
-split the branch — but be aware that changes the serialized output.
+split the branch.
 
 ### `if` / `unless`
 
@@ -50,12 +50,12 @@ If that logic doesn't work for something, use one of these methods in place of `
 
 ```ruby
 # Force `arg` to be treated like a collection (must respond to `map` with an Enumerable)
-array = WidgetBlueprint.render_collection(arg).to_hash
+array = WidgetBlueprint.render_collection(arg, format: :hash)
 ```
 
 ```ruby
 # Force `arg` to be treated like an object
-hash = WidgetBlueprint.render_object(arg).to_hash
+hash = WidgetBlueprint.render_object(arg, format: :hash)
 ```
 
 ### `extractor_default`
@@ -85,6 +85,7 @@ format(FalseClass) { |val| "N" }
 # Or with method names
 format Date, :iso8601
 format Time, :iso8601
+format ActiveSupport::TimeWithZone, :iso8601
 
 def iso8601(val) = val.iso8601
 ```

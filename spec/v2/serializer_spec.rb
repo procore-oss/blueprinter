@@ -405,10 +405,10 @@ describe Blueprinter::V2::Serializer do
   end
 
   it 'uses the core root extension' do
-    result = category_blueprint.render({ name: 'Foo' }, { root: :data }).to_hash
+    result = category_blueprint.render({ name: 'Foo' }, { root: :data, format: :hash })
     expect(result).to eq({ data: { name: 'Foo' } })
 
-    result = category_blueprint.render({ name: 'Foo' }, { root: :data, meta: { links: [] } }).to_hash
+    result = category_blueprint.render({ name: 'Foo' }, { root: :data, meta: { links: [] }, format: :hash })
     expect(result).to eq({ data: { name: 'Foo' }, meta: { links: [] } })
   end
 
@@ -682,7 +682,7 @@ describe Blueprinter::V2::Serializer do
       fields :id, :name, :summary, :description
     end
 
-    result = blueprint.render({ id: 42, name: nil, summary: 'foo', description: nil }).to_json
+    result = blueprint.render({ id: 42, name: nil, summary: 'foo', description: nil })
     expect(result).to eq({
       description: nil,
       id: 42,

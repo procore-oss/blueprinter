@@ -31,13 +31,13 @@ describe Blueprinter::Extensions::LegacyOptions do
 
   it 'respects both V1 and V2 conditionals' do
     blueprint.add subject
-    result = blueprint.render({ name: 'Foo' }).to_hash
+    result = blueprint.render({ name: 'Foo' }, format: :hash)
     expect(result).to eq({ name: 'Foo' })
   end
 
   it 'passes the field name, object, and options to V1 conditionals' do
     blueprint.add subject
-    result = blueprint.render({ name: 'Bar' }).to_hash
+    result = blueprint.render({ name: 'Bar' }, format: :hash)
     expect(result).to eq({
       name: 'Bar',
       legacy_desc_if: nil,
@@ -53,7 +53,7 @@ describe Blueprinter::Extensions::LegacyOptions do
       field :description, name: :desc, if: ->(field, _object, _options) { names << field }
     end
     blueprint.add subject
-    blueprint.render({ description: 'Foo' }).to_hash
+    blueprint.render({ description: 'Foo' }, format: :hash)
     expect(names).to eq [:desc]
   end
 
@@ -69,7 +69,7 @@ describe Blueprinter::Extensions::LegacyOptions do
       private_class_method :also_show?
     end
     blueprint.add subject
-    result = blueprint.render({ name: 'Foo', optional: 1, splat: 2, optional_method: 3, private_method: 4 }).to_hash
+    result = blueprint.render({ name: 'Foo', optional: 1, splat: 2, optional_method: 3, private_method: 4 }, format: :hash)
     expect(result).to eq({ optional: 1, splat: 2, optional_method: 3, private_method: 4 })
   end
 
@@ -79,6 +79,6 @@ describe Blueprinter::Extensions::LegacyOptions do
       def format(_ctx) = true
     end
     blueprint.add subject
-    expect(blueprint.render({ name: 'Foo' }).to_hash).to eq({ name: 'Foo' })
+    expect(blueprint.render({ name: 'Foo' }, format: :hash)).to eq({ name: 'Foo' })
   end
 end

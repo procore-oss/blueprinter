@@ -11,7 +11,7 @@ describe Blueprinter::Extensions::FieldOrder do
 
   it 'sorts fields alphabetically' do
     blueprint.add described_class.new { |a, b| a.name <=> b.name }
-    result = blueprint.render({}).to_json
+    result = blueprint.render({})
     expect(result).to eq '{"bar":null,"foo":null,"id":null}'
   end
 
@@ -25,7 +25,7 @@ describe Blueprinter::Extensions::FieldOrder do
         a.name <=> b.name
       end
     }
-    result = blueprint.render({}).to_json
+    result = blueprint.render({})
     expect(result).to eq '{"id":null,"bar":null,"foo":null}'
   end
 end

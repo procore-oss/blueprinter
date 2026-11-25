@@ -31,8 +31,8 @@ class WidgetBlueprint < ApplicationBlueprint
 end
 
 # Render the default view to JSON
-WidgetBlueprint.render(widget).to_json
+WidgetBlueprint.render(widget)
 
 # Render the extended view to a Hash
-WidgetBlueprint[:extended].render(widget).to_hash
+WidgetBlueprint[:extended].render(widget, format: :hash)
 ```

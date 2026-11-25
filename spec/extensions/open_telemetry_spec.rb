@@ -74,7 +74,7 @@ describe Blueprinter::Extensions::OpenTelemetry do
     expect_any_instance_of(OpenTelemetry::Internal::ProxyTracer).
       to receive(:in_span).with('blueprinter.collection', attributes: { 'blueprint' => sub_blueprint.to_s }.merge(attributes)).twice.and_call_original
 
-    blueprint.render(object).to_hash
+    blueprint.render(object, format: :hash)
     expect(log).to eq [
       'around_hook(MetaExt#around_object_value): A',
       'around_object_value',

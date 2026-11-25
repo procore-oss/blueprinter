@@ -13,7 +13,7 @@ describe Blueprinter::Extensions::LegacyOptions do
 
   it 'respects both V1 and V2 options' do
     blueprint.add subject
-    result = blueprint.render({ name: '', desc: '' }).to_hash
+    result = blueprint.render({ name: '', desc: '' }, format: :hash)
     expect(result).to eq({ name: 'No name', desc: 'No desc' })
   end
 
@@ -23,7 +23,7 @@ describe Blueprinter::Extensions::LegacyOptions do
       field :desc, default: 'No desc', default_if: Blueprinter::EMPTY_STRING
     end
     blueprint.add subject
-    result = blueprint.render({ name: nil, desc: nil }).to_hash
+    result = blueprint.render({ name: nil, desc: nil }, format: :hash)
     expect(result).to eq({ name: nil, desc: 'No desc' })
   end
 
@@ -34,14 +34,14 @@ describe Blueprinter::Extensions::LegacyOptions do
     end
     blueprint.add subject
     # V2's default_if is still ignored when there's no default
-    expect(blueprint.render({ name: '', desc: '' }).to_hash).to eq({ name: nil, desc: '' })
+    expect(blueprint.render({ name: '', desc: '' }, format: :hash)).to eq({ name: nil, desc: '' })
   end
 
   it "ignores V1's global field_default config" do
     blueprint = Class.new(Blueprinter::V2::Base) { field :name, default_if: Blueprinter::EMPTY_STRING }
     blueprint.add subject
     allow(Blueprinter.configuration).to receive(:field_default).and_return('N/A')
-    expect(blueprint.render({ name: '' }).to_hash).to eq({ name: nil })
+    expect(blueprint.render({ name: '' }, format: :hash)).to eq({ name: nil })
   end
 
   it "doesn't override a blueprint-level default" do
@@ -50,6 +50,6 @@ describe Blueprinter::Extensions::LegacyOptions do
       field :name, default_if: Blueprinter::EMPTY_STRING
     end
     blueprint.add subject
-    expect(blueprint.render({ name: '' }).to_hash).to eq({ name: 'None' })
+    expect(blueprint.render({ name: '' }, format: :hash)).to eq({ name: 'None' })
   end
 end
